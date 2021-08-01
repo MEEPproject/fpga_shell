@@ -1,0 +1,141 @@
+stages:
+    - binaries
+    - generate
+    - implementation
+    - bitstream
+variables:
+        GIT_SUBMODULE_STRATEGY: recursive   
+        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$MEEP_PERSONAL_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+        EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
+        VIVADO_VERSION: "2020.1"
+        VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
+        THIS_REPO: "FPGA_implementations%2FAlveoU280%2Frepo_generation_script"
+        LAST_BINARIES_JOB: "219760"
+        NUMBER_OF_JOBS: "8"
+        ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
+
+job0-download:
+        stage: binaries
+        rules:
+            # The default is download the binaries from a successful job
+            - if: '$CI_PIPELINE_SOURCE == "push"'
+              when: on_success
+            - when: never
+        tags:
+            - MEEP_FPGA     
+        
+        script:
+            - echo "$ARTIFACTS, $THIS_REPO, $LAST_BINARIES_JOB"
+            - source sh/get_artifacts.sh $THIS_REPO $LAST_BINARIES_JOB $ARTIFACTS
+            - unzip download.zip -d .
+            
+        artifacts:
+                #  untracked: true
+            expire_in: 1 day
+            paths:            
+                - binaries 
+job0-binaries:
+        stage: binaries
+        rules:
+            - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
+            #- if: '$CI_PIPELINE_SOURCE == "push"'
+              when: on_success
+        timeout: 2h
+        tags: 
+            - MEEP_FPGA
+        before_script:
+            - source /home/tools/riscv_vector_toolchain/set_env.sh
+            - source $VIVADO_PATH
+            - mkdir -p binaries
+        script:
+            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - source ./sh/accelerator_build.sh            
+        after_script:
+            - cp -r accelerator/meep_shell/binaries/* binaries
+        artifacts:
+                #  untracked: true
+          expire_in: 1 month
+          paths:            
+            - binaries        
+
+job1-vivado:
+        stage: generate
+        timeout: 2h
+        tags: 
+            - MEEP_FPGA
+        before_script:
+            - source $VIVADO_PATH
+            - export PROJECT_NAME=$(grep -rnw -m 1 'tcl/environment.tcl' -e 'g_project_name' | cut -d ' ' -f3)
+            - echo "$PROJECT_NAME"
+            #- curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.example.com/api/v4/projects/1/jobs/8/artifacts"
+            # https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/download?job=<job_name>
+            # https://gitlab.com/gitlab-org/gitlab/-/jobs/artifacts/main/download?job=job0-binaries
+
+
+        script:
+            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - source ./init_vivado.sh         
+        after_script:
+                - >
+                 echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
+                 EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
+                 Vivado version --> $VIVADO_VERSION   \r\n
+                 Vivado path --> $VIVADO_PATH        \r\n
+                 Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt            
+        artifacts:
+          expire_in: 1 month
+          paths:
+            - cicd_log.txt
+            - src/system_top.sv
+            - tcl/shell_env.tcl
+            - gen_system.tcl
+            
+job2-implementation:
+        stage: implementation
+        timeout: 4h
+        tags: 
+            - MEEP_FPGA
+        before_script:
+            - source $VIVADO_PATH
+            - export PROJECT_NAME=$(grep -rnw -m 1 'tcl/environment.tcl' -e 'g_project_name' | cut -d ' ' -f3)   
+            - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
+        script:
+            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - vivado -mode batch -nolog -nojournal -notrace -source gen_system.tcl
+            - source sh/run_implementation.sh            
+        artifacts:
+            when: on_success
+            expire_in: 1 day
+            paths:
+                - reports
+                - dcp                
+job3-bitstream:
+        stage: bitstream
+        before_script:
+            - source $VIVADO_PATH       
+        tags: 
+            - MEEP_FPGA             
+        script:
+            - echo "Checking implementation reports..." 
+            - source sh/run_bitstream.sh
+        after_script:
+            - cp system.bit system_${CI_JOB_ID}.bit
+        dependencies:
+            - job2-implementation
+        artifacts:
+            when: always
+            expire_in: 1 month
+            paths:
+                - system_${CI_JOB_ID}.bit
+job4-validation:
+        stage: bitstream
+        tags: 
+            - MEEP_FPGA             
+        script:
+            - echo "Checking implementation reports..." 
+            - source sh/check_reports.sh
+        allow_failure: true            
+        dependencies:
+            - job2-implementation
+
+                

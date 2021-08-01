@@ -1,0 +1,5 @@
+ EA URL --> https://gitlab-ci-token:voqVxbz-4q4Nrk2GmSsS@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git 
+ EA SHA --> 4db0e79cbd31c27d24bd0b2865248a3aa28df668 
+ Vivado version --> 2020.1   
+ Vivado path --> /opt/Xilinx/Vivado/2020.1/settings64.sh        
+ Commit time --> 2021-07-28T02:54:54+02:00

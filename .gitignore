@@ -1,0 +1,6 @@
+tcl/shell_env.tcl
+project
+src/system_top.sv
+accelerator
+project.tcl
+shell/gen_shell.tcl

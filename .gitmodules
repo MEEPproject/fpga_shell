@@ -1,0 +1,7 @@
+[submodule "meep_dvino"]
+  path = meep_dvino
+  url = ../../../rtl_designs/meep_dvino.git
+  branch = feature/meep_shell_dvino
+[submodule "ip/axi_brom"]
+	path = ip/axi_brom
+	url = ../axi_brom.git
