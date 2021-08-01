@@ -1,5 +1,5 @@
 stages:
-    - binaries
+    - initialization
     - generate
     - implementation
     - bitstream
@@ -10,16 +10,16 @@ variables:
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Frepo_generation_script"
-        LAST_BINARIES_JOB: "219760"
+        LAST_BINARIES_JOB: "219823"
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
 
-job0-download:
-        stage: binaries
+job0-download-binaries:
+        stage: initialization
         rules:
             # The default is download the binaries from a successful job
             - if: '$CI_PIPELINE_SOURCE == "push"'
-              when: never
+              when: on_success
             - when: never
         tags:
             - MEEP_FPGA     
@@ -34,12 +34,12 @@ job0-download:
             expire_in: 1 day
             paths:            
                 - binaries 
-job0-binaries:
-        stage: binaries
-        # rules:
-            # - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
-            # #- if: '$CI_PIPELINE_SOURCE == "push"'
-              # when: on_success
+job0-EA-init:
+        stage: EA-initialization
+        rules:
+            - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
+            #- if: '$CI_PIPELINE_SOURCE == "push"'
+              when: on_success
         timeout: 2h
         tags: 
             - MEEP_FPGA

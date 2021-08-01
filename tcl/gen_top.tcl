@@ -232,9 +232,9 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 			set matchString [lindex $elem 1]
 
 			while {[gets $fd_intf line] >= 0} {
-			puts "Line: $line"
+			#puts "Line: $line"
 				if {[ string match *$matchString* $line ] } {
-					puts "MATCH! $matchString"
+					#puts "MATCH! $matchString"
 					set newline [regsub $matchString $line $ifname ]								
 					puts $fd_map "    .$newline    ($newline)    , "
 					#puts "    .$newline    ($newline)    , "
