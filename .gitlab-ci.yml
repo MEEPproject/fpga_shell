@@ -5,7 +5,7 @@ stages:
     - bitstream
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
-        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$MEEP_PERSONAL_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
         EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
