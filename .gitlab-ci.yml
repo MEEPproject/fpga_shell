@@ -1,5 +1,5 @@
 stages:
-    - initialization
+    - EA-initialization
     - generate
     - implementation
     - bitstream
@@ -14,8 +14,8 @@ variables:
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
 
-job0-download-binaries:
-        stage: initialization
+download-binaries:
+        stage: EA-initialization
         rules:
             # The default is download the binaries from a successful job
             - if: '$CI_PIPELINE_SOURCE == "push"'
@@ -34,7 +34,7 @@ job0-download-binaries:
             expire_in: 1 day
             paths:            
                 - binaries 
-job0-EA-init:
+EA-init:
         stage: EA-initialization
         rules:
             - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
@@ -58,7 +58,7 @@ job0-EA-init:
           paths:            
             - binaries        
 
-job1-vivado:
+init-vivado:
         stage: generate
         timeout: 2h
         tags: 
@@ -67,10 +67,6 @@ job1-vivado:
             - source $VIVADO_PATH
             - export PROJECT_NAME=$(grep -rnw -m 1 'tcl/environment.tcl' -e 'g_project_name' | cut -d ' ' -f3)
             - echo "$PROJECT_NAME"
-            #- curl --location --header "JOB-TOKEN: $CI_JOB_TOKEN" "https://gitlab.example.com/api/v4/projects/1/jobs/8/artifacts"
-            # https://example.com/<namespace>/<project>/-/jobs/artifacts/<ref>/download?job=<job_name>
-            # https://gitlab.com/gitlab-org/gitlab/-/jobs/artifacts/main/download?job=job0-binaries
-
 
         script:
             - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
@@ -90,7 +86,7 @@ job1-vivado:
             - tcl/shell_env.tcl
             - gen_system.tcl
             
-job2-implementation:
+implementation:
         stage: implementation
         timeout: 4h
         tags: 
@@ -109,7 +105,7 @@ job2-implementation:
             paths:
                 - reports
                 - dcp                
-job3-bitstream:
+bitstream:
         stage: bitstream
         before_script:
             - source $VIVADO_PATH       
@@ -121,7 +117,7 @@ job3-bitstream:
         after_script:
             - cp system.bit system_${CI_JOB_ID}.bit
         dependencies:
-            - job2-implementation
+            - implementation
         artifacts:
             when: always
             expire_in: 1 month
@@ -136,6 +132,6 @@ job4-validation:
             - source sh/check_reports.sh
         allow_failure: true            
         dependencies:
-            - job2-implementation
+            - implementation
 
                 
