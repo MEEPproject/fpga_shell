@@ -1,6 +1,6 @@
 To create a shell around a given accelerator, generate_design.sh needs to be sourced using the URL and the branch of the desired accelerator as arguments. Use:
 
-generate_design.sh <git_repo_url> <repo_branch>.
+init_design.sh <git_repo_url> <commit_sha>.
 
 For instance, for Dvino, it will be:
 
