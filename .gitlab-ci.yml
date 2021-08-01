@@ -9,7 +9,7 @@ variables:
         EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
-        THIS_REPO: "FPGA_implementations%2FAlveoU280%2Frepo_generation_script"
+        THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
         LAST_BINARIES_JOB: "219823"
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
