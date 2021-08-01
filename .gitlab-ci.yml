@@ -19,7 +19,7 @@ job0-download:
         rules:
             # The default is download the binaries from a successful job
             - if: '$CI_PIPELINE_SOURCE == "push"'
-              when: on_success
+              when: never
             - when: never
         tags:
             - MEEP_FPGA     
@@ -36,10 +36,10 @@ job0-download:
                 - binaries 
 job0-binaries:
         stage: binaries
-        rules:
-            - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
-            #- if: '$CI_PIPELINE_SOURCE == "push"'
-              when: on_success
+        # rules:
+            # - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
+            # #- if: '$CI_PIPELINE_SOURCE == "push"'
+              # when: on_success
         timeout: 2h
         tags: 
             - MEEP_FPGA
