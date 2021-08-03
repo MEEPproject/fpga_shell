@@ -13,6 +13,7 @@ proc synthesis { g_root_dir g_project_name g_project_dir g_number_of_jobs} {
 	reset_run synth_1
 	launch_runs synth_1 -jobs ${number_of_jobs}
 	wait_on_run synth_1
+	open_run synth_1
 	write_checkpoint -force $g_root_dir/dcp/synthesis.dcp
 }
 
