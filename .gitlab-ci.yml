@@ -66,7 +66,7 @@ init-vivado:
         before_script:
             - source $VIVADO_PATH
             - export PROJECT_NAME=$(grep -rnw -m 1 'tcl/environment.tcl' -e 'g_project_name' | cut -d ' ' -f3)
-            - echo "$PROJECT_NAME"
+            - echo "$PROJECT_NAME" >> project.env
 
         script:
             - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
@@ -80,11 +80,13 @@ init-vivado:
                  Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt            
         artifacts:
           expire_in: 1 month
-          paths:
-            - cicd_log.txt
+          paths:            
             - src/system_top.sv
             - tcl/shell_env.tcl
             - gen_system.tcl
+          reports:
+            dotenv: project.env
+            - cicd_log.txt
             
 implementation:
         stage: implementation
@@ -92,8 +94,7 @@ implementation:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source $VIVADO_PATH
-            - export PROJECT_NAME=$(grep -rnw -m 1 'tcl/environment.tcl' -e 'g_project_name' | cut -d ' ' -f3)   
+            - source $VIVADO_PATH            
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
         script:
             - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA

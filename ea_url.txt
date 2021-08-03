@@ -1,0 +1,2 @@
+EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8

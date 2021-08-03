@@ -4,3 +4,4 @@ src/system_top.sv
 accelerator
 project.tcl
 shell/gen_shell.tcl
+binaries

@@ -1,43 +1,54 @@
 ROOT_DIR   =  $(PWD)
 TCL_DIR    =  $(ROOT_DIR)/tcl
-EA_REPO   :=  ${shell grep -rn -m 1 'ea_url.txt' -e 'EMULATED_ACCELERATOR_REPO' | awk -F ' ' '$$3 {print $$3}'}
-EA_SHA    :=  ${shell grep -rn -m 1 'ea_url.txt' -e 'EMULATED_ACCELERATOR_SHA' | awk -F ' ' '$$3 {print $$3}'}
+SH_DIR	   =  $(ROOT_DIR)/sh
+DEF_FILE   =  $(ROOT_DIR)/ea_url.txt
+EA_REPO    =  EMULATED_ACCELERATOR_REPO
+EA_SHA     =  EMULATED_ACCELERATOR_SHA
+EA_GIT_URL = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
+EA_GIT_SHA = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
 EA_DIR     =  $(ROOT_DIR)/accelerator
 DATE       =  `date +'%a %b %e %H:%M:$S %Z %Y'`
+ACCEL_DIR  =  $(ROOT_DIR)/accelerator
 SYNTH_DCP  =  $(ROOT_DIR)/dcp/synthesis.dcp 
 REPORT_DIR =  $(ROOT_DIR)/reports
+YAML_FILE  =  $(ROOT_DIR)/.gitlab-ci.yml
 
-.PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation 
+.PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation ci_cd
 
 #.DEFAULT_GOAL := initialize
 all: binaries vivado synthesis implementation bitstream validate
 
-initialize:
-	./init_project.sh '$(EA_REPO) $(EA_SHA)'
-	mkdir -p binaries
-
+ci_cd: $(YAML_FILE)
+	$(SH_DIR)/extract_url.sh
+	
+initialize: 
+	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
+	$(ROOT_DIR)/init_project.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
 
 binaries: initialize
-	./sh/accelerator_build.sh
+	$(SH_DIR)/accelerator_build.sh
 
 vivado: initialize
 	cp -r accelerator/meep_shell/binaries/* binaries	
-	./init_vivado.sh 
+	$(ROOT_DIR)/init_vivado.sh 
 
 synthesis: initialize
-	./sh/run_synthesis
+	$(SH_DIR)/run_synthesis
 
 implementation: $(SYNTH_DCP)
-	./sh/run_implementation
+	$(SH_DIR)/run_implementation
 	
 bitstream: $(IMPL_DCP)
-	./sh/run_bitstream.sh
+	$(SH_DIR)/run_bitstream.sh
 	
 validate: $(REPORT_DIR)
-	./sh/check_reports.sh
+	$(SH_DIR)/check_reports.sh
 
 clean: 
-	rm -rf project dcp reports accelerator src
+	rm -rf project dcp reports accelerator src binaries
+	
+clean_ci_cd:
+	git checkout $(DEF_FILE)
 	
 clean_shell:
 	rm -rf project src

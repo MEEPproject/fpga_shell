@@ -17,7 +17,7 @@ bash -x meep_shell/accelerator_init.sh
 cd ..
 #read -n 1 -p "eii"
 
-source sh/define_shell.sh
+sh/define_shell.sh
 
 if [ -d "binaries" ]; then
 	echo "binaries folder already exists"
@@ -27,5 +27,5 @@ fi
 
 cp -r accelerator/meep_shell/binaries/* binaries/
 
-source sh/init_ips.sh
+sh/init_ips.sh
 
