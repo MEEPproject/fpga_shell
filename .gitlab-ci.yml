@@ -63,7 +63,7 @@ init-vivado:
         tags: 
             - MEEP_FPGA       
         script:
-            - init_project $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - source init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             - make synthesis
         after_script:
                 - >
