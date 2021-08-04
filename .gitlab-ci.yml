@@ -8,7 +8,7 @@ variables:
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
         EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
         VIVADO_VERSION: "2020.1"
-        VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
+        VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/'       
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
         LAST_BINARIES_JOB: "219823"
         NUMBER_OF_JOBS: "8"
@@ -60,12 +60,12 @@ init-vivado:
         tags: 
             - MEEP_FPGA       
         before_script:
-            - source $VIVADO_PATH
+                - export vivado=$VIVADO_PATH/bin/vivado
         script:
-            - echo "VIVADO PATH is $VIVADO_PATH"
             - source init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             #- make synthesis
-        after_script:
+        after_script:                
+                - echo "VIVADO PATH is $VIVADO_PATH"
                 - make synthesis
                 - >
                  echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
