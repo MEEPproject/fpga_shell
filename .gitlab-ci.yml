@@ -62,6 +62,8 @@ init-vivado:
         timeout: 2h
         tags: 
             - MEEP_FPGA       
+        before_script:
+            - source $VIVADO_PATH
         script:
             - source init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             #- make synthesis
@@ -89,6 +91,8 @@ implementation:
         timeout: 4h
         tags: 
             - MEEP_FPGA          
+        before_script:
+            - source $VIVADO_PATH
         script:
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
             - make implementation        
@@ -102,8 +106,10 @@ bitstream:
         stage: bitstream     
         tags: 
             - MEEP_FPGA             
+        before_script:
+            - source $VIVADO_PATH
         script:
-            - echo "Checking implementation reports..." 
+            - echo "Generating bitstream..." 
             - make bitstream
         after_script:
             - cp system.bit system_${CI_JOB_ID}.bit
