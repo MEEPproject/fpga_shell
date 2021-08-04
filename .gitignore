@@ -5,3 +5,6 @@ accelerator
 project.tcl
 shell/gen_shell.tcl
 binaries
+dcp
+reports
+system.bit

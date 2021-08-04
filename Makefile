@@ -23,21 +23,21 @@ ci_cd: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
 	$(SH_DIR)/extract_url.sh
 
-initialize: $(ACCEL_DIR)
+initialize:
 	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
 	$(ROOT_DIR)/init_project.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
 
 binaries: $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh
 
-vivado: $(PROJECT_DIR)
+vivado: 
 	$(ROOT_DIR)/init_vivado.sh 
 
-synthesis: vivado
-	$(SH_DIR)/run_synthesis
+synthesis: $(PROJECT_DIR)
+	$(SH_DIR)/run_synthesis.sh
 
 implementation: $(SYNTH_DCP)
-	$(SH_DIR)/run_implementation
+	$(SH_DIR)/run_implementation.sh
 	
 bitstream: $(IMPL_DCP)
 	$(SH_DIR)/run_bitstream.sh
