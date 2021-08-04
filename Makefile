@@ -33,7 +33,7 @@ binaries: $(ACCEL_DIR)
 vivado: 
 	$(ROOT_DIR)/init_vivado.sh 
 
-synthesis: $(PROJECT_DIR)
+synthesis: vivado
 	$(SH_DIR)/run_synthesis.sh
 
 implementation: $(SYNTH_DCP)
