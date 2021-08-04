@@ -15,17 +15,4 @@ bash -x sh/gitsubmodules.sh $1 $2
 cd accelerator
 bash -x meep_shell/accelerator_init.sh
 cd ..
-#read -n 1 -p "eii"
-
-sh/define_shell.sh
-
-if [ -d "binaries" ]; then
-	echo "binaries folder already exists"
-else
-mkdir -p binaries	
-fi
-
-cp -r accelerator/meep_shell/binaries/* binaries/
-
-sh/init_ips.sh
-
+#Make a make inside DVINO

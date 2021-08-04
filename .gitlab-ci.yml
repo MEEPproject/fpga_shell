@@ -5,8 +5,8 @@ stages:
     - bitstream
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
-        # EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        # EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
+        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+        EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
@@ -47,7 +47,7 @@ EA-init:
         tags: 
             - MEEP_FPGA
         script:
-            - make ci_cd
+            - init_project $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             - make binaries          
         #after_script:
             #- cp -r accelerator/meep_shell/binaries/* binaries
@@ -63,7 +63,7 @@ init-vivado:
         tags: 
             - MEEP_FPGA       
         script:
-            - make ci_cd
+            - init_project $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             - make synthesis
         after_script:
                 - >
