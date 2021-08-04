@@ -31,7 +31,7 @@ binaries: $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh
 
 vivado: 
-	/opt/Xilinx/Vivado/2020.1/bin/settings64.sh
+	/opt/Xilinx/Vivado/2020.1/settings64.sh
 	$(ROOT_DIR)/init_vivado.sh 
 
 synthesis: vivado
