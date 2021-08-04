@@ -24,7 +24,6 @@ ci_cd: $(YAML_FILE)
 initialize: 
 	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
 	$(ROOT_DIR)/init_project.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
-	cp -r accelerator/meep_shell/binaries/* binaries
 
 binaries: initialize
 	$(SH_DIR)/accelerator_build.sh
