@@ -14,9 +14,6 @@ variables:
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
         
-before_script:
-            - source $VIVADO_PATH        
-
 download-binaries:
         stage: EA-initialization
         rules:
@@ -65,6 +62,7 @@ init-vivado:
         before_script:
             - source $VIVADO_PATH
         script:
+            - echo "VIVADO PATH is $VIVADO_PATH"
             - source init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             #- make synthesis
         after_script:
