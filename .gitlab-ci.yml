@@ -60,7 +60,7 @@ init-vivado:
         tags: 
             - MEEP_FPGA       
         before_script:
-                - export vivado=$VIVADO_PATH/bin/vivado
+                - export "PATH=$VIVADO_PATH/bin/:$PATH"
         script:
             - source init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             #- make synthesis
