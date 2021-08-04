@@ -1,18 +1,21 @@
 stages:
     - EA-initialization
-    - generate
+    - synthesis
     - implementation
     - bitstream
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
-        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
+        # EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+        # EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
         LAST_BINARIES_JOB: "219823"
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
+        
+before_script:
+            - source $VIVADO_PATH        
 
 download-binaries:
         stage: EA-initialization
@@ -43,15 +46,11 @@ EA-init:
         timeout: 2h
         tags: 
             - MEEP_FPGA
-        before_script:
-            - source /home/tools/riscv_vector_toolchain/set_env.sh
-            - source $VIVADO_PATH
-            - mkdir -p binaries
         script:
-            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
-            - source ./sh/accelerator_build.sh            
-        after_script:
-            - cp -r accelerator/meep_shell/binaries/* binaries
+            - make ci_cd
+            - make binaries          
+        #after_script:
+            #- cp -r accelerator/meep_shell/binaries/* binaries
         artifacts:
                 #  untracked: true
           expire_in: 1 month
@@ -59,18 +58,13 @@ EA-init:
             - binaries        
 
 init-vivado:
-        stage: generate
+        stage: synthesis
         timeout: 2h
         tags: 
-            - MEEP_FPGA
-        before_script:
-            - source $VIVADO_PATH
-            - export PROJECT_NAME=$(grep -rnw -m 1 'tcl/environment.tcl' -e 'g_project_name' | cut -d ' ' -f3)
-            - echo "$PROJECT_NAME" >> project.env
-
+            - MEEP_FPGA       
         script:
-            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
-            - source ./init_vivado.sh         
+            - make ci_cd
+            - make synthesis
         after_script:
                 - >
                  echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
@@ -79,42 +73,37 @@ init-vivado:
                  Vivado path --> $VIVADO_PATH        \r\n
                  Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt            
         artifacts:
-          expire_in: 1 month
+          expire_in: 1 day
           paths:            
             - src/system_top.sv
             - tcl/shell_env.tcl
             - gen_system.tcl
+            - dcp/synthesis.dcp
           reports:
             dotenv: project.env
-            - cicd_log.txt
+                - cicd_log.txt
             
 implementation:
         stage: implementation
         timeout: 4h
         tags: 
-            - MEEP_FPGA
-        before_script:
-            - source $VIVADO_PATH            
-            - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
+            - MEEP_FPGA          
         script:
-            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
-            - vivado -mode batch -nolog -nojournal -notrace -source gen_system.tcl
-            - source sh/run_implementation.sh            
+            - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
+            - make implementation        
         artifacts:
             when: on_success
             expire_in: 1 day
             paths:
                 - reports
-                - dcp                
+                - dcp/implementation.dcp               
 bitstream:
-        stage: bitstream
-        before_script:
-            - source $VIVADO_PATH       
+        stage: bitstream     
         tags: 
             - MEEP_FPGA             
         script:
             - echo "Checking implementation reports..." 
-            - source sh/run_bitstream.sh
+            - make bitstream
         after_script:
             - cp system.bit system_${CI_JOB_ID}.bit
         dependencies:
@@ -130,7 +119,7 @@ job4-validation:
             - MEEP_FPGA             
         script:
             - echo "Checking implementation reports..." 
-            - source sh/check_reports.sh
+            - make validation
         allow_failure: true            
         dependencies:
             - implementation
