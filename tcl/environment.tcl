@@ -1,5 +1,8 @@
 #script_version 0
-set g_scripts_vivado_version 2020.1 
+set g_vivado_version 2020.1 
+set g_fpga_part "xcvu47p-fsvh2892-2L-e"
+set g_board_part "alveo280"
+#set g_board_part "u55c"
 set g_current_vivado_version [version -short] 
 set g_project_name system      
 set g_root_dir    [pwd]                     

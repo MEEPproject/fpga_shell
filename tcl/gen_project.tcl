@@ -14,12 +14,11 @@ source $script_folder/shell_env.tcl
 ################################################################
 # Check if script is running in correct Vivado version.
 ################################################################
-set scripts_vivado_version 2020.1
 set current_vivado_version [version -short]
 
-if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
+if { [string first $g_vivado_version $current_vivado_version] == -1 } {
     puts ""
-    catch {common::send_gid_msg -ssname BD::TCL -id 2041 -severity "ERROR" "This script was generated using Vivado <$scripts_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."}
+    catch {common::send_gid_msg -ssname BD::TCL -id 2041 -severity "ERROR" "This script was generated using Vivado <$g_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."}
 
     return 1
 }
@@ -41,6 +40,9 @@ if { $list_projs eq "" } {
 # Set project properties
 set obj [current_project]
 set_property -name "board_part" -value "xilinx.com:au280:part0:1.1" -objects $obj
+
+#MEEP Phase 2 part
+#set_property -name "target_part" -value "xcvu47p-fsvh2892-2L-e" -objects $obj
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -65,7 +67,7 @@ add_files ${src_files}
 # Add Constraint files to project
 add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_timing.xdc"
 add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_ila.xdc"
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_alveo280.xdc"
+add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_${g_board_part}.xdc"
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
 source $root_dir/accelerator/meep_shell/tcl/project_options.tcl
