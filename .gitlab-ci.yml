@@ -64,8 +64,9 @@ init-vivado:
             - MEEP_FPGA       
         script:
             - source init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
-            - make synthesis
+            #- make synthesis
         after_script:
+                - make synthesis
                 - >
                  echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
                  EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
