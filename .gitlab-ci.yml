@@ -48,7 +48,7 @@ EA-init:
             - source $VIVADO_PATH
             - mkdir -p binaries
         script:
-            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             - source ./sh/accelerator_build.sh            
         after_script:
             - cp -r accelerator/meep_shell/binaries/* binaries
@@ -66,7 +66,7 @@ init-vivado:
         before_script:
             - source $VIVADO_PATH
         script:
-            - source ./init_design.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             - source ./init_vivado.sh         
             - source ./sh/run_synthesis.sh
         after_script:
