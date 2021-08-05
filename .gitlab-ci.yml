@@ -44,11 +44,9 @@ EA-init:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source /home/tools/riscv_vector_toolchain/set_env.sh
-            - source $VIVADO_PATH
             - mkdir -p binaries
+            - source ./init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
         script:
-            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
             - source ./sh/accelerator_build.sh            
         after_script:
             - cp -r accelerator/meep_shell/binaries/* binaries
@@ -64,11 +62,9 @@ init-vivado:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source $VIVADO_PATH
-        script:
             - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
-            - source ./init_vivado.sh         
-            - source ./sh/run_synthesis.sh
+        script:
+            - make synthesis
         after_script:
                 - >
                  echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
@@ -91,10 +87,9 @@ implementation:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source $VIVADO_PATH
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
         script:
-            - source sh/run_implementation.sh            
+            - make implementation
         artifacts:
             when: on_success
             expire_in: 1 day
@@ -103,13 +98,10 @@ implementation:
                 - dcp                
 bitstream:
         stage: bitstream
-        before_script:
-            - source $VIVADO_PATH       
         tags: 
             - MEEP_FPGA             
         script:
-            - echo "Checking implementation reports..." 
-            - source sh/run_bitstream.sh
+            - make bitstream
         after_script:
             - cp system.bit system_${CI_JOB_ID}.bit
         dependencies:
@@ -125,7 +117,7 @@ job4-validation:
             - MEEP_FPGA             
         script:
             - echo "Checking implementation reports..." 
-            - source sh/check_reports.sh
+            - make validation
         allow_failure: true            
         dependencies:
             - implementation

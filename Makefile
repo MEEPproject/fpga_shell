@@ -13,6 +13,9 @@ SYNTH_DCP   =  $(ROOT_DIR)/dcp/synthesis.dcp
 REPORT_DIR  =  $(ROOT_DIR)/reports
 YAML_FILE   =  $(ROOT_DIR)/.gitlab-ci.yml
 PROJECT_DIR =  $(ROOT_DIR)/project
+VIVADO_VER  :=  "2020.1"
+VIVADO_PATH := /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/vivado
+VIVADO_OPT  = -mode batch -nolog -nojournal -notrace -source
 
 .PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation ci_cd
 
@@ -23,25 +26,29 @@ ci_cd: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
 	$(SH_DIR)/extract_url.sh
 
-initialize:
+initialize: clean
 	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
 	$(ROOT_DIR)/init_project.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
 
 binaries: $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh
 
-vivado: 
-	/opt/Xilinx/Vivado/2020.1/settings64.sh
-	$(ROOT_DIR)/init_vivado.sh 
-
-synthesis: vivado
-	$(SH_DIR)/run_synthesis.sh
-
-implementation: $(SYNTH_DCP)
-	$(SH_DIR)/run_implementation.sh
+vivado: $(ACCEL_DIR) 
+	sh/define_shell.sh
+	mkdir -p binaries
+	cp -r accelerator/meep_shell/binaries/* binaries/
+	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/init_ips.tcl
+	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_top.tcl
+	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_project.tcl
 	
-bitstream: $(IMPL_DCP)
-	$(SH_DIR)/run_bitstream.sh
+synthesis: vivado 
+	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
+
+implementation: synthesis
+	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(PROJECT_DIR)
+	
+bitstream: implementation
+	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(PROJECT_DIR)
 	
 validate: $(REPORT_DIR)
 	$(SH_DIR)/check_reports.sh
