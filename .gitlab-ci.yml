@@ -22,7 +22,9 @@ download-binaries:
               when: on_success
             - when: never
         tags:
-            - MEEP_FPGA     
+            - MEEP_FPGA 
+        before_script:
+            - make clean    
         
         script:
             - echo "$ARTIFACTS, $THIS_REPO, $LAST_BINARIES_JOB"
@@ -44,6 +46,7 @@ EA-init:
         tags: 
             - MEEP_FPGA
         before_script:
+            - make clean
             - mkdir -p binaries
             - source ./init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
         script:
