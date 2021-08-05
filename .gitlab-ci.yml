@@ -69,12 +69,13 @@ init-vivado:
         script:
             - make synthesis
         after_script:
+                - make clean_accelerator clean_shell
                 - >
                  echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
                  EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
                  Vivado version --> $VIVADO_VERSION   \r\n
                  Vivado path --> $VIVADO_PATH        \r\n
-                 Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt            
+                 Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
         artifacts:
           expire_in: 1 month
           paths:
@@ -93,6 +94,10 @@ implementation:
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
         script:
             - make implementation
+
+        after_script:
+            - make clean_synthesis
+
         artifacts:
             when: on_success
             expire_in: 1 day

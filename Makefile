@@ -61,13 +61,13 @@ clean_ci_cd:
 	git checkout $(DEF_FILE)
 	
 clean_shell:
-	rm -rf project src
+	rm -rf project
 	
 clean_accelerator:
 	rm -rf accelerator
 
 clean_synthesis:	
-	rm -rf dcp/*
+	rm -rf dcp/synthesis.dcp
 
 clean_implementation:
 	rm -rf dcp/implementation.dcp reports
