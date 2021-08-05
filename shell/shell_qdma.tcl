@@ -30,33 +30,37 @@
   # Create instance: qdma_0, and set properties
   set qdma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:qdma:4.0 qdma_0 ]
   set_property -dict [ list \
-   CONFIG.MAILBOX_ENABLE {false} \
+   CONFIG.MAILBOX_ENABLE {true} \
    CONFIG.PCIE_BOARD_INTERFACE {pci_express_x16} \
-   CONFIG.PF0_SRIOV_CAP_INITIAL_VF {0} \
-   CONFIG.PF0_SRIOV_FIRST_VF_OFFSET {0} \
-   CONFIG.PF1_SRIOV_CAP_INITIAL_VF {0} \
-   CONFIG.PF2_SRIOV_CAP_INITIAL_VF {0} \
-   CONFIG.PF3_SRIOV_CAP_INITIAL_VF {0} \
-   CONFIG.SRIOV_CAP_ENABLE {false} \
-   CONFIG.SRIOV_FIRST_VF_OFFSET {1} \
+   CONFIG.PF0_SRIOV_CAP_INITIAL_VF {4} \
+   CCONFIG.PF0_SRIOV_FIRST_VF_OFFSET {4} \
+   CONFIG.PF1_SRIOV_CAP_INITIAL_VF {4} \
+   CONFIG.PF1_SRIOV_FIRST_VF_OFFSET {7} \
+   CONFIG.PF2_SRIOV_CAP_INITIAL_VF {4} \
+   CONFIG.PF2_SRIOV_FIRST_VF_OFFSET {10} \
+   CONFIG.PF3_SRIOV_CAP_INITIAL_VF {4} \
+   CONFIG.PF3_SRIOV_FIRST_VF_OFFSET {13} \
+   CONFIG.SRIOV_CAP_ENABLE {true} \
+   CONFIG.SRIOV_FIRST_VF_OFFSET {4} \
    CONFIG.SYS_RST_N_BOARD_INTERFACE {pcie_perstn} \
-   CONFIG.barlite_mb_pf0 {0} \
+   CONFIG.barlite_mb_pf0 {1} \
+   CONFIG.barlite_mb_pf1 {1} \
+   CONFIG.barlite_mb_pf2 {1} \
+   CONFIG.barlite_mb_pf3 {1} \
    CONFIG.dma_intf_sel_qdma {AXI_MM} \
-   CONFIG.flr_enable {false} \
-   CONFIG.pf0_ari_enabled {false} \
-   CONFIG.pf0_bar0_prefetchable_qdma {false} \
-   CONFIG.pf0_bar2_prefetchable_qdma {false} \
-   CONFIG.pf0_bar2_size_qdma {64} \
-   CONFIG.pf0_pciebar2axibar_2 {0x0} \
-   CONFIG.pf1_bar0_prefetchable_qdma {false} \
-   CONFIG.pf1_bar2_prefetchable_qdma {false} \
-   CONFIG.pf1_bar2_size_qdma {64} \
-   CONFIG.pf2_bar0_prefetchable_qdma {false} \
-   CONFIG.pf2_bar2_prefetchable_qdma {false} \
-   CONFIG.pf2_bar2_size_qdma {64} \
-   CONFIG.pf3_bar0_prefetchable_qdma {false} \
-   CONFIG.pf3_bar2_prefetchable_qdma {false} \
-   CONFIG.pf3_bar2_size_qdma {64} \
+   CONFIG.en_axi_st_qdma {false} \
+   CONFIG.flr_enable {true} \
+   CONFIG.pf0_ari_enabled {true} \
+   CONFIG.pf0_bar0_prefetchable_qdma {true} \
+   CONFIG.pf0_bar2_prefetchable_qdma {true} \
+   CONFIG.pf1_bar0_prefetchable_qdma {true} \
+   CONFIG.pf1_bar2_prefetchable_qdma {true} \
+   CONFIG.pf2_bar0_prefetchable_qdma {true} \
+   CONFIG.pf2_bar2_prefetchable_qdma {true} \
+   CONFIG.pf3_bar0_prefetchable_qdma {true} \
+   CONFIG.pf3_bar2_prefetchable_qdma {true} \
+   CONFIG.testname {mm} \
+   CONFIG.tl_pf_enable_reg {4} \
  ] $qdma_0
  
  
