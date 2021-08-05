@@ -9,7 +9,8 @@ Both the Repository and the specific commit need to be provided.
 
 After this, the flow is Makefile-based. In order to generate the design at your end, you need to:
 
-1) "make initialize", to clone the targeted accelerator
+1) "make initialize", to clone the targeted accelerator. This is mandatory at least once.
+1.1) "make binaries" calls the EA internal processes to generate bootrom and the opensbi binaries.
 2) "make vivado", to create the vivado design. It will be created under ./project as "system.xpr"
 3) "make synthesis/implementation/bitstream", depending on how far in the design flow you desire to go.
 4) "make validation" will parse the reports generated in the implementation stage.
