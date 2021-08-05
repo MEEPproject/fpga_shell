@@ -10,6 +10,7 @@ EA_DIR      =  $(ROOT_DIR)/accelerator
 DATE        =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 ACCEL_DIR   =  $(ROOT_DIR)/accelerator
 SYNTH_DCP   =  $(ROOT_DIR)/dcp/synthesis.dcp 
+IMPL_DCP    =  $(ROOT_DIR)/dcp/implementation.dcp 
 REPORT_DIR  =  $(ROOT_DIR)/reports
 YAML_FILE   =  $(ROOT_DIR)/.gitlab-ci.yml
 PROJECT_DIR =  $(ROOT_DIR)/project
@@ -44,10 +45,10 @@ vivado: $(ACCEL_DIR)
 synthesis: vivado 
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
-implementation: synthesis
+implementation: $(SYNTH_DCP)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(PROJECT_DIR)
 	
-bitstream: implementation
+bitstream: $(IMPL_DCP)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(PROJECT_DIR)
 	
 validate: $(REPORT_DIR)
