@@ -125,7 +125,7 @@ job4-validation:
             - MEEP_FPGA             
         script:
             - echo "Checking implementation reports..." 
-            - make validation
+            - make validate
         allow_failure: true            
         dependencies:
             - implementation
