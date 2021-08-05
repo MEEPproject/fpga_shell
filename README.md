@@ -1,22 +1,21 @@
-To create a shell around a given accelerator, generate_design.sh needs to be sourced using the URL and the branch of the desired accelerator as arguments. Use:
-
-init_design.sh <git_repo_url> <commit_sha>.
+To create a shell around the accelerator, fill the ea_url.txt file:
 
 For instance, for Dvino, it will be:
 
-init_design.sh https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git 5476d2528d1c37521b80c018f3197f96c5b75fb8
+EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git 
+EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
 
-This script is expected to:
+Both the Repository and the specific commit need to be provided.
 
-1) Clone the targeted accelerator
-2) Initialize the given accelerator
-3) Create a top level module, the MEEP shell, and the necessary connections between them.
-4) Create the Vivado project
+After this, the flow is Makefile-based. In order to generate the design at your end, you need to:
 
-Once the process is completed, sh/run_implementation.sh can be sourced to generate the bitstream.
+1) "make initialize", to clone the targeted accelerator
+2) "make vivado", to create the vivado design. It will be created under ./project as "system.xpr"
+3) "make synthesis/implementation/bitstream", depending on how far in the design flow you desire to go.
+4) "make validation" will parse the reports generated in the implementation stage.
 
 
-How the accelerator def file should be used:
+From the EA perspective, the accelerator def file should be used like shown below:
 
 ACC_TOP_MODULE=shell_dvino_top  #Module name
 DDR4,yes,mem_nasti_pack			#DDR4 used, name
