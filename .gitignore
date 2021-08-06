@@ -8,3 +8,4 @@ binaries
 dcp
 reports
 system.bit
+gen_system.tcl

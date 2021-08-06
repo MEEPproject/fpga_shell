@@ -5,8 +5,8 @@ stages:
     - bitstream
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
-        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
+        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/noesDVINO.git
+        EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80olakasec018f38
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
@@ -48,7 +48,7 @@ EA-init:
         before_script:
             - make clean
             - mkdir -p binaries
-            - source ./init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
+            - source ./init_project.sh $EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/noesDVINO.git
         script:
             - source ./sh/accelerator_build.sh            
         after_script:
@@ -65,14 +65,14 @@ init-vivado:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/noesDVINO.git
         script:
             - make synthesis
         after_script:
                 - make clean_accelerator clean_shell
                 - >
-                 echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
-                 EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
+                 echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/noesDVINO.git
+                 EA SHA --> $EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80olakasec018f38
                  Vivado version --> $VIVADO_VERSION   \r\n
                  Vivado path --> $VIVADO_PATH        \r\n
                  Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
@@ -103,7 +103,7 @@ implementation:
             expire_in: 1 day
             paths:
                 - reports
-                - dcp                
+                - dcp/implementation.dcp                
 bitstream:
         stage: bitstream
         tags: 
