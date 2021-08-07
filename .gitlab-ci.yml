@@ -15,6 +15,7 @@ variables:
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
         FPGA_LOG_FILE: fpga.log
+        BITSTREAM: system_${CI_PIPELINE_ID}.bit
 
 download-binaries:
         stage: EA-initialization
@@ -113,14 +114,14 @@ bitstream:
         script:
             - make bitstream
         after_script:
-            - cp system.bit system_${CI_JOB_ID}.bit
+            - cp system.bit $BITSTREAM
         dependencies:
             - implementation
         artifacts:
             when: always
             expire_in: 1 month
             paths:
-                - system_${CI_JOB_ID}.bit
+                - $BITSTREAM
 validation:
         stage: bitstream
         tags: 
@@ -139,7 +140,7 @@ fpga-test:
         before_script:
             - export PATH=$PATH:/home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
         script:
-            - sh/load_bitstream.sh qdma system_{CI_JOB_ID}.bit
+            - sh/load_bitstream.sh qdma $BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
             - source sh/pcie_script.sh binaries/fw_payload.bin
             - sleep 30
