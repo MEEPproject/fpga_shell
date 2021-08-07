@@ -62,7 +62,7 @@ EA-build:
           paths:            
             - binaries        
 
-init-vivado:
+synthesis:
         stage: synthesis
         timeout: 4h
         tags: 
