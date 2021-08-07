@@ -39,7 +39,7 @@ download-binaries:
             expire_in: 1 day
             paths:            
                 - binaries 
-EA-init:
+EA-build:
         stage: EA-initialization
         rules:
             - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
@@ -151,7 +151,7 @@ fpga-test:
         after_script:
             - sh/check_log.sh $FPGA_LOG_FILE
         dependencies:
-            - EA-init
+            - EA-build
             - download-binaries
             - bitstream
         artifacts:
