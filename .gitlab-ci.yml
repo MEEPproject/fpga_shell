@@ -101,6 +101,9 @@ implementation:
         after_script:
             - make clean_synthesis
 
+        dependencies:
+            - synthesis
+
         artifacts:
             when: on_success
             expire_in: 1 day
@@ -148,7 +151,8 @@ fpga-test:
         after_script:
             - sh/check_log.sh $FPGA_LOG_FILE
         dependencies:
-            - EA-initialization
+            - EA-init
+            - download-binaries
             - bitstream
         artifacts:
             paths:
