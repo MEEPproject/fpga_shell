@@ -3,6 +3,7 @@ stages:
     - synthesis
     - implementation
     - bitstream
+    - fpga-test
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
@@ -13,6 +14,7 @@ variables:
         LAST_BINARIES_JOB: "219823"
         NUMBER_OF_JOBS: "8"
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
+        FPGA_LOG_FILE: fpga.log
 
 download-binaries:
         stage: EA-initialization
@@ -119,7 +121,7 @@ bitstream:
             expire_in: 1 month
             paths:
                 - system_${CI_JOB_ID}.bit
-job4-validation:
+validation:
         stage: bitstream
         tags: 
             - MEEP_FPGA             
@@ -130,4 +132,24 @@ job4-validation:
         dependencies:
             - implementation
 
-                
+fpga-test:
+        stage: fpga-test
+        tags: 
+            - FPGA_TEST
+        before_script:
+            - export PATH=$PATH:/home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
+        script:
+            - sh/load_bitstream.sh qdma system_{CI_JOB_ID}.bit
+            - source sh/fpga_test.sh $FPGA_LOG_FILE                
+            - source sh/pcie_script.sh binaries/fw_payload.bin
+            - sleep 30
+            - sudo pkill cat
+        after_script:
+            - sh/check_log.sh $FPGA_LOG_FILE
+        dependencies:
+            - bitstream
+        artifacts:
+            paths:
+            - $FPGA_LOG_FILE
+
+

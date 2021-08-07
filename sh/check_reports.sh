@@ -7,6 +7,7 @@ fi
 
 ret=0
 
+#If this message is found, variable is NOT empty and the next if marks the error
 TimingError="`grep -rn reports -e 'Timing constraints are not met' || true`"
 
 if [ -n "$TimingError" ]; then	
