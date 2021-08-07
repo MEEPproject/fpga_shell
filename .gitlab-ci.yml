@@ -148,6 +148,7 @@ fpga-test:
         after_script:
             - sh/check_log.sh $FPGA_LOG_FILE
         dependencies:
+            - EA-initialization
             - bitstream
         artifacts:
             paths:
