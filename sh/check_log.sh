@@ -22,7 +22,7 @@ fi
 
 if [ "$ret" -eq 1 ]; then
     echo "Log validation failed"
-    exit 1
+    exit -1
 else
     echo "Log validation passed"
     #exit 0

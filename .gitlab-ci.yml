@@ -146,9 +146,10 @@ fpga-test:
             - sh/load_bitstream.sh qdma $BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
             - source sh/pcie_script.sh binaries/fw_payload.bin
-            - sleep 30
+            - sleep 60            
             - sudo pkill cat
         after_script:
+            - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG_FILE
         dependencies:
             - EA-build
