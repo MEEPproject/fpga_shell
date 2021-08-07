@@ -248,4 +248,3 @@ lspci -vd 10ee:
 
 dma-ctl qdma08000 q add mode mm idx 0 dir bi;
 dma-ctl qdma08000 q start idx 0 dir bi;
-sudo chmod a+rw /dev/qdma*
