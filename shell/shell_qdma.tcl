@@ -33,8 +33,9 @@
    CONFIG.MAILBOX_ENABLE {true} \
    CONFIG.PCIE_BOARD_INTERFACE {pci_express_x16} \
    CONFIG.PF0_SRIOV_CAP_INITIAL_VF {4} \
-   CONFIG.PF1_SRIOV_CAP_INITIAL_VF {4} \
-   CONFIG.PF1_SRIOV_FIRST_VF_OFFSET {7} \
+   CONFIG.PF1_MSIX_CAP_TABLE_SIZE_qdma {000} \
+   CONFIG.PF1_SRIOV_CAP_INITIAL_VF {0} \
+   CONFIG.PF1_SRIOV_FIRST_VF_OFFSET {0} \
    CONFIG.PF2_MSIX_CAP_TABLE_SIZE_qdma {000} \
    CONFIG.PF2_SRIOV_CAP_INITIAL_VF {0} \
    CONFIG.PF2_SRIOV_FIRST_VF_OFFSET {0} \
@@ -45,7 +46,7 @@
    CONFIG.SRIOV_FIRST_VF_OFFSET {4} \
    CONFIG.SYS_RST_N_BOARD_INTERFACE {pcie_perstn} \
    CONFIG.barlite_mb_pf0 {1} \
-   CONFIG.barlite_mb_pf1 {1} \
+   CONFIG.barlite_mb_pf1 {0} \
    CONFIG.barlite_mb_pf2 {0} \
    CONFIG.barlite_mb_pf3 {0} \
    CONFIG.dma_intf_sel_qdma {AXI_MM} \
@@ -56,6 +57,7 @@
    CONFIG.pf0_bar2_prefetchable_qdma {true} \
    CONFIG.pf1_bar0_prefetchable_qdma {true} \
    CONFIG.pf1_bar2_prefetchable_qdma {true} \
+   CONFIG.pf1_msix_enabled_qdma {false} \
    CONFIG.pf2_bar0_prefetchable_qdma {true} \
    CONFIG.pf2_bar2_prefetchable_qdma {true} \
    CONFIG.pf2_msix_enabled_qdma {false} \
@@ -63,11 +65,10 @@
    CONFIG.pf3_bar2_prefetchable_qdma {true} \
    CONFIG.pf3_msix_enabled_qdma {false} \
    CONFIG.testname {mm} \
-   CONFIG.tl_pf_enable_reg {2} \
+   CONFIG.tl_pf_enable_reg {1} \
  ] $qdma_0
 
 
- 
    # Create instance: util_ds_buf, and set properties
   set util_ds_buf [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf ]
   set_property -dict [ list \
