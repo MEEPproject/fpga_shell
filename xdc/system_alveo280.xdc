@@ -15,15 +15,12 @@ set_property PACKAGE_PIN D32              [get_ports hbm_cattrip]
 set_property IOSTANDARD  LVCMOS18         [get_ports hbm_cattrip] 
 
 set_property PACKAGE_PIN BJ44             [get_ports  {sysclk0_clk_n} ]            
-set_property IOSTANDARD  LVDS             [get_ports  {sysclk0_clk_n} ]            
 set_property PACKAGE_PIN BJ43             [get_ports  {sysclk0_clk_p} ]            
-set_property IOSTANDARD  LVDS             [get_ports  {sysclk0_clk_p} ]
-
 
 set_property PACKAGE_PIN BJ6               [ get_ports  {sysclk1_clk_n} ]     
-set_property IOSTANDARD  LVDS              [ get_ports  {sysclk1_clk_n} ]     
 set_property PACKAGE_PIN BH6               [ get_ports  {sysclk1_clk_p} ]     
-set_property IOSTANDARD  LVDS              [ get_ports  {sysclk1_clk_p} ]     
+
+set_property IOSTANDARD  LVDS              [ get_ports  {sysclk*} ]     
 
 
 set_property PACKAGE_PIN L30              [get_ports resetn]   			

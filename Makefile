@@ -17,11 +17,20 @@ PROJECT_DIR =  $(ROOT_DIR)/project
 VIVADO_VER  :=  "2020.1"
 VIVADO_PATH := /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/vivado
 VIVADO_OPT  = -mode batch -nolog -nojournal -notrace -source
+U280_PART   = "xcu280-fsvh2892-2L-e" 
+U55C_PART   = "xcvu47p-fsvh2892-2L-e"  
 
 .PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation ci_cd
 
 #.DEFAULT_GOAL := initialize
 all: binaries vivado synthesis implementation bitstream validate
+
+u280:
+	$(SH_DIR)/extract_part.sh $(U280_PART) alveo280
+
+u55c:
+	$(SH_DIR)/extract_part.sh $(U55C_PART) u55c
+
 
 ci_cd: $(YAML_FILE)
 	# Edit the YAML file to update the URLs

@@ -35,7 +35,7 @@ set bdName meep_shell_bd
 
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
-    create_project $g_project_name $projec_dir -force -part xcu280-fsvh2892-2L-e
+    create_project $g_project_name $projec_dir -force -part $g_fpga_part
 }
 # Set project properties
 set obj [current_project]
@@ -65,7 +65,7 @@ set top_module "$root_dir/src/${g_top_name}.sv"
 set src_files [glob ${root_dir}/src/*]
 add_files ${src_files}
 # Add Constraint files to project
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_timing.xdc"
+add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_timing_${g_board_part_name}.xdc"
 add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_ila.xdc"
 add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_${g_board_part}.xdc"
 set_property target_language Verilog [current_project]
