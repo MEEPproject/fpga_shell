@@ -39,7 +39,7 @@ if { $list_projs eq "" } {
 }
 # Set project properties
 set obj [current_project]
-set_property -name "board_part" -value "xilinx.com:au280:part0:1.1" -objects $obj
+#set_property -name "board_part" -value "xilinx.com:au280:part0:1.1" -objects $obj
 
 #MEEP Phase 2 part
 #set_property -name "target_part" -value "xcvu47p-fsvh2892-2L-e" -objects $obj

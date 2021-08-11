@@ -177,7 +177,6 @@ proc select_interface { g_interface } {
 		}
 		"UART" {
 		set g_uart yes
-		puts "SELECT UART!"
 		}
 		default {
 		set g_axi4 no
@@ -191,7 +190,7 @@ proc select_interface { g_interface } {
 	set axi_list "{$g_axi4 axi4} {$g_axiS axiS} {$g_axiL axiL} {$g_clk clk} {$g_uart rs232}"
 
 
-	puts "$g_interface $g_axi4 $g_axiS $g_axiL $g_clk $g_uart"
+	#puts "$g_interface $g_axi4 $g_axiS $g_axiL $g_clk $g_uart"
 	return $axi_list
 
 }
@@ -356,7 +355,7 @@ puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
 
-puts "MEEP SHELL created"
+puts "MEEP SHELL top created"
 
 file delete -force $g_root_dir/tmp
 

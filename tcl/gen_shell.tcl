@@ -7,7 +7,7 @@ source $g_root_dir/shell/shell_base.tcl
 # Create the PCIe strucutre
 source $g_root_dir/shell/shell_qdma.tcl
 # Added by definition
-add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/qdma_alveo280.xdc"
+add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/qdma_${g_board_part}.xdc"
 
 
 if { $g_DDR4 eq "yes"} {
@@ -18,7 +18,7 @@ if { $g_DDR4 eq "yes"} {
 
 if { $g_UART eq "yes"} {
 	source $g_root_dir/shell/shell_uart.tcl
-	add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/uart_alveo280.xdc"
+	add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/uart_${g_board_part}.xdc"
 }
 
 if { $g_BROM eq "yes"} {
