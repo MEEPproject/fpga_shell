@@ -51,7 +51,7 @@ EA-build:
         before_script:
             - make clean
             - mkdir -p binaries
-            - source ./init_project.sh $EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+            - source ./init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
         script:
             - source ./sh/accelerator_build.sh            
         after_script:
@@ -68,14 +68,14 @@ synthesis:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
         script:
             - make synthesis
         after_script:
                 - make clean_accelerator clean_shell
                 - >
-                 echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-                 EA SHA --> $EMULATED_ACCELERATOR_SHA: 6b1d57b80cda92bb40adc7b935c66dc9c3bd0199
+                 echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
+                 EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
                  Vivado version --> $VIVADO_VERSION   \r\n
                  Vivado path --> $VIVADO_PATH        \r\n
                  Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
