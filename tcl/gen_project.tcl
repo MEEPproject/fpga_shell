@@ -65,9 +65,9 @@ set top_module "$root_dir/src/${g_top_name}.sv"
 set src_files [glob ${root_dir}/src/*]
 add_files ${src_files}
 # Add Constraint files to project
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_timing_${g_board_part_name}.xdc"
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_ila.xdc"
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_project_name}_${g_board_part}.xdc"
+add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_timing_${g_board_part}.xdc"
+add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_ila_${g_board_part}.xdc"
+add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_${g_board_part}.xdc"
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
 source $root_dir/accelerator/meep_shell/tcl/project_options.tcl
