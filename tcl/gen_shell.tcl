@@ -6,6 +6,8 @@ source $g_root_dir/shell/shell_base.tcl
 
 # Create the PCIe strucutre
 source $g_root_dir/shell/shell_qdma.tcl
+# Added by definition
+add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/qdma_alveo280.xdc"
 
 
 if { $g_DDR4 eq "yes"} {

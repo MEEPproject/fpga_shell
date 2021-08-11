@@ -10,7 +10,10 @@
    CONFIG.POLARITY {ACTIVE_LOW} \
  ] $pcie_perstn
   set resetn [ create_bd_port -dir I -type rst resetn ]
-  
+
+
+  #Depends on the board
+  set sysclk1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sysclk1 ]
   
   
   # Create instance: axi_interconnect_0, and set properties
@@ -31,7 +34,6 @@
   set qdma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:qdma:4.0 qdma_0 ]
   set_property -dict [ list \
    CONFIG.MAILBOX_ENABLE {true} \
-   CONFIG.PCIE_BOARD_INTERFACE {pci_express_x16} \
    CONFIG.PF0_SRIOV_CAP_INITIAL_VF {4} \
    CONFIG.PF1_MSIX_CAP_TABLE_SIZE_qdma {000} \
    CONFIG.PF1_SRIOV_CAP_INITIAL_VF {0} \
@@ -44,7 +46,6 @@
    CONFIG.PF3_SRIOV_FIRST_VF_OFFSET {0} \
    CONFIG.SRIOV_CAP_ENABLE {true} \
    CONFIG.SRIOV_FIRST_VF_OFFSET {4} \
-   CONFIG.SYS_RST_N_BOARD_INTERFACE {pcie_perstn} \
    CONFIG.barlite_mb_pf0 {1} \
    CONFIG.barlite_mb_pf1 {0} \
    CONFIG.barlite_mb_pf2 {0} \
@@ -52,6 +53,9 @@
    CONFIG.dma_intf_sel_qdma {AXI_MM} \
    CONFIG.en_axi_st_qdma {false} \
    CONFIG.flr_enable {true} \
+   CONFIG.mode_selection {Advanced} \
+   CONFIG.pcie_blk_locn {PCIE4C_X1Y0} \
+   CONFIG.select_quad {GTY_Quad_227} \
    CONFIG.pf0_ari_enabled {true} \
    CONFIG.pf0_bar0_prefetchable_qdma {true} \
    CONFIG.pf0_bar2_prefetchable_qdma {true} \
@@ -69,12 +73,12 @@
  ] $qdma_0
 
 
-   # Create instance: util_ds_buf, and set properties
+ # Create instance: util_ds_buf, and set properties
   set util_ds_buf [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf ]
   set_property -dict [ list \
-   CONFIG.DIFF_CLK_IN_BOARD_INTERFACE {pcie_refclk} \
-   CONFIG.USE_BOARD_FLOW {true} \
+   CONFIG.C_BUF_TYPE {IBUFDSGTE} \
  ] $util_ds_buf
+
  
   # Create instance: vdd_0, and set properties (tie to vdd ready pcie signal)
   set vdd_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 vdd_0 ]
@@ -96,20 +100,16 @@
   #Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
   set_property -dict [ list \
-   CONFIG.CLK_IN1_BOARD_INTERFACE {sysclk1} \
    CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
-   CONFIG.USE_BOARD_FLOW {true} \
    CONFIG.USE_RESET {false} \
+   CONFIG.PRIM_IN_FREQ {100.000} \
+   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+   CONFIG.USE_LOCKED {true} \
  ] $clk_wiz_1
 
-  set_property -dict [list CONFIG.USE_LOCKED {true}] [get_bd_cells clk_wiz_1]
+  connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
  
- 
-  set_property -dict [list CONFIG.CLK_IN1_BOARD_INTERFACE {sysclk1}] [get_bd_cells clk_wiz_1]
-  apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {sysclk1 ( 100 MHz System differential clock1 ) } Manual_Source {Auto}}  [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
-  # The frequency value should be passed as a parameter from the def.txt file, the name too
-  set_property -dict [list CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} CONFIG.USE_LOCKED {true} CONFIG.MMCM_CLKOUT0_DIVIDE_F {24.000} CONFIG.CLKOUT1_JITTER {132.683}] [get_bd_cells clk_wiz_1]
-  
+
   create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_domain
   connect_bd_net [get_bd_pins clk_wiz_1/clk_out1] [get_bd_pins rst_ea_domain/slowest_sync_clk]
   connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_domain/ext_reset_in]
