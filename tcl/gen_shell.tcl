@@ -8,6 +8,7 @@ source $g_root_dir/shell/shell_base.tcl
 source $g_root_dir/shell/shell_qdma.tcl
 # Added by definition
 add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/qdma_${g_board_part}.xdc"
+add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/hbm_${g_board_part}.xdc"
 
 
 if { $g_DDR4 eq "yes"} {

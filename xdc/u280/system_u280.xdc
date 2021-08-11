@@ -11,8 +11,6 @@ set_property BITSTREAM.CONFIG.SPI_FALL_EDGE YES [current_design]
 set_property BITSTREAM.CONFIG.UNUSEDPIN Pullup [current_design]           
 set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR Yes [current_design]         
 # ------------------------------------------------------------------------
-set_property PACKAGE_PIN D32              [get_ports hbm_cattrip]   		
-set_property IOSTANDARD  LVCMOS18         [get_ports hbm_cattrip] 
 
 set_property PACKAGE_PIN BJ44             [get_ports  {sysclk0_clk_n} ]            
 set_property PACKAGE_PIN BJ43             [get_ports  {sysclk0_clk_p} ]            
