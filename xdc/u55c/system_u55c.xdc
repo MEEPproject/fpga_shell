@@ -14,14 +14,18 @@ set_property BITSTREAM.CONFIG.SPI_32BIT_ADDR Yes [current_design]
 set_property PACKAGE_PIN BL10             [get_ports  {sysclk0_clk_n} ]            
 set_property PACKAGE_PIN BK10             [get_ports  {sysclk0_clk_p} ]            
 
-set_property PACKAGE_PIN BK43             [get_ports  {sysclk1_clk_n} ]     
-set_property PACKAGE_PIN BK44             [get_ports  {sysclk1_clk_p} ]     
+set_property PACKAGE_PIN BK44             [get_ports  {sysclk1_clk_n} ]     
+set_property PACKAGE_PIN BK43             [get_ports  {sysclk1_clk_p} ]     
 
 #set_property PACKAGE_PIN F23              [get_ports  {sysclk2_clk_n} ] 
 #set_property PACKAGE_PIN F24              [get_ports  {sysclk2_clk_p} ] 
 
 
 set_property IOSTANDARD  LVDS              [ get_ports  {sysclk*} ]     
+
+set_property PACKAGE_PIN BG45              [get_ports resetn] ;# Bank  65 VCCO - VCC1V8   - IO_L18N_T2U_N11_AD2N_D13_65
+set_property IOSTANDARD  LVCMOS18          [get_ports resetn] ;# Bank  65 VCCO - VCC1V8   - IO_L18N_T2U_N11_AD2N_D13_65
+
 
 #Clocks 0, 1 and 2 are 2,3, and 4 in the u55c master file:
 #set_property PACKAGE_PIN F23     [get_ports "SYSCLK4_N"] ;# Bank  72 VCCO - VCC1V8   - IO_L11N_T1U_N9_GC_72_F23

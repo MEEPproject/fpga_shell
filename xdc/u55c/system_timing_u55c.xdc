@@ -2,7 +2,7 @@
 #For u280 compatibility reasons
 
 create_clock -period 10.000 -name SYSCLK_2      [get_ports sysclk0_clk_p]
-create_clock -period 10.000 -name SYSCLK_3      [get_ports sysclk1_clk_p] 
+#create_clock -period 10.000 -name SYSCLK_3      [get_ports sysclk1_clk_p] 
 #create_clock -period 10.000 -name sysclk4      [get_ports sysclk2_clk_p]
 
 create_clock -period 10.000 -name  pcie_refclk [get_ports pcie_refclk_p]
