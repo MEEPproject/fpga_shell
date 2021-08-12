@@ -1,4 +1,14 @@
-  set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
+#Make the configurations needed depending on the flexibility the Shell wants to provide.
+# For instance, pick between targets:
+
+if { "$g_board_part" eq "u55c" } {
+	set HBM_AXI_LABEL "_8HI"
+} else {
+	set HBM_AXI_LABEL ""
+}
+
+
+set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH {32} \
    CONFIG.ARUSER_WIDTH {1} \
@@ -54,7 +64,7 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
 	CONFIG.USER_SAXI_15 {false} \
 	CONFIG.USER_APB_EN {false}] [get_bd_cells hbm_0]
 	
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_08]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf_0
 make_bd_intf_pins_external  [get_bd_intf_pins util_ds_buf_0/CLK_IN_D]
 set_property name sysclk0 [get_bd_intf_ports CLK_IN_D_0]
