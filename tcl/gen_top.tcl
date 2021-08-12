@@ -24,13 +24,25 @@ set g_aurora_file $g_root_dir/interfaces/aurora.sv
 set g_eth_file    $g_root_dir/interfaces/ethernet.sv
 set g_uart_file   $g_root_dir/interfaces/uart.sv
 set g_axi_file    $g_root_dir/interfaces/axi_intf.sv
+set g_axiLi_file  $g_root_dir/interfaces/axilite_intf.sv
 
 set g_pcie yes
 
-#if HBM is set to no, HBMCATTRIP needs to be forced to '0'.
-#There is a better option, set HBMCATTRIP as pulldown in the constraints
+# if HBM is set to no, HBMCATTRIP needs to be forced to '0'.
+# There is a better option, set HBMCATTRIP as pulldown in the constraints.
+# Both are valid and can live together.
 
-# Add top level signals to the top level module based on interface file
+##################################################################
+## Functions
+##################################################################
+
+# Create EA instance using the EA top module as template. This function takes the inputs/outpus
+# and uses them to create a system verilog instance using the formula ".mySignal (mySignal)"
+# It also creates the wires along the way, as they will be used to connect to the Shell. The wires
+# are stored in a separated file.
+# It can skip blank lines and comments.
+# EA ports <---> EA wires
+
 proc parse_module {fd_mod fd_inst fd_wire} {		
 	
 	set firstLine 0
@@ -90,6 +102,9 @@ proc parse_module {fd_mod fd_inst fd_wire} {
 }
 
 
+# This function takes the content of the interface files and unify them
+# at the top of the TOP module file, meaning this is the actual I/O interface
+# of the final system.
 proc add_interface {g_interface g_intf_file g_mod_file} {
 		
 	if { $g_interface eq "yes" } {
@@ -107,6 +122,11 @@ proc add_interface {g_interface g_intf_file g_mod_file} {
 }
 
 
+# This function creates the connections between the top level ports 
+# and the MEEP Shell in the MEEP Shell instantiation. 
+# The instance is closed using hbm_cattrip, which is always required,
+# regardless if HBM is actually used or not.
+# TOP LEVEL PORTS <---> Shell instance
 proc add_instance { g_fd g_fd_tmp } {
 		
 	
@@ -147,6 +167,10 @@ proc add_instance { g_fd g_fd_tmp } {
 }
 
 
+# This function associates Peripherals and AXI interfaces.
+# If the peripheral/IP has more than one interface, it will get
+# marked as "yes" and the <add_acc_connection> function will go 
+# over it, creating the necessary connections.
 proc select_interface { g_interface } {
 
 	set g_axi4 no
@@ -189,24 +213,15 @@ proc select_interface { g_interface } {
 	
 	set axi_list "{$g_axi4 axi4} {$g_axiS axiS} {$g_axiL axiL} {$g_clk clk} {$g_uart rs232}"
 
-
 	#puts "$g_interface $g_axi4 $g_axiS $g_axiL $g_clk $g_uart"
 	return $axi_list
 
 }
 
-proc add_simple_connection { name map_file wire_file} {
 
-	set fd_map   [open $map_file "a"]
-	set fd_wire  [open $wire_file "a"]
-	puts $fd_map  "    .$name        ($name)    , "
-	#puts $fd_wire "    wire    $name    ;     " 
-	close $fd_map
-	close $fd_wire
-
-}
-
-
+# This function receives a peripheral/IP name, check if it exists and then create instance
+# connections depending on the inferface(s) the peripheral/IP uses.
+# EA ports <---> Shell instance
 proc add_acc_connection { device interface ifname intf_file wire_file map_file} {
 
 
@@ -224,7 +239,7 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 		set matchString ""
 	
 		foreach item $axiList {
-		#split coverts properly the element list into srings
+		#split coverts properly the element list into strings
 		set elem [split $item " "]
 		set firstElem [lindex $elem 0]
 		if { $firstElem eq "yes" } {
@@ -249,6 +264,25 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 }
 
 
+# This function creates simple connections in the Shell instance. The signal
+# is passed as a parameter and then added.
+# EA ports <---> Shell instance
+proc add_simple_connection { name map_file wire_file} {
+
+	set fd_map   [open $map_file "a"]
+	set fd_wire  [open $wire_file "a"]
+	puts $fd_map  "    .$name        ($name)    , "
+	#puts $fd_wire "    wire    $name    ;     " 
+	close $fd_map
+	close $fd_wire
+
+}
+
+
+##################################################################
+## Body
+##################################################################
+
 set fd_mod    [open $g_mod_file    "w"]
 set fd_system [open $g_system_file "r"]
 
@@ -261,7 +295,12 @@ fcopy $fd_system $fd_mod
 close $fd_mod
 close $fd_system
 
-#Add the enabled interfaces to the top level module.
+# 12/08/2021
+# Add interface creates the top level signals using 
+# an existing template in "interfaces" folder.
+# All the interfaces can be issued here as the function
+# itself will look for a "yes" in the first parameter.
+# Add the enabled interfaces to the top level module.
 add_interface  $g_pcie     $g_pcie_file   $g_mod_file 
 add_interface  $g_DDR4     $g_ddr4_file   $g_mod_file
 add_interface  $g_AURORA   $g_aurora_file $g_mod_file
@@ -270,12 +309,18 @@ add_interface  $g_UART     $g_uart_file   $g_mod_file
 #HBM has no interfaces but hbm_cattrip
 
 # Close the top level module
+# hbm_cattrip is used to close it as it always exists
 set   fd_mod  [open $g_mod_file    "a"]
 puts  $fd_mod "    output        hbm_cattrip "
 close $fd_mod
 
-#Read the top module to extract the ports and create the corresponding
-#signals to make the connections between the top ports and the Shell (BD)
+## Here, the module definition file has been created and closed.
+
+# Read the top module to extract the ports and create the corresponding
+# signals to make the connections between the top ports and the Shell (BD)
+# Connections between the shell and the EA need are yet to be created.
+# TOP LEVEL PORTS <---> Shell instance
+
 set fd_mod    [open $g_mod_file    "r"]
 set fd_inst   [open $g_inst_file   "w"]
 
@@ -284,7 +329,14 @@ add_instance $fd_mod $fd_inst
 close $fd_mod
 close $fd_inst
 
-# Parse the EA top module
+## Here, the shell instantiation is partially filled with connections 
+## to the top level ports.
+
+##################################################################
+
+# Parse the EA top module:
+# The EA will be entirely connected to the MEEP Shell.
+# EA ports <---> EA wires
 
 set fd_mod    [open $g_acc_file    "r"]
 set fd_inst   [open $g_eamap_file  "w"]
@@ -296,6 +348,15 @@ close $fd_mod
 close $fd_inst
 close $fd_wire
 
+## Here, the EA instance has been created.
+
+##################################################################
+# Create AXI-based connections. It follows an AXI4 template from "interfaces" folder,
+# and detects the same in the EA via <add_acc_connection>.
+# Simple connection will be created also using <add_simple_connection>
+# EA ports <---> Shell instance
+##################################################################
+
 if { $g_DDR4 eq "yes"} {
 	# Create the connections between the EA and the Shell
 	add_acc_connection "DDR4" $g_DDR4 $g_DDR4_ifname $g_axi_file $g_wire_file $g_map_file
@@ -303,7 +364,6 @@ if { $g_DDR4 eq "yes"} {
 	# Create the connections between the EA and the Shell
 	add_acc_connection "HBM" $g_HBM $g_HBM_ifname $g_axi_file $g_wire_file $g_map_file
 }
-
 
 
 # Create not-AXI connections
@@ -314,15 +374,20 @@ if {[info exists g_RST0]} {
 	add_simple_connection $g_RST0 $g_map_file $g_wire_file
 }
 if {[info exists g_UART_MODE]} {
-	add_acc_connection "UART" "yes" $g_UART_ifname $g_axi_file $g_wire_file $g_map_file
+	# TODO: Add here if mode eq simple or full
+	add_acc_connection "UART" "yes" $g_UART_ifname $g_axiLi_file $g_wire_file $g_map_file
 }
-#TODO: add_simple_connection should go throug a list of interfaces (foreach)
+#TODO: add_simple_connection should go through a list of interfaces (foreach)
 
 set   fd_top      [open $g_top_file    "w"]
 set   fd_mod      [open $g_mod_file    "a"]
 set   fd_inst     [open $g_inst_file   "r"]
 set   fd_map      [open $g_map_file    "r"]
 set   fd_wire     [open $g_wire_file   "r"]
+
+##################################################################
+## Next, all the temp files are put together and neceesary sintax is added.
+##################################################################
 
 puts  $fd_mod    "   ); \r\n "
 fcopy $fd_wire   $fd_mod

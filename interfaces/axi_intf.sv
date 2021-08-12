@@ -48,5 +48,3 @@ axi4_rresp
 axi4_rdata     
 axi4_rlast     
 
-rs232_rxd
-rs232_txd  
