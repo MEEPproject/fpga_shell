@@ -1,24 +1,24 @@
 
-axilite_awready   
-axilite_awvalid     
-axilite_awaddr    
+axiL_awready   
+axiL_awvalid     
+axiL_awaddr    
 
-axilite_wready    
-axilite_wvalid    
-axilite_wdata        
-axilite_wstrb     
+axiL_wready    
+axiL_wvalid    
+axiL_wdata        
+axiL_wstrb     
    
-axilite_bready    
-axilite_bvalid       
-axilite_bresp     
+axiL_bready    
+axiL_bvalid       
+axiL_bresp     
 
-axilite_arready   
-axilite_arvalid     
-axilite_araddr    
+axiL_arready   
+axiL_arvalid     
+axiL_araddr    
 
-axilite_rready    
-axilite_rvalid        
-axilite_rresp     
-axilite_rdata     
+axiL_rready    
+axiL_rvalid        
+axiL_rresp     
+axiL_rdata     
  
 
