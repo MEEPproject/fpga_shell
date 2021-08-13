@@ -21,6 +21,7 @@ ETHERNET_ifname="`grep -rn $ACC_DEF -e 'ETHERNET' | awk -F ',' '$3 {print $3}'`"
 AURORA_MODE="`grep -rn $ACC_DEF -e 'AURORA' | awk -F ',' '$3 {print $3}'`"
 UART_MODE="`grep -rn $ACC_DEF -e 'UART' | awk -F ',' '$3 {print $3}'`"
 UART_ifname="`grep -rn $ACC_DEF -e 'UART' | awk -F ',' '$4 {print $4}'`"
+UART_irq="`grep -rn $ACC_DEF -e 'UART' | awk -F ',' '$5 {print $5}'`"
 
 BROM="`grep -rn $ACC_DEF -e 'BROM' | awk -F ',' '$2 {print $2}'`"
 BROM_initname="`grep -rn $ACC_DEF -e 'UART' | awk -F ',' '$3 {print $3}'`"
@@ -45,6 +46,7 @@ echo ""				    	   >> $ENV_FILE
 echo "set g_AURORA_MODE $AURORA_MODE"      >> $ENV_FILE
 echo "set g_UART_MODE $UART_MODE"          >> $ENV_FILE
 echo "set g_UART_ifname $UART_ifname" 	   >> $ENV_FILE
+echo "set g_UART_irq $UART_irq" 	   >> $ENV_FILE
 echo "set g_BROM_initname  $BROM_initname" >> $ENV_FILE
 echo "set g_CLK0	 $CLK0_ifname"     >> $ENV_FILE
 echo "set g_CLK0_freq $CLK0_freq"          >> $ENV_FILE

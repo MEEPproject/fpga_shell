@@ -381,6 +381,9 @@ if {[info exists g_RST0]} {
 if {[info exists g_UART_MODE]} {
 	# TODO: Add here if mode eq simple or full
 	add_acc_connection "UART" "yes" $g_UART_ifname $g_axiLi_file $g_wire_file $g_map_file
+	if {[info exists g_UART_irq]} {
+		add_simple_connection $g_UART_irq $g_map_file $g_wire_file
+	}
 }
 #TODO: add_simple_connection should go through a list of interfaces (foreach)
 
