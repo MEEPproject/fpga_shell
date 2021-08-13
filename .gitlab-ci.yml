@@ -7,7 +7,7 @@ stages:
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA: 458b2256026da35f3b7ef03a66f9578b98438cac
+        EMULATED_ACCELERATOR_SHA: 8a55e1e3ee50d9bf8fbd69e2f38426e45f10de41
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
@@ -72,6 +72,8 @@ synthesis:
         script:
             - make synthesis
         after_script:
+                - cp $(find . -wholename "*/synth_1/runme.log") ./synth.log
+                  # Maybe is interesting bring in all the IPs logs. For that, search only "runme.log"
                 - make clean_accelerator clean_shell
                 - >
                  echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
@@ -80,11 +82,13 @@ synthesis:
                  Vivado path --> $VIVADO_PATH        \r\n
                  Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
         artifacts:
+          when: always
           expire_in: 1 month
           paths:
             - src/system_top.sv
             - tcl/shell_env.tcl
             - gen_system.tcl 
+            - synth.log
             - dcp/synthesis.dcp
             - cicd_log.txt
             
