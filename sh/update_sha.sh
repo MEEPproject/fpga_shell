@@ -1,13 +1,14 @@
 #!/bin/bash
 
-EMPTY=""
+ROOT_DIR=$(pwd)
 EA_SHA="EMULATED_ACCELERATOR_SHA"
 DEF_FILE=$1
+ACC_DIR=$ROOT_DIR/accelerator
 
-#Do the same process (almost) for the SHA line
-#1 obtain the right line
+cd $ACC_DIR
 EA_SHA_BRANCH=$(git branch --show-current)
 EA_SHA_TMP=$(git rev-parse $EA_SHA_BRANCH)
+cd $ROOT_DIR
 
 echo "$EA_SHA: $EA_SHA_TMP"
 NEW_SHA="$EA_SHA: $EA_SHA_TMP"
