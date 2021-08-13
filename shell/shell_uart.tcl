@@ -20,9 +20,13 @@ connect_bd_net [get_bd_ports rs232_txd] [get_bd_pins axi_uart16550_0/sout]
 connect_bd_net [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins clk_wiz_1/clk_out1]
 connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn]
 
+# TODO: Deal with no IRQ scenario with if
+
 make_bd_intf_pins_external  [get_bd_intf_pins axi_uart16550_0/S_AXI]
 set_property name $g_UART_ifname [get_bd_intf_ports S_AXI_0]
-set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /io_nasti_uart]
-exclude_bd_addr_seg [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -target_address_space [get_bd_addr_spaces io_nasti_uart]
+set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /$g_UART_ifname]
+make_bd_pins_external  [get_bd_pins axi_uart16550_0/ip2intc_irpt]
+set_property name $g_UART_irq [get_bd_ports ip2intc_irpt_0]
+exclude_bd_addr_seg [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -target_address_space [get_bd_addr_spaces $g_UART_ifname]
 
 }
