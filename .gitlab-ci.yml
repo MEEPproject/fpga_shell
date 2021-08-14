@@ -7,7 +7,7 @@ stages:
 variables:
         GIT_SUBMODULE_STRATEGY: recursive   
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA: 17aeab3008473d7e01835545c1614b2750fb0736
+        EMULATED_ACCELERATOR_SHA: 596cd15af9464e2d5a59117fbeea99bd57597361
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
