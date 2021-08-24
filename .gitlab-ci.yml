@@ -159,6 +159,7 @@ fpga-test:
             - download-binaries
             - bitstream
         artifacts:
+            when: always
             paths:
             - $FPGA_LOG_FILE
 
