@@ -146,6 +146,7 @@ fpga-test:
             - FPGA_TEST
         before_script:
             - export PATH=$PATH:/home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
+            - /home/tools/scripts/givememyuart
         script:
             - sh/load_bitstream.sh qdma $BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
