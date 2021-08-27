@@ -7,16 +7,16 @@ if { $::argc > 0 } {
 
 open_project ${g_project_dir}/${g_project_name}.xpr
 
-proc synthesis { g_root_dir g_project_name g_project_dir g_number_of_jobs} {
+proc synthesis { g_root_dir g_number_of_jobs} {
 
 	set number_of_jobs $g_number_of_jobs
 	reset_run synth_1
-	launch_runs synth_1 -jobs ${number_of_jobs}
+	launch_runs synth_1 -jobs ${g_number_of_jobs}
 	puts "Waiting for the Out Of Context IPs to be synthesized..."
 	wait_on_run synth_1
 	open_run synth_1
 	write_checkpoint -force $g_root_dir/dcp/synthesis.dcp
 }
 
-synthesis $g_root_dir $g_project_name $g_project_dir $g_number_of_jobs
+synthesis $g_root_dir $g_number_of_jobs
 
