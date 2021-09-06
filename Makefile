@@ -11,14 +11,15 @@ DATE        =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 ACCEL_DIR   =  $(ROOT_DIR)/accelerator
 SYNTH_DCP   =  $(ROOT_DIR)/dcp/synthesis.dcp 
 IMPL_DCP    =  $(ROOT_DIR)/dcp/implementation.dcp 
+BIT_FILE    =  $(ROOT_DIR)/bitstream/system.bit
 REPORT_DIR  =  $(ROOT_DIR)/reports
 YAML_FILE   =  $(ROOT_DIR)/.gitlab-ci.yml
 PROJECT_DIR =  $(ROOT_DIR)/project
-VIVADO_VER  := "2020.1"
+VIVADO_VER  ?= "2020.1"
 VIVADO_PATH := /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/vivado
 VIVADO_OPT  = -mode batch -nolog -nojournal -notrace -source
 U280_PART   = "xcu280-fsvh2892-2L-e" 
-U55C_PART   = "xcvu47p-fsvh2892-2L-e"  
+U55C_PART   = "xcu55c-fsvh2892-2L-e"  
 U280_BOARD  = "u280"
 U55C_BOARD  = "u55c"
 
@@ -32,6 +33,15 @@ u280:
 
 u55c:
 	$(SH_DIR)/extract_part.sh $(U55C_PART) $(U55C_BOARD)
+	echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.1"
+
+initialize: $(ACCEL_DIR)
+
+synthesis: $(SYNTH_DCP)
+
+implementation: $(IMPL_DCP)
+
+bitstream: $(BIT_FILE)
 
 update_sha: $(ACCEL_DIR)
 	# Update the ea_url file with the actual accelerator sha
@@ -43,7 +53,7 @@ yaml: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
 	$(SH_DIR)/extract_url.sh
 
-initialize: clean
+$(ACCEL_DIR): 
 	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
 	$(ROOT_DIR)/init_project.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
 
@@ -58,13 +68,13 @@ vivado: $(ACCEL_DIR)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_top.tcl
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_project.tcl
 	
-synthesis: vivado 
+$(SYNTH_DCP): vivado 
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
-implementation: $(SYNTH_DCP)
+$(IMPL_DCP): $(SYNTH_DCP)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(PROJECT_DIR)
 	
-bitstream: $(IMPL_DCP)
+$(BIT_FILE): $(IMPL_DCP)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(PROJECT_DIR)
 	
 validate: $(REPORT_DIR)

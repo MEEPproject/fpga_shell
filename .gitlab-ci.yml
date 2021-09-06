@@ -121,14 +121,14 @@ bitstream:
         script:
             - make bitstream
         after_script:
-            - cp system.bit $BITSTREAM
+            - mv bitstream/system.bit bitstream/$BITSTREAM
         dependencies:
             - implementation
         artifacts:
             when: always
             expire_in: 1 month
             paths:
-                - $BITSTREAM
+                - bitstream
 validation:
         stage: bitstream
         tags: 
@@ -148,7 +148,7 @@ fpga-test:
             - export PATH=$PATH:/home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
             - /home/tools/scripts/givememyuart
         script:
-            - sh/load_bitstream.sh qdma $BITSTREAM
+            - sh/load_bitstream.sh qdma bitstream/$BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
             - source sh/pcie_script.sh binaries/fw_payload.bin
             - sleep 60            
