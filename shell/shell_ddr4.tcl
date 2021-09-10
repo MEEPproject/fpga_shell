@@ -42,14 +42,27 @@
 
   set ddr4_sdram_c0 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddr4_rtl:1.0 ddr4_sdram_c0 ]
   
-   
   # Create instance: ddr4_0, and set properties
   set ddr4_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:ddr4:2.2 ddr4_0 ]
   set_property -dict [ list \
-   CONFIG.C0_CLOCK_BOARD_INTERFACE {sysclk0} \
-   CONFIG.C0_DDR4_BOARD_INTERFACE {ddr4_sdram_c0} \
+   CONFIG.C0_CLOCK_BOARD_INTERFACE {Custom} \
+   CONFIG.C0_DDR4_BOARD_INTERFACE {Custom} \
    CONFIG.RESET_BOARD_INTERFACE {Custom} \
+   CONFIG.C0.DDR4_TimePeriod {833} \
+   CONFIG.C0.DDR4_InputClockPeriod {9996} \
+   CONFIG.C0.DDR4_CLKOUT0_DIVIDE {5} \
+   CONFIG.C0.DDR4_MemoryType {RDIMMs} \
+   CONFIG.C0.DDR4_MemoryPart {MTA18ASF2G72PZ-2G3} \
+   CONFIG.C0.DDR4_DataWidth {72} \
+   CONFIG.C0.DDR4_DataMask {NONE} \
+   CONFIG.C0.DDR4_Ecc {true} \
+   CONFIG.C0.DDR4_CasLatency {17} \
+   CONFIG.C0.DDR4_CasWriteLatency {12} \
+   CONFIG.C0.DDR4_AxiDataWidth {512} \
+   CONFIG.C0.DDR4_AxiAddressWidth {34} \
+   CONFIG.C0.DDR4_EN_PARITY {true} \
  ] $ddr4_0
+ 
  
  
  # # Insert AXI GPIO
@@ -69,9 +82,8 @@
 
 
 
-
- 
- apply_bd_automation -rule xilinx.com:bd_rule:board -config { Board_Interface {sysclk0 ( 100 MHz System differential clock0 ) } Manual_Source {Auto}}  [get_bd_intf_pins ddr4_0/C0_SYS_CLK]
+ make_bd_intf_pins_external  [get_bd_intf_pins ddr4_0/C0_SYS_CLK]
+ set_property name sysclk0 [get_bd_intf_ports C0_SYS_CLK_0]
  connect_bd_intf_net [get_bd_intf_ports ddr4_sdram_c0] [get_bd_intf_pins ddr4_0/C0_DDR4]
 
  create_bd_port -dir O -type clk clk_ddr4
@@ -96,8 +108,7 @@
   connect_bd_net [get_bd_pins rst_system_ddr/peripheral_aresetn] [get_bd_pins ddr4_0/c0_ddr4_aresetn]
   connect_bd_net [get_bd_pins rst_system_ddr/peripheral_reset] [get_bd_pins ddr4_0/sys_rst]
   
-  connect_bd_intf_net -intf_net axi_interconnect_1_M00_AXI [get_bd_intf_pins axi_interconnect_1/M00_AXI] [get_bd_intf_pins ddr4_0/C0_DDR4_S_AXI_CTRL]
-  
+  connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_1/M00_AXI] [get_bd_intf_pins ddr4_0/C0_DDR4_S_AXI_CTRL]
 
   connect_bd_net [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins ddr4_0/c0_ddr4_ui_clk]
   connect_bd_net [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins ddr4_0/c0_ddr4_ui_clk]
@@ -115,7 +126,7 @@
   set_property name $g_CLK0 [get_bd_ports clk_ddr4]
   
 
-
+  save_bd_design
 
 
 
