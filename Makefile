@@ -38,6 +38,8 @@ u55c:
 
 initialize: $(ACCEL_DIR)
 
+vivado: $(PROJECT_FILE)
+
 synthesis: $(SYNTH_DCP)
 
 implementation: $(IMPL_DCP)
@@ -61,7 +63,7 @@ $(ACCEL_DIR):
 binaries: $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh
 
-vivado: $(ACCEL_DIR) 
+$(PROJECT_FILE): $(ACCEL_DIR) 
 	sh/define_shell.sh
 	mkdir -p binaries
 	cp -r accelerator/meep_shell/binaries/* binaries/
