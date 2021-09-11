@@ -1,8 +1,8 @@
 source [pwd]/tcl/environment.tcl
 
 if { $::argc > 0 } {
- set g_project_dir $::argv
- puts "project directory is $g_project_dir"
+ set g_root_dir $::argv
+ puts "Root directory is $g_root_dir"
 }
 
 proc implementation { g_root_dir } {

@@ -11,3 +11,4 @@ system.bit
 gen_system.tcl
 *.swp
 *.log
+*.dcp
