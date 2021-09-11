@@ -1,27 +1,28 @@
-ROOT_DIR    =  $(PWD)
-TCL_DIR     =  $(ROOT_DIR)/tcl
-SH_DIR	    =  $(ROOT_DIR)/sh
-DEF_FILE    =  $(ROOT_DIR)/ea_url.txt
-EA_REPO     =  EMULATED_ACCELERATOR_REPO
-EA_SHA      =  EMULATED_ACCELERATOR_SHA
-EA_GIT_URL  = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
-EA_GIT_SHA  = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
-EA_DIR      =  $(ROOT_DIR)/accelerator
-DATE        =  `date +'%a %b %e %H:%M:$S %Z %Y'`
-ACCEL_DIR   =  $(ROOT_DIR)/accelerator
-SYNTH_DCP   =  $(ROOT_DIR)/dcp/synthesis.dcp 
-IMPL_DCP    =  $(ROOT_DIR)/dcp/implementation.dcp 
-BIT_FILE    =  $(ROOT_DIR)/bitstream/system.bit
-REPORT_DIR  =  $(ROOT_DIR)/reports
-YAML_FILE   =  $(ROOT_DIR)/.gitlab-ci.yml
-PROJECT_DIR =  $(ROOT_DIR)/project
-VIVADO_VER  ?= "2020.1"
-VIVADO_PATH := /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/vivado
-VIVADO_OPT  = -mode batch -nolog -nojournal -notrace -source
-U280_PART   = "xcu280-fsvh2892-2L-e" 
-U55C_PART   = "xcu55c-fsvh2892-2L-e"  
-U280_BOARD  = "u280"
-U55C_BOARD  = "u55c"
+ROOT_DIR     =  $(PWD)
+TCL_DIR      =  $(ROOT_DIR)/tcl
+SH_DIR	     =  $(ROOT_DIR)/sh
+DEF_FILE     =  $(ROOT_DIR)/ea_url.txt
+EA_REPO      =  EMULATED_ACCELERATOR_REPO
+EA_SHA       =  EMULATED_ACCELERATOR_SHA
+EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
+EA_GIT_SHA   = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
+EA_DIR       =  $(ROOT_DIR)/accelerator
+DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
+PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
+ACCEL_DIR    =  $(ROOT_DIR)/accelerator
+SYNTH_DCP    =  $(ROOT_DIR)/dcp/synthesis.dcp 
+IMPL_DCP     =  $(ROOT_DIR)/dcp/implementation.dcp 
+BIT_FILE     =  $(ROOT_DIR)/bitstream/system.bit
+REPORT_DIR   =  $(ROOT_DIR)/reports
+YAML_FILE    =  $(ROOT_DIR)/.gitlab-ci.yml
+PROJECT_DIR  =  $(ROOT_DIR)/project
+VIVADO_VER   ?= "2020.1"
+VIVADO_PATH  := /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/vivado
+VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
+U280_PART    = "xcu280-fsvh2892-2L-e" 
+U55C_PART    = "xcu55c-fsvh2892-2L-e"  
+U280_BOARD   = "u280"
+U55C_BOARD   = "u55c"
 
 .PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation ci_cd
 
@@ -68,7 +69,7 @@ vivado: $(ACCEL_DIR)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_top.tcl
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_project.tcl
 	
-$(SYNTH_DCP): vivado 
+$(SYNTH_DCP): $(PROJECT_FILE) 
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)

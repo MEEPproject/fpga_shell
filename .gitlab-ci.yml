@@ -5,7 +5,6 @@ stages:
     - bitstream
     - fpga-test
 variables:
-        GIT_SUBMODULE_STRATEGY: recursive   
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
         EMULATED_ACCELERATOR_SHA: 596cd15af9464e2d5a59117fbeea99bd57597361
         VIVADO_VERSION: "2020.1"
@@ -50,6 +49,7 @@ EA-build:
             - MEEP_FPGA
         before_script:
             - make clean
+            - git submodule update --init --recursive
             - mkdir -p binaries
             - source ./init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
         script:
@@ -58,7 +58,7 @@ EA-build:
             - cp -r accelerator/meep_shell/binaries/* binaries
         artifacts:
                 #  untracked: true
-          expire_in: 1 month
+          expire_in: never
           paths:            
             - binaries        
 
@@ -68,6 +68,7 @@ synthesis:
         tags: 
             - MEEP_FPGA
         before_script:
+            - git submodule update --init --recursive
             - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
         script:
             - make synthesis
@@ -123,6 +124,7 @@ bitstream:
         after_script:
             - mv bitstream/system.bit bitstream/$BITSTREAM
         dependencies:
+            - synthesis
             - implementation
         artifacts:
             when: always
