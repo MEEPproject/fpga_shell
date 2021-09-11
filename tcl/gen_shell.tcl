@@ -13,6 +13,7 @@ add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/hbm_$
 
 if { $g_DDR4 eq "yes"} {
 	source $g_root_dir/shell/shell_ddr4.tcl
+	add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ddr4_${g_board_part}.xdc"
 } elseif { $g_HBM eq "yes"} {
 	source $g_root_dir/shell/shell_hbm.tcl
 }
