@@ -71,6 +71,7 @@ synthesis:
             - git submodule update --init --recursive
             - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
         script:
+            - make vivado
             - make synthesis
         after_script:
                 - cp $(find . -wholename "*/synth_1/runme.log") ./synth.log

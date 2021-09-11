@@ -24,7 +24,7 @@ U55C_PART    = "xcu55c-fsvh2892-2L-e"
 U280_BOARD   = "u280"
 U55C_BOARD   = "u55c"
 
-.PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation ci_cd
+.PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation clean_ci_cd
 
 #.DEFAULT_GOAL := initialize
 all: binaries vivado synthesis implementation bitstream validate
@@ -36,9 +36,7 @@ u55c:
 	$(SH_DIR)/extract_part.sh $(U55C_PART) $(U55C_BOARD)
 	echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.1"
 
-initialize: $(ACCEL_DIR)
-
-vivado: $(PROJECT_FILE)
+initialize: clean $(ACCEL_DIR)
 
 synthesis: $(SYNTH_DCP)
 
@@ -63,7 +61,7 @@ $(ACCEL_DIR):
 binaries: $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh
 
-$(PROJECT_FILE): $(ACCEL_DIR) 
+vivado: $(ACCEL_DIR) 
 	sh/define_shell.sh
 	mkdir -p binaries
 	cp -r accelerator/meep_shell/binaries/* binaries/
@@ -71,7 +69,7 @@ $(PROJECT_FILE): $(ACCEL_DIR)
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_top.tcl
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_project.tcl
 	
-$(SYNTH_DCP): $(PROJECT_FILE) 
+$(SYNTH_DCP):
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
