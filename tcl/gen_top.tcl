@@ -48,13 +48,23 @@ proc parse_module {fd_mod fd_inst fd_wire} {
 	set firstLine 0
 	
 	while {[gets $fd_mod line] >= 0} {
-
+		
+		#First thing to do is to isolate "[]" so is treated as field 
+		#separated with spaces
+		set line [string map {\[ \ \[} $line]
+		set line [string map {\] \]\ } $line]
+		
+        
+		# Following line expects something like:
+		# input [3:0] someSignal or output otherSignal
+		# The string gets separated in fields "input", "[3:0]" and "someSignal"
 		set fields [regexp -all -inline {\S+} $line]
 		#puts [lindex $fields 1]
 		set resultV  [lindex $fields 2]
 		set result   [lindex $fields 1]
 		set comments [lindex $fields 0]
 		
+		# Do the connection by default
 		set doConnection 1		
 		
 		if { [regexp -inline -all {\/\/} $comments] ne ""} {
@@ -67,8 +77,13 @@ proc parse_module {fd_mod fd_inst fd_wire} {
 			#puts "Empty Line detected"
 		} elseif { [regexp -inline -all {\[} $result] ne ""} {
 			#this detects vectors, e.g [3:0] my_vector
+			
+			# Extract whatever falls inside "[]"
+			#set debug [ regexp {\[(.*?)\]} $line]
+			
 			set mySignal $resultV
 			set myWire "$result $resultV"
+			
 		} elseif { [regexp -inline -all {module} $comments] ne "" } {
 			set doConnection 0
 			set firstLine 1			
@@ -244,7 +259,7 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 		set matchString ""
 	
 		foreach item $axiList {
-		#split coverts properly the element list into strings
+		#split converts  the element list into strings
 		set elem [split $item " "]
 		set firstElem [lindex $elem 0]
 		if { $firstElem eq "yes" } {
