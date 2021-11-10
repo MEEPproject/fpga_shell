@@ -1,2 +1,3 @@
-EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-EMULATED_ACCELERATOR_SHA: 596cd15af9464e2d5a59117fbeea99bd57597361
+EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
+EMULATED_ACCELERATOR_SHA: 58f905fad7de7d06bdfcbcb648edecf79c5f88c2
+

@@ -13,6 +13,10 @@ fi
 bash -x sh/gitsubmodules.sh $1 $2
 #Generic call to accelerator conf script. It should be meep_shell/accelerator_init.sh
 cd accelerator
+
+MEEP_DIR=$(find . -type d -name "meep_shell")
+ln -sf $MEEP_DIR ./meep_shell
+
 bash -x meep_shell/accelerator_init.sh
 cd ..
 #Make a make inside DVINO
