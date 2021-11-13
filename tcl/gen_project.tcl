@@ -10,6 +10,7 @@ set script_folder [_tcl::get_script_folder]
 
 puts "The environment tcl will be sourced from ${script_folder}"
 source $script_folder/environment.tcl
+source $script_folder/procedures.tcl
 source $script_folder/shell_env.tcl
 ################################################################
 # Check if script is running in correct Vivado version.
@@ -82,7 +83,7 @@ set_property  ip_repo_paths  $ip_dir_list [current_project]
 # This is how we call the top module in the meep_shell project. It may change if we want
 set_property top $g_top_name [current_fileset]
 
-puts "Project generation ended successfully"
+putcolors "Project generation ended successfully" $GREEN
 
 #source $root_dir/tcl/gen_bitstream.tcl
 write_project_tcl -force -all_properties -dump_project_info -quiet -verbose "${root_dir}/gen_system.tcl"

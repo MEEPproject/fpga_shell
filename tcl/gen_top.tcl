@@ -5,6 +5,7 @@ set g_acc_dir $g_root_dir/accelerator
 file mkdir $g_root_dir/tmp
 file mkdir $g_root_dir/src
 
+source $g_root_dir/tcl/procedures.tcl
 source $g_root_dir/tcl/shell_env.tcl
 
 set g_top_file    $g_root_dir/src/system_top.sv
@@ -443,7 +444,7 @@ puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
 
-puts "MEEP SHELL top created"
+putcolors "INFO: MEEP SHELL top created" $GREEN
 
 file delete -force $g_root_dir/tmp
 
