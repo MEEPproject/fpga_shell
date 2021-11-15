@@ -10,3 +10,8 @@ proc putcolors { someText color } {
 
 }
 
+proc putmeeps { someText } {        
+
+        puts "\[MEEP\]\ ${someText}"
+
+}

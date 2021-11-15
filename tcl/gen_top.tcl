@@ -44,83 +44,81 @@ set g_pcie yes
 # It can skip blank lines and comments.
 # EA ports <---> EA wires
 
-proc parse_module {fd_mod fd_inst fd_wire} {		
+proc parse_module {fd_mod fd_inst fd_wire} {	
+
+	set doConnection 0
+	set moduleParsed 0
 	
-	set firstLine 0
+	set comma ""
 	
+
 	while {[gets $fd_mod line] >= 0} {
-		
-		#First thing to do is to isolate "[]" so is treated as field 
-		#separated with spaces
-		set line [string map {\[ \ \[} $line]
-		set line [string map {\] \]\ } $line]
-		
-        
-		# Following line expects something like:
-		# input [3:0] someSignal or output otherSignal
-		# The string gets separated in fields "input", "[3:0]" and "someSignal"
-		set fields [regexp -all -inline {\S+} $line]
-		#puts [lindex $fields 1]
-		set resultV  [lindex $fields 2]
-		set result   [lindex $fields 1]
-		set comments [lindex $fields 0]
-		
-		# Do the connection by default
-		set doConnection 1		
-		
-		if { [regexp -inline -all {\/\/} $comments] ne ""} {
-			#puts "// $result"			
-			set doConnection 0
-			#regexp: starging from the beginning of the line, find 0 or more
-			#spaces before meeting the end of the line
-		} elseif { [ regexp {^\s*$} $line ] } {
-			set doConnection 0				
-			#puts "Empty Line detected"
-		} elseif { [regexp -inline -all {\[} $result] ne ""} {
-			#this detects vectors, e.g [3:0] my_vector
-			
-			# Extract whatever falls inside "[]"
-			#set debug [ regexp {\[(.*?)\]} $line]
-			
-			set mySignal $resultV
-			set myWire "$result $resultV"
-			
-		} elseif { [regexp -inline -all {module} $comments] ne "" } {
-			set doConnection 0
-			set firstLine 1			
-			puts $fd_inst "$result ${result}_inst \( "
-		} elseif { [regexp -inline -all {\(} $comments] ne "" } {
-			set doConnection 0
-		} elseif { [regexp -inline -all {\)} $comments] ne "" } {
-			set doConnection 0
-		} else {		
-			#puts $result
-			set mySignal $result
-			set myWire   $result
-		}
-		
-		if { $doConnection eq 1 } {
-			if { $firstLine eq 1} {
-			set firstLine 0
-			set PortConnection  "     .$mySignal     \($mySignal\)    "
-			} else {
-			set PortConnection  ",    .$mySignal     \($mySignal\)    "
+	
+	# Loof for the module name. Expecting something similar to a wrapper.
+	# Use a condition to not do it in every line once it has been discovered.
+		if { $moduleParsed == 0} {
+		# module system_wrapper returns a single word separated by spaces
+			set moduleDef [regexp -inline -all {\ymodule\y\s[a-z|A-z|0-9]*} $line]
+			if { $moduleDef ne ""} {
+				set moduleName [split $moduleDef " "]
+				set moduleName [lindex $moduleName  1]
+				set moduleName [join $moduleName]
+				set moduleParsed 1
+				puts $fd_inst "$moduleName ${moduleName}_inst \( "
 			}
-			set WireDefinition  "    wire $myWire    ;  	    	  "
-			# puts "$PortConnection"
-			# gets stdin ""
-			puts $fd_inst $PortConnection
-			puts $fd_wire $WireDefinition
+		} else {
+		
+		# Look for comments at the begining of the line
+			if { [regexp -inline -all {^\s*//} $line] ne ""} {
+				putmeeps "INFO: comment line\r\n"	
+		# Detect empty lines
+			} elseif { [ regexp {^\s*$} $line ] } {
+				putmeeps "INFO: empty line\r\n"	
+			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
+				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
+					putcolors "INFO: 'wire' keyword is not needed, removing ..." $RED
+					set line [string map {wire \ } $line]
+				}					
+				# find whatever is after input/ouput without a final comma
+				set MyWire    [regexp -inline -all {[^((input)|(output))].*[^,]} $line] 
+				set MyWire    [join $MyWire]
+				
+				# Search for a vector
+				if { [regexp -inline -all {\[.*[^,]} $MyWire] ne ""} {
+				# Divide into fields to capture the vector
+					set fields       [regexp -all -inline {\S+} $MyWire]
+					set MyVector [lindex $fields 0]
+					set MySignal [lindex $fields 1]					
+				} else {
+				# Thereis no vector
+					set MySignal $MyWire
+				}
+				set PortConnection  "$comma     .$mySignal     \($mySignal\)    "
+				set WireDefinition   "    wire $myWire    ;  	    	  "
+				
+				puts $fd_inst $PortConnection
+				puts $fd_wire $WireDefinition
+				
+				# The first connection need to be comma-less. Place it thereafter				
+				set comma ","
+				
+			} elseif { } {
+				putcolors "INFO: Not considered branch?...\r\n" $RED
+			}		
 		}
-	}	
+	}
+	
 	puts $fd_inst "    \) ;" 
 }
 
 
+################################################
 # This function takes the content of the interface files and unify them
 # at the top of the TOP module file, meaning this is the actual I/O interface
 # of the final system.
+################################################
+
 proc add_interface {g_interface g_intf_file g_mod_file} {
 		
 	if { $g_interface eq "yes" } {
@@ -137,56 +135,69 @@ proc add_interface {g_interface g_intf_file g_mod_file} {
 	
 }
 
-
+################################################
 # This function creates the connections between the top level ports 
-# and the MEEP Shell in the MEEP Shell instantiation. 
+# and the MEEP Shell in the MEEP Shell instance. 
 # The instance is closed using hbm_cattrip, which is always required,
 # regardless if HBM is actually used or not.
 # TOP LEVEL PORTS <---> Shell instance
+################################################
 proc add_instance { g_fd g_fd_tmp } {
+
+# Receive the top level ports as a parameter and write the connections
+# to the file that temporally stores the shell instance
+	set NoCattrip 1
 		
-	
 	while {[gets $g_fd line] >= 0} {
+	
+	# Seach for three different fields in case we are handling a vector: 
+	# input [33:0] MyPort. This can be handled better. Need refactor
+	# Seach for "[" and decide this is field 0. Then search for the signal. 
+	# The "input" fiedl can be discarded. Lines startig with "//" need to be 
+	# discared or the // maintained.
 
 		set fields [regexp -all -inline {\S+} $line]
-		#puts [lindex $fields 1]
-		set resultV  [lindex $fields 2]
-		set result   [lindex $fields 1]
-		set comments [lindex $fields 0]
 		
-		set doConnection 1
+		if { [regexp -inline -all {\[} $result] ne ""} {
 		
-		if { [regexp -inline -all {//} $comments] ne ""} {
-			#puts "// $result"
-			set mySignal "// $result"
-			set doConnection 0
+			set MyVector  [lindex $fields 1]
+			set MySignal  [lindex $fields 2]
+		
+		} else {
+		
+			set MyVector 0
+			set MySignal  [lindex $fields 1]
+		
+		}
+								
+		if { [regexp -inline -all {^\s*//} $line] ne ""} {		# TODO: This is NOT checking for "//" at the begining of a line but anywhere in it.
+			#putmeeps "// $result"
+			set MySignal "// $line"
+
 		} elseif { [string match "" $line ] } {
-			set doConnection 0
-			#puts "Empty Line detected"
-		} elseif { [regexp -inline -all {\[} $result] ne ""} {
-			#this detects vectors, e.g [3:0] my_vector
-			set mySignal $resultV
+		
+			putmeeps "INFO: Empty line detected\r\n"
+			#putmeeps "Empty Line detected"
 		} elseif { [regexp -inline -all {hbm_cattrip} $result] ne "" } {
-			set doConnection 0
-			# hbm_cattrip is used manually to close the instance.
+			putcolors "INFO: skipping hbm_cattrip port\r\n" $GREEN
+			set NoCattrip 0
+			# hbm_cattrip is used manually to close the instance,
+			# so we don't want to make the connection here.
 		} else {		
 			#puts $result
-			set mySignal $result
-		}
-		
-		if { $doConnection eq 1 } {
-		set PortConnection  "    .$mySignal     \($mySignal\)    ,"
-		#puts "$PortConnection"
-		puts $g_fd_tmp $PortConnection
-		}
+			set PortConnection  "    .$MySignal     \($MySignal\)    ,"
+			puts $g_fd_tmp $PortConnection					
+		}			
 	}	
+	return $NoCattrip	
 }
 
-
+########################################################
 # This function associates Peripherals and AXI interfaces.
 # If the peripheral/IP has more than one interface, it will get
 # marked as "yes" and the <add_acc_connection> function will go 
 # over it, creating the necessary connections.
+########################################################
 proc select_interface { g_interface } {
 
 	set g_axi4 no
@@ -195,37 +206,37 @@ proc select_interface { g_interface } {
 	set g_clk  no
 	set g_uart no
 	
-	puts "Interface: $g_interface"
+	putmeeps "Interface: $g_interface"
 
 	switch -regexp $g_interface {
 		"DDR4" {
-		set g_axi4 yes
+			set g_axi4 yes
 		}
 		"HBM" {
-		set g_axi4 yes
+			set g_axi4 yes
 		}
 		"ETHERNET" {
-		set g_axi4 yes
-		set g_axiS yes
-		set g_axiL yes
+			set g_axi4 yes
+			set g_axiS yes
+			set g_axiL yes
 		}
 		"AURORA" {
-		set g_axiS yes
+			set g_axiS yes
 		}
 		[CLK0,CLK1,CLK2,CLK3] {
-		set g_clk yes
+			set g_clk yes
 		}
 		"UART" {
-		set g_uart yes
-		#if mode is not simple:
-		set g_axiL yes
+			set g_uart yes
+			#if mode is not simple:
+			set g_axiL yes
 		}
 		default {
-		set g_axi4 no
-		set g_axiS no
-		set g_axiL no
-		set g_clk  no
-		set g_uart no
+			set g_axi4 no
+			set g_axiS no
+			set g_axiL no
+			set g_clk  no
+			set g_uart no
 		}
 	}
 	
@@ -234,22 +245,22 @@ proc select_interface { g_interface } {
 	# This labels (axi4, axiS..) need to match what is used in the corresponding interface file present 
 	# in the "$root_dir/interface" folder. 
 
-	#puts "$g_interface $g_axi4 $g_axiS $g_axiL $g_clk $g_uart"
+	#putmeeps "$g_interface $g_axi4 $g_axiS $g_axiL $g_clk $g_uart"
 	return $axi_list
 
 }
 
-
+########################################################
 # This function receives a peripheral/IP name, check if it exists and then create instance
 # connections depending on the inferface(s) the peripheral/IP uses.
 # EA ports <---> Shell instance
+########################################################
 proc add_acc_connection { device interface ifname intf_file wire_file map_file} {
 
-
 	if { $interface eq "yes" } {
-		set fd_intf [open $intf_file "r"]
+		set fd_intf    [open $intf_file "r"]
 		set fd_map  [open $map_file  "a"]
-		set fd_wire [open $wire_file "a"]		
+		set fd_wire  [open $wire_file "a"]		
 		
 		#lassign [select_interface $device] g_axi4 g_axiS g_axiL g_clk g_uart
 		#Need to create a var for mathing axi ifs below
@@ -261,22 +272,24 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 	
 		foreach item $axiList {
 		#split converts  the element list into strings
-		set elem [split $item " "]
-		set firstElem [lindex $elem 0]
-		if { $firstElem eq "yes" } {
-			set matchString [lindex $elem 1]
+			set elem [split $item " "]
+			set firstElem [lindex $elem 0]
+			
+			if { $firstElem eq "yes" } {
+			
+				set matchString [lindex $elem 1]
 
-			while {[gets $fd_intf line] >= 0} {
-			#puts "Line: $line"
-				if {[ string match *$matchString* $line ] } {
-					#puts "MATCH! $matchString"
-					set newline [regsub $matchString $line $ifname ]								
-					puts $fd_map "    .$newline    ($newline)    , "
-					#puts "    .$newline    ($newline)    , "
-					#gets stdin ""
-				}
+				while {[gets $fd_intf line] >= 0} {
+				#putmeeps "Line: $line"
+					if {[ string match *$matchString* $line ] } {
+						#putmeeps "MATCH! $matchString"
+						set newline [regsub $matchString $line $ifname ]								
+						puts $fd_map "    .$newline    ($newline)    , "
+						#putmeeps "    .$newline    ($newline)    , "
+						#gets stdin ""
+					}
+				}	
 			}	
-		}	
 		}	
 		close $fd_intf
 		close $fd_map	
@@ -317,16 +330,17 @@ close $fd_mod
 close $fd_system
 
 # 12/08/2021
-# Add interface creates the top level signals using 
+# Add interface creates the TOP level I/O ports using 
 # an existing template in "interfaces" folder.
 # All the interfaces can be issued here as the function
-# itself will look for a "yes" in the first parameter.
+# itself will look for a "yes" in the first parameter, granted
+# via the sh/parse_module.sh to an environment tlc file.
 # Add the enabled interfaces to the top level module.
-add_interface  $g_pcie     $g_pcie_file   $g_mod_file 
-add_interface  $g_DDR4     $g_ddr4_file   $g_mod_file
-add_interface  $g_AURORA   $g_aurora_file $g_mod_file
-add_interface  $g_ETHERNET $g_eth_file    $g_mod_file
-add_interface  $g_UART     $g_uart_file   $g_mod_file
+add_interface  $g_pcie           $g_pcie_file    $g_mod_file 
+add_interface  $g_DDR4        $g_ddr4_file    $g_mod_file
+add_interface  $g_AURORA    $g_aurora_file $g_mod_file
+add_interface  $g_ETHERNET $g_eth_file      $g_mod_file
+add_interface  $g_UART        $g_uart_file     $g_mod_file
 #HBM has no interfaces but hbm_cattrip
 
 # Close the top level module
@@ -342,16 +356,16 @@ close $fd_mod
 # Connections between the shell and the EA need are yet to be created.
 # TOP LEVEL PORTS <---> Shell instance
 
-set fd_mod    [open $g_mod_file    "r"]
-set fd_inst   [open $g_inst_file   "w"]
+set fd_mod  [open $g_mod_file   "r"]
+set fd_inst   [open $g_inst_file    "w"]
 
 add_instance $fd_mod $fd_inst
 
 close $fd_mod
 close $fd_inst
 
-## Here, the shell instantiation is partially filled with connections 
-## to the top level ports.
+## Here, the shell instance is partially filled with connections 
+## to the top level I/O ports.
 
 ##################################################################
 
@@ -359,9 +373,9 @@ close $fd_inst
 # The EA will be entirely connected to the MEEP Shell.
 # EA ports <---> EA wires
 
-set fd_mod    [open $g_acc_file    "r"]
-set fd_inst   [open $g_eamap_file  "w"]
-set fd_wire   [open $g_wire_file   "w"]
+set fd_mod   [open $g_acc_file      "r"]
+set fd_inst    [open $g_eamap_file "w"]
+set fd_wire   [open $g_wire_file     "w"]
 
 parse_module $fd_mod $fd_inst $fd_wire
 
@@ -387,7 +401,8 @@ if { $g_DDR4 eq "yes"} {
 }
 
 
-# Create not-AXI connections
+# Create not-AXI connections. 
+#TODO: This can be done with a list and foreach.
 if {[info exists g_CLK0]} {
 	add_simple_connection $g_CLK0 $g_map_file $g_wire_file
 }
@@ -403,11 +418,11 @@ if {[info exists g_UART_MODE]} {
 }
 #TODO: add_simple_connection should go through a list of interfaces (foreach)
 
-set   fd_top      [open $g_top_file    "w"]
-set   fd_mod      [open $g_mod_file    "a"]
+set   fd_top      [open $g_top_file   "w"]
+set   fd_mod    [open $g_mod_file  "a"]
 set   fd_inst     [open $g_inst_file   "r"]
-set   fd_map      [open $g_map_file    "r"]
-set   fd_wire     [open $g_wire_file   "r"]
+set   fd_map    [open $g_map_file  "r"]
+set   fd_wire    [open $g_wire_file   "r"]
 
 ##################################################################
 ## Next, all the temp files are put together and neceesary sintax is added.
