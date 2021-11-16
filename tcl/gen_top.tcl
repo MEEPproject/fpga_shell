@@ -71,56 +71,49 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 		
 		# Look for comments at the begining of the line
 			if { [regexp -inline -all {^\s*//} $line] ne ""} {
-				putmeeps "INFO: comment line\r\n"	
+				#putmeeps "INFO: comment line\r\n"	
 		# Detect empty lines
 			} elseif { [ regexp {^\s*$} $line ] } {
-				putmeeps "INFO: empty line\r\n"	
+				#putmeeps "INFO: empty line\r\n"	
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
-					putmeeps "INFO: 'wire' keyword is not needed, removing ..."
+					#putmeeps "INFO: 'wire' keyword is not needed, removing ..."
 					set line [string map {wire \ } $line]
 				}
 				
-				# find whatever is after input/ouput without a final comma and remove them
-				set MyPort    [regexp -inline -all {^.*[^,]} $line] 						
-				set MyPort    [join $MyPort]
+				set line [string map {\[ \ \[} $line]
+				set line [string map {\] \]\ } $line]
 				
-				if { [regexp -inline -all {\[.*[^,]} $MyPort] ne ""} {				
-					set MyPort [string map {\[ \ \[} $MyPort]
-					set MyPort [string map {\] \]\ } $MyPort]
+				# Join is used to remove the regexp returning braces. They are placed there
+				# by tcl to not to interpted returning brackets.
+				
+				set MyVector [regexp -all -inline {\[.+\]} $line]
+				set MyVector [string map {" " ""} $MyVector]
+				set MyVector [join $MyVector]
+				
+				set MySignal [regexp -inline -all {\s{1}[a-z|A-Z|0-9|-|_]+\s*,*$} $line]
+				set MySignal [string map {" " ""} $MySignal]
+				# Need to remove the comma, as there is no lookbehind regex in tcl
+				set MySignal [string map {"," ""} $MySignal]
+				set MySignal [join $MySignal]
+				
+				set MyWire "wire $MyVector\ $MySignal    ;"
+				set MyPortConnection "$comma     .$MySignal     \($MySignal\)    "
 										
-					
-					set fields  [regexp -all -inline {\S+} $MyPort]				
-				# Search for a vector				
-				# Divide into fields to capture the vector					
-					set MyVector [lindex $fields 1]
-					set MySignal   [lindex $fields 2]		
-					set MyWire "  $MyVector      $MySignal       "
-					putmeeps "INFO: Creating vector connection... $MyWire "
-				} else {
-				# Thereis no vector
-				    set fields  [regexp -all -inline {\S+} $MyPort]				
-				    set MySignal [lindex $fields 1]	
-					set MyWire "    $MySignal       "
-					putmeeps "INFO: Creating  simple connection... $MyWire"
-				}
-				set PortConnection  "$comma     .$MySignal     \($MySignal\)    "
-				set WireDefinition   "    wire $MyWire    ;  	    	  "
-				
-				puts "WireDef: $WireDefinition"
-				
-				puts $fd_inst $PortConnection
-				puts $fd_wire $WireDefinition
+				puts $fd_inst $MyPortConnection
+				puts $fd_wire $MyWire
 				
 				## Store only port connections to be appended to the shell instance
 				puts $fd_shell  "       .$MySignal     \($MySignal\)     , " 
 				
-				# The first connection need to be comma-less. Place it thereafter				
+				# # The first connection need to be comma-less. Place it thereafter				
 				set comma ","
 				
+				
 			} else {
-				puts "INFO: Not considered branch?...\r\n"
+				puts "INFO: Not considered branch?..."
+				puts " --> $line"
 				set teclado [read stdin 1]
 
 			}		
@@ -338,6 +331,57 @@ proc add_simple_connection { name map_file wire_file} {
 
 }
 
+########################################################
+# This procedure receives the EA module name and 
+# extracts address and data bus widths.
+# TODO: This procedure counts on the vector to be declared
+#     : always using '0' as the righmost value e.g 63:0
+########################################################
+proc get_axi_properties { fd_module axi_ifname } {
+
+	set awaddrMatch 0
+	set wdataMatch  0
+	set axiProperties [list]
+
+	while {[gets $fd_module line] >= 0} { 
+		
+		putmeeps "DEBUG: $axi_ifname"
+		putmeeps "DEBUG: $line"
+				
+		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		
+			set awaddrMatch [regexp -inline -all "[0-9]+.+${axi_ifname}_awaddr" $line]
+		}
+		putmeeps $awaddrMatch
+				
+		
+		if {[regexp -inline -all "${axi_ifname}_wdata" $line] != "" } {
+			set wdataMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_wdata" $line]	
+		}
+		putmeeps $wdataMatch
+
+
+		if { $awaddrMatch == "" } {
+			putmeeps "AXI awaddr signal not found "
+		} else {
+			set addrWidth [regexp -inline  {[0-9]+[^:]} $awaddrMatch]			
+		}
+		if { $wdataMatch == "" } {
+			putmeeps "AXI wdata signal not found "	
+		} else {
+			set dataWidth [regexp -inline  {[0-9]+[^:]} $wdataMatch]
+
+		}								
+	}
+	set addrWidth [expr $addrWidth + 1]
+	set dataWidth [expr $dataWidth + 1]
+
+	
+	set axiProperties [list $addrWidth $dataWidth]
+	
+	
+	return $axiProperties
+
+}
 
 ##################################################################
 ## Body
@@ -411,7 +455,6 @@ close $fd_inst
 close $fd_wire
 close $fd_shell
 
-set teclado [read stdin 1]
 
 ## Here, the EA instance has been created.
 
@@ -455,8 +498,9 @@ set   fd_inst     [open $g_inst_file   "r"]
 set   fd_wire    [open $g_wire_file   "r"]
 set   fd_shell   [open $g_shell_file   "r"]
 
-set teclado [read stdin 1]
+set axivalues [ get_axi_properties $fd_wire mem_axi ]
 
+puts "[lindex $axivalues 0] [lindex $axivalues 1] "
 
 ##################################################################
 ## Next, all the temp files are put together and neceesary sintax is added.
@@ -487,9 +531,6 @@ fcopy $fd_mod     $fd_top
 close $fd_mod
 # close the top file now.
 close $fd_top
-
-set teclado [read stdin 1]
-
 
 
 set   fd_top      [open $g_top_file    "a"]
