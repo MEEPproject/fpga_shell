@@ -13,6 +13,7 @@ set g_mod_file    $g_root_dir/tmp/mod_tmp.sv
 set g_inst_file   $g_root_dir/tmp/inst_tmp.sv
 set g_tmp_file	  $g_root_dir/tmp/top_tmp.sv
 set g_wire_file	  $g_root_dir/tmp/wire_tmp.sv
+set g_shell_file	  $g_root_dir/tmp/shell_tmp.sv
 set g_map_file	  $g_root_dir/tmp/map_tmp.sv
 set g_eamap_file  $g_root_dir/tmp/ea_top_tmp.sv
 set g_acc_file	  $g_acc_dir/meep_shell/accelerator_mod.sv
@@ -44,7 +45,7 @@ set g_pcie yes
 # It can skip blank lines and comments.
 # EA ports <---> EA wires
 
-proc parse_module {fd_mod fd_inst fd_wire} {	
+proc parse_module {fd_mod fd_inst fd_wire fd_shell} {	
 
 	set doConnection 0
 	set moduleParsed 0
@@ -77,34 +78,51 @@ proc parse_module {fd_mod fd_inst fd_wire} {
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
-					putcolors "INFO: 'wire' keyword is not needed, removing ..." $RED
+					putmeeps "INFO: 'wire' keyword is not needed, removing ..."
 					set line [string map {wire \ } $line]
-				}					
-				# find whatever is after input/ouput without a final comma
-				set MyWire    [regexp -inline -all {[^((input)|(output))].*[^,]} $line] 
-				set MyWire    [join $MyWire]
+				}
 				
-				# Search for a vector
-				if { [regexp -inline -all {\[.*[^,]} $MyWire] ne ""} {
-				# Divide into fields to capture the vector
-					set fields       [regexp -all -inline {\S+} $MyWire]
-					set MyVector [lindex $fields 0]
-					set MySignal [lindex $fields 1]					
+				# find whatever is after input/ouput without a final comma and remove them
+				set MyPort    [regexp -inline -all {^.*[^,]} $line] 						
+				set MyPort    [join $MyPort]
+				
+				if { [regexp -inline -all {\[.*[^,]} $MyPort] ne ""} {				
+					set MyPort [string map {\[ \ \[} $MyPort]
+					set MyPort [string map {\] \]\ } $MyPort]
+										
+					
+					set fields  [regexp -all -inline {\S+} $MyPort]				
+				# Search for a vector				
+				# Divide into fields to capture the vector					
+					set MyVector [lindex $fields 1]
+					set MySignal   [lindex $fields 2]		
+					set MyWire "  $MyVector      $MySignal       "
+					putmeeps "INFO: Creating vector connection... $MyWire "
 				} else {
 				# Thereis no vector
-					set MySignal $MyWire
+				    set fields  [regexp -all -inline {\S+} $MyPort]				
+				    set MySignal [lindex $fields 1]	
+					set MyWire "    $MySignal       "
+					putmeeps "INFO: Creating  simple connection... $MyWire"
 				}
-				set PortConnection  "$comma     .$mySignal     \($mySignal\)    "
-				set WireDefinition   "    wire $myWire    ;  	    	  "
+				set PortConnection  "$comma     .$MySignal     \($MySignal\)    "
+				set WireDefinition   "    wire $MyWire    ;  	    	  "
+				
+				puts "WireDef: $WireDefinition"
 				
 				puts $fd_inst $PortConnection
 				puts $fd_wire $WireDefinition
 				
+				## Store only port connections to be appended to the shell instance
+				puts $fd_shell  "       .$MySignal     \($MySignal\)     , " 
+				
 				# The first connection need to be comma-less. Place it thereafter				
 				set comma ","
 				
-			} elseif { } {
-				putcolors "INFO: Not considered branch?...\r\n" $RED
+			} else {
+				puts "INFO: Not considered branch?...\r\n"
+				set teclado [read stdin 1]
+
 			}		
 		}
 	}
@@ -158,7 +176,7 @@ proc add_instance { g_fd g_fd_tmp } {
 
 		set fields [regexp -all -inline {\S+} $line]
 		
-		if { [regexp -inline -all {\[} $result] ne ""} {
+		if { [regexp -inline -all {\[} $line] ne ""} {
 		
 			set MyVector  [lindex $fields 1]
 			set MySignal  [lindex $fields 2]
@@ -178,8 +196,8 @@ proc add_instance { g_fd g_fd_tmp } {
 		
 			putmeeps "INFO: Empty line detected\r\n"
 			#putmeeps "Empty Line detected"
-		} elseif { [regexp -inline -all {hbm_cattrip} $result] ne "" } {
-			putcolors "INFO: skipping hbm_cattrip port\r\n" $GREEN
+		} elseif { [regexp -inline -all {hbm_cattrip} $line] ne "" } {
+			puts "INFO: skipping hbm_cattrip port\r\n"
 			set NoCattrip 0
 			# hbm_cattrip is used manually to close the instance,
 			# so we don't want to make the connection here.
@@ -266,15 +284,21 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 		#Need to create a var for mathing axi ifs below
 		#if g_axi4 = yes ? set match_string "axi4"
 
+		# This send an interface (e.g, ETHERNET) and get the list of interfaces needed
+		# to implement it. It can happen Ethernet needs not only AXI4 but also 
+		# AXILite or AXI Stream.
 		set axiList [select_interface $device]		
 	
 		set matchString ""
 	
+		# e.g AXI4
 		foreach item $axiList {
 		#split converts  the element list into strings
 			set elem [split $item " "]
 			set firstElem [lindex $elem 0]
 			
+			# The first element is Yes or NO (2D list). 
+			# TODO: Refactor. 
 			if { $firstElem eq "yes" } {
 			
 				set matchString [lindex $elem 1]
@@ -298,9 +322,11 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 }
 
 
+########################################################
 # This function creates simple connections in the Shell instance. The signal
 # is passed as a parameter and then added.
 # EA ports <---> Shell instance
+########################################################
 proc add_simple_connection { name map_file wire_file} {
 
 	set fd_map   [open $map_file "a"]
@@ -376,12 +402,16 @@ close $fd_inst
 set fd_mod   [open $g_acc_file      "r"]
 set fd_inst    [open $g_eamap_file "w"]
 set fd_wire   [open $g_wire_file     "w"]
+set fd_shell  [open $g_shell_file     "w"]
 
-parse_module $fd_mod $fd_inst $fd_wire
+parse_module $fd_mod $fd_inst $fd_wire $fd_shell
 
 close $fd_mod
 close $fd_inst
 close $fd_wire
+close $fd_shell
+
+set teclado [read stdin 1]
 
 ## Here, the EA instance has been created.
 
@@ -392,37 +422,41 @@ close $fd_wire
 # EA ports <---> Shell instance
 ##################################################################
 
-if { $g_DDR4 eq "yes"} {
-	# Create the connections between the EA and the Shell
-	add_acc_connection "DDR4" $g_DDR4 $g_DDR4_ifname $g_axi_file $g_wire_file $g_map_file
-} elseif { $g_HBM eq "yes"} {
-	# Create the connections between the EA and the Shell
-	add_acc_connection "HBM" $g_HBM $g_HBM_ifname $g_axi_file $g_wire_file $g_map_file
-}
+# if { $g_DDR4 eq "yes"} {
+	# # Create the connections between the EA and the Shell
+	# add_acc_connection "DDR4" $g_DDR4 $g_DDR4_ifname $g_axi_file $g_wire_file $g_map_file
+# } elseif { $g_HBM eq "yes"} {
+	# # Create the connections between the EA and the Shell
+	# add_acc_connection "HBM" $g_HBM $g_HBM_ifname $g_axi_file $g_wire_file $g_map_file
+# }
 
 
-# Create not-AXI connections. 
-#TODO: This can be done with a list and foreach.
-if {[info exists g_CLK0]} {
-	add_simple_connection $g_CLK0 $g_map_file $g_wire_file
-}
-if {[info exists g_RST0]} {
-	add_simple_connection $g_RST0 $g_map_file $g_wire_file
-}
-if {[info exists g_UART_MODE]} {
-	# TODO: Add here if mode eq simple or full
-	add_acc_connection "UART" "yes" $g_UART_ifname $g_axiLi_file $g_wire_file $g_map_file
-	if {[info exists g_UART_irq]} {
-		add_simple_connection $g_UART_irq $g_map_file $g_wire_file
-	}
-}
+# # Create not-AXI connections. 
+# #TODO: This can be done with a list and foreach.
+# if {[info exists g_CLK0]} {
+	# add_simple_connection $g_CLK0 $g_map_file $g_wire_file
+# }
+# if {[info exists g_RST0]} {
+	# add_simple_connection $g_RST0 $g_map_file $g_wire_file
+# }
+# if {[info exists g_UART_MODE]} {
+	# # TODO: Add here if mode eq simple or full
+	# add_acc_connection "UART" "yes" $g_UART_ifname $g_axiLi_file $g_wire_file $g_map_file
+	# if {[info exists g_UART_irq]} {
+		# add_simple_connection $g_UART_irq $g_map_file $g_wire_file
+	# }
+# }
 #TODO: add_simple_connection should go through a list of interfaces (foreach)
 
 set   fd_top      [open $g_top_file   "w"]
 set   fd_mod    [open $g_mod_file  "a"]
 set   fd_inst     [open $g_inst_file   "r"]
-set   fd_map    [open $g_map_file  "r"]
+#set   fd_map    [open $g_map_file  "r"]
 set   fd_wire    [open $g_wire_file   "r"]
+set   fd_shell   [open $g_shell_file   "r"]
+
+set teclado [read stdin 1]
+
 
 ##################################################################
 ## Next, all the temp files are put together and neceesary sintax is added.
@@ -435,21 +469,27 @@ puts  $fd_mod    "   \("
 
 # Put together the Shell-top connections and the EA-shell connections
 fcopy $fd_inst    $fd_mod
-fcopy $fd_map     $fd_mod
+#fcopy $fd_map   $fd_mod
+fcopy $fd_shell   $fd_mod
 puts  $fd_mod    "    .hbm_cattrip             \(hbm_cattrip\)"
 puts  $fd_mod 	 "\);\r\n"
 close $fd_wire
-close $fd_map
+close $fd_shell
+#close $fd_map
 close $fd_inst
 close $fd_mod
 
+set   fd_mod      [open $g_mod_file    "r"]
 # Create the top module boundaries
 puts  $fd_top "module system_top"
 puts  $fd_top "   \("
-set   fd_mod      [open $g_mod_file    "r"]
 fcopy $fd_mod     $fd_top
 close $fd_mod
+# close the top file now.
 close $fd_top
+
+set teclado [read stdin 1]
+
 
 
 set   fd_top      [open $g_top_file    "a"]
@@ -461,6 +501,6 @@ close $fd_top
 
 putcolors "INFO: MEEP SHELL top created" $GREEN
 
-file delete -force $g_root_dir/tmp
+#file delete -force $g_root_dir/tmp
 
 exit
