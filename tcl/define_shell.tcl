@@ -80,19 +80,25 @@ proc InterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile} {
 proc ClocksDefinition { DefinitionFile ShellEnvFile } {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
-	set fd_ShellEnv    [open $ShellEnvFile  "a"]
-
-	set EnabledClocks [list]
+	set fd_ShellEnv    [open $ShellEnvFile  "a"]	
+	
+	set i 0
 		
 	while {[gets $fd_AccDef line] >= 0} {
 	
+	set line [string map {" " ""} $line]
+	
 		set fields [split $line ","]
-		
+				
+			if { [regexp -all -inline {^CLK.,} $line] ne "" } {					
+				puts $fd_ShellEnv "set list g_CLK${i} \[CLK${i} [lindex $fields 1] [lindex $fields 2] \]"
+				incr i	
+			}						
 	}
 
 }
 
 InterfaceDefinition $ShellInterfacesList $p_EAdefFile $p_ShellEnvFile
-
+ClocksDefinition $p_EAdefFile $p_ShellEnvFile
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN
