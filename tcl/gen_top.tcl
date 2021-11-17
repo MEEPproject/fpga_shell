@@ -14,7 +14,6 @@ set g_inst_file   $g_root_dir/tmp/inst_tmp.sv
 set g_tmp_file	  $g_root_dir/tmp/top_tmp.sv
 set g_wire_file	  $g_root_dir/tmp/wire_tmp.sv
 set g_shell_file	  $g_root_dir/tmp/shell_tmp.sv
-set g_map_file	  $g_root_dir/tmp/map_tmp.sv
 set g_eamap_file  $g_root_dir/tmp/ea_top_tmp.sv
 set g_acc_file	  $g_acc_dir/meep_shell/accelerator_mod.sv
 
@@ -34,9 +33,30 @@ set g_pcie yes
 # There is a better option, set HBMCATTRIP as pulldown in the constraints.
 # Both are valid and can live together.
 
+set ShellInterfacesList [list g_DDR4 g_HBM g_AURORA g_ETHERNET g_BROM]
+
+
 ##################################################################
 ## Functions
 ##################################################################
+
+proc ShellInterfaces { interfaceList } {
+
+	set EnabledInft [list]
+	
+	putmeeps "DEBUG: [lindex $interfaceList 0]"
+	
+	foreach shellIntf $interfaceList {
+		global $shellIntf
+		if {[info exists $shellIntf]} {
+			set EnabledInft [lappend EnabledInft $shellIntf]
+		}
+	}
+	
+	putmeeps "\[INFO\] Shell enabled interfaces: $EnabledInft"
+	
+	return $EnabledInft
+}
 
 # Create EA instance using the EA top module as template. This function takes the inputs/outpus
 # and uses them to create a system verilog instance using the formula ".mySignal (mySignal)"
@@ -114,7 +134,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 			} else {
 				puts "INFO: Not considered branch?..."
 				puts " --> $line"
-				set teclado [read stdin 1]
+				#set teclado [read stdin 1]
 
 			}		
 		}
@@ -316,22 +336,6 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 
 
 ########################################################
-# This function creates simple connections in the Shell instance. The signal
-# is passed as a parameter and then added.
-# EA ports <---> Shell instance
-########################################################
-proc add_simple_connection { name map_file wire_file} {
-
-	set fd_map   [open $map_file "a"]
-	set fd_wire  [open $wire_file "a"]
-	puts $fd_map  "    .$name        ($name)    , "
-	#puts $fd_wire "    wire    $name    ;     " 
-	close $fd_map
-	close $fd_wire
-
-}
-
-########################################################
 # This procedure receives the EA module name and 
 # extracts address and data bus widths.
 # TODO: This procedure counts on the vector to be declared
@@ -406,11 +410,11 @@ close $fd_system
 # itself will look for a "yes" in the first parameter, granted
 # via the sh/parse_module.sh to an environment tlc file.
 # Add the enabled interfaces to the top level module.
-add_interface  $g_pcie           $g_pcie_file    $g_mod_file 
-add_interface  $g_DDR4        $g_ddr4_file    $g_mod_file
-add_interface  $g_AURORA    $g_aurora_file $g_mod_file
-add_interface  $g_ETHERNET $g_eth_file      $g_mod_file
-add_interface  $g_UART        $g_uart_file     $g_mod_file
+add_interface  $g_pcie     $g_pcie_file   $g_mod_file 
+add_interface  $g_DDR4     $g_ddr4_file   $g_mod_file
+add_interface  $g_AURORA   $g_aurora_file $g_mod_file
+add_interface  $g_ETHERNET $g_eth_file    $g_mod_file
+add_interface  $g_UART     $g_uart_file   $g_mod_file
 #HBM has no interfaces but hbm_cattrip
 
 # Close the top level module
@@ -458,47 +462,21 @@ close $fd_shell
 
 ## Here, the EA instance has been created.
 
-##################################################################
-# Create AXI-based connections. It follows an AXI4 template from "interfaces" folder,
-# and detects the same in the EA via <add_acc_connection>.
-# Simple connection will be created also using <add_simple_connection>
-# EA ports <---> Shell instance
-##################################################################
+set   fd_top     [open $g_top_file   "w"]
+set   fd_mod     [open $g_mod_file   "a"]
+set   fd_inst    [open $g_inst_file  "r"]
+set   fd_wire    [open $g_wire_file  "r"]
+set   fd_shell   [open $g_shell_file "r"]
 
-# if { $g_DDR4 eq "yes"} {
-	# # Create the connections between the EA and the Shell
-	# add_acc_connection "DDR4" $g_DDR4 $g_DDR4_ifname $g_axi_file $g_wire_file $g_map_file
-# } elseif { $g_HBM eq "yes"} {
-	# # Create the connections between the EA and the Shell
-	# add_acc_connection "HBM" $g_HBM $g_HBM_ifname $g_axi_file $g_wire_file $g_map_file
-# }
+ShellInterfaces $ShellInterfacesList
 
 
-# # Create not-AXI connections. 
-# #TODO: This can be done with a list and foreach.
-# if {[info exists g_CLK0]} {
-	# add_simple_connection $g_CLK0 $g_map_file $g_wire_file
-# }
-# if {[info exists g_RST0]} {
-	# add_simple_connection $g_RST0 $g_map_file $g_wire_file
-# }
-# if {[info exists g_UART_MODE]} {
-	# # TODO: Add here if mode eq simple or full
-	# add_acc_connection "UART" "yes" $g_UART_ifname $g_axiLi_file $g_wire_file $g_map_file
-	# if {[info exists g_UART_irq]} {
-		# add_simple_connection $g_UART_irq $g_map_file $g_wire_file
-	# }
-# }
-#TODO: add_simple_connection should go through a list of interfaces (foreach)
+#### Extract the AXI parameters needed later by the shell
+set ifname "mem_axi"
 
-set   fd_top      [open $g_top_file   "w"]
-set   fd_mod    [open $g_mod_file  "a"]
-set   fd_inst     [open $g_inst_file   "r"]
-#set   fd_map    [open $g_map_file  "r"]
-set   fd_wire    [open $g_wire_file   "r"]
-set   fd_shell   [open $g_shell_file   "r"]
-
-set axivalues [ get_axi_properties $fd_wire mem_axi ]
+#foreach $ifnamme $shellInterfaces {
+	set axivalues [ get_axi_properties $fd_wire $ifname ]
+#}
 
 puts "[lindex $axivalues 0] [lindex $axivalues 1] "
 
@@ -539,6 +517,8 @@ fcopy $fd_acc $fd_top
 puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
+
+ShellInterfaces $ShellInterfacesList
 
 putcolors "INFO: MEEP SHELL top created" $GREEN
 
