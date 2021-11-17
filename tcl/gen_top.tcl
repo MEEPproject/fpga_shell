@@ -33,7 +33,7 @@ set g_pcie yes
 # There is a better option, set HBMCATTRIP as pulldown in the constraints.
 # Both are valid and can live together.
 
-set ShellInterfacesList [list g_DDR4 g_HBM g_AURORA g_ETHERNET g_BROM]
+set ShellInterfacesList [list g_DDR4 g_HBM g_AURORA g_ETHERNET g_UART g_BROM]
 
 
 ##################################################################
@@ -468,15 +468,14 @@ set   fd_inst    [open $g_inst_file  "r"]
 set   fd_wire    [open $g_wire_file  "r"]
 set   fd_shell   [open $g_shell_file "r"]
 
-ShellInterfaces $ShellInterfacesList
+#ShellInterfaces $ShellInterfacesList
 
 
 #### Extract the AXI parameters needed later by the shell
-set ifname "mem_axi"
 
-#foreach $ifnamme $shellInterfaces {
+foreach ifname [ShellInterfaces $ShellInterfacesList] {
 	set axivalues [ get_axi_properties $fd_wire $ifname ]
-#}
+}
 
 puts "[lindex $axivalues 0] [lindex $axivalues 1] "
 
@@ -518,7 +517,7 @@ puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
 
-ShellInterfaces $ShellInterfacesList
+
 
 putcolors "INFO: MEEP SHELL top created" $GREEN
 
