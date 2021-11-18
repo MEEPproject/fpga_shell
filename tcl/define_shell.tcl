@@ -31,6 +31,8 @@ set p_ShellEnvFile  $g_root_dir/tcl/shell_env.tcl
 ################################################################
 # Create a Physical Interface Enabled List. Needs a valid
 # list of shell enabled interfaces
+# Returns the enabled elements of the following physical available interfaces list:
+# set PortInterfacesList  [list pcie ddr4 aurora ethernet uart ]
 ################################################################
 proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
 
@@ -53,14 +55,14 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
 
 }
 
-################################################################
-# Create the list of the files corresponding to enabled Port
-# interfaces.
-################################################################
-
 
 ################################################################
 # Parse the EA interfaces and create the shell environment file.
+# Returns the enabled elements of the following Shell available interfaces:
+# set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
+# *HBM will be returned as HBMn, where n is a channel identificator
+# TODO: Choosing to what HBM pseudochannel to be connected
+# TODO: Choose different clocks for different instances of the same interface.
 ################################################################
 proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile} {
 
@@ -69,30 +71,33 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 	
 	# PCIe is not enabled by default.
 	set EnabledIntf [list]
+	
 		
 	while {[gets $fd_AccDef line] >= 0} {
+	
+		set line [string map {" " ""} $line]
 	
 		set fields [split $line ","]
 	
 		foreach device $ShellInterfacesList {
 		
-		# putmeeps "DEBUG: [lindex $fields 0]"
-		# putmeeps "DEBUG: [lindex $fields 1]"
-		# putmeeps "DEBUG: [lindex $fields 2]"
+		putmeeps "DEBUG: [lindex $fields 0]"
+		putmeeps "DEBUG: [lindex $fields 1]"
+		putmeeps "DEBUG: [lindex $fields 2]"
 		
-			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {								
-			## HBM can have multiple AXI interfaces. They need to be named differently
-				if { [lindex $fields 0] == "HBM" } {
+			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
+				# Dont push to the user to number his interfaces when there is only one.
+				if {[lindex $fields 3] == 1} {
+					set EnabledIntf [lappend EnabledIntf "g_${device}"]
+					puts $fd_ShellEnv \
+					"set g_${device} \[list [lindex $fields 2] [lindex $fields 4]\]"
+				} else {
 					for {set i 0} {$i < [lindex $fields 3] } {incr i} {
 						#puts "I inside first loop: $i"
 						set EnabledIntf [lappend EnabledIntf "g_${device}${i}"]	
-						puts $fd_ShellEnv "set g_${device}${i} \[list [lindex $fields 2]${i}\]"
-					}			
-				} else {
-				# Normal path, not HBM
-					set EnabledIntf [lappend EnabledIntf "g_${device}"]	
-					puts $fd_ShellEnv "set g_${device} \[list [lindex $fields 2]\]"
-					#putmeeps "DEBUG: [lindex $fields 0]"
+						puts $fd_ShellEnv \
+						"set g_${device}${i} \[list [lindex $fields 2]${i} [lindex $fields 4]\]"
+					}		
 				}
 			}
 		}	
@@ -111,9 +116,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 }
 
 
-###################################################
+################################################################
 # Parse the EA clocks. Create a list of clocks, frequencies and names
-###################################################
+################################################################
 proc ClocksDefinition { DefinitionFile ShellEnvFile } {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
@@ -137,6 +142,8 @@ proc ClocksDefinition { DefinitionFile ShellEnvFile } {
 	close $fd_ShellEnv
 
 }
+
+putmeeps "Starting shell definition process..."
 
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $p_EAdefFile $p_ShellEnvFile]
 
