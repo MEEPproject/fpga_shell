@@ -14,24 +14,61 @@ puts "The environment tcl will be sourced from ${script_folder}"
 source $script_folder/environment.tcl
 source $g_root_dir/tcl/procedures.tcl
 
-###################################################
-# This list the shell capabilities. Add more interfaces when they are ready to be 
-# implemented
-###################################################
-set ShellInterfacesList [list DDR4 HBM AURORA ETHERNET UART ]
+#################################################################
+# This list the shell capabilities. Add more interfaces when they 
+# are ready to be implemented. XDC FPGA Board file could be used.
+#################################################################
+set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
+
+## List here the physical interfaces. Lowercase as they are connected
+## to file names. 
+set PortInterfacesList  [list pcie ddr4 aurora ethernet uart ]
+
 set p_EAdefFile     $g_root_dir/accelerator/meep_shell/accelerator_def.txt
-set p_ShellEnvFile $g_root_dir/tcl/shell_env.tcl
+set p_ShellEnvFile  $g_root_dir/tcl/shell_env.tcl
 
 
-###################################################
-# Parse the EA interfaces
-###################################################
-proc InterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile} {
+################################################################
+# Create a Physical Interface Enabled List. Needs a valid
+# list of shell enabled interfaces
+################################################################
+proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
+
+	set fd_ShellEnv    [open $ShellEnvFile "a"]
+
+	set PortEnabledList [list pcie]
+	set EnabledIntf [join $EnabledIntf]
+
+	foreach PhysIntf $PortInterfacesList {
+		
+		if {[regexp -inline -all -nocase $PhysIntf "$EnabledIntf"] ne ""} {
+			set PortEnabledList [lappend PortEnabledList $PhysIntf]
+			putmeeps "DEBUG: Show enabled physical Intf - $PhysIntf"
+		}		
+	}
+	
+	puts $fd_ShellEnv "set PortEnabledList \[list [join [list $PortEnabledList]]\]"
+	
+	close $fd_ShellEnv
+
+}
+
+################################################################
+# Create the list of the files corresponding to enabled Port
+# interfaces.
+################################################################
+
+
+################################################################
+# Parse the EA interfaces and create the shell environment file.
+################################################################
+proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile} {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
 	set fd_ShellEnv    [open $ShellEnvFile "w"]
-
-	set EnabledInft [list]
+	
+	# PCIe is not enabled by default.
+	set EnabledIntf [list]
 		
 	while {[gets $fd_AccDef line] >= 0} {
 	
@@ -39,38 +76,38 @@ proc InterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile} {
 	
 		foreach device $ShellInterfacesList {
 		
-		putmeeps "DEBUG: [lindex $fields 0]"
-		putmeeps "DEBUG: [lindex $fields 1]"
-		putmeeps "DEBUG: [lindex $fields 2]"
+		# putmeeps "DEBUG: [lindex $fields 0]"
+		# putmeeps "DEBUG: [lindex $fields 1]"
+		# putmeeps "DEBUG: [lindex $fields 2]"
 		
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {								
 			## HBM can have multiple AXI interfaces. They need to be named differently
 				if { [lindex $fields 0] == "HBM" } {
 					for {set i 0} {$i < [lindex $fields 3] } {incr i} {
-						puts "I inside first loop: $i"
-						set EnabledInft [lappend EnabledInft "g_${device}${i}"]	
-						puts $fd_ShellEnv "set g_${device}${i} [lindex $fields 2]${i}"
+						#puts "I inside first loop: $i"
+						set EnabledIntf [lappend EnabledIntf "g_${device}${i}"]	
+						puts $fd_ShellEnv "set g_${device}${i} \[list [lindex $fields 2]${i}\]"
 					}			
 				} else {
 				# Normal path, not HBM
-					set EnabledInft [lappend EnabledInft "g_${device}"]	
-					puts $fd_ShellEnv "set g_${device} [lindex $fields 2]"
-					putmeeps "DEBUG: [lindex $fields 0]"
+					set EnabledIntf [lappend EnabledIntf "g_${device}"]	
+					puts $fd_ShellEnv "set g_${device} \[list [lindex $fields 2]\]"
+					#putmeeps "DEBUG: [lindex $fields 0]"
 				}
 			}
 		}	
 		#if {[info exists $shellIntf]} {
-			#set EnabledInft [lappend EnabledInft $shellIntf]
+			#set EnabledIntf [lappend EnabledIntf $shellIntf]
 		#}
 	}
 	
-	
-	putmeeps "\[INFO\] Shell enabled interfaces: $EnabledInft"
+	puts $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"
+	putmeeps "\[INFO\] Shell enabled interfaces: $EnabledIntf"
 		
 	close $fd_AccDef
 	close $fd_ShellEnv
 	
-	return $EnabledInft
+	return $EnabledIntf
 }
 
 
@@ -91,14 +128,23 @@ proc ClocksDefinition { DefinitionFile ShellEnvFile } {
 		set fields [split $line ","]
 				
 			if { [regexp -all -inline {^CLK.,} $line] ne "" } {					
-				puts $fd_ShellEnv "set list g_CLK${i} \[CLK${i} [lindex $fields 1] [lindex $fields 2] \]"
+				puts $fd_ShellEnv "set g_CLK${i} \[list CLK${i} [lindex $fields 1] [lindex $fields 2]\]"
 				incr i	
 			}						
 	}
+	
+	close $fd_AccDef
+	close $fd_ShellEnv
 
 }
 
-InterfaceDefinition $ShellInterfacesList $p_EAdefFile $p_ShellEnvFile
+set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $p_EAdefFile $p_ShellEnvFile]
+
 ClocksDefinition $p_EAdefFile $p_ShellEnvFile
+
+PortInterfaceDefinition $PortInterfacesList $EnabledIntf $p_ShellEnvFile
+
+
+
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN

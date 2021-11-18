@@ -13,50 +13,25 @@ set g_mod_file    $g_root_dir/tmp/mod_tmp.sv
 set g_inst_file   $g_root_dir/tmp/inst_tmp.sv
 set g_tmp_file	  $g_root_dir/tmp/top_tmp.sv
 set g_wire_file	  $g_root_dir/tmp/wire_tmp.sv
-set g_shell_file	  $g_root_dir/tmp/shell_tmp.sv
+set g_shell_file  $g_root_dir/tmp/shell_tmp.sv
 set g_eamap_file  $g_root_dir/tmp/ea_top_tmp.sv
 set g_acc_file	  $g_acc_dir/meep_shell/accelerator_mod.sv
 
+# The files are hard-coded. TODO: Make it dependand on the XDC board file
+set g_system_file   $g_root_dir/interfaces/system.sv
+set g_pcie_file     $g_root_dir/interfaces/pcie.sv
+set g_ddr4_file     $g_root_dir/interfaces/ddr4.sv
+set g_aurora_file   $g_root_dir/interfaces/aurora.sv
+set g_ethernet_file $g_root_dir/interfaces/ethernet.sv
+set g_uart_file     $g_root_dir/interfaces/uart.sv
+#set g_axi_file      $g_root_dir/interfaces/axi_intf.sv
+#set g_axiLi_file    $g_root_dir/interfaces/axilite_intf.sv
 
-set g_system_file $g_root_dir/interfaces/system.sv
-set g_pcie_file   $g_root_dir/interfaces/pcie.sv
-set g_ddr4_file   $g_root_dir/interfaces/ddr4.sv
-set g_aurora_file $g_root_dir/interfaces/aurora.sv
-set g_eth_file    $g_root_dir/interfaces/ethernet.sv
-set g_uart_file   $g_root_dir/interfaces/uart.sv
-set g_axi_file    $g_root_dir/interfaces/axi_intf.sv
-set g_axiLi_file  $g_root_dir/interfaces/axilite_intf.sv
-
-set g_pcie yes
 
 # if HBM is set to no, HBMCATTRIP needs to be forced to '0'.
 # There is a better option, set HBMCATTRIP as pulldown in the constraints.
 # Both are valid and can live together.
 
-set ShellInterfacesList [list g_DDR4 g_HBM g_AURORA g_ETHERNET g_UART g_BROM]
-
-
-##################################################################
-## Functions
-##################################################################
-
-proc ShellInterfaces { interfaceList } {
-
-	set EnabledInft [list]
-	
-	putmeeps "DEBUG: [lindex $interfaceList 0]"
-	
-	foreach shellIntf $interfaceList {
-		global $shellIntf
-		if {[info exists $shellIntf]} {
-			set EnabledInft [lappend EnabledInft $shellIntf]
-		}
-	}
-	
-	putmeeps "\[INFO\] Shell enabled interfaces: $EnabledInft"
-	
-	return $EnabledInft
-}
 
 # Create EA instance using the EA top module as template. This function takes the inputs/outpus
 # and uses them to create a system verilog instance using the formula ".mySignal (mySignal)"
@@ -150,20 +125,18 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 # of the final system.
 ################################################
 
-proc add_interface {g_interface g_intf_file g_mod_file} {
+proc add_interface {g_intf_file g_mod_file} {
 		
-	if { $g_interface eq "yes" } {
-		set fd_intf [open $g_intf_file "r"]
-		set fd_mod  [open $g_mod_file  "a"]
-		
-		while {[gets $fd_intf line] >= 0} {
-			set newline $line
-			puts $fd_mod $newline
-		}		
-		close $fd_intf
-		close $fd_mod	
-	}
+	set fd_intf [open $g_intf_file "r"]
+	set fd_mod  [open $g_mod_file  "a"]
 	
+	while {[gets $fd_intf line] >= 0} {
+		set newline $line
+		puts $fd_mod $newline
+	}		
+	close $fd_intf
+	close $fd_mod	
+
 }
 
 ################################################
@@ -346,42 +319,39 @@ proc get_axi_properties { fd_module axi_ifname } {
 	set awaddrMatch 0
 	set wdataMatch  0
 	set axiProperties [list]
+	set addrWidth 0
+	set dataWidth 0
 
 	while {[gets $fd_module line] >= 0} { 
 		
-		putmeeps "DEBUG: $axi_ifname"
-		putmeeps "DEBUG: $line"
 				
 		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		
 			set awaddrMatch [regexp -inline -all "[0-9]+.+${axi_ifname}_awaddr" $line]
+			putmeeps "MATCH: ${axi_ifname}_awaddr $awaddrMatch"
+			set addrWidth [regexp -inline  {[0-9]+[^:]} $awaddrMatch]			
+			set addrWidth [expr $addrWidth + 1]
+			putmeeps $addrWidth
+
 		}
-		putmeeps $awaddrMatch
 				
 		
 		if {[regexp -inline -all "${axi_ifname}_wdata" $line] != "" } {
 			set wdataMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_wdata" $line]	
-		}
-		putmeeps $wdataMatch
-
-
-		if { $awaddrMatch == "" } {
-			putmeeps "AXI awaddr signal not found "
-		} else {
-			set addrWidth [regexp -inline  {[0-9]+[^:]} $awaddrMatch]			
-		}
-		if { $wdataMatch == "" } {
-			putmeeps "AXI wdata signal not found "	
-		} else {
+			putmeeps "MATCH: ${axi_ifname}_wdata $wdataMatch"
 			set dataWidth [regexp -inline  {[0-9]+[^:]} $wdataMatch]
-
+			set dataWidth [expr $dataWidth + 1]
+			putmeeps $dataWidth
+		}
+		
+		if { $awaddrMatch != 0 } {
+			#putmeeps "AXI awaddr signal not found "
+		}
+		if { $wdataMatch != 0 } {
+			#putmeeps "AXI wdata signal not found "	
 		}								
 	}
-	set addrWidth [expr $addrWidth + 1]
-	set dataWidth [expr $dataWidth + 1]
-
-	
-	set axiProperties [list $addrWidth $dataWidth]
-	
+			
+	set axiProperties [list $addrWidth $dataWidth]	
 	
 	return $axiProperties
 
@@ -403,19 +373,22 @@ fcopy $fd_system $fd_mod
 close $fd_mod
 close $fd_system
 
-# 12/08/2021
-# Add interface creates the TOP level I/O ports using 
-# an existing template in "interfaces" folder.
-# All the interfaces can be issued here as the function
-# itself will look for a "yes" in the first parameter, granted
-# via the sh/parse_module.sh to an environment tlc file.
-# Add the enabled interfaces to the top level module.
-add_interface  $g_pcie     $g_pcie_file   $g_mod_file 
-add_interface  $g_DDR4     $g_ddr4_file   $g_mod_file
-add_interface  $g_AURORA   $g_aurora_file $g_mod_file
-add_interface  $g_ETHERNET $g_eth_file    $g_mod_file
-add_interface  $g_UART     $g_uart_file   $g_mod_file
-#HBM has no interfaces but hbm_cattrip
+# 18/11/2021
+# add_interface creates the TOP level I/O ports using 
+# an existing template in the "interfaces" folder.
+# It receives a filtered list of present physical interfaces.
+
+foreach ifname $PortEnabledList {	
+	
+	 
+	set g_file_name g_${ifname}_file
+	
+	# Dirty little trick to do variable substitution
+	set g_file_path [subst $$g_file_name]
+	#putmeeps "DEBUG: filename - $g_file_name"
+	#putmeeps "DEBUG: filepath - ${g_file_path}"
+	add_interface  [subst $$g_file_name] $g_mod_file 
+}
 
 # Close the top level module
 # hbm_cattrip is used to close it as it always exists
@@ -431,7 +404,7 @@ close $fd_mod
 # TOP LEVEL PORTS <---> Shell instance
 
 set fd_mod  [open $g_mod_file   "r"]
-set fd_inst   [open $g_inst_file    "w"]
+set fd_inst [open $g_inst_file  "w"]
 
 add_instance $fd_mod $fd_inst
 
@@ -473,11 +446,17 @@ set   fd_shell   [open $g_shell_file "r"]
 
 #### Extract the AXI parameters needed later by the shell
 
-foreach ifname [ShellInterfaces $ShellInterfacesList] {
-	set axivalues [ get_axi_properties $fd_wire $ifname ]
+foreach ifname $ShellEnabledIntf {	
+	set IntfList [lappend IntfList [subst $$ifname]]	
 }
 
-puts "[lindex $axivalues 0] [lindex $axivalues 1] "
+foreach ifname $IntfList {
+	set axivalues [ get_axi_properties $fd_wire [lindex $ifname 0]]
+	#set $ifname [lappend $ifname $axivalues]
+	puts "[lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] "
+
+}
+
 
 ##################################################################
 ## Next, all the temp files are put together and neceesary sintax is added.
