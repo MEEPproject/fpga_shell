@@ -160,16 +160,18 @@ close $fd_top
 
 set   fd_wire    [open $g_wire_file  "r"]
 
-foreach ifname $ShellEnabledIntf {	
-	set IntfList [lappend IntfList [subst $$ifname]]	
-	putmeeps "Interface List $IntfList"
-}
 
-foreach ifname $IntfList {
-	putmeeps "Interface List $ifname"
-	set axivalues [ get_axi_properties $fd_wire [lindex $ifname 0]]
+
+foreach dicEntry $ShellEnabledIntf {
+	
+	putmeeps "\[DEBUG\] DicList $dicEntry"
+	
+	set ifname [dict get $dicEntry IntfLabel]
+
+	putmeeps "\[DEBUG\] DicEntry: $ifname"
+	set axivalues [ get_axi_properties $fd_wire $ifname ]
 	#set $ifname [lappend $ifname $axivalues]
-	puts "[lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] "
+	puts "\[INFO\] AXI properties: [lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] "
 
 }
 

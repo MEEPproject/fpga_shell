@@ -39,11 +39,19 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
 	set fd_ShellEnv    [open $ShellEnvFile "a"]
 
 	set PortEnabledList [list pcie]
-	set EnabledIntf [join $EnabledIntf]
+	
+	set EnIntfNameList [list]
+	
+	foreach dicEntry $EnabledIntf {
+		#putmeeps "DEBUG ENTRY: $dicEntry"		
+		set EnIntfNameList [lappend EnIntfNameList [dict get $dicEntry Name]]		
+		#putmeeps "DEBUG PORTS: $EnIntfNameList"
+	}
+	set EnIntfName [join $EnIntfNameList]
 
 	foreach PhysIntf $PortInterfacesList {
 		
-		if {[regexp -inline -all -nocase $PhysIntf "$EnabledIntf"] ne ""} {
+		if {[regexp -inline -all -nocase $PhysIntf "$EnIntfName"] ne ""} {
 			set PortEnabledList [lappend PortEnabledList $PhysIntf]
 			putmeeps "DEBUG: Show enabled physical Intf - $PhysIntf"
 		}		
@@ -58,7 +66,7 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
 
 ################################################################
 # Parse the EA interfaces and create the shell environment file.
-# Returns the enabled elements of the following Shell available interfaces:
+# Returns a dictionary of the following Shell available interfaces:
 # set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
 # *HBM will be returned as HBMn, where n is a channel identificator
 # TODO: Choosing to what HBM pseudochannel to be connected
@@ -70,7 +78,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 	set fd_ShellEnv    [open $ShellEnvFile "w"]
 	
 	# PCIe is not enabled by default.
-	set EnabledIntf [list]
+	set EnabledIntf {}
 	
 		
 	while {[gets $fd_AccDef line] >= 0} {
@@ -81,22 +89,26 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 	
 		foreach device $ShellInterfacesList {
 		
-		putmeeps "DEBUG: [lindex $fields 0]"
-		putmeeps "DEBUG: [lindex $fields 1]"
-		putmeeps "DEBUG: [lindex $fields 2]"
+		# putmeeps "DEBUG: [lindex $fields 0]"
+		# putmeeps "DEBUG: [lindex $fields 1]"
+		# putmeeps "DEBUG: [lindex $fields 2]"
 		
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
 				# Dont push to the user to number his interfaces when there is only one.
-				if {[lindex $fields 3] == 1} {
-					set EnabledIntf [lappend EnabledIntf "g_${device}"]
-					puts $fd_ShellEnv \
-					"set g_${device} \[list [lindex $fields 2] [lindex $fields 4]\]"
+				if {[lindex $fields 3] == 1} {					
+					
+					set d_device [dict create Name g_${device}]					
+					dict set d_device IntfLabel [lindex $fields 2]					
+					dict set d_device SyncClock [lindex $fields 4]
+					set EnabledIntf [lappend EnabledIntf "$d_device"]
+														
+					
 				} else {
 					for {set i 0} {$i < [lindex $fields 3] } {incr i} {
-						#puts "I inside first loop: $i"
-						set EnabledIntf [lappend EnabledIntf "g_${device}${i}"]	
-						puts $fd_ShellEnv \
-						"set g_${device}${i} \[list [lindex $fields 2]${i} [lindex $fields 4]\]"
+						set d_device [dict create Name g_${device}]${i}				
+						dict set d_device IntfLabel [lindex $fields 2]${i}
+						dict set d_device SyncClock [lindex $fields 4]
+						set EnabledIntf [lappend EnabledIntf "g_${device}${i}"]						
 					}		
 				}
 			}
@@ -143,15 +155,15 @@ proc ClocksDefinition { DefinitionFile ShellEnvFile } {
 
 }
 
-putmeeps "Starting shell definition process..."
+putmeeps "\[INFO\] Starting shell definition process..."
 
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $p_EAdefFile $p_ShellEnvFile]
+
+putmeeps "Dictionary $EnabledIntf ..."
 
 ClocksDefinition $p_EAdefFile $p_ShellEnvFile
 
 PortInterfaceDefinition $PortInterfacesList $EnabledIntf $p_ShellEnvFile
-
-
 
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN
