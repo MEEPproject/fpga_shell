@@ -63,13 +63,15 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
 # TODO: Choosing to what HBM pseudochannel to be connected
 # TODO: Choose different clocks for different instances of the same interface.
 ################################################################
-proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile} {
+proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile ShellEnvFile} {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
 	set fd_ShellEnv    [open $ShellEnvFile "w"]
 	
 	# PCIe is not enabled by default.
 	set EnabledIntf {}
+	
+	putmeeps "OLKASE FIRST CLOCKS $ClockList"
 	
 		
 	while {[gets $fd_AccDef line] >= 0} {
@@ -94,12 +96,26 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 					}
 					set d_device [dict create Name g_${device}${n}]
 					dict set d_device IntfLabel [lindex $fields 2]${n}
-					dict set d_device SyncClk   [lindex $fields 4]					
+					dict set d_device SyncClk   [lindex $fields 4] Freq ""
+					dict set d_device SyncClk   [lindex $fields 4] Name ""
+					dict set d_device AxiIntf "Axi4"
+					
+					## If the Interface has an associated clock, add it to the dict
+					foreach vclocks $ClockList {						
+						if {[lindex $vclocks 0] == [lindex $fields 4] } {
+							dict set d_device SyncClk [lindex $fields 4] Freq [lindex $vclocks 1]
+							dict set d_device SyncClk [lindex $fields 4] Name [lindex $vclocks 2]
+						}
+					}
 					
 					### Device-dependant settings
 					if { "${device}" == "UART" } {
 						dict set d_device Mode [lindex $fields 5]	
 						dict set d_device IRQ  [lindex $fields 6]	
+						dict set d_device AxiIntf "AxiL"
+						if { [lindex $fields 5] != "normal" } {
+							dict set d_device AxiIntf "no"						
+						} 
 					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
@@ -120,10 +136,11 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 ################################################################
 # Parse the EA clocks. Create a list of clocks, frequencies and names
 ################################################################
-proc ClocksDefinition { DefinitionFile ShellEnvFile } {
+proc ClocksDefinition { DefinitionFile } {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
-	set fd_ShellEnv    [open $ShellEnvFile  "a"]	
+
+	set RetList [list]
 	
 	set i 0
 		
@@ -134,23 +151,25 @@ proc ClocksDefinition { DefinitionFile ShellEnvFile } {
 		set fields [split $line ","]
 				
 			if { [regexp -all -inline {^CLK.,} $line] ne "" } {					
-				puts $fd_ShellEnv "set g_CLK${i} \[list CLK${i} [lindex $fields 1] [lindex $fields 2]\]"
+				set g_CLK [list CLK${i} [lindex $fields 1] [lindex $fields 2]]
+				set RetList [lappend RetList $g_CLK]
 				incr i	
 			}						
 	}
 	
 	close $fd_AccDef
-	close $fd_ShellEnv
-
+	
+	return $RetList
 }
 
 putmeeps "\[INFO\] Starting shell definition process..."
 
-set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $p_EAdefFile $p_ShellEnvFile]
+set ClockList [ClocksDefinition $p_EAdefFile ]
+
+set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile]
 
 putmeeps "Dictionary $EnabledIntf ..."
 
-ClocksDefinition $p_EAdefFile $p_ShellEnvFile
 
 PortInterfaceDefinition $PortInterfacesList $EnabledIntf $p_ShellEnvFile
 

@@ -7,15 +7,21 @@ if { "$g_board_part" eq "u55c" } {
 	set HBM_AXI_LABEL ""
 }
 
+set HBMclk [dict get $HBMentry SyncClk]
+set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
+set HBMdataWidth [dict get $HBMentry AxiDataWidth]
+
+set HBMFreq [lindex $g_CLK0 1]
+
 
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
   set_property -dict [ list \
-   CONFIG.ADDR_WIDTH {32} \
+   CONFIG.ADDR_WIDTH $HBMaddrWidth \
    CONFIG.ARUSER_WIDTH {1} \
    CONFIG.AWUSER_WIDTH {1} \
    CONFIG.BUSER_WIDTH {1} \
-   CONFIG.DATA_WIDTH {128} \
-   CONFIG.FREQ_HZ {50000000} \
+   CONFIG.DATA_WIDTH $HBMdataWidth \
+   CONFIG.FREQ_HZ $HBMFreq \
    CONFIG.HAS_BRESP {1} \
    CONFIG.HAS_BURST {1} \
    CONFIG.HAS_CACHE {1} \
