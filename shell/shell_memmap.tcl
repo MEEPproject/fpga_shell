@@ -1,6 +1,6 @@
 
 
-if { $g_DDR4 eq "yes"} {
+if { [info exists DDR4entry] } {
 
   assign_bd_address
   exclude_bd_addr_seg [get_bd_addr_segs qdma_0/M_AXI_LITE/SEG_ddr4_0_C0_REG]
@@ -12,7 +12,7 @@ if { $g_DDR4 eq "yes"} {
   set_property range 64K [get_bd_addr_segs {qdma_0/M_AXI_LITE/SEG_axi_gpio_0_Reg}]
   set_property offset 0x00000000 [get_bd_addr_segs {qdma_0/M_AXI_LITE/SEG_axi_gpio_0_Reg}]
   
-	  if { $g_BROM eq "yes"} {
+	  if { [info exists g_BROM] } {
 
 	  exclude_bd_addr_seg [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] -target_address_space [get_bd_addr_spaces qdma_0/M_AXI]
 	  assign_bd_address [get_bd_addr_segs {axi_bram_ctrl_0/S_AXI/Mem0 }]
@@ -21,14 +21,14 @@ if { $g_DDR4 eq "yes"} {
 
 	  }
   
-} elseif { $g_HBM eq "yes"} {
+} elseif { [info exists HBMentry] } {
 	
 	  #GPIO
 	  assign_bd_address [get_bd_addr_segs {axi_gpio_0/S_AXI/Reg }]
 	  set_property offset 0x00000000 [get_bd_addr_segs {qdma_0/M_AXI_LITE/SEG_axi_gpio_0_Reg}]
 
   
-	  if { $g_BROM eq "yes"} {
+	  if { [info exists g_BROM]} {
 	  
 	  #EA network
 	  # Create address segments

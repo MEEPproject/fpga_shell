@@ -85,35 +85,26 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 		# putmeeps "DEBUG: [lindex $fields 2]"
 		
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
-				# Dont push to the user to number his interfaces when there is only one.
-				if {[lindex $fields 3] == 1} {					
+				# Dont push to the user to number his interfaces when there is only one.							
+				for {set i 0} {$i < [lindex $fields 3] } {incr i} {
+					if {[lindex $fields 3] == 1} {	
+						set n ""
+					} else {
+						set n $i
+					}
+					set d_device [dict create Name g_${device}${n}]
+					dict set d_device IntfLabel [lindex $fields 2]${n}
+					dict set d_device SyncClk   [lindex $fields 4]					
 					
-					set d_device [dict create Name g_${device}]					
-					dict set d_device IntfLabel [lindex $fields 2]					
-					dict set d_device SyncClock [lindex $fields 4]
-					set EnabledIntf [lappend EnabledIntf "$d_device"]
-					# TODO: Clock Freq entry and names can be created here							
-					
-				} else {
-					for {set i 0} {$i < [lindex $fields 3] } {incr i} {
-						set d_device [dict create Name g_${device}]${i}				
-						dict set d_device IntfLabel [lindex $fields 2]${i}
-						dict set d_device SyncClock [lindex $fields 4]
-						set EnabledIntf [lappend EnabledIntf "g_${device}${i}"]						
-					}		
-				}
-				### Device-dependant settings
-				if { "${device}" == "UART" } {
-					dict set d_device Mode [lindex $fields 5]	
-					dict set d_device IRQ  [lindex $fields 6]	
-					set EnabledIntf [lreplace $EnabledIntf [llength EnabledIntf] [llength EnabledIntf]]
-					set EnabledIntf [lappend EnabledIntf "$d_device"]									
+					### Device-dependant settings
+					if { "${device}" == "UART" } {
+						dict set d_device Mode [lindex $fields 5]	
+						dict set d_device IRQ  [lindex $fields 6]	
+					}
+					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}
 		}	
-		#if {[info exists $shellIntf]} {
-			#set EnabledIntf [lappend EnabledIntf $shellIntf]
-		#}
 	}
 	
 	puts $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"

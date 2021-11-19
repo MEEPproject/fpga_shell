@@ -1,11 +1,11 @@
 
-if { $g_DDR4 eq "yes"} {
+if { [info exists DDR4entry] } {
 	set master_gpio M01
 	set_property -dict [list CONFIG.NUM_MI {2}] [get_bd_cells axi_interconnect_1]
 	connect_bd_net [get_bd_pins axi_interconnect_1/M01_ACLK] [get_bd_pins clk_wiz_1/clk_out1]
 	connect_bd_net [get_bd_pins axi_interconnect_1/M01_ARESETN] [get_bd_pins rst_ea_domain/peripheral_aresetn]
 
-} elseif { $g_HBM eq "yes"} {
+} elseif { [info exists HBMentry] } {
 	set master_gpio M00
 }
 

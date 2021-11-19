@@ -4,7 +4,7 @@ set g_UART_MODE   [dict get $UARTentry Mode]
 set g_UART_ifname [dict get $UARTentry IntfLabel]
 set g_UART_irq    [dict get $UARTentry IRQ]
 set g_UART_CLK	  [dict get $UARTentry SyncClk]
-set g_CLK0_freq   [lindex $g_CLK0 0]
+set g_CLK0_freq   [lindex $g_CLK0 1]
 
 if { $g_UART_MODE eq "simple"} {
 create_bd_port -dir I -type data rs232_rxd
