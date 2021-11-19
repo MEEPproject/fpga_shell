@@ -160,23 +160,35 @@ close $fd_top
 
 set   fd_wire    [open $g_wire_file  "r"]
 
+set NewList [list]
+set NewDict ""
 
 
 foreach dicEntry $ShellEnabledIntf {
-	
-	putmeeps "\[DEBUG\] DicList $dicEntry"
-	
+		
 	set ifname [dict get $dicEntry IntfLabel]
-
-	putmeeps "\[DEBUG\] DicEntry: $ifname"
+	set NewDict $dicEntry
+	
 	set axivalues [ get_axi_properties $fd_wire $ifname ]
-	#set $ifname [lappend $ifname $axivalues]
 	puts "\[INFO\] AXI properties: [lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] "
+	dict set NewDict "AxiAddrWidth" [lindex $axivalues 0]
+	dict set NewDict "AxiDataWidth" [lindex $axivalues 1]
+	
+	set NewList [lappend NewList $NewDict]	
 
 }
 
 close $fd_wire
 
+######################################################
+# Update the environment file as it adds the AXI info
+# that will be used by the genproject later.
+######################################################
+
+set sandbox_file $g_root_dir/sandbox.file
+set ReplaceToken "set ShellEnabledIntf"
+
+updateFile "$g_root_dir/tcl/shell_env.tcl" $ReplaceToken "$ReplaceToken \[list $NewList \]"
 
 putcolors "INFO: MEEP SHELL top created" $GREEN
 

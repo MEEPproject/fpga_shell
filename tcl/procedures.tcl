@@ -342,3 +342,27 @@ proc get_axi_properties { fd_module axi_ifname } {
 	return $axiProperties
 
 }
+
+proc updateFile {path2file match replace} {
+
+	set tmp_file ${path2file}.tmp
+	
+	set fd_file [open $path2file "r"]
+	set fd_tmp  [open $tmp_file  "w"]
+	
+	while {[gets $fd_file line] >= 0} {
+	
+		set newline [regsub -line "$match.*" $line $replace]
+		if { $newline == "" } {
+			set newline $line
+		}
+		puts $fd_tmp $newline	
+	}
+
+	close $fd_file
+	close $fd_tmp
+	
+	file copy -force $tmp_file $path2file
+	file delete -force $tmp_file
+
+}
