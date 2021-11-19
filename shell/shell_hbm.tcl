@@ -86,8 +86,9 @@ connect_bd_intf_net [get_bd_intf_ports hbm_axi4] -boundary_type upper [get_bd_in
 set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 
-set_property name $g_HBM_ifname [get_bd_intf_ports hbm_axi4]
+set_property name [dict get $HBMentry IntfLabel] [get_bd_intf_ports hbm_axi4]
 
+set HBMclk [dict get $HBMentry SyncClock]
 
-create_bd_port -dir O -type clk $g_CLK0
-connect_bd_net [get_bd_ports $g_CLK0] [get_bd_pins clk_wiz_1/clk_out1]
+create_bd_port -dir O -type clk $HBMclk
+connect_bd_net [get_bd_ports $HBMclk] [get_bd_pins clk_wiz_1/clk_out1]

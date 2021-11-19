@@ -14,15 +14,6 @@ puts "The environment tcl will be sourced from ${script_folder}"
 source $script_folder/environment.tcl
 source $g_root_dir/tcl/procedures.tcl
 
-#################################################################
-# This list the shell capabilities. Add more interfaces when they 
-# are ready to be implemented. XDC FPGA Board file could be used.
-#################################################################
-set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
-
-## List here the physical interfaces. Lowercase as they are connected
-## to file names. 
-set PortInterfacesList  [list pcie ddr4 aurora ethernet uart ]
 
 set p_EAdefFile     $g_root_dir/accelerator/meep_shell/accelerator_def.txt
 set p_ShellEnvFile  $g_root_dir/tcl/shell_env.tcl
@@ -101,7 +92,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 					dict set d_device IntfLabel [lindex $fields 2]					
 					dict set d_device SyncClock [lindex $fields 4]
 					set EnabledIntf [lappend EnabledIntf "$d_device"]
-														
+					# TODO: Clock Freq entry and names can be created here							
 					
 				} else {
 					for {set i 0} {$i < [lindex $fields 3] } {incr i} {
@@ -110,6 +101,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList DefinitionFile ShellEnvFile}
 						dict set d_device SyncClock [lindex $fields 4]
 						set EnabledIntf [lappend EnabledIntf "g_${device}${i}"]						
 					}		
+				}
+				### Device-dependant settings
+				if { "${device}" == "UART" } {
+					dict set d_device Mode [lindex $fields 5]	
+					dict set d_device IRQ  [lindex $fields 6]	
+					set EnabledIntf [lreplace $EnabledIntf [llength EnabledIntf] [llength EnabledIntf]]
+					set EnabledIntf [lappend EnabledIntf "$d_device"]									
 				}
 			}
 		}	

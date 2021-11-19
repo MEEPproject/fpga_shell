@@ -1,5 +1,11 @@
 #uart_rxd/txd could be renamed depending on the uart interface name passed on def.txt
 
+set g_UART_MODE   [dict get $UARTentry Mode]
+set g_UART_ifname [dict get $UARTentry IntfLabel]
+set g_UART_irq    [dict get $UARTentry IRQ]
+set g_UART_CLK	  [dict get $UARTentry SyncClk]
+set g_CLK0_freq   [lindex $g_CLK0 0]
+
 if { $g_UART_MODE eq "simple"} {
 create_bd_port -dir I -type data rs232_rxd
 create_bd_port -dir O -type data rs232_txd
@@ -27,7 +33,7 @@ set_property name $g_UART_ifname [get_bd_intf_ports S_AXI_0]
 set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /$g_UART_ifname]
 make_bd_pins_external  [get_bd_pins axi_uart16550_0/ip2intc_irpt]
 set_property name $g_UART_irq [get_bd_ports ip2intc_irpt_0]
-set_property CONFIG.ASSOCIATED_BUSIF ${g_UART_ifname} [get_bd_ports /$g_CLK0]
+set_property CONFIG.ASSOCIATED_BUSIF ${g_UART_ifname} [get_bd_ports /$g_UART_CLK]
 exclude_bd_addr_seg [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -target_address_space [get_bd_addr_spaces $g_UART_ifname]
 
 }

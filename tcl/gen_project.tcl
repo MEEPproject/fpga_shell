@@ -34,6 +34,9 @@ set projec_dir $root_dir/project
 set shell_dir $root_dir/meep_shell_bd
 set bdName meep_shell_bd
 
+file delete -force $projec_dir
+file delete -force $shell_dir
+
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
     create_project $g_project_name $projec_dir -force -part $g_fpga_part

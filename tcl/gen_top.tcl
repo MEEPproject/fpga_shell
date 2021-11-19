@@ -180,6 +180,6 @@ close $fd_wire
 
 putcolors "INFO: MEEP SHELL top created" $GREEN
 
-#file delete -force $g_root_dir/tmp
+file delete -force $g_root_dir/tmp
 
 exit
