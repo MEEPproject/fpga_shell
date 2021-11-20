@@ -74,7 +74,11 @@ add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_p
 add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_${g_board_part}.xdc"
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
-source $root_dir/accelerator/meep_shell/tcl/project_options.tcl
+if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl}]} {
+	putwarnings "File project_options.tcl has not been loaded"
+} else {
+	putmeeps "File project_options.tcl loaded"
+}
 
 # The accelerator needs to define its own repo paths and the main project ip_path can be overwritten. 
 # Need to define it again

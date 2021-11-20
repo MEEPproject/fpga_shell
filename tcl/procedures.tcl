@@ -24,7 +24,7 @@ proc puterrors { someText } {
 	set RED "\033\[1;31m"
 	set RESET "\033\[0m"
 
-	puts "${RED}\[MEEP\]\ \[ERROR\]: ${RESET}${someText}"
+	puts "${RED}\[MEEP\]\ ERROR: ${RESET}${someText}"
 	
 	return 1
 }
@@ -34,7 +34,7 @@ proc putwarnings { someText } {
 	set YELLOW "\033\[1;33m"
 	set RESET "\033\[0m"
 
-	puts "${YELLOW}\[MEEP\]\ \[WARNING\]: ${RESET}${someText}"
+	puts "${YELLOW}\[MEEP\]\ WARNING: ${RESET}${someText}"
 }
 
 # Create EA instance using the EA top module as template. This function takes the inputs/outpus
@@ -342,8 +342,8 @@ proc get_axi_properties { fd_module axi_ifname } {
 				
 		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		
 			set awaddrMatch [regexp -inline -all "[0-9]+.+${axi_ifname}_awaddr" $line]
-			putmeeps "MATCH: ${axi_ifname}_awaddr $awaddrMatch"
-			set addrWidth [regexp -inline  {[0-9]+[^:]} $awaddrMatch]			
+			putmeeps "MATCH: ${axi_ifname}_awaddr $awaddrMatch"			
+			set addrWidth [regexp -inline  {[0-9]+} $awaddrMatch]			
 			set addrWidth [expr $addrWidth + 1]
 			putmeeps $addrWidth
 
@@ -352,7 +352,7 @@ proc get_axi_properties { fd_module axi_ifname } {
 		if {[regexp -inline -all "${axi_ifname}_wdata" $line] != "" } {
 			set wdataMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_wdata" $line]	
 			putmeeps "MATCH: ${axi_ifname}_wdata $wdataMatch"
-			set dataWidth [regexp -inline  {[0-9]+[^:]} $wdataMatch]
+			set dataWidth [regexp -inline  {[0-9]+} $wdataMatch]
 			set dataWidth [expr $dataWidth + 1]
 			putmeeps $dataWidth
 		}
@@ -360,7 +360,7 @@ proc get_axi_properties { fd_module axi_ifname } {
 		if {[regexp -inline -all "${axi_ifname}_awid" $line] != "" } {
 			set awidMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_awid" $line]	
 			putmeeps "MATCH: ${axi_ifname}_awid $awidMatch"
-			set IdWidth [regexp -inline {[0-9]+(?=:)} $awidMatch]
+			set IdWidth [regexp -inline {[0-9]+} $awidMatch]
 			set IdWidth [expr $IdWidth + 1]
 			putmeeps $IdWidth
 		}
