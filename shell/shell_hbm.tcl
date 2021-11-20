@@ -7,11 +7,17 @@ if { "$g_board_part" eq "u55c" } {
 	set HBM_AXI_LABEL ""
 }
 
-set HBMclk [dict get $HBMentry SyncClk]
+putwarnings $HBMentry
+
+set HBMFreq [dict get $HBMentry SyncClk Freq]
+set HBMname [dict get $HBMentry SyncClk Name]
+set HBMintf [dict get $HBMentry IntfLabel]
+
 set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
 set HBMdataWidth [dict get $HBMentry AxiDataWidth]
+set HBMidWidth   [dict get $HBMentry AxiIdWidth]
 
-set HBMFreq [lindex $g_CLK0 1]
+
 
 
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
@@ -31,7 +37,7 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.HAS_REGION {1} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
-   CONFIG.ID_WIDTH {9} \
+   CONFIG.ID_WIDTH {$HBMidWidth} \
    CONFIG.MAX_BURST_LENGTH {256} \
    CONFIG.NUM_READ_OUTSTANDING {1} \
    CONFIG.NUM_READ_THREADS {1} \
@@ -92,9 +98,7 @@ connect_bd_intf_net [get_bd_intf_ports hbm_axi4] -boundary_type upper [get_bd_in
 set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 
-set_property name [dict get $HBMentry IntfLabel] [get_bd_intf_ports hbm_axi4]
+set_property name $HBMintf [get_bd_intf_ports hbm_axi4]
 
-set HBMclk [dict get $HBMentry SyncClk]
-
-create_bd_port -dir O -type clk $HBMclk
-connect_bd_net [get_bd_ports $HBMclk] [get_bd_pins clk_wiz_1/clk_out1]
+create_bd_port -dir O -type clk $HBMname
+connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/clk_out1]

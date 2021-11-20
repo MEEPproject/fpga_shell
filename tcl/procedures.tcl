@@ -1,19 +1,40 @@
 set RED "\033\[1;31m"
 set GREEN "\033\[1;32m"
+set YELLOW "\033\[1;33m"
+set RESET "\033\[0m"
+
 
 
 proc putcolors { someText color } {
 
-        set RESET "\033\[0m"
+	set RESET "\033\[0m"
 
-        puts "${color}\[MEEP\]\ ${someText}${RESET}"
+	puts "${color}\[MEEP\] INFO: ${someText}${RESET}"
 
 }
 
 proc putmeeps { someText } {        
 
-        puts "\[MEEP\]\ ${someText}"
+	puts "\[MEEP\] INFO: ${someText}"
 
+}
+
+proc puterrors { someText } {
+
+	set RED "\033\[1;31m"
+	set RESET "\033\[0m"
+
+	puts "${RED}\[MEEP\]\ \[ERROR\]: ${RESET}${someText}"
+	
+	return 1
+}
+
+proc putwarnings { someText } {
+
+	set YELLOW "\033\[1;33m"
+	set RESET "\033\[0m"
+
+	puts "${YELLOW}\[MEEP\]\ \[WARNING\]: ${RESET}${someText}"
 }
 
 # Create EA instance using the EA top module as template. This function takes the inputs/outpus
@@ -27,6 +48,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 
 	set doConnection 0
 	set moduleParsed 0
+	set ret 0
 	
 	set comma ""
 	
@@ -54,6 +76,10 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 		# Detect empty lines
 			} elseif { [ regexp {^\s*$} $line ] } {
 				#putmeeps "INFO: empty line\r\n"	
+			} elseif { [ regexp {[(|)]\s*;*\s*$} $line ] } {
+				#putmeeps "Module opening/closing"
+			} elseif { [ regexp {endmodule} $line ] } {
+				#putmeeps "endmodule"			
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
@@ -91,8 +117,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				
 				
 			} else {
-				puts "INFO: Not considered branch?..."
-				puts " --> $line"
+				set ret [puterros "Not considered branch?...--> $line"]
 				#set teclado [read stdin 1]
 
 			}		
@@ -100,6 +125,8 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 	}
 	
 	puts $fd_inst "    \) ;" 
+	
+	return $ret
 }
 
 
@@ -305,6 +332,8 @@ proc get_axi_properties { fd_module axi_ifname } {
 	set axiProperties [list]
 	set addrWidth 0
 	set dataWidth 0
+	set IdWidth 0
+
 	
 	putmeeps "Inside properties: $axi_ifname"
 
@@ -319,14 +348,21 @@ proc get_axi_properties { fd_module axi_ifname } {
 			putmeeps $addrWidth
 
 		}
-				
-		
+						
 		if {[regexp -inline -all "${axi_ifname}_wdata" $line] != "" } {
 			set wdataMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_wdata" $line]	
 			putmeeps "MATCH: ${axi_ifname}_wdata $wdataMatch"
 			set dataWidth [regexp -inline  {[0-9]+[^:]} $wdataMatch]
 			set dataWidth [expr $dataWidth + 1]
 			putmeeps $dataWidth
+		}
+		
+		if {[regexp -inline -all "${axi_ifname}_awid" $line] != "" } {
+			set awidMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_awid" $line]	
+			putmeeps "MATCH: ${axi_ifname}_awid $awidMatch"
+			set IdWidth [regexp -inline {[0-9]+(?=:)} $awidMatch]
+			set IdWidth [expr $IdWidth + 1]
+			putmeeps $IdWidth
 		}
 		
 		if { $awaddrMatch != 0 } {
@@ -337,7 +373,7 @@ proc get_axi_properties { fd_module axi_ifname } {
 		}								
 	}
 			
-	set axiProperties [list $addrWidth $dataWidth]	
+	set axiProperties [list $addrWidth $dataWidth $IdWidth]	
 	
 	return $axiProperties
 

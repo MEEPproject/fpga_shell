@@ -70,9 +70,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	
 	# PCIe is not enabled by default.
 	set EnabledIntf {}
-	
-	putmeeps "OLKASE FIRST CLOCKS $ClockList"
-	
+		
 		
 	while {[gets $fd_AccDef line] >= 0} {
 	
@@ -82,11 +80,12 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	
 		foreach device $ShellInterfacesList {
 		
-		# putmeeps "DEBUG: [lindex $fields 0]"
-		# putmeeps "DEBUG: [lindex $fields 1]"
-		# putmeeps "DEBUG: [lindex $fields 2]"
+		#putmeeps "DEBUG: FIELDS: $fields"
+		
+		
 		
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
+
 				# Dont push to the user to number his interfaces when there is only one.							
 				for {set i 0} {$i < [lindex $fields 3] } {incr i} {
 					if {[lindex $fields 3] == 1} {	
@@ -99,12 +98,16 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device SyncClk   [lindex $fields 4] Freq ""
 					dict set d_device SyncClk   [lindex $fields 4] Name ""
 					dict set d_device AxiIntf "Axi4"
-					
+
 					## If the Interface has an associated clock, add it to the dict
-					foreach vclocks $ClockList {						
+					foreach vclocks $ClockList {	
 						if {[lindex $vclocks 0] == [lindex $fields 4] } {
-							dict set d_device SyncClk [lindex $fields 4] Freq [lindex $vclocks 1]
-							dict set d_device SyncClk [lindex $fields 4] Name [lindex $vclocks 2]
+							putmeeps "$device Clk: [lindex $vclocks 1]Hz [lindex $vclocks 2]"
+							set ClkValue [lindex $vclocks 0]
+							set ClkFreq  [lindex $vclocks 1]
+							set ClkName  [lindex $vclocks 2]
+							set ClkList [list Freq $ClkFreq Name $ClkName]
+							dict set d_device SyncClk $ClkList
 						}
 					}
 					
@@ -124,7 +127,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	}
 	
 	puts $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"
-	putmeeps "\[INFO\] Shell enabled interfaces: $EnabledIntf"
+	#putmeeps "Shell enabled interfaces: $EnabledIntf"
 		
 	close $fd_AccDef
 	close $fd_ShellEnv
@@ -162,13 +165,78 @@ proc ClocksDefinition { DefinitionFile } {
 	return $RetList
 }
 
-putmeeps "\[INFO\] Starting shell definition process..."
+################################################################
+# Parse the definiton file. Check correctness
+################################################################
+proc parse_definiton_file { DefinitionFile } {
+
+	set fd_AccDef      [open $DefinitionFile "r"]
+	set storeClockList [list]
+	set ret 0
+	
+
+	while {[gets $fd_AccDef line] >= 0} {
+		if {[regexp -inline -all {[\t|\s]+} $line] ne ""} {
+			putwarnings "The definition file contains white spaces. Check \
+			the definition file. \r\n\tDetected in line: $line"
+			set ret 1
+		}	
+		if {[regexp -inline -all {yes,.*} $line] ne ""} {
+			if {[regexp -inline -all {CLK\d} $line] eq ""} {
+			puterrors "The interface is enabled but doesn't have a valid clock.\
+			\r\n\tDetected in line: $line"
+			set ret 2
+			break			
+			} else {
+				set storeClockList [lappend storeClockList [regexp -inline -all {CLK\d} $line]]
+			}
+		}
+		if {[regexp -inline -all {^CLK\d} $line] ne ""} {
+			set capturedClockList [lappend capturedClockList [regexp -inline -all {^CLK\d} $line]]
+		}
+
+	}
+	
+	## Compare the clocks declared in the defined list against those linked to the interfaces
+	foreach storedClock $storeClockList {
+		set ClockError  1
+		# A detection must happend for the error flag to be disabled
+		foreach capturedClock $capturedClockList {
+			if {$storedClock == $capturedClock} {
+				set ClockError  0
+			}
+		}
+		if { $ClockError == 1 } {
+			puterrors "Missing clock for interfaces"
+			set ret 2
+		}
+	}
+	
+	close $fd_AccDef
+		
+	return $ret
+}
+
+putmeeps " Starting shell definition process..."
+
+set ParseRet [parse_definiton_file $p_EAdefFile]
+
+if { $ParseRet == 1 } {
+	putmeeps "INFO: Whitespaces detected. This is not an error but \
+	it is suggested to clean the definition file"
+	#exit 1	
+} 
+if { $ParseRet == 2 } {
+	puterrors "Clock parsing failed"
+	exit 1	
+}
+
 
 set ClockList [ClocksDefinition $p_EAdefFile ]
 
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile]
 
-putmeeps "Dictionary $EnabledIntf ..."
+putmeeps "Dictionary: $EnabledIntf ..."
 
 
 PortInterfaceDefinition $PortInterfacesList $EnabledIntf $p_ShellEnvFile

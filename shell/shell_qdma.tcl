@@ -103,7 +103,7 @@
    CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
    CONFIG.USE_RESET {false} \
    CONFIG.PRIM_IN_FREQ {100.000} \
-   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.000} \
+   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
    CONFIG.USE_LOCKED {true} \
  ] $clk_wiz_1
 

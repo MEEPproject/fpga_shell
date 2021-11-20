@@ -170,9 +170,10 @@ foreach dicEntry $ShellEnabledIntf {
 	set NewDict $dicEntry
 	
 	set axivalues [ get_axi_properties $fd_wire $ifname ]
-	puts "\[INFO\] AXI properties: [lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] "
+	puts " AXI properties: [lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] [lindex $axivalues 2]"
 	dict set NewDict "AxiAddrWidth" [lindex $axivalues 0]
 	dict set NewDict "AxiDataWidth" [lindex $axivalues 1]
+	dict set NewDict "AxiIdWidth"   [lindex $axivalues 2]
 	
 	set NewList [lappend NewList $NewDict]	
 
@@ -190,7 +191,7 @@ set ReplaceToken "set ShellEnabledIntf"
 
 updateFile "$g_root_dir/tcl/shell_env.tcl" $ReplaceToken "$ReplaceToken \[list $NewList \]"
 
-putcolors "INFO: MEEP SHELL top created" $GREEN
+putcolors "MEEP SHELL top created" $GREEN
 
 file delete -force $g_root_dir/tmp
 
