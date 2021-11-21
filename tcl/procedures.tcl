@@ -350,3 +350,12 @@ proc updateFile {path2file match replace} {
 	file delete -force $tmp_file
 
 }
+
+proc Add2EnvFile {path2file addString} {
+	
+	set fd_file [open $path2file "a"]
+	
+	puts $fd_file $addString
+	
+	close $fd_file	
+}

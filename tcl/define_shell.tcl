@@ -25,13 +25,12 @@ set p_ShellEnvFile  $g_root_dir/tcl/shell_env.tcl
 # Returns the enabled elements of the following physical available interfaces list:
 # set PortInterfacesList  [list pcie ddr4 aurora ethernet uart ]
 ################################################################
-proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
-
-	set fd_ShellEnv    [open $ShellEnvFile "a"]
+proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 
 	set PortEnabledList [list pcie]
 	
 	set EnIntfNameList [list]
+	set RetString ""
 	
 	foreach dicEntry $EnabledIntf {
 		#putmeeps "DEBUG ENTRY: $dicEntry"		
@@ -48,10 +47,9 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf ShellEnvFile} {
 		}		
 	}
 	
-	puts $fd_ShellEnv "set PortEnabledList \[list [join [list $PortEnabledList]]\]"
-	
-	close $fd_ShellEnv
-
+	set RetString "\[list [join [list $PortEnabledList]]\]"
+		
+	return $RetString
 }
 
 
@@ -217,6 +215,35 @@ proc parse_definiton_file { DefinitionFile } {
 	return $ret
 }
 
+################################################################
+# Parse the PCIe GPIO. 
+################################################################
+proc GPIODefinition { DefinitionFile } {
+
+	set fd_AccDef      [open $DefinitionFile "r"]
+	set GPIList [list]
+	
+	set i 0
+		
+	while {[gets $fd_AccDef line] >= 0} {
+		set line [string map {" " ""} $line]	
+		if {[regexp -inline -all {^GPIO,} $line] ne ""} {
+			set fields [split $line ","]
+			set d_device [dict create Name GPIO_${i}]
+			dict set d_device Label [lindex $fields 1]
+			dict set d_device InitialLevel [lindex $fields 2]
+			set GPIList [lappend GPIList $d_device]
+			incr i
+			#putmeeps "Adding GPIO to the list: $d_device "
+		}
+		
+	}
+	
+	close $fd_AccDef
+
+	return $GPIList
+}
+
 putmeeps " Starting shell definition process..."
 
 set ParseRet [parse_definiton_file $p_EAdefFile]
@@ -233,10 +260,19 @@ if { $ParseRet == 2 } {
 
 
 set ClockList [ClocksDefinition $p_EAdefFile ]
+set GPIOList  [GPIODefinition $p_EAdefFile ]
+
+putmeeps "GPIO List: $GPIOList"
 
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile]
 
-PortInterfaceDefinition $PortInterfacesList $EnabledIntf $p_ShellEnvFile
+set PortInt [PortInterfaceDefinition $PortInterfacesList $EnabledIntf]
+
+putmeeps "DEBUG: $PortInt"
+## Add the Port Interface list to the environment file
+Add2EnvFile $p_ShellEnvFile "set PortEnabledList $PortInt"
+## Add the GPIO list to the environment file
+Add2EnvFile $p_ShellEnvFile "set GPIOList $GPIOList"
 
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN
