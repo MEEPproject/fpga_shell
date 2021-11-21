@@ -62,7 +62,7 @@ binaries: $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh
 
 vivado: $(ACCEL_DIR) 
-	sh/define_shell.sh
+	#sh/define_shell.sh
 	mkdir -p binaries
 	cp -r accelerator/meep_shell/binaries/* binaries/
 	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/init_ips.tcl

@@ -158,7 +158,7 @@ close $fd_top
 #### Extract the AXI parameters needed later by the shell
 ##################################################################
 
-set   fd_wire    [open $g_wire_file  "r"]
+set fd_wire    [open $g_wire_file  "r"]
 
 set NewList [list]
 set NewDict ""
@@ -170,13 +170,13 @@ foreach dicEntry $ShellEnabledIntf {
 	set NewDict $dicEntry
 	
 	set axivalues [ get_axi_properties $fd_wire $ifname ]
-	puts " AXI properties: [lindex $ifname 0]: [lindex $axivalues 0] [lindex $axivalues 1] [lindex $axivalues 2]"
+	putmeeps " AXI properties: [lindex $ifname 0]:\
+	[lindex $axivalues 0] [lindex $axivalues 1] [lindex $axivalues 2]"
 	dict set NewDict "AxiAddrWidth" [lindex $axivalues 0]
 	dict set NewDict "AxiDataWidth" [lindex $axivalues 1]
 	dict set NewDict "AxiIdWidth"   [lindex $axivalues 2]
 	
 	set NewList [lappend NewList $NewDict]	
-
 }
 
 close $fd_wire
@@ -186,7 +186,6 @@ close $fd_wire
 # that will be used by the genproject later.
 ######################################################
 
-set sandbox_file $g_root_dir/sandbox.file
 set ReplaceToken "set ShellEnabledIntf"
 
 updateFile "$g_root_dir/tcl/shell_env.tcl" $ReplaceToken "$ReplaceToken \[list $NewList \]"

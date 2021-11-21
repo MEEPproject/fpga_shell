@@ -125,8 +125,8 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 			}
 		}	
 	}
-	
 	puts $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"
+	#putmeeps $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"
 	#putmeeps "Shell enabled interfaces: $EnabledIntf"
 		
 	close $fd_AccDef
@@ -235,9 +235,6 @@ if { $ParseRet == 2 } {
 set ClockList [ClocksDefinition $p_EAdefFile ]
 
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile]
-
-putmeeps "Dictionary: $EnabledIntf ..."
-
 
 PortInterfaceDefinition $PortInterfacesList $EnabledIntf $p_ShellEnvFile
 

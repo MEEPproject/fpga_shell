@@ -207,63 +207,6 @@ proc add_instance { g_fd g_fd_tmp } {
 	return $NoCattrip	
 }
 
-########################################################
-# This function associates Peripherals and AXI interfaces.
-# If the peripheral/IP has more than one interface, it will get
-# marked as "yes" and the <add_acc_connection> function will go 
-# over it, creating the necessary connections.
-########################################################
-proc select_interface { g_interface } {
-
-	set g_axi4 no
-	set g_axiS no
-	set g_axiL no
-	set g_clk  no
-	set g_uart no
-	
-	putmeeps "Interface: $g_interface"
-
-	switch -regexp $g_interface {
-		"DDR4" {
-			set g_axi4 yes
-		}
-		"HBM" {
-			set g_axi4 yes
-		}
-		"ETHERNET" {
-			set g_axi4 yes
-			set g_axiS yes
-			set g_axiL yes
-		}
-		"AURORA" {
-			set g_axiS yes
-		}
-		[CLK0,CLK1,CLK2,CLK3] {
-			set g_clk yes
-		}
-		"UART" {
-			set g_uart yes
-			#if mode is not simple:
-			set g_axiL yes
-		}
-		default {
-			set g_axi4 no
-			set g_axiS no
-			set g_axiL no
-			set g_clk  no
-			set g_uart no
-		}
-	}
-	
-	set axi_list "{$g_axi4 axi4} {$g_axiS axiS} {$g_axiL axiL} {$g_clk clk} {$g_uart rs232}"
-
-	# This labels (axi4, axiS..) need to match what is used in the corresponding interface file present 
-	# in the "$root_dir/interface" folder. 
-
-	#putmeeps "$g_interface $g_axi4 $g_axiS $g_axiL $g_clk $g_uart"
-	return $axi_list
-
-}
 
 ########################################################
 # This function receives a peripheral/IP name, check if it exists and then create instance
@@ -342,27 +285,27 @@ proc get_axi_properties { fd_module axi_ifname } {
 				
 		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		
 			set awaddrMatch [regexp -inline -all "[0-9]+.+${axi_ifname}_awaddr" $line]
-			putmeeps "MATCH: ${axi_ifname}_awaddr $awaddrMatch"			
+			#putmeeps "MATCH: ${axi_ifname}_awaddr $awaddrMatch"			
 			set addrWidth [regexp -inline  {[0-9]+} $awaddrMatch]			
 			set addrWidth [expr $addrWidth + 1]
-			putmeeps $addrWidth
+			#putmeeps $addrWidth
 
 		}
 						
 		if {[regexp -inline -all "${axi_ifname}_wdata" $line] != "" } {
 			set wdataMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_wdata" $line]	
-			putmeeps "MATCH: ${axi_ifname}_wdata $wdataMatch"
+			#putmeeps "MATCH: ${axi_ifname}_wdata $wdataMatch"
 			set dataWidth [regexp -inline  {[0-9]+} $wdataMatch]
 			set dataWidth [expr $dataWidth + 1]
-			putmeeps $dataWidth
+			#putmeeps $dataWidth
 		}
 		
 		if {[regexp -inline -all "${axi_ifname}_awid" $line] != "" } {
 			set awidMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_awid" $line]	
-			putmeeps "MATCH: ${axi_ifname}_awid $awidMatch"
+			#putmeeps "MATCH: ${axi_ifname}_awid $awidMatch"
 			set IdWidth [regexp -inline {[0-9]+} $awidMatch]
 			set IdWidth [expr $IdWidth + 1]
-			putmeeps $IdWidth
+			#putmeeps $IdWidth
 		}
 		
 		if { $awaddrMatch != 0 } {
@@ -378,6 +321,11 @@ proc get_axi_properties { fd_module axi_ifname } {
 	return $axiProperties
 
 }
+
+####################################################
+# Replace a matching Line in a file when it matches
+# the input value
+####################################################
 
 proc updateFile {path2file match replace} {
 

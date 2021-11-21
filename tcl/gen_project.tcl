@@ -8,9 +8,9 @@ proc get_script_folder {} {
 variable script_folder
 set script_folder [_tcl::get_script_folder]
 
-puts "The environment tcl will be sourced from ${script_folder}"
-source $script_folder/environment.tcl
 source $script_folder/procedures.tcl
+putmeeps "The environment tcl will be sourced from ${script_folder}"
+source $script_folder/environment.tcl
 source $script_folder/shell_env.tcl
 ################################################################
 # Check if script is running in correct Vivado version.
@@ -19,7 +19,13 @@ set current_vivado_version [version -short]
 
 if { [string first $g_vivado_version $current_vivado_version] == -1 } {
     puts ""
-    catch {common::send_gid_msg -ssname BD::TCL -id 2041 -severity "ERROR" "This script was generated using Vivado <$g_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."}
+    catch {common::send_gid_msg -ssname BD::TCL -id 2041 -severity "ERROR"\
+	"This script was generated using Vivado <$g_vivado_version> and is being\
+	run in <$current_vivado_version> of Vivado. Please run the script in Vivado\
+	<$scripts_vivado_version> then open the design in Vivado\
+	<$current_vivado_version>. Upgrade the design by running \"Tools => \
+	Report => Report IP Status...\", then run write_bd_tcl to create an updated\
+	script."}
 
     return 1
 }
@@ -59,8 +65,11 @@ set_property  ip_repo_paths  $ip_dir_list [current_project]
 
 if { $g_useBlockDesign eq "Y" } {
 update_ip_catalog -rebuild
-source ${root_dir}/tcl/gen_shell.tcl
-}
+	if { [catch {source ${root_dir}/tcl/gen_shell.tcl}] } {
+		puterrors "Shell generation process failed, terminating ..."
+		exit 1
+	}
+}	
 ####################################################
 # MAIN FLOW
 ####################################################
@@ -94,8 +103,8 @@ putcolors "Project generation ended successfully" $GREEN
 
 #source $root_dir/tcl/gen_bitstream.tcl
 write_project_tcl -force -all_properties -dump_project_info -quiet -verbose "${root_dir}/gen_system.tcl"
-puts "Cleaning up..."
+putmeeps "Cleaning up..."
 file delete -force ${g_project_name}_def_val.txt
 file delete -force ${g_project_name}_dump.txt
-puts "Done"
+putmeeps "Done"
 exit

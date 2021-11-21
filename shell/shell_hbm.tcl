@@ -17,9 +17,6 @@ set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
 set HBMdataWidth [dict get $HBMentry AxiDataWidth]
 set HBMidWidth   [dict get $HBMentry AxiIdWidth]
 
-
-
-
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
