@@ -81,15 +81,31 @@
   connect_bd_net -net util_ds_buf_IBUF_OUT [get_bd_pins qdma_0/sys_clk_gt] [get_bd_pins util_ds_buf/IBUF_OUT]
 
 
+###############################################################
+# Set MMCM using the clocks extracted from the definition file
+###############################################################
+
+set i 1
+foreach eaclocks $ClockList {
+	set ClkFreq  [dict get $eaclocks ClkFreq]
+	set ClkFreqMHz [expr $ClkFreq/1000000 ]
+	putwarnings "Configuring MMCM output $i: ${ClkFreqMHz}MHz"
+	set ConfMMCM "CONFIG.CLKOUT${i}_REQUESTED_OUT_FREQ ${ClkFreqMHz}"
+	set ConfMMCMList [lappend ConfMMCMList $ConfMMCM]
+	incr i
+}
+
   #Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
   set_property -dict [ list \
    CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
    CONFIG.USE_RESET {false} \
    CONFIG.PRIM_IN_FREQ {100.000} \
-   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
+   $ConfMMCMList \
    CONFIG.USE_LOCKED {true} \
  ] $clk_wiz_1
+ 
+ #   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
 
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
  

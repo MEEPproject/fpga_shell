@@ -99,12 +99,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 
 					## If the Interface has an associated clock, add it to the dict
 					foreach vclocks $ClockList {	
-						if {[lindex $vclocks 0] == [lindex $fields 4] } {
-							putmeeps "$device Clk: [lindex $vclocks 1]Hz [lindex $vclocks 2]"
-							set ClkValue [lindex $vclocks 0]
-							set ClkFreq  [lindex $vclocks 1]
-							set ClkName  [lindex $vclocks 2]
+						set ClkNum  [dict get $vclocks ClkNum]
+						if { $ClkNum == [lindex $fields 4] } {
+							set ClkValue [dict get $vclocks ClkNum]
+							set ClkFreq  [dict get $vclocks ClkFreq]
+							set ClkName  [dict get $vclocks ClkName]
 							set ClkList [list Freq $ClkFreq Name $ClkName]
+							putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
 							dict set d_device SyncClk $ClkList
 						}
 					}
@@ -147,16 +148,22 @@ proc ClocksDefinition { DefinitionFile } {
 	set RetList [list]
 	
 	set i 0
-		
+	
+	
 	while {[gets $fd_AccDef line] >= 0} {
 	
 	set line [string map {" " ""} $line]
 	
 		set fields [split $line ","]
 				
-			if { [regexp -all -inline {^CLK.,} $line] ne "" } {					
-				set g_CLK [list CLK${i} [lindex $fields 1] [lindex $fields 2]]
-				set RetList [lappend RetList $g_CLK]
+			if { [regexp -all -inline {^CLK.,} $line] ne "" } {	
+
+				set d_clock [dict create Name CLK${i}]
+				dict set d_clock ClkNum  [lindex $fields 0]
+				dict set d_clock ClkFreq [lindex $fields 1]
+				dict set d_clock ClkName [lindex $fields 2]
+			
+				set RetList [lappend RetList $d_clock]
 				incr i	
 			}						
 	}
@@ -280,7 +287,7 @@ proc GetEAname { DefinitionFile } {
 ## MEEP SHELL GENERATION STARTS
 ###############################################################
 
-putmeeps " Starting shell definition process..."
+putmeeps "Starting shell definition process..."
 
 set ParseRet [parse_definiton_file $p_EAdefFile]
 

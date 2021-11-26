@@ -194,4 +194,3 @@ putcolors "MEEP SHELL top created" $GREEN
 
 file delete -force $g_root_dir/tmp
 
-exit
