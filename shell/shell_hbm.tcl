@@ -7,11 +7,25 @@ if { "$g_board_part" eq "u55c" } {
 	set HBM_AXI_LABEL ""
 }
 
+# source tcl/procedures.tcl
+# source tcl/shell_env.tcl
+
+# foreach dicEntry $ShellEnabledIntf {
+
+	# set IntfName [dict get $dicEntry Name]
+	
+	# if {[regexp -inline -all "HBM" $IntfName] ne "" } {
+		# set HBMentry $dicEntry
+	# }
+	
+# }
+
 putwarnings $HBMentry
 
-set HBMFreq [dict get $HBMentry SyncClk Freq]
-set HBMname [dict get $HBMentry SyncClk Name]
-set HBMintf [dict get $HBMentry IntfLabel]
+set HBMFreq  [dict get $HBMentry SyncClk Freq]
+set HBMname  [dict get $HBMentry SyncClk Name]
+set HBMintf  [dict get $HBMentry IntfLabel]
+set HBMReady [dict get $HBMentry CalibDone]
 
 set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
 set HBMdataWidth [dict get $HBMentry AxiDataWidth]
@@ -73,7 +87,6 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
 	CONFIG.USER_SAXI_15 {false} \
 	CONFIG.USER_APB_EN {false}] [get_bd_cells hbm_0]
 	
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_interconnect_0/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf_0
 make_bd_intf_pins_external  [get_bd_intf_pins util_ds_buf_0/CLK_IN_D]
 set_property name sysclk0 [get_bd_intf_ports CLK_IN_D_0]
@@ -82,16 +95,6 @@ connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins clk_wiz_1/clk_out1]
 connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/clk_out1]
 connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins hbm_0/AXI_08_ARESET_N]
 connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins rst_ea_domain/peripheral_aresetn]
-connect_bd_net [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins rst_ea_domain/peripheral_aresetn]
-connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins axi_interconnect_0/ACLK]
-connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins axi_interconnect_0/ARESETN]
-connect_bd_net [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins clk_wiz_1/clk_out1]
-connect_bd_net [get_bd_pins axi_interconnect_0/S01_ACLK] [get_bd_pins clk_wiz_1/clk_out1]
-connect_bd_net [get_bd_pins axi_interconnect_1/ACLK] [get_bd_pins qdma_0/axi_aclk]
-connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins axi_interconnect_1/ARESETN]
-connect_bd_net [get_bd_pins axi_interconnect_1/M00_ACLK] [get_bd_pins clk_wiz_1/clk_out1]
-connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_interconnect_1/M00_ARESETN]
-connect_bd_intf_net [get_bd_intf_ports hbm_axi4] -boundary_type upper [get_bd_intf_pins axi_interconnect_0/S01_AXI]
 set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 
@@ -99,3 +102,15 @@ set_property name $HBMintf [get_bd_intf_ports hbm_axi4]
 
 create_bd_port -dir O -type clk $HBMname
 connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/clk_out1]
+
+## HBM Calibration Complete, 
+## It can be used when it has been defined in the definition file
+
+if { $HBMReady != ""} {
+	make_bd_pins_external  [get_bd_pins hbm_0/apb_complete_0]
+	set_property name $HBMReady [get_bd_ports apb_complete_0_0]
+}
+
+
+
+save_bd_design

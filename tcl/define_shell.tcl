@@ -118,6 +118,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							dict set d_device AxiIntf "no"						
 						} 
 					}
+					if { "${device}" == "HBM" || "${device}" == "DDR4" } {
+						dict set d_device CalibDone [lindex $fields 5]	
+					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}
@@ -216,35 +219,66 @@ proc parse_definiton_file { DefinitionFile } {
 }
 
 ################################################################
-# Parse the PCIe GPIO. 
+# Parse the PCIe GPIO. Only Outputs. 
+# TODO: GPIO inputs can be added as another dictionary in the same
+# 	  : list 
 ################################################################
 proc GPIODefinition { DefinitionFile } {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
-	set GPIOList [list "GPIO"]
+	set d_gpio {}
+	
+	set d_gpio [dict create Name g_gpio]
 			
 	while {[gets $fd_AccDef line] >= 0} {
 		set line [string map {" " ""} $line]	
 		if {[regexp -inline -all {^GPIO,} $line] ne ""} {
 			set fields [split $line ","]	
 			# GPIO width is the second field
-			set GPIOwidth   [lindex $fields 1]
-			set GPIOList    [lappend GPIOList $GPIOwidth]
+			
+			dict set d_gpio Width     [lindex $fields 1]
+			dict set d_gpio IntfLabel [lindex $fields 2]
+			dict set d_gpio InitValue [lindex $fields 3]
+			
 			# The Initial value is received as an hexadecimal string: 0xABDC
 			# string map can be called to remove "0x". Then do:
 			# binary scan [binary format H* $hex] B* bits
-			set GPIOdefault [lindex $fields 2]
-			set GPIOList    [lappend GPIOList $GPIOdefault]
+
 						
-			#putmeeps "Adding GPIO to the list: $GPIOList "
+			#putmeeps "Adding GPIO to the list: $d_gpio "
 		}
 		
 	}
 	
 	close $fd_AccDef
 
-	return $GPIOList
+	return $d_gpio
 }
+
+################################################################
+# Get the EA name so it is shown later
+################################################################
+proc GetEAname { DefinitionFile } {
+
+	set fd_AccDef      [open $DefinitionFile "r"]
+	set i 0 
+	set ModuleName ""
+	
+	while {[gets $fd_AccDef line] >= 0} {
+		if {[regexp -inline -all {^EAname,} $line] ne ""} {
+			set fields [split $line ","]
+			set ModuleName [lindex ModuleName 1]			
+			putwarnings "Found module name -$ModuleName- at line $i" 
+			incr i
+			break
+		}		
+	}
+		
+}
+
+###############################################################
+## MEEP SHELL GENERATION STARTS
+###############################################################
 
 putmeeps " Starting shell definition process..."
 
@@ -274,7 +308,9 @@ putmeeps "DEBUG: $PortInt"
 ## Add the Port Interface list to the environment file
 Add2EnvFile $p_ShellEnvFile "set PortEnabledList $PortInt"
 ## Add the GPIO list to the environment file
-Add2EnvFile $p_ShellEnvFile "set GPIOList $GPIOList"
+Add2EnvFile $p_ShellEnvFile "set GPIOList \{$GPIOList\}"
+## Add the Clock list to the environment file
+Add2EnvFile $p_ShellEnvFile "set ClockList \[list $ClockList\]"
 
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN

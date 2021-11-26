@@ -46,15 +46,20 @@ foreach dicEntry $ShellEnabledIntf {
 		source $g_root_dir/shell/shell_aurora.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/aurora_${g_board_part}.xdc"		
 	}
+	
 }
 
 #GEnerate IF GPIO
-source $g_root_dir/shell/shell_gpio.tcl
 
-source $g_root_dir/shell/shell_memmap.tcl
+if {[info exists $GPIOList]} {
+	source $g_root_dir/shell/shell_gpio.tcl
+}
+
+
+#source $g_root_dir/shell/shell_memmap.tcl
  
 
 
 save_bd_design 
-validate_bd_design
+#validate_bd_design
 
