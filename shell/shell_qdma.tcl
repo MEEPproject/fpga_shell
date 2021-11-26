@@ -127,7 +127,7 @@
   connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins axi_interconnect_1/S00_ACLK]
   connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins axi_interconnect_1/S00_ARESETN]
 
-  
+ save_bd_design  
 
 
 

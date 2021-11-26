@@ -221,27 +221,29 @@ proc parse_definiton_file { DefinitionFile } {
 proc GPIODefinition { DefinitionFile } {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
-	set GPIList [list]
-	
-	set i 0
-		
+	set GPIOList [list "GPIO"]
+			
 	while {[gets $fd_AccDef line] >= 0} {
 		set line [string map {" " ""} $line]	
 		if {[regexp -inline -all {^GPIO,} $line] ne ""} {
-			set fields [split $line ","]
-			set d_device [dict create Name GPIO_${i}]
-			dict set d_device Label [lindex $fields 1]
-			dict set d_device InitialLevel [lindex $fields 2]
-			set GPIList [lappend GPIList $d_device]
-			incr i
-			#putmeeps "Adding GPIO to the list: $d_device "
+			set fields [split $line ","]	
+			# GPIO width is the second field
+			set GPIOwidth   [lindex $fields 1]
+			set GPIOList    [lappend GPIOList $GPIOwidth]
+			# The Initial value is received as an hexadecimal string: 0xABDC
+			# string map can be called to remove "0x". Then do:
+			# binary scan [binary format H* $hex] B* bits
+			set GPIOdefault [lindex $fields 2]
+			set GPIOList    [lappend GPIOList $GPIOdefault]
+						
+			#putmeeps "Adding GPIO to the list: $GPIOList "
 		}
 		
 	}
 	
 	close $fd_AccDef
 
-	return $GPIList
+	return $GPIOList
 }
 
 putmeeps " Starting shell definition process..."
