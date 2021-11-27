@@ -1,7 +1,7 @@
 
-set NumGPIO   [dict get $g_gpio Width]
-set IntfName  [dict get $g_gpio IntfLabel]
-set InitValue [dict get $g_gpio InitValue]
+set NumGPIO   [dict get $GPIOList Width]
+set IntfName  [dict get $GPIOList IntfLabel]
+set InitValue [dict get $GPIOList InitValue]
 
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0

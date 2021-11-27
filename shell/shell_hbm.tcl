@@ -35,9 +35,9 @@ set HBMidWidth   [dict get $HBMentry AxiIdWidth]
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
-   CONFIG.ARUSER_WIDTH {1} \
-   CONFIG.AWUSER_WIDTH {1} \
-   CONFIG.BUSER_WIDTH {1} \
+   CONFIG.ARUSER_WIDTH {0} \
+   CONFIG.AWUSER_WIDTH {0} \
+   CONFIG.BUSER_WIDTH {0} \
    CONFIG.DATA_WIDTH $HBMdataWidth \
    CONFIG.FREQ_HZ $HBMFreq \
    CONFIG.HAS_BRESP {1} \
@@ -58,10 +58,10 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.PROTOCOL {AXI4} \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
-   CONFIG.RUSER_WIDTH {1} \
+   CONFIG.RUSER_WIDTH {0} \
    CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
-   CONFIG.WUSER_WIDTH {1} \
+   CONFIG.WUSER_WIDTH {0} \
    ] $hbm_axi4
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0
@@ -101,8 +101,13 @@ connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP
 
 set_property name $HBMintf [get_bd_intf_ports hbm_axi4]
 
+## User clock
 create_bd_port -dir O -type clk $HBMname
 connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
+
+## Associate the clock with the user interface
+set_property CONFIG.ASSOCIATED_BUSIF {$HBMintf} [get_bd_ports /$HBMname]
+
 
 ## HBM Calibration Complete, 
 ## It can be used when it has been defined in the definition file
