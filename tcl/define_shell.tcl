@@ -102,7 +102,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							set ClkValue [dict get $vclocks ClkNum]
 							set ClkFreq  [dict get $vclocks ClkFreq]
 							set ClkName  [dict get $vclocks ClkName]
-							set ClkList [list Freq $ClkFreq Name $ClkName]
+							set ClkList [list Label $ClkValue Freq $ClkFreq Name $ClkName]
 							putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
 							dict set d_device SyncClk $ClkList
 						}

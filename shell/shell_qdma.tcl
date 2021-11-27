@@ -86,18 +86,25 @@
 ###############################################################
 
 set i 1
-set ConfMMCMString ""
+set n 0
+set ConfMMCMString " "
 foreach eaclocks $ClockList {
+
+	### Spaces at the end of a string are necessary when using append
 	if { $i > 1 } {
-		set ConfMMCM "CONFIG.CLKOUT${i}_USED true"
-		set ConfMMCMString "$ConfMMCMString $ConfMMCM"
+		set ConfMMCM "CONFIG.CLKOUT${i}_USED true "
+		append ConfMMCMString "$ConfMMCM"
 	}
 	set ClkFreq  [dict get $eaclocks ClkFreq]
 	set ClkFreqMHz [expr $ClkFreq/1000000 ]
 	putmeeps "Configuring MMCM output $i: ${ClkFreqMHz}MHz"
-	set ConfMMCM "CONFIG.CLKOUT${i}_REQUESTED_OUT_FREQ ${ClkFreqMHz}"
-	set ConfMMCMString "$ConfMMCMString $ConfMMCM"
+	set ConfMMCM "CONFIG.CLKOUT${i}_REQUESTED_OUT_FREQ ${ClkFreqMHz} "
+	append ConfMMCMString "$ConfMMCM"
+	
+	set ConfMMCM "CONFIG.CLK_OUT${i}_PORT CLK${n} "
+	append ConfMMCMString "$ConfMMCM"
 	incr i
+	incr n
 }
 	
 
@@ -114,13 +121,13 @@ foreach eaclocks $ClockList {
   #Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
   set_property -dict $ClockParamList $clk_wiz_1
- 
+    
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
  
   create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_domain
-  connect_bd_net [get_bd_pins clk_wiz_1/clk_out1] [get_bd_pins rst_ea_domain/slowest_sync_clk]
+  #connect_bd_net [get_bd_pins clk_wiz_1/clk_out1] [get_bd_pins rst_ea_domain/slowest_sync_clk]
   connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_domain/ext_reset_in]
-  connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_domain/dcm_locked]
+  #connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_domain/dcm_locked]
   
   
  save_bd_design  

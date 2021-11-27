@@ -3,9 +3,12 @@
 set g_UART_MODE   [dict get $UARTentry Mode]
 set g_UART_ifname [dict get $UARTentry IntfLabel]
 set g_UART_irq    [dict get $UARTentry IRQ]
-set g_UART_CLK	  [dict get $UARTentry SyncClk]
+set g_UART_CLK	  [dict get $UARTentry SyncClk Name]
 set g_CLK0_freq   [dict get $UARTentry SyncClk Freq]
+set g_UARTClkPort [dict get $UARTentry SyncClk Label]
 
+
+putdebugs "UART? $g_UART_CLK"
 
 if { $g_UART_MODE eq "simple"} {
 
@@ -25,7 +28,7 @@ if { $g_UART_MODE eq "normal" } {
 	connect_bd_net [get_bd_ports rs232_rxd] [get_bd_pins axi_uart16550_0/sin]
 	connect_bd_net [get_bd_ports rs232_txd] [get_bd_pins axi_uart16550_0/sout]
 	#make_bd_pins_external  [get_bd_pins axi_uart16550_0/ip2intc_irpt]
-	connect_bd_net [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins clk_wiz_1/clk_out1]
+	connect_bd_net [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins clk_wiz_1/$g_UARTClkPort]
 	connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn]
 
 	# TODO: Deal with no IRQ scenario with if
