@@ -78,9 +78,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	
 		foreach device $ShellInterfacesList {
 		
-		#putmeeps "DEBUG: FIELDS: $fields"
-		
-		
+		#putmeeps "DEBUG: FIELDS: $fields"			
 		
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
 

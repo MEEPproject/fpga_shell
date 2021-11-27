@@ -86,30 +86,37 @@
 ###############################################################
 
 set i 1
+set ConfMMCMString ""
 foreach eaclocks $ClockList {
+	if { $i > 1 } {
+		set ConfMMCM "CONFIG.CLKOUT${i}_USED true"
+		set ConfMMCMString "$ConfMMCMString $ConfMMCM"
+	}
 	set ClkFreq  [dict get $eaclocks ClkFreq]
 	set ClkFreqMHz [expr $ClkFreq/1000000 ]
-	putwarnings "Configuring MMCM output $i: ${ClkFreqMHz}MHz"
+	putmeeps "Configuring MMCM output $i: ${ClkFreqMHz}MHz"
 	set ConfMMCM "CONFIG.CLKOUT${i}_REQUESTED_OUT_FREQ ${ClkFreqMHz}"
-	set ConfMMCMList [lappend ConfMMCMList $ConfMMCM]
+	set ConfMMCMString "$ConfMMCMString $ConfMMCM"
 	incr i
 }
+	
+
+   set ClockParamList [list CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
+   CONFIG.USE_RESET {false} \
+   CONFIG.PRIM_IN_FREQ {100.000} \
+   CONFIG.USE_LOCKED {true} \
+   ]
+
+  append ClockParamList $ConfMMCMString
+  
+  putdebugs "MMCM configuration: $ClockParamList"
 
   #Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
-  set_property -dict [ list \
-   CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
-   CONFIG.USE_RESET {false} \
-   CONFIG.PRIM_IN_FREQ {100.000} \
-   $ConfMMCMList \
-   CONFIG.USE_LOCKED {true} \
- ] $clk_wiz_1
+  set_property -dict $ClockParamList $clk_wiz_1
  
- #   CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {100.000} \
-
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
  
-
   create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_domain
   connect_bd_net [get_bd_pins clk_wiz_1/clk_out1] [get_bd_pins rst_ea_domain/slowest_sync_clk]
   connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_domain/ext_reset_in]

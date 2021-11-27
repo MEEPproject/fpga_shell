@@ -17,9 +17,10 @@ echo "[MEEP] *   https://meep-project.eu/          *"
 echo "[MEEP] *                                     *"
 echo -e "[MEEP] ***************************************\r\n"
 
-EA=`grep -o ea_url.txt -e https.*$`
+EAURL=`grep -o ea_url.txt -e https.*$`
+EANAME=`grep -o ea_url.txt -e EANAME.*$`
 
-echo -e "[MEEP] Emulated accelerator: \r\n\r\n\t$GREEN $EA $NC\r\n"
+echo -e "[MEEP] Emulated accelerator: \r\n\r\n\t$GREEN $EAURL $NC\r\n"
 
 if [ -d "binaries" ]; then
 	echo "[MEEP] binaries folder already exists"
@@ -30,11 +31,4 @@ fi
 
 cp -r accelerator/meep_shell/binaries/* binaries/
 
-echo "[MEEP] INFO: Defining the shell environment file"
-vivado -mode batch -nolog -nojournal -notrace -source ./tcl/define_shell.tcl
-echo "[MEEP] INFO: Generating the shell IPs ..."
-vivado -mode batch -nolog -nojournal -notrace -source ./tcl/init_ips.tcl
-echo "[MEEP] INFO: Generating the RTL top file ..."
-vivado -mode tcl   -nolog -nojournal -notrace -source ./tcl/gen_top.tcl
-echo "[MEEP] INFO: Creating the project ..."
-vivado -mode batch -nolog -nojournal -notrace -source ./tcl/gen_project.tcl
+vivado -mode batch -nolog -nojournal -notrace -source ./tcl/gen_meep.tcl

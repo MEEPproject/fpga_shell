@@ -22,3 +22,8 @@ set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
 ## List here the physical interfaces. Lowercase as they are connected
 ## to file names. 
 set PortInterfacesList  [list pcie ddr4 aurora ethernet uart ]
+
+##################################################################
+# Enable debug messages
+##################################################################
+set DebugEnable "True"

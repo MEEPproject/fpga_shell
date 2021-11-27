@@ -65,10 +65,11 @@ set_property  ip_repo_paths  $ip_dir_list [current_project]
 
 if { $g_useBlockDesign eq "Y" } {
 update_ip_catalog -rebuild
-	if { [catch {source ${root_dir}/tcl/gen_shell.tcl}] } {
-		puterrors "Shell generation process failed, terminating ..."
-		exit 1
-	}
+	# if { [catch {source ${root_dir}/tcl/gen_shell.tcl}] } {
+		# puterrors "Shell generation process failed, terminating ..."
+		# exit 1
+	# }
+	source ${root_dir}/tcl/gen_shell.tcl
 }	
 ####################################################
 # MAIN FLOW

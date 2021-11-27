@@ -1,6 +1,7 @@
 set RED "\033\[1;31m"
 set GREEN "\033\[1;32m"
 set YELLOW "\033\[1;33m"
+set CYAN "\033\[1;36m"
 set RESET "\033\[0m"
 
 
@@ -35,6 +36,18 @@ proc putwarnings { someText } {
 	set RESET "\033\[0m"
 
 	puts "${YELLOW}\[MEEP\]\ WARNING: ${RESET}${someText}"
+}
+
+proc putdebugs { someText } {
+
+	global DebugEnable
+
+	set CYAN "\033\[1;36m"
+	set RESET "\033\[0m"
+	
+	if { $DebugEnable == True } {
+		puts "${CYAN}\[MEEP\]\ DEBUG: ${RESET}${someText}"
+	}
 }
 
 # Create EA instance using the EA top module as template. This function takes the inputs/outpus
