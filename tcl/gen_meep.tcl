@@ -15,6 +15,7 @@ source $g_root_dir/tcl/procedures.tcl
 
 putmeeps "Environment loaded from ${script_folder}"
 
+### TODO: Add catch to every source
 putmeeps "Defining the shell environment file"
 source $g_root_dir/tcl/define_shell.tcl
 putmeeps "Generating the shell IPs ..."

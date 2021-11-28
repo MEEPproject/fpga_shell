@@ -51,15 +51,21 @@ foreach dicEntry $ShellEnabledIntf {
 
 #GEnerate IF GPIO
 
-if {[info exists $GPIOList]} {
+if {[info exists GPIOList]} {
+	putdebugs "Calling to GPIO: $GPIOList"
 	source $g_root_dir/shell/shell_gpio.tcl
 }
 
+source $g_root_dir/shell/shell_connect.tcl
 
-#source $g_root_dir/shell/shell_memmap.tcl
+## TODO: Find the right place for this, as lools like the smartConnect
+## needs to be present for this to get set
+set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
+
  
-
+source $g_root_dir/shell/shell_memmap.tcl
+ 
+save_bd_design 
+validate_bd_design
 
 save_bd_design 
-#validate_bd_design
-

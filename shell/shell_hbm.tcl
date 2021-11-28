@@ -32,6 +32,7 @@ set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
 set HBMdataWidth [dict get $HBMentry AxiDataWidth]
 set HBMidWidth   [dict get $HBMentry AxiIdWidth]
 
+
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
@@ -63,13 +64,23 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
    ] $hbm_axi4
+   
+## User clock
+create_bd_port -dir O -type clk $HBMname
+connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 
+set_property name $HBMintf [get_bd_intf_ports hbm_axi4]
+## Associate the clock with the user interface
+## TODO: Looks like this doesn't work until smartConnect is connected
+# putdebugs "Associated clock-intf: $HBMintf - $HBMname"
+# set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
+
+# save_bd_design 
+
+
+## TODO: Make dependant of selected HBM channels number
 create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0
 set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
-	CONFIG.USER_MC_ENABLE_00 {FALSE} \
-	CONFIG.USER_MC_ENABLE_01 {FALSE} \
-	CONFIG.USER_MC_ENABLE_02 {FALSE} \
-	CONFIG.USER_MC_ENABLE_03 {FALSE} \
 	CONFIG.USER_SAXI_00 {false} \
 	CONFIG.USER_SAXI_01 {false} \
 	CONFIG.USER_SAXI_02 {false} \
@@ -88,10 +99,14 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
 	CONFIG.USER_SAXI_15 {false} \
 	CONFIG.USER_APB_EN {false}] [get_bd_cells hbm_0]
 	
+	
+
+	
 create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf_0
 make_bd_intf_pins_external  [get_bd_intf_pins util_ds_buf_0/CLK_IN_D]
 set_property name sysclk0 [get_bd_intf_ports CLK_IN_D_0]
 connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins hbm_0/HBM_REF_CLK_0]
+### TODO: APB CLOCK Can't be the same as ACLK. Needs to be a different source
 connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
 connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
 #connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins hbm_0/AXI_08_ARESET_N]
@@ -99,15 +114,10 @@ connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
 set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 
-set_property name $HBMintf [get_bd_intf_ports hbm_axi4]
 
-## User clock
-create_bd_port -dir O -type clk $HBMname
-connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 
-## Associate the clock with the user interface
-putdebugs "Associated clock-intf: $HBMintf - $HBMname"
-set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
+
+
 
 ## HBM Calibration Complete, 
 ## It can be used when it has been defined in the definition file

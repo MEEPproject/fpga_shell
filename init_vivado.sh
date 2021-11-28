@@ -32,11 +32,12 @@ fi
 
 cp -r accelerator/meep_shell/binaries/* binaries/
 
+### Call the main program
 vivado -mode batch -nolog -nojournal -notrace -source ./tcl/gen_meep.tcl | tee $LOG_FILE
 
 CriticalWarnings=$(grep -riw $LOG_FILE -e Critical)
 
 if [ -n "$CriticalWarnings" ]; then	
-	echo "Critical warnings summary: "
-	echo "$CriticalWarnings "
+	echo -e "$YELLOW[MEEP] Critical warnings summary: $NC\r\n"
+	echo "$CriticalWarnings"
 fi
