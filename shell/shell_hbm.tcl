@@ -106,8 +106,8 @@ create_bd_port -dir O -type clk $HBMname
 connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 
 ## Associate the clock with the user interface
-set_property CONFIG.ASSOCIATED_BUSIF {$HBMintf} [get_bd_ports /$HBMname]
-
+putdebugs "Associated clock-intf: $HBMintf - $HBMname"
+set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
 
 ## HBM Calibration Complete, 
 ## It can be used when it has been defined in the definition file

@@ -1,5 +1,6 @@
 #!/bin/bash
 #sh/define_shell.sh
+LOG_FILE=shell_build.log
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -31,4 +32,11 @@ fi
 
 cp -r accelerator/meep_shell/binaries/* binaries/
 
-vivado -mode batch -nolog -nojournal -notrace -source ./tcl/gen_meep.tcl
+vivado -mode batch -nolog -nojournal -notrace -source ./tcl/gen_meep.tcl | tee $LOG_FILE
+
+CriticalWarnings=$(grep -riw $LOG_FILE -e Critical)
+
+if [ -n "$CriticalWarnings" ]; then	
+	echo "Critical warnings summary: "
+	echo "$CriticalWarnings "
+fi
