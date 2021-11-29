@@ -88,6 +88,10 @@
 set i 1
 set n 0
 set ConfMMCMString " "
+# 1GHz, arbitrarily High
+set slowestSyncCLK 1000000000
+set APBclkCandidate ""
+
 foreach eaclocks $ClockList {
 
 	### Spaces at the end of a string are necessary when using append
@@ -105,7 +109,29 @@ foreach eaclocks $ClockList {
 	append ConfMMCMString "$ConfMMCM"
 	incr i
 	incr n
+	
+	#Get the slowest clock and check if there is any below
+	#100MHz. If it doesn't, it needs to be created to source
+	#the HBM APB port.
+	
+	set currentClk [dict get $clkObj ClkFreq]
+	
+	if { $currentClk < $slowestSyncCLK } {
+		set slowestSyncCLK [dict get $clkObj Name]
+	}
+	if { 50000000 < $slowestSyncCLK && $slowestSyncCLK < 100000000} {
+		set APBclkCandidate $slowestSyncCLK
+	}
 }
+
+set APBclk ""
+
+if { $APBclkCandidate ne "" } {
+	
+	set APBclk $APBclkCandidate
+
+}
+
 	
 
    set ClockParamList [list CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
