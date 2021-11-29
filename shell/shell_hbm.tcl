@@ -114,7 +114,40 @@ connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
 set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 
+## Use protocol and data width converters blocks to translate 
+## HBM-User Inft protocols -HBM is AXI3-
+## TODO: Not convert if user interface is already 256 bits
 
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_0
+connect_bd_intf_net [get_bd_intf_ports mem_nasti] [get_bd_intf_pins axi_protocol_convert_0/S_AXI]
+connect_bd_net [get_bd_pins axi_protocol_convert_0/aclk] [get_bd_pins clk_wiz_1/CLK0]
+connect_bd_net [get_bd_pins rst_ea_domain/interconnect_aresetn] [get_bd_pins axi_protocol_convert_0/aresetn]
+## Width
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0
+connect_bd_net [get_bd_pins axi_dwidth_converter_0/s_axi_aclk] [get_bd_pins clk_wiz_1/CLK0]
+connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
+connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
+connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08]
+
+## IF PCIe has a direct access to the main memory, open an HBM channel for it
+## Actually, we are using an AXI interconnect so we rely on address editor. 
+## Not optimal
+if { $PCIeDMA eq "yes"} {
+
+	set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_00_ACLK} CONFIG.USER_SAXI_00 {true}] [get_bd_cells hbm_0]
+	create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_1
+	create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_1
+	connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_1/M_AXI] [get_bd_intf_pins axi_dwidth_converter_1/S_AXI]
+	connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] [get_bd_intf_pins axi_protocol_convert_1/S_AXI]
+	connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_1/M_AXI] [get_bd_intf_pins hbm_0/SAXI_00]
+	connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins hbm_0/AXI_00_ACLK]
+	connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins hbm_0/AXI_00_ARESET_N]
+	connect_bd_net [get_bd_pins axi_dwidth_converter_1/s_axi_aresetn] [get_bd_pins qdma_0/axi_aresetn]
+	connect_bd_net [get_bd_pins axi_protocol_convert_1/aresetn] [get_bd_pins qdma_0/axi_aresetn]
+	connect_bd_net [get_bd_pins axi_dwidth_converter_1/s_axi_aclk] [get_bd_pins qdma_0/axi_aclk]
+	connect_bd_net [get_bd_pins axi_protocol_convert_1/aclk] [get_bd_pins qdma_0/axi_aclk]
+	
+}
 
 
 
