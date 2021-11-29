@@ -6,7 +6,7 @@ stages:
     - fpga-test
 variables:
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA: 596cd15af9464e2d5a59117fbeea99bd57597361
+        EMULATED_ACCELERATOR_SHA: 823a24952cbc793472e9eee9b7fc6a636a7d28d0
         VIVADO_VERSION: "2020.1"
         VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
         THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
