@@ -1,8 +1,17 @@
+### If no GPIO is defined, set default values
+### that will be left unconnected
 
-set NumGPIO   [dict get $GPIOList Width]
-set IntfName  [dict get $GPIOList IntfLabel]
-set InitValue [dict get $GPIOList InitValue]
+if { $GPIOList eq "" } {
+	set NumGPIO 1   
+	set IntfName  NotUsedGPIO
+	set InitValue 0x0	
+} else {
+	set NumGPIO   [dict get $GPIOList Width]
+	set IntfName  [dict get $GPIOList IntfLabel]
+	set InitValue [dict get $GPIOList InitValue]
+}
 
+putdebugs "Calling to GPIO: $GPIOList"
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_0
 set_property -dict [list CONFIG.C_GPIO_WIDTH "$NumGPIO" CONFIG.C_ALL_OUTPUTS 1] [get_bd_cells axi_gpio_0]

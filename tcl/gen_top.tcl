@@ -170,7 +170,7 @@ foreach dicEntry $ShellEnabledIntf {
 	set NewDict $dicEntry
 	
 	set axivalues [ get_axi_properties $fd_wire $ifname ]
-	putmeeps " AXI properties: [lindex $ifname 0]:\
+	putmeeps "AXI properties: [lindex $ifname 0]:\
 	[lindex $axivalues 0] [lindex $axivalues 1] [lindex $axivalues 2]"
 	dict set NewDict "AxiAddrWidth" [lindex $axivalues 0]
 	dict set NewDict "AxiDataWidth" [lindex $axivalues 1]

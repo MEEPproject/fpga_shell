@@ -96,15 +96,19 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
 	
 	## APB CLOCKS and RESET
 	
+	if { $APBclk eq "" } {
+	
+	} else {
+	
+	}
+	
 	create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf_0
 	make_bd_intf_pins_external  [get_bd_intf_pins util_ds_buf_0/CLK_IN_D]
 	set_property name sysclk0 [get_bd_intf_ports CLK_IN_D_0]
 	connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins hbm_0/HBM_REF_CLK_0]
 	### TODO: APB CLOCK Can't be the same as ACLK. Needs to be a different source
 	connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
-	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
-	#connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins hbm_0/AXI_08_ARESET_N]
-	#connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins rst_ea_domain/peripheral_aresetn]
+	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
 	set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 

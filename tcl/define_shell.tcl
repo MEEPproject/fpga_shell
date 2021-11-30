@@ -43,7 +43,7 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 		
 		if {[regexp -inline -all -nocase $PhysIntf "$EnIntfName"] ne ""} {
 			set PortEnabledList [lappend PortEnabledList $PhysIntf]
-			putmeeps "DEBUG: Show enabled physical Intf - $PhysIntf"
+			putmeeps "Show enabled physical Intf - $PhysIntf"
 		}		
 	}
 	
@@ -231,28 +231,24 @@ proc parse_definiton_file { DefinitionFile } {
 proc GPIODefinition { DefinitionFile } {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
-	set d_gpio {}
+	set d_gpio ""
 	
-	set d_gpio [dict create Name g_gpio]
 			
 	while {[gets $fd_AccDef line] >= 0} {
 		set line [string map {" " ""} $line]	
 		if {[regexp -inline -all {^GPIO,} $line] ne ""} {
 			set fields [split $line ","]	
 			# GPIO width is the second field
-			
+			set d_gpio [dict create Name g_gpio]
 			dict set d_gpio Width     [lindex $fields 1]
 			dict set d_gpio IntfLabel [lindex $fields 2]
 			dict set d_gpio InitValue [lindex $fields 3]
 			
 			# The Initial value is received as an hexadecimal string: 0xABDC
 			# string map can be called to remove "0x". Then do:
-			# binary scan [binary format H* $hex] B* bits
-
-						
+			# binary scan [binary format H* $hex] B* bits					
 			#putmeeps "Adding GPIO to the list: $d_gpio "
-		}
-		
+		}		
 	}
 	
 	close $fd_AccDef
@@ -309,7 +305,7 @@ set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAd
 
 set PortInt [PortInterfaceDefinition $PortInterfacesList $EnabledIntf]
 
-putmeeps "DEBUG: $PortInt"
+putmeeps "$PortInt"
 ## Add the Port Interface list to the environment file
 Add2EnvFile $p_ShellEnvFile "set PortEnabledList $PortInt"
 ## Add the GPIO list to the environment file
