@@ -121,13 +121,12 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
 	create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_0
 	connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_0/S_AXI]
 	connect_bd_net [get_bd_pins axi_protocol_convert_0/aclk] [get_bd_pins clk_wiz_1/$HBMClkNm]
-	connect_bd_net [get_bd_pins rst_ea_domain/interconnect_aresetn] [get_bd_pins axi_protocol_convert_0/aresetn]
 	
 	## Width
 	if { $HBMdataWidth != 256 } {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0
 		connect_bd_net [get_bd_pins axi_dwidth_converter_0/s_axi_aclk] [get_bd_pins clk_wiz_1/$HBMClkNm]
-		connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
+		#connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
 		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
 		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08]
 	} else {

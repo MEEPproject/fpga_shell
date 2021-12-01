@@ -97,11 +97,20 @@ if { $APBclkCandidate ne "" } {
   set_property -dict $ClockParamList $clk_wiz_1
     
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
- 
-  create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_domain
-  connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_domain/ext_reset_in]
+
+	foreach clkObj $ClockList {
+
+		set ClkNum [dict get $clkObj ClkNum]
+
+		create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
+		connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
+		### Create the reset list to be used later
+		connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/$ClkNum]
+		### TODO: connect DCM locked signal
+
+	}
   
-  
+
  save_bd_design  
 
 
