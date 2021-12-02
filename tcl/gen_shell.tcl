@@ -48,6 +48,10 @@ foreach dicEntry $ShellEnabledIntf {
 		source $g_root_dir/shell/shell_aurora.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/aurora_${g_board_part}.xdc"		
 	}
+	if {[regexp -inline -all "BROM" $IntfName] ne "" } {
+		set BROMentry $dicEntry
+		source $g_root_dir/shell/shell_brom.tcl
+	}
 	
 }
 

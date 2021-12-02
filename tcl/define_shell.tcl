@@ -14,9 +14,11 @@ puts "The environment tcl will be sourced from ${script_folder}"
 source $script_folder/environment.tcl
 source $g_root_dir/tcl/procedures.tcl
 
+set g_acc_dir $g_root_dir/accelerator
 
-set p_EAdefFile     $g_root_dir/accelerator/meep_shell/accelerator_def.txt
 set p_ShellEnvFile  $g_root_dir/tcl/shell_env.tcl
+set p_EAdefFile     $g_acc_dir/meep_shell/accelerator_def.txt
+set p_EAmodFile	    $g_acc_dir/meep_shell/accelerator_mod.sv
 
 
 ################################################################
@@ -61,7 +63,7 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 # TODO: Choosing to what HBM pseudochannel to be connected
 # TODO: Choose different clocks for different instances of the same interface.
 ################################################################
-proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile ShellEnvFile} {
+proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile ShellEnvFile EAModFile} {
 
 	set fd_AccDef      [open $DefinitionFile "r"]
 	set fd_ShellEnv    [open $ShellEnvFile "w"]
@@ -91,9 +93,18 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					}
 					set d_device [dict create Name g_${device}${n}]
 					dict set d_device IntfLabel [lindex $fields 2]${n}
+					# Create empty fields to be filled later
 					dict set d_device SyncClk   [lindex $fields 4] Freq ""
 					dict set d_device SyncClk   [lindex $fields 4] Name ""
 					dict set d_device AxiIntf "Axi4"
+					dict set d_device BaseAddr [lindex $fields 5]
+					# set BROMMemRange [expr {2**$BROMaddrWidth/1024}]
+					set IntfLabel [dict get $d_device IntfLabel]
+					set axivalues [ get_axi_properties $EAModFile $IntfLabel ]
+
+					dict set d_device "AxiAddrWidth" [lindex $axivalues 0]
+					dict set d_device "AxiDataWidth" [lindex $axivalues 1]
+					dict set d_device "AxiIdWidth"   [lindex $axivalues 2]
 
 					## If the Interface has an associated clock, add it to the dict
 					foreach vclocks $ClockList {	
@@ -110,15 +121,15 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					
 					### Device-dependant settings
 					if { "${device}" == "UART" } {
-						dict set d_device Mode [lindex $fields 5]	
-						dict set d_device IRQ  [lindex $fields 6]	
+						dict set d_device Mode [lindex $fields 6]	
+						dict set d_device IRQ  [lindex $fields 7]	
 						dict set d_device AxiIntf "AxiL"
 						if { [lindex $fields 5] != "normal" } {
 							dict set d_device AxiIntf "no"						
 						} 
 					}
 					if { "${device}" == "HBM" || "${device}" == "DDR4" } {
-						dict set d_device CalibDone [lindex $fields 5]	
+						dict set d_device CalibDone [lindex $fields 6]	
 					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
@@ -151,6 +162,7 @@ proc ClocksDefinition { DefinitionFile } {
 	while {[gets $fd_AccDef line] >= 0} {
 	
 	set line [string map {" " ""} $line]
+	### TODO: Remove also tabs
 	
 		set fields [split $line ","]
 				
@@ -301,7 +313,7 @@ set GPIOList  [GPIODefinition $p_EAdefFile ]
 
 putmeeps "GPIO List: $GPIOList"
 
-set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile]
+set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile $p_EAmodFile]
 
 set PortInt [PortInterfaceDefinition $PortInterfacesList $EnabledIntf]
 

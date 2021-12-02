@@ -207,7 +207,7 @@ proc add_instance { g_fd g_fd_tmp } {
 			putmeeps "INFO: Empty line detected\r\n"
 			#putmeeps "Empty Line detected"
 		} elseif { [regexp -inline -all {hbm_cattrip} $line] ne "" } {
-			putmeeps "INFO: skipping hbm_cattrip port\r\n"
+			putmeeps "INFO: skipping hbm_cattrip port"
 			set NoCattrip 0
 			# hbm_cattrip is used manually to close the instance,
 			# so we don't want to make the connection here.
@@ -281,7 +281,7 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 # TODO: This procedure counts on the vector to be declared
 #     : always using '0' as the righmost value e.g 63:0
 ########################################################
-proc get_axi_properties { fd_module axi_ifname } {
+proc get_axi_properties { g_wire_file axi_ifname } {
 
 	set awaddrMatch 0
 	set wdataMatch  0
@@ -290,47 +290,52 @@ proc get_axi_properties { fd_module axi_ifname } {
 	set dataWidth 0
 	set IdWidth 0
 
+	set fd_wire    [open $g_wire_file  "r"]
+
+
 	
 	putmeeps "Inside properties: $axi_ifname"
 
-	while {[gets $fd_module line] >= 0} { 
+	while {[gets $fd_wire line] >= 0} { 
 		
 				
 		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		
 			set awaddrMatch [regexp -inline -all "[0-9]+.+${axi_ifname}_awaddr" $line]
-			#putmeeps "MATCH: ${axi_ifname}_awaddr $awaddrMatch"			
+			#putdebugs "MATCH: ${axi_ifname}_awaddr $awaddrMatch"			
 			set addrWidth [regexp -inline  {[0-9]+} $awaddrMatch]			
 			set addrWidth [expr $addrWidth + 1]
-			#putmeeps $addrWidth
+			putdebugs $addrWidth
 
 		}
 						
 		if {[regexp -inline -all "${axi_ifname}_wdata" $line] != "" } {
 			set wdataMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_wdata" $line]	
-			#putmeeps "MATCH: ${axi_ifname}_wdata $wdataMatch"
+			#putdebugs "MATCH: ${axi_ifname}_wdata $wdataMatch"
 			set dataWidth [regexp -inline  {[0-9]+} $wdataMatch]
 			set dataWidth [expr $dataWidth + 1]
-			#putmeeps $dataWidth
+			putdebugs $dataWidth
 		}
 		
 		if {[regexp -inline -all "${axi_ifname}_awid" $line] != "" } {
 			set awidMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_awid" $line]	
-			#putmeeps "MATCH: ${axi_ifname}_awid $awidMatch"
+			#putdebugs "MATCH: ${axi_ifname}_awid $awidMatch"
 			set IdWidth [regexp -inline {[0-9]+} $awidMatch]
 			set IdWidth [expr $IdWidth + 1]
-			#putmeeps $IdWidth
+			putdebugs $IdWidth
 		}
 		
 		if { $awaddrMatch != 0 } {
-			#putmeeps "AXI awaddr signal not found "
+			#putdebugs "AXI awaddr signal not found "
 		}
 		if { $wdataMatch != 0 } {
-			#putmeeps "AXI wdata signal not found "	
+			#putdebugs "AXI wdata signal not found "	
 		}								
 	}
 			
 	set axiProperties [list $addrWidth $dataWidth $IdWidth]	
-	
+
+	close $fd_wire
+
 	return $axiProperties
 
 }

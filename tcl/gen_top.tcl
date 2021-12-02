@@ -154,42 +154,6 @@ puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
 
-##################################################################
-#### Extract the AXI parameters needed later by the shell
-##################################################################
-
-set fd_wire    [open $g_wire_file  "r"]
-
-set NewList [list]
-set NewDict ""
-
-
-foreach dicEntry $ShellEnabledIntf {
-		
-	set ifname [dict get $dicEntry IntfLabel]
-	set NewDict $dicEntry
-	
-	set axivalues [ get_axi_properties $fd_wire $ifname ]
-	putmeeps "AXI properties: [lindex $ifname 0]:\
-	[lindex $axivalues 0] [lindex $axivalues 1] [lindex $axivalues 2]"
-	dict set NewDict "AxiAddrWidth" [lindex $axivalues 0]
-	dict set NewDict "AxiDataWidth" [lindex $axivalues 1]
-	dict set NewDict "AxiIdWidth"   [lindex $axivalues 2]
-	
-	set NewList [lappend NewList $NewDict]	
-}
-
-close $fd_wire
-
-######################################################
-# Update the environment file as it adds the AXI info
-# that will be used by the genproject later.
-######################################################
-
-set ReplaceToken "set ShellEnabledIntf"
-
-updateFile "$g_root_dir/tcl/shell_env.tcl" $ReplaceToken "$ReplaceToken \[list $NewList \]"
-
 putcolors "MEEP SHELL top created" $GREEN
 
 file delete -force $g_root_dir/tmp

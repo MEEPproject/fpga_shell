@@ -85,7 +85,7 @@ add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_p
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
 if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl}]} {
-	putwarnings "File project_options.tcl has not been loaded"
+	puterrors "File project_options.tcl has not been loaded"
 } else {
 	putmeeps "File project_options.tcl loaded"
 }
