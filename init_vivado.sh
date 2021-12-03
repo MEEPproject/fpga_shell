@@ -19,9 +19,9 @@ echo "[MEEP] *                                     *"
 echo -e "[MEEP] ***************************************\r\n"
 
 EAURL=`grep -o ea_url.txt -e https.*$`
-EANAME=`grep -o ea_url.txt -e EANAME.*$`
+EANAME=$(grep -o ea_url.txt -e NAME.*$ | awk -F ':' '$2 {print $2}')
 
-echo -e "[MEEP] Emulated accelerator: \r\n\r\n\t$GREEN $EAURL $NC\r\n"
+echo -e "[MEEP] Emulated accelerator:$EANAME\r\n\r\n\t$GREEN $EAURL $NC\r\n"
 
 if [ -d "binaries" ]; then
 	echo "[MEEP] binaries folder already exists"
