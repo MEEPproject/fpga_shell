@@ -7,6 +7,7 @@ set g_UART_CLK	  [dict get $UARTentry SyncClk Name]
 set g_CLK0_freq   [dict get $UARTentry SyncClk Freq]
 set g_UARTClkPort [dict get $UARTentry SyncClk Label]
 
+set UARTaddrWidth [dict get $UARTentry AxiAddrWidth]
 
 putdebugs "UART? $g_UART_CLK"
 
@@ -40,6 +41,14 @@ if { $g_UART_MODE eq "normal" } {
 	set_property name $g_UART_irq [get_bd_ports ip2intc_irpt_0]
 	set_property CONFIG.ASSOCIATED_BUSIF ${g_UART_ifname} [get_bd_ports /$g_UART_CLK]
 	#exclude_bd_addr_seg [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -target_address_space [get_bd_addr_spaces $g_UART_ifname]
+	### UART memory map
+	set UARTbaseAddr [dict get $UARTentry BaseAddr]
+	set UARTMemRange [expr {2**$UARTaddrWidth/1024}]
+
+	assign_bd_address [get_bd_addr_segs {axi_uart16550_0/S_AXI/Reg }]
+	set_property range ${UARTMemRange}K [get_bd_addr_segs {io_nasti_uart/SEG_axi_uart16550_0_Reg}]
+	set_property offset $UARTbaseAddr [get_bd_addr_segs {io_nasti_uart/SEG_axi_uart16550_0_Reg}]
+
 }
 
 putmeeps "UART is configured in $g_UART_MODE mode"

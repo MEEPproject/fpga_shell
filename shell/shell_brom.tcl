@@ -8,27 +8,28 @@ set BROMaddrWidth [dict get $BROMentry AxiAddrWidth]
 set BROMdataWidth [dict get $BROMentry AxiDataWidth]
 set BROMidWidth   [dict get $BROMentry AxiIdWidth]
 
-
-
-set initFilePath $g_accel_dir/meep_shell/binaries/$BROMinitfile
+set InitFilePath $g_accel_dir/meep_shell/binaries/$BROMinitfile
 
 #This needs to be extracted from the definition file, not set here would be needed
-if { [file exists $initFilePath] == 1} {               
-	file copy -force $initFilePath $meep_dir/ip/axi_brom/src/initrom.mem
-	puts " BROM init file copied!"
+if { [file exists $InitFilePath] == 1} {               
+	file copy -force $InitFilePath $g_root_dir/ip/axi_brom/src/initrom.mem
+	putmeeps "BROM init file copied!"
 } else {
-	puts " BROM init file hasn't been provided!"
-	puts " Consider to create it under EA/$initFilePath folder \r\n"
-	#puts " Defaults to "
-	#file copy -force $initFilePath $meep_dir/accelerator/meep_shell/binaries/$initBromFile
-}
-source $meep_dir/ip/axi_brom/tcl/gen_project.tcl
+	putmeeps "BROM init file hasn't been provided!"
+	putmeeps "Consider to create it under EA/$InitFilePath folder"
 }
 
+### Initialize the IPs
+putmeeps "Packaging BROM IP..."
+exec vivado -mode batch -nolog -nojournal -notrace -source ./ip/axi_brom/tcl/gen_project.tcl
+putmeeps "... Done."
+update_ip_catalog -rebuild
 
 source $g_root_dir/ip/axi_brom/tcl/project_options.tcl
+
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:axi_brom:$g_ip_version axi_brom_0
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0
+
 set_property -dict [list CONFIG.DATA_WIDTH $BROMdataWidth CONFIG.SINGLE_PORT_BRAM {1} \
 CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
 
@@ -77,12 +78,20 @@ CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
  connect_bd_net [get_bd_pins axi_bram_ctrl_0/bram_en_a] [get_bd_pins axi_brom_0/ena]
  connect_bd_net [get_bd_pins axi_bram_ctrl_0/bram_we_a] [get_bd_pins axi_brom_0/wea]
 
- set BROMMemRange [expr {2**$BROMaddrWidth/1024}]
-
- putdebugs "BROM Mem Range: $BROMMemRange"
-
- # set_property offset 0x00000000 [get_bd_addr_segs {brom_axi/SEG_axi_bram_ctrl_0_Mem0}]
- # set_property range 64K [get_bd_addr_segs {brom_axi/SEG_axi_bram_ctrl_0_Mem0}]
-
  connect_bd_intf_net [get_bd_intf_ports brom_axi] [get_bd_intf_pins axi_bram_ctrl_0/S_AXI]
+
+### Set Base Addresses to peripheral
+# BROM
+set BROMbaseAddr [dict get $BROMentry BaseAddr]
+set BROMMemRange [expr {2**$BROMaddrWidth/1024}]
+
+putdebugs "Base Addr BROM: $BROMbaseAddr"
+putdebugs "Mem Range BROM: $BROMMemRange"
+
+assign_bd_address [get_bd_addr_segs {axi_bram_ctrl_0/S_AXI/Mem0 }]
+
+set_property offset $BROMbaseAddr [get_bd_addr_segs {brom_axi/SEG_axi_bram_ctrl_0_Mem0}]
+set_property range ${BROMMemRange}K [get_bd_addr_segs {brom_axi/SEG_axi_bram_ctrl_0_Mem0}]
+
+
 

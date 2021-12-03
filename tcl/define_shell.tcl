@@ -133,7 +133,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device CalibDone [lindex $fields 6]	
 					}
 					if { "${device}" == "BROM" } {
-						dict set d_device InitFile [lindex $fields 5]	
+						dict set d_device InitFile [lindex $fields 6]	
 					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
