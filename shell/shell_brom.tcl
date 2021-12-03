@@ -2,14 +2,31 @@ set BROMClkNm [dict get $BROMentry SyncClk Label]
 set BROMFreq  [dict get $BROMentry SyncClk Freq]
 set BROMname  [dict get $BROMentry SyncClk Name]
 set BROMintf  [dict get $BROMentry IntfLabel]
-#set BROMinitfile? [dict get $BROMentry InitFile]
+set BROMinitfile [dict get $BROMentry InitFile]
 
 set BROMaddrWidth [dict get $BROMentry AxiAddrWidth]
 set BROMdataWidth [dict get $BROMentry AxiDataWidth]
 set BROMidWidth   [dict get $BROMentry AxiIdWidth]
 
 
-source ./ip/axi_brom/tcl/project_options.tcl
+
+set initFilePath $g_accel_dir/meep_shell/binaries/$BROMinitfile
+
+#This needs to be extracted from the definition file, not set here would be needed
+if { [file exists $initFilePath] == 1} {               
+	file copy -force $initFilePath $meep_dir/ip/axi_brom/src/initrom.mem
+	puts " BROM init file copied!"
+} else {
+	puts " BROM init file hasn't been provided!"
+	puts " Consider to create it under EA/$initFilePath folder \r\n"
+	#puts " Defaults to "
+	#file copy -force $initFilePath $meep_dir/accelerator/meep_shell/binaries/$initBromFile
+}
+source $meep_dir/ip/axi_brom/tcl/gen_project.tcl
+}
+
+
+source $g_root_dir/ip/axi_brom/tcl/project_options.tcl
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:axi_brom:$g_ip_version axi_brom_0
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0
 set_property -dict [list CONFIG.DATA_WIDTH $BROMdataWidth CONFIG.SINGLE_PORT_BRAM {1} \

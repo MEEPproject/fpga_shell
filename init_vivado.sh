@@ -30,7 +30,7 @@ else
 mkdir -p binaries
 fi
 
-cp -r accelerator/meep_shell/binaries/* binaries/
+#cp -r accelerator/meep_shell/binaries/* binaries/
 
 ### Call the main program
 vivado -mode batch -nolog -nojournal -notrace -source ./tcl/gen_meep.tcl | tee $LOG_FILE

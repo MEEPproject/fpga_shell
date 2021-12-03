@@ -75,6 +75,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	while {[gets $fd_AccDef line] >= 0} {
 	
 		set line [string map {" " ""} $line]
+		set line [string map {"\t" ""} $line]	
 	
 		set fields [split $line ","]
 	
@@ -131,6 +132,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					if { "${device}" == "HBM" || "${device}" == "DDR4" } {
 						dict set d_device CalibDone [lindex $fields 6]	
 					}
+					if { "${device}" == "BROM" } {
+						dict set d_device InitFile [lindex $fields 5]	
+					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}
@@ -162,6 +166,7 @@ proc ClocksDefinition { DefinitionFile } {
 	while {[gets $fd_AccDef line] >= 0} {
 	
 	set line [string map {" " ""} $line]
+	set line [string map {"\t" ""} $line]
 	### TODO: Remove also tabs
 	
 		set fields [split $line ","]
@@ -248,6 +253,7 @@ proc GPIODefinition { DefinitionFile } {
 			
 	while {[gets $fd_AccDef line] >= 0} {
 		set line [string map {" " ""} $line]	
+		set line [string map {"\t" ""} $line]	
 		if {[regexp -inline -all {^GPIO,} $line] ne ""} {
 			set fields [split $line ","]	
 			# GPIO width is the second field
