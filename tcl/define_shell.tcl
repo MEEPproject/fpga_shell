@@ -106,6 +106,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device "AxiAddrWidth" [lindex $axivalues 0]
 					dict set d_device "AxiDataWidth" [lindex $axivalues 1]
 					dict set d_device "AxiIdWidth"   [lindex $axivalues 2]
+					dict set d_device "AxiUserWidth" [lindex $axivalues 3]
 
 					## If the Interface has an associated clock, add it to the dict
 					foreach vclocks $ClockList {	

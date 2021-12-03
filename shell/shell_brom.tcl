@@ -7,6 +7,7 @@ set BROMinitfile [dict get $BROMentry InitFile]
 set BROMaddrWidth [dict get $BROMentry AxiAddrWidth]
 set BROMdataWidth [dict get $BROMentry AxiDataWidth]
 set BROMidWidth   [dict get $BROMentry AxiIdWidth]
+set BROMUserWidth [dict get $BROMentry AxiUserWidth]
 
 set InitFilePath $g_accel_dir/meep_shell/binaries/$BROMinitfile
 
@@ -34,6 +35,8 @@ set_property -dict [list CONFIG.DATA_WIDTH $BROMdataWidth CONFIG.SINGLE_PORT_BRA
 CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
 
 ## Create the Shell interface to the RTL
+## CAUTION: The user can't specify USER, QOS and REGION signal for this interface
+## This means those signals can't be in the module definition file
 
   # Create interface ports
   set brom_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 brom_axi ]
@@ -49,8 +52,6 @@ CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
    CONFIG.HAS_CACHE {1} \
    CONFIG.HAS_LOCK {1} \
    CONFIG.HAS_PROT {1} \
-   CONFIG.HAS_QOS {1} \
-   CONFIG.HAS_REGION {1} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
    CONFIG.ID_WIDTH $BROMidWidth \

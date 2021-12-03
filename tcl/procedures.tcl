@@ -130,7 +130,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				
 				
 			} else {
-				set ret [puterros "Not considered branch?...--> $line"]
+				set ret [puterrors "Not considered branch?...--> $line"]
 				#set teclado [read stdin 1]
 
 			}		
@@ -160,7 +160,6 @@ proc add_interface {g_intf_file g_mod_file} {
 	}		
 	close $fd_intf
 	close $fd_mod	
-
 }
 
 ################################################
@@ -280,6 +279,7 @@ proc add_acc_connection { device interface ifname intf_file wire_file map_file} 
 # extracts address and data bus widths.
 # TODO: This procedure counts on the vector to be declared
 #     : always using '0' as the righmost value e.g 63:0
+#	  : 1bit vectors are not supported e.g user\[0:0\]
 ########################################################
 proc get_axi_properties { g_wire_file axi_ifname } {
 
@@ -289,10 +289,9 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 	set addrWidth 0
 	set dataWidth 0
 	set IdWidth 0
+	set UserWidth 0
 
 	set fd_wire    [open $g_wire_file  "r"]
-
-
 	
 	putmeeps "Inside properties: $axi_ifname"
 
@@ -323,7 +322,16 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 			set IdWidth [expr $IdWidth + 1]
 			putdebugs $IdWidth
 		}
-		
+
+		if {[regexp -inline -all "${axi_ifname}_awuser" $line] != "" } {
+			set awuserMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_awuser" $line]	
+			#putdebugs "MATCH: ${axi_ifname}_awid $awidMatch"
+			set UserWidth [regexp -inline {[0-9]+} $awuserMatch]
+			set UserWidth [expr $UserWidth + 1]
+			putdebugs $UserWidth
+		}
+		### TODO: Some protection here to make sure this procedure don't
+		### 	: returns empty values
 		if { $awaddrMatch != 0 } {
 			#putdebugs "AXI awaddr signal not found "
 		}
@@ -332,7 +340,7 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 		}								
 	}
 			
-	set axiProperties [list $addrWidth $dataWidth $IdWidth]	
+	set axiProperties [list $addrWidth $dataWidth $IdWidth $UserWidth]	
 
 	close $fd_wire
 
