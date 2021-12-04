@@ -92,7 +92,10 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 			} elseif { [ regexp {[(|)]\s*;*\s*$} $line ] } {
 				#putmeeps "Module opening/closing"
 			} elseif { [ regexp {endmodule} $line ] } {
-				#putmeeps "endmodule"			
+				#putmeeps "endmodule"	
+			} elseif { [ regexp axi_.*user $line ] } {
+				putwarnings	"AXI user signals are not supported and will not be connected"
+				putdebugs "[ regexp -inline axi_.*user $line ]"
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
@@ -217,60 +220,6 @@ proc add_instance { g_fd g_fd_tmp } {
 		}			
 	}	
 	return $NoCattrip	
-}
-
-
-########################################################
-# This function receives a peripheral/IP name, check if it exists and then create instance
-# connections depending on the inferface(s) the peripheral/IP uses.
-# EA ports <---> Shell instance
-########################################################
-proc add_acc_connection { device interface ifname intf_file wire_file map_file} {
-
-	if { $interface eq "yes" } {
-		set fd_intf    [open $intf_file "r"]
-		set fd_map  [open $map_file  "a"]
-		set fd_wire  [open $wire_file "a"]		
-		
-		#lassign [select_interface $device] g_axi4 g_axiS g_axiL g_clk g_uart
-		#Need to create a var for mathing axi ifs below
-		#if g_axi4 = yes ? set match_string "axi4"
-
-		# This send an interface (e.g, ETHERNET) and get the list of interfaces needed
-		# to implement it. It can happen Ethernet needs not only AXI4 but also 
-		# AXILite or AXI Stream.
-		set axiList [select_interface $device]		
-	
-		set matchString ""
-	
-		# e.g AXI4
-		foreach item $axiList {
-		#split converts  the element list into strings
-			set elem [split $item " "]
-			set firstElem [lindex $elem 0]
-			
-			# The first element is Yes or NO (2D list). 
-			# TODO: Refactor. 
-			if { $firstElem eq "yes" } {
-			
-				set matchString [lindex $elem 1]
-
-				while {[gets $fd_intf line] >= 0} {
-				#putmeeps "Line: $line"
-					if {[ string match *$matchString* $line ] } {
-						#putmeeps "MATCH! $matchString"
-						set newline [regsub $matchString $line $ifname ]								
-						puts $fd_map "    .$newline    ($newline)    , "
-						#putmeeps "    .$newline    ($newline)    , "
-						#gets stdin ""
-					}
-				}	
-			}	
-		}	
-		close $fd_intf
-		close $fd_map	
-		close $fd_wire
-	}	
 }
 
 
