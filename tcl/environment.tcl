@@ -19,6 +19,7 @@ set g_number_of_jobs 4
 #################################################################
 set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART BROM]
 
+## TODO: Add JTAG?
 ## List here the physical interfaces. Lowercase as they are connected
 ## to file names. 
 set PortInterfacesList  [list pcie ddr4 aurora ethernet uart ]

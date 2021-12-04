@@ -7,6 +7,16 @@ if { "$g_board_part" eq "u55c" } {
 	set HBM_AXI_LABEL ""
 }
 
+# set_property -dict [list CONFIG.USER_HBM_DENSITY {8GB} \
+# CONFIG.USER_HBM_STACK {2} CONFIG.USER_MEMORY_DISPLAY {8192} \
+# CONFIG.USER_SWITCH_ENABLE_01 {TRUE} CONFIG.USER_HBM_CP_1 {6} \
+# CONFIG.USER_HBM_RES_1 {10} CONFIG.USER_HBM_LOCK_REF_DLY_1 {31} \
+# CONFIG.USER_HBM_LOCK_FB_DLY_1 {31} CONFIG.USER_HBM_FBDIV_1 {36} \
+# CONFIG.USER_HBM_HEX_CP_RES_1 {0x0000A600} \
+# CONFIG.USER_HBM_HEX_LOCK_FB_REF_DLY_1 {0x00001f1f} \
+# CONFIG.USER_HBM_HEX_FBDIV_CLKOUTDIV_1 {0x00000902} CONFIG.USER_CLK_SEL_LIST0 {AXI_01_ACLK} CONFIG.USER_CLK_SEL_LIST1 {AXI_23_ACLK} CONFIG.USER_MC_ENABLE_08 {TRUE} CONFIG.USER_MC_ENABLE_09 {TRUE} CONFIG.USER_MC_ENABLE_10 {TRUE} CONFIG.USER_MC_ENABLE_11 {TRUE} CONFIG.USER_MC_ENABLE_12 {TRUE} CONFIG.USER_MC_ENABLE_13 {TRUE} CONFIG.USER_MC_ENABLE_14 {TRUE} CONFIG.USER_MC_ENABLE_15 {TRUE} CONFIG.USER_MC_ENABLE_APB_01 {TRUE} CONFIG.USER_SAXI_00 {false} CONFIG.USER_SAXI_15 {true} CONFIG.USER_PHY_ENABLE_08 {TRUE} CONFIG.USER_PHY_ENABLE_09 {TRUE} CONFIG.USER_PHY_ENABLE_10 {TRUE} CONFIG.USER_PHY_ENABLE_11 {TRUE} CONFIG.USER_PHY_ENABLE_12 {TRUE} CONFIG.USER_PHY_ENABLE_13 {TRUE} CONFIG.USER_PHY_ENABLE_14 {TRUE} CONFIG.USER_PHY_ENABLE_15 {TRUE}] [get_bd_cells hbm_0]
+
+
 # source tcl/procedures.tcl
 # source tcl/shell_env.tcl
 
@@ -31,14 +41,19 @@ set HBMReady [dict get $HBMentry CalibDone]
 set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
 set HBMdataWidth [dict get $HBMentry AxiDataWidth]
 set HBMidWidth   [dict get $HBMentry AxiIdWidth]
+set HBMuserWidth [dict get $HBMentry AxiUserWidth]
+## CAUTION: Axi user signals are not supported as input to the protocol 
+## converter to HBM. Hardcoded to 0
+set HBMuserWidth 0
 
-
+### TODO: Support different user widths per AXI channel
+### TODO: Region, prot and others can be extracted as the other widths
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
-   CONFIG.ARUSER_WIDTH {0} \
-   CONFIG.AWUSER_WIDTH {0} \
-   CONFIG.BUSER_WIDTH {0} \
+   CONFIG.ARUSER_WIDTH $HBMuserWidth \
+   CONFIG.AWUSER_WIDTH $HBMuserWidth \
+   CONFIG.BUSER_WIDTH $HBMuserWidth \
    CONFIG.DATA_WIDTH $HBMdataWidth \
    CONFIG.FREQ_HZ $HBMFreq \
    CONFIG.HAS_BRESP {1} \
@@ -59,10 +74,10 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.PROTOCOL {AXI4} \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
-   CONFIG.RUSER_WIDTH {0} \
+   CONFIG.RUSER_WIDTH $HBMuserWidth \
    CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
-   CONFIG.WUSER_WIDTH {0} \
+   CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
    
 ## User clock

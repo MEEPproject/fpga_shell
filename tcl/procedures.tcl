@@ -325,7 +325,7 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 
 		if {[regexp -inline -all "${axi_ifname}_awuser" $line] != "" } {
 			set awuserMatch  [regexp -inline -all "[0-9]+.+${axi_ifname}_awuser" $line]	
-			#putdebugs "MATCH: ${axi_ifname}_awid $awidMatch"
+			putdebugs "MATCH: ${axi_ifname}_awuser $awuserMatch"
 			set UserWidth [regexp -inline {[0-9]+} $awuserMatch]
 			set UserWidth [expr $UserWidth + 1]
 			putdebugs $UserWidth
