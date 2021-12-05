@@ -64,13 +64,13 @@ yaml: $(YAML_FILE)
 
 $(ACCEL_DIR):
 	$(SH_DIR)/load_module.sh $(LOAD_EA)
-	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
-	$(SH_DIR)/init_modules.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
+	@(EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
+	$(SH_DIR)/init_modules.sh $$EA_GIT_URL $(EA_GIT_SHA))
 
 
 $(BINARIES_DIR):
-	mkdir -p $(BINARIES_DIR)
 	$(SH_DIR)/accelerator_build.sh	
+	mkdir -p $(BINARIES_DIR)
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): $(ACCEL_DIR) 	

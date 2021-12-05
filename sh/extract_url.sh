@@ -4,7 +4,11 @@ EMPTY=""
 EA_REPO="EMULATED_ACCELERATOR_REPO"
 EA_SHA="EMULATED_ACCELERATOR_SHA"
 DEF_FILE="ea_url.txt"
-YAML_FILE=".gitlab-ci.yml"
+YAML_FILE=$1
+
+if [ "$YAML_FILE" = "" ]; then
+	YAML_FILE=".gitlab-ci.yml"
+fi
 
 # Seach the YAML File token-based URL and convert it to a normal URL
 EA_REPO_TMP=$(grep $DEF_FILE -e "$EA_REPO") 

@@ -3,7 +3,7 @@
 #we need to write here the .gitsubmodules file, so this process receives that
 #label as a parameter and the ci/cd can proceed. The accelerator is received.
 #Then, call <accelerator_init.sh>, to trigger the needed processes.
-ROOT_DIR=$(PWD)
+ROOT_DIR=$(pwd)
 ACC_DIR=$ROOT_DIR/accelerator
 SH_DIR=$ROOT_DIR/sh
 
@@ -30,7 +30,6 @@ else
  echo "[MEEP] INFO: SymLink won't be created"
 fi
 
-mkdir -p $ROOT_DIR/binaries
 bash -x $ACC_DIR/meep_shell/accelerator_init.sh
 cd $ROOT_DIR
 #Make a make inside DVINO

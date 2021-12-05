@@ -10,8 +10,6 @@
 
 variables:
         GIT_SUBMODULE_STRATEGY: recursive
-        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA:
         NUMBER_OF_JOBS: "8"
         FPGA_LOG_FILE: fpga.log
         TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
@@ -38,9 +36,10 @@ EA-build:
         tags: 
             - MEEP_FPGA
         before_script:
-            - make initialize
-            - source ./sh/init_modules.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
+            # This is a CI/CD requirement. Use a token-ed URL instead of the normal repo URL
+            - sh/extract_url.sh ea_url.txt
         script:    
+            - make initialize
             - make binaries
         after_script:
             - cp -r accelerator/meep_shell/binaries/* binaries
@@ -55,8 +54,9 @@ synthesis:
         tags: 
             - MEEP_FPGA
         before_script:
-            - source ./sh/init_modules.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - sh/extract_url.sh ea_url.txt
         script:
+            - make initialize
             - make project
             - make synthesis
         after_script:
