@@ -54,12 +54,13 @@ synthesis:
         tags: 
             - MEEP_FPGA
         before_script:
-            - sh/extract_url.sh ea_url.txt
+            - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
         script:
             - make initialize
             - make project
             - make synthesis
         after_script:
+            - mkdir tmp
             - make clean_accelerator clean_shell
             - >
               echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
@@ -67,14 +68,18 @@ synthesis:
               Vivado version --> $VIVADO_VERSION   \r\n
               Vivado path --> $VIVADO_PATH        \r\n
               Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
+            - cp -r dcp tmp
+            - cp cicd_log.txt tmp
+            - cp -r src/system_top.sv tmp
+            - cp -r tcl/shell_env.tcl tmp
+            - cp gen_system.tcl tmp/tcl
         artifacts:
           when: always
           paths:
+            - tmp
             - src/system_top.sv
             - tcl/shell_env.tcl
             - gen_system.tcl 
-            - dcp/synthesis.dcp
-            - cicd_log.txt
             
 implementation:
         stage: implementation
@@ -88,6 +93,7 @@ implementation:
 
         after_script:
             - make clean_synthesis
+            - cp -r dcp tmp
 
         dependencies:
             - synthesis
@@ -96,8 +102,8 @@ implementation:
             when: on_success
             expire_in: 1 day
             paths:
+                - tmp
                 - reports
-                - dcp/implementation.dcp                
 bitstream:
         stage: bitstream
         needs:
@@ -108,7 +114,7 @@ bitstream:
         script:
             - make bitstream
         after_script:
-            - mv bitstream/system.bit bitstream/$BITSTREAM
+            - mv bitstream/system.bit tmp/bitstream/$BITSTREAM
         dependencies:
             - synthesis
             - implementation
@@ -116,7 +122,7 @@ bitstream:
             when: always
             expire_in: 1 month
             paths:
-                - bitstream
+                - tmp
 validation:
         stage: bitstream
         needs: 
@@ -148,13 +154,15 @@ fpga-test:
             - source $ACC_DIR/scripts/$BOOT_SCRIPT binaries/fw_payload.bin
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG_FILE
+        after_script:
+            - cp $FPGA_LOG_FILE tmp
         dependencies:
             - EA-build
             - bitstream
         artifacts:
             when: always
             paths:
-            - $FPGA_LOG_FILE
+            - tmp
 
 deploy-EA:
         stage: deploy
@@ -163,10 +171,11 @@ deploy-EA:
         rules:
                 #- if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
         before_script:
-            - mkdir -p $DEPLOY_DIR/ariane_$CI_COMMIT_SHORT_SHA
+            - EANAME=$(grep -o ea_url.txt -e NAME.*$ | awk -F ':' '$2 {print $2}') ;\
+              mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         script:
-            - date >> $DEPLOY_DIR/ariane_$CI_COMMIT_SHORT_SHA/date.txt
-            - cp -r ariane/* $DEPLOY_DIR/ariane_$CI_COMMIT_SHORT_SHA
+            - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
+            - cp -r tmp/* $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         needs:
             - synthesis
             - implementation

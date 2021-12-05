@@ -33,14 +33,6 @@ EANAME=$(grep -o ea_url.txt -e NAME.*$ | awk -F ':' '$2 {print $2}')
 
 echo -e "[MEEP] Emulated accelerator:$EANAME\r\n\r\n\t$GREEN $EAURL $NC\r\n"
 
-# if [ -d "binaries" ]; then
-	# echo "[MEEP] binaries folder already exists"
-# else
-	# echo "[MEEP] Creating binaries folder ..."
-# mkdir -p binaries
-# fi
-
-#cp -r accelerator/meep_shell/binaries/* binaries/
 
 ### Call the main program
 $VIVADO_XLNX -mode batch -nolog -nojournal -notrace -source ./tcl/gen_meep.tcl | tee $LOG_FILE
