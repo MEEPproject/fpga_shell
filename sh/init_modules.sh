@@ -30,6 +30,6 @@ else
  echo "[MEEP] INFO: SymLink won't be created"
 fi
 
-bash -x $ACC_DIR/meep_shell/accelerator_init.sh
+bash -x $ACC_DIR/meep_shell/accelerator_init.sh $ACC_DIR
 cd $ROOT_DIR
 #Make a make inside DVINO
