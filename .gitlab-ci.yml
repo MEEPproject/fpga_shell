@@ -111,8 +111,9 @@ bitstream:
         script:
             - make bitstream
         after_script:
-            - mv bitstream/system.bit tmp/bitstream/$BITSTREAM
-            - mv dcp tmp/dcp
+            - mv bitstream/system.bit bitstream/$BITSTREAM
+            - mv bitstream/ tmp/
+            - mv dcp/ tmp/
         dependencies:
             - synthesis
             - implementation
@@ -146,7 +147,7 @@ fpga-test:
             - export PATH=$PATH:$QDMA_DRIVERS
             - sudo $TOOLS_DIR/givememyuart
         script:
-            - sh/load_bitstream.sh qdma bitstream/$BITSTREAM
+            - sh/load_bitstream.sh qdma tmp/bitstream/$BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
             # The EA script should provide the right script and the right binary
             - source $ACC_DIR/scripts/$BOOT_SCRIPT binaries/fw_payload.bin
