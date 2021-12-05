@@ -5,15 +5,17 @@ EA_REPO="EMULATED_ACCELERATOR_REPO"
 EA_SHA="EMULATED_ACCELERATOR_SHA"
 DEF_FILE="ea_url.txt"
 YAML_FILE=$1
+TOKEN=$2
 
 if [ "$YAML_FILE" = "" ]; then
 	YAML_FILE=".gitlab-ci.yml"
+	TOKEN="\\\$RTL_REPO_TOKEN"
 fi
 
 # Seach the YAML File token-based URL and convert it to a normal URL
 EA_REPO_TMP=$(grep $DEF_FILE -e "$EA_REPO") 
 # Take a normal URL and insert the token-based string
-EA_REPO_YAML=$(grep $DEF_FILE -e "$EA_REPO" | sed "s/https:\/\//https:\/\/gitlab-ci-token:\$RTL_REPO_TOKEN@/")
+EA_REPO_YAML=$(grep $DEF_FILE -e "$EA_REPO" | sed "s/https:\/\//https:\/\/gitlab-ci-token:$TOKEN@/")
 
 
 echo "$EA_REPO_TMP"

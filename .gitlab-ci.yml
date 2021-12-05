@@ -37,7 +37,7 @@ EA-build:
             - MEEP_FPGA
         before_script:
             # This is a CI/CD requirement. Use a token-ed URL instead of the normal repo URL
-            - sh/extract_url.sh ea_url.txt
+            - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
         script:    
             - make initialize
             - make binaries
