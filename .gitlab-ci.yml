@@ -9,6 +9,7 @@
 
 
 variables:
+        EMULATED_ACCELERATOR: dvino
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
         FPGA_LOG_FILE: fpga.log
@@ -37,6 +38,7 @@ EA-build:
             - MEEP_FPGA
         before_script:
             # This is a CI/CD requirement. Use a token-ed URL instead of the normal repo URL
+            - sh/load_module.sh $EMULATED_ACCELERATOR            
             - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
         script:    
             - make initialize
@@ -56,6 +58,7 @@ synthesis:
         tags: 
             - MEEP_FPGA
         before_script:
+            - sh/load_module.sh $EMULATED_ACCELERATOR
             - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
         script:
             - make initialize
