@@ -1,7 +1,8 @@
 ROOT_DIR     =  $(PWD)
 TCL_DIR      =  $(ROOT_DIR)/tcl
 SH_DIR	     =  $(ROOT_DIR)/sh
-DEF_FILE     =  $(ROOT_DIR)/ea_url.txt
+DEF_FILE     ?= $(ROOT_DIR)/ea_url.txt
+LOAD_EA		 ?= 
 EA_REPO      =  EMULATED_ACCELERATOR_REPO
 EA_SHA       =  EMULATED_ACCELERATOR_SHA
 EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
@@ -16,18 +17,21 @@ BIT_FILE     =  $(ROOT_DIR)/bitstream/system.bit
 REPORT_DIR   =  $(ROOT_DIR)/reports
 YAML_FILE    =  $(ROOT_DIR)/.gitlab-ci.yml
 PROJECT_DIR  =  $(ROOT_DIR)/project
-VIVADO_VER   ?= "2020.1"
-VIVADO_PATH  := /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/vivado
+BINARIES_DIR =  $(ROOT_DIR)/binaries
+VIVADO_VER   ?= 2020.1
+VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
+VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 U280_PART    = "xcu280-fsvh2892-2L-e" 
 U55C_PART    = "xcu55c-fsvh2892-2L-e"  
 U280_BOARD   = "u280"
 U55C_BOARD   = "u55c"
+#SHELL := /bin/bash
 
 .PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation clean_ci_cd
 
 #.DEFAULT_GOAL := initialize
-all: binaries vivado synthesis implementation bitstream validate
+all: initialize binaries project synthesis implementation validate bitstream
 
 u280:
 	$(SH_DIR)/extract_part.sh $(U280_PART) $(U280_BOARD)
@@ -37,6 +41,10 @@ u55c:
 	echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.1"
 
 initialize: clean $(ACCEL_DIR)
+
+project: $(PROJECT_FILE)
+
+binaries: $(BINARIES_DIR)
 
 synthesis: $(SYNTH_DCP)
 
@@ -54,34 +62,35 @@ yaml: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
 	$(SH_DIR)/extract_url.sh
 
-$(ACCEL_DIR): 
+$(ACCEL_DIR):
+	$(SH_DIR)/load_module.sh $(LOAD_EA)
 	EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
-	$(ROOT_DIR)/init_project.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
+	$(SH_DIR)/init_modules.sh $$EA_GIT_URL $(EA_GIT_SHA) ;\
 
-binaries: $(ACCEL_DIR)
-	$(SH_DIR)/accelerator_build.sh
 
-vivado: $(ACCEL_DIR) 
-	cp -r accelerator/meep_shell/binaries/* binaries/
-	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_meep.tcl
+$(BINARIES_DIR):
+	mkdir -p $(BINARIES_DIR)
+	$(SH_DIR)/accelerator_build.sh	
+	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
+
+$(PROJECT_FILE): $(ACCEL_DIR) 	
+	#$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_meep.tcl
+	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
-	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
-	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR)
 	
 $(BIT_FILE): $(IMPL_DCP)
-	$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
 	
 validate: $(REPORT_DIR)
 	$(SH_DIR)/check_reports.sh
 
 clean: 
-	rm -rf project dcp reports accelerator src binaries
-	
-clean_ci_cd:
-	git checkout $(DEF_FILE)
+	rm -rf project dcp reports accelerator src binaries	
 	
 clean_shell:
 	rm -rf project
