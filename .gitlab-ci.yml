@@ -50,6 +50,8 @@ EA-build:
 
 synthesis:
         stage: synthesis
+        needs:
+            - EA-build
         timeout: 4h
         tags: 
             - MEEP_FPGA
@@ -63,8 +65,8 @@ synthesis:
             - mkdir tmp
             - make clean_accelerator clean_shell
             - >
-              echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
-              EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
+              echo -e " EA URL --> gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
+              EA SHA --> $EMULATED_ACCELERATOR_SHA: 00abeae75a09d85d534ba0f2daf4d451ecae377b
               Vivado version --> $VIVADO_VERSION   \r\n
               Vivado path --> $VIVADO_PATH        \r\n
               Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
@@ -80,6 +82,8 @@ synthesis:
             
 implementation:
         stage: implementation
+        needs:
+            - synthesis
         timeout: 4h
         tags: 
             - MEEP_FPGA
