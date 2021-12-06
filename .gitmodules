@@ -1,3 +1,6 @@
 [submodule "ip/axi_brom"]
 	path = ip/axi_brom
 	url = ../axi_brom.git
+[submodule "ip/100GbEthernet"]
+	path = ip/100GbEthernet
+	url = https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/ethernet_test.git

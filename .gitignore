@@ -9,6 +9,7 @@ dcp
 reports
 system.bit
 gen_system.tcl
+ea_url.txt
 *.swp
 *.log
 *.dcp

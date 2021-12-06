@@ -39,7 +39,7 @@ foreach dicEntry $ShellEnabledIntf {
 	}
 
 	if {[regexp -inline -all "ETHERNET" $IntfName] ne "" } {
-		set ETHERNETentry $dicEntry
+		set ETHentry $dicEntry
 		source $g_root_dir/shell/shell_ethernet.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet_${g_board_part}.xdc"		
 	}
