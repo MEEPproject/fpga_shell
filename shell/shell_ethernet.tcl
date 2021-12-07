@@ -22,14 +22,34 @@ putdebugs "ETHUserWidth $ETHUserWidth"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source ./ip/100GbEthernet/tcl/gen_project.tcl
+exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
 source $g_root_dir/ip/100GbEthernet/tcl/project_options.tcl
+create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_version MEEP_100Gb_Ethernet_0
 
-create_bd_cell -type ip -vlnv meep-project.eu:MEEP:100GbEthernet:$g_ip_version axi_ETH_0
+create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 eth_axi
+connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/s_axi]
+set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /sys_clk]
 
+set_property CONFIG.DATA_WIDTH $ETHdataWidth [get_bd_intf_ports /$ETHintf]
+set_property CONFIG.ADDR_WIDTH $ETHaddrWidth [get_bd_intf_ports /$ETHintf]
+set_property CONFIG.ID_WIDTH $ETHidWidth [get_bd_intf_ports /$ETHintf]
+
+
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_p]
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_n]
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_p]
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_n]
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_p]
+connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins clk_wiz_1/CLK0]
+connect_bd_net [get_bd_pins rst_ea_CLK0/peripheral_aresetn] [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_resetn]
+
+assign_bd_address [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/s_axi/reg0 }]
+
+
+save_bd_design
 # ## Create the Shell interface to the RTL
 # ## CAUTION: The user can't specify USER, QOS and REGION signal for this interface
 # ## This means those signals can't be in the module definition file
