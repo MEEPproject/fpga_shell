@@ -136,6 +136,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
 					}
+					if { "${device}" == "ETHERNET" } {
+                                                dict set d_device IRQ [lindex $fields 7]
+                                        }
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}

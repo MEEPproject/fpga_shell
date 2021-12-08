@@ -71,6 +71,8 @@ set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHname]
 
 ### TODO: Catch
 source $g_root_dir/shell/shell_memmap.tcl
+
+update_ip_catalog -rebuild -scan_changes
  
 validate_bd_design
 

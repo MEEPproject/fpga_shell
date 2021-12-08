@@ -1,22 +1,24 @@
-set ETHClkNm [dict get $ETHentry SyncClk Label]
-set ETHFreq  [dict get $ETHentry SyncClk Freq]
-set ETHname  [dict get $ETHentry SyncClk Name]
-set ETHintf  [dict get $ETHentry IntfLabel]
+set ETHClkNm   [dict get $ETHentry SyncClk Label]
+set ETHFreq    [dict get $ETHentry SyncClk Freq]
+set ETHClkName [dict get $ETHentry SyncClk Name]
+set ETHintf    [dict get $ETHentry IntfLabel]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
 set ETHidWidth   [dict get $ETHentry AxiIdWidth]
 set ETHUserWidth [dict get $ETHentry AxiUserWidth]
 
+set ETHirq [dict get $ETHentry IRQ]
+
 putdebugs "ETHClkNm     $ETHClkNm    "
 putdebugs "ETHFreq      $ETHFreq     "
-putdebugs "ETHname      $ETHname     "
+putdebugs "ETHClkName   $ETHClkName  "
 putdebugs "ETHintf      $ETHintf     "
 putdebugs "ETHaddrWidth $ETHaddrWidth"
 putdebugs "ETHdataWidth $ETHdataWidth"
 putdebugs "ETHidWidth   $ETHidWidth  "
 putdebugs "ETHUserWidth $ETHUserWidth"
-
+putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
@@ -27,15 +29,8 @@ update_ip_catalog -rebuild
 source $g_root_dir/ip/100GbEthernet/tcl/project_options.tcl
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_version MEEP_100Gb_Ethernet_0
 
-# create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 eth_axi
-# connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
-# #set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkNm]
-
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
-# set_property CONFIG.DATA_WIDTH $ETHdataWidth [get_bd_intf_ports /$ETHintf]
-# set_property CONFIG.ADDR_WIDTH $ETHaddrWidth [get_bd_intf_ports /$ETHintf]
-# set_property CONFIG.ID_WIDTH $ETHidWidth [get_bd_intf_ports /$ETHintf]
 
   set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
   set_property -dict [ list \
@@ -69,15 +64,29 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_ver
    ] $eth_axi
 
 
+create_bd_port -dir I -from 3 -to 0 -type data qsfp_4x_grx_n
+create_bd_port -dir I -from 3 -to 0 -type data qsfp_4x_grx_p
 
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_p]
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_n]
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_p]
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_n]
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_p]
-connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins clk_wiz_1/CLK0]
-connect_bd_net [get_bd_pins rst_ea_CLK0/peripheral_aresetn] [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_resetn]
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]
+create_bd_port -dir O -from 3 -to 0 -type data qsfp_4x_gtx_n
+create_bd_port -dir O -from 3 -to 0 -type data qsfp_4x_gtx_p
+
+create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_refck_clk_n
+create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_refck_clk_p
+
+connect_bd_net [get_bd_ports qsfp_refck_clk_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_p]
+connect_bd_net [get_bd_ports qsfp_refck_clk_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_n]
+
+connect_bd_net [get_bd_ports qsfp_4x_grx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_n]
+connect_bd_net [get_bd_ports qsfp_4x_grx_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_p]
+
+connect_bd_net [get_bd_ports qsfp_4x_gtx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_n]
+connect_bd_net [get_bd_ports qsfp_4x_gtx_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_p]
+
+
+connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins clk_wiz_1/$ETHClkName
+connect_bd_net [get_bd_pins rst_ea_$ETHClkName/peripheral_aresetn] [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_resetn]
+# Make External avoids passing the signal width to this point. The bus is created automatically
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/$ETHirq]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
 
 save_bd_design
@@ -105,6 +114,4 @@ assign_bd_address [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 
 
 save_bd_design
-
-# set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHname]
 
