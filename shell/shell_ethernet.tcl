@@ -70,11 +70,11 @@ create_bd_port -dir I -from 3 -to 0 -type data qsfp_4x_grx_p
 create_bd_port -dir O -from 3 -to 0 -type data qsfp_4x_gtx_n
 create_bd_port -dir O -from 3 -to 0 -type data qsfp_4x_gtx_p
 
-create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_refck_clk_n
-create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_refck_clk_p
+create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_n
+create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_p
 
-connect_bd_net [get_bd_ports qsfp_refck_clk_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_p]
-connect_bd_net [get_bd_ports qsfp_refck_clk_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_n]
+connect_bd_net [get_bd_ports qsfp_ref_clk_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_p]
+connect_bd_net [get_bd_ports qsfp_ref_clk_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_n]
 
 connect_bd_net [get_bd_ports qsfp_4x_grx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_n]
 connect_bd_net [get_bd_ports qsfp_4x_grx_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_p]
