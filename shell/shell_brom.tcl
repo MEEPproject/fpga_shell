@@ -39,7 +39,7 @@ CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
 ## This means those signals can't be in the module definition file
 
   # Create interface ports
-  set brom_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 brom_axi ]
+  set brom_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $BROMintf ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $BROMaddrWidth \
    CONFIG.ARUSER_WIDTH {0} \
@@ -79,7 +79,7 @@ CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
  connect_bd_net [get_bd_pins axi_bram_ctrl_0/bram_en_a] [get_bd_pins axi_brom_0/ena]
  connect_bd_net [get_bd_pins axi_bram_ctrl_0/bram_we_a] [get_bd_pins axi_brom_0/wea]
 
- connect_bd_intf_net [get_bd_intf_ports brom_axi] [get_bd_intf_pins axi_bram_ctrl_0/S_AXI]
+ connect_bd_intf_net [get_bd_intf_ports $BROMintf] [get_bd_intf_pins axi_bram_ctrl_0/S_AXI]
 
 ### Set Base Addresses to peripheral
 # BROM
@@ -91,8 +91,8 @@ putdebugs "Mem Range BROM: $BROMMemRange"
 
 assign_bd_address [get_bd_addr_segs {axi_bram_ctrl_0/S_AXI/Mem0 }]
 
-set_property offset $BROMbaseAddr [get_bd_addr_segs {brom_axi/SEG_axi_bram_ctrl_0_Mem0}]
-set_property range ${BROMMemRange}K [get_bd_addr_segs {brom_axi/SEG_axi_bram_ctrl_0_Mem0}]
+set_property offset $BROMbaseAddr [get_bd_addr_segs {$BROMintf/SEG_axi_bram_ctrl_0_Mem0}]
+set_property range ${BROMMemRange}K [get_bd_addr_segs {$BROMintf/SEG_axi_bram_ctrl_0_Mem0}]
 
 
 

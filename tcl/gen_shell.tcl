@@ -52,6 +52,10 @@ foreach dicEntry $ShellEnabledIntf {
 		set BROMentry $dicEntry
 		source $g_root_dir/shell/shell_brom.tcl
 	}
+        if {[regexp -inline -all "BRAM" $IntfName] ne "" } {
+                set BRAMentry $dicEntry
+                source $g_root_dir/shell/shell_bram.tcl
+        }	
 	
 }
 

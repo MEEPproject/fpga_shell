@@ -28,7 +28,7 @@ U280_BOARD   = "u280"
 U55C_BOARD   = "u55c"
 #SHELL := /bin/bash
 
-.PHONY: clean clean_shell clean_accelerator clean_synthesis clean_implementation clean_ci_cd
+.PHONY: clean clean_project clean_accelerator clean_synthesis clean_implementation clean_ci_cd
 
 #.DEFAULT_GOAL := initialize
 all: initialize binaries project synthesis implementation validate bitstream
@@ -92,7 +92,7 @@ validate: $(REPORT_DIR)
 clean: 
 	rm -rf project dcp reports accelerator src binaries	
 	
-clean_shell:
+clean_project:
 	rm -rf project
 	
 clean_accelerator:

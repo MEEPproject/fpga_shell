@@ -37,7 +37,7 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_ver
 # set_property CONFIG.ADDR_WIDTH $ETHaddrWidth [get_bd_intf_ports /$ETHintf]
 # set_property CONFIG.ID_WIDTH $ETHidWidth [get_bd_intf_ports /$ETHintf]
 
-  set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 eth_axi ]
+  set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $ETHaddrWidth \
    CONFIG.ARUSER_WIDTH {0} \
@@ -69,6 +69,7 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_ver
    ] $eth_axi
 
 
+
 make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_grx_p]
 make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_n]
 make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_refck_clk_p]
@@ -77,7 +78,7 @@ make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_p]
 connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins clk_wiz_1/CLK0]
 connect_bd_net [get_bd_pins rst_ea_CLK0/peripheral_aresetn] [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_resetn]
 make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]
-
+connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
 
 save_bd_design
 ## Create the Shell interface to the RTL

@@ -46,9 +46,10 @@ set HBMuserWidth [dict get $HBMentry AxiUserWidth]
 ## converter to HBM. Hardcoded to 0
 set HBMuserWidth 0
 
+putmeeps "Creating HBM instance..."
 ### TODO: Support different user widths per AXI channel
 ### TODO: Region, prot and others can be extracted as the other widths
-set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 hbm_axi4 ]
+set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
    CONFIG.ARUSER_WIDTH $HBMuserWidth \
@@ -83,8 +84,6 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 ## User clock
 create_bd_port -dir O -type clk $HBMname
 connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
-
-set_property name $HBMintf [get_bd_intf_ports hbm_axi4]
 
 
 ## TODO: Make dependant of selected HBM channels number
