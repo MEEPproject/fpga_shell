@@ -95,7 +95,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				#putmeeps "endmodule"	
 			} elseif { [ regexp axi_.*user $line ] } {
 				putwarnings	"AXI user signals are not supported and will not be connected"
-				putdebugs "[ regexp -inline axi_.*user $line ]"
+				#putdebugs "[ regexp -inline axi_.*user $line ]"
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
