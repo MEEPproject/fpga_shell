@@ -9,7 +9,7 @@
 
 
 variables:
-        EMULATED_ACCELERATOR: dvino
+        #EMULATED_ACCELERATOR: openpiton
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
         FPGA_LOG_FILE: fpga.log
@@ -69,7 +69,7 @@ synthesis:
             - make clean_accelerator clean_shell
             - >
               echo -e " EA URL --> gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
-              EA SHA --> $EMULATED_ACCELERATOR_SHA: 00abeae75a09d85d534ba0f2daf4d451ecae377b
+              EA SHA --> $EMULATED_ACCELERATOR_SHA: 4ccf6cbd04bc1d84b8dd169bf0ede796fe441963
               Vivado version --> $VIVADO_VERSION   \r\n
               Vivado path --> $VIVADO_PATH        \r\n
               Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             

@@ -86,7 +86,8 @@ connect_bd_net [get_bd_ports qsfp_4x_gtx_p] [get_bd_pins MEEP_100Gb_Ethernet_0/q
 connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins clk_wiz_1/$ETHClkNm]
 connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_resetn]
 # Make External avoids passing the signal width to this point. The bus is created automatically
-make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/$ETHirq]
+make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]
+set_property name $ETHirq [get_bd_ports intc_0]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
 
 save_bd_design
