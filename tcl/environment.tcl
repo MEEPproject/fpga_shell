@@ -28,4 +28,4 @@ set PCIeDMA "yes"
 ##################################################################
 # Enable debug messages
 ##################################################################
-set DebugEnable "True"
+set DebugEnable "False"

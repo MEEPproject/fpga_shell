@@ -154,7 +154,7 @@ puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
 
-putcolors "MEEP SHELL top created" $GREEN
+putcolors "MEEP SHELL RTL top created" $GREEN
 
 file delete -force $g_root_dir/tmp
 

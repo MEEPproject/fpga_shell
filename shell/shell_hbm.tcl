@@ -87,25 +87,74 @@ connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 
 
 ## TODO: Make dependant of selected HBM channels number
-create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0
-set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
-	CONFIG.USER_SAXI_00 {false} \
-	CONFIG.USER_SAXI_01 {false} \
-	CONFIG.USER_SAXI_02 {false} \
-	CONFIG.USER_SAXI_03 {false} \
-	CONFIG.USER_SAXI_04 {false} \
-	CONFIG.USER_SAXI_05 {false} \
-	CONFIG.USER_SAXI_06 {false} \
-	CONFIG.USER_SAXI_07 {false} \
-	CONFIG.USER_SAXI_08 {true} \
-	CONFIG.USER_SAXI_09 {false} \
-	CONFIG.USER_SAXI_10 {false} \
-	CONFIG.USER_SAXI_11 {false} \
-	CONFIG.USER_SAXI_12 {false} \
-	CONFIG.USER_SAXI_13 {false} \
-	CONFIG.USER_SAXI_14 {false} \
-	CONFIG.USER_SAXI_15 {false} \
-	CONFIG.USER_APB_EN {false}] [get_bd_cells hbm_0]
+  # Create instance: hbm_0, and set properties
+  set hbm_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0 ]
+  set_property -dict [ list \
+   CONFIG.USER_APB_EN {false} \
+   CONFIG.USER_CLK_SEL_LIST0 {AXI_00_ACLK} \
+   CONFIG.USER_CLK_SEL_LIST1 {AXI_16_ACLK} \
+   CONFIG.USER_HBM_CP_1 {6} \
+   CONFIG.USER_HBM_DENSITY {8GB} \
+   CONFIG.USER_HBM_FBDIV_1 {36} \
+   CONFIG.USER_HBM_HEX_CP_RES_1 {0x0000A600} \
+   CONFIG.USER_HBM_HEX_FBDIV_CLKOUTDIV_1 {0x00000902} \
+   CONFIG.USER_HBM_HEX_LOCK_FB_REF_DLY_1 {0x00001f1f} \
+   CONFIG.USER_HBM_LOCK_FB_DLY_1 {31} \
+   CONFIG.USER_HBM_LOCK_REF_DLY_1 {31} \
+   CONFIG.USER_HBM_RES_1 {10} \
+   CONFIG.USER_HBM_STACK {2} \
+   CONFIG.USER_MC_ENABLE_08 {TRUE} \
+   CONFIG.USER_MC_ENABLE_09 {TRUE} \
+   CONFIG.USER_MC_ENABLE_10 {TRUE} \
+   CONFIG.USER_MC_ENABLE_11 {TRUE} \
+   CONFIG.USER_MC_ENABLE_12 {TRUE} \
+   CONFIG.USER_MC_ENABLE_13 {TRUE} \
+   CONFIG.USER_MC_ENABLE_14 {TRUE} \
+   CONFIG.USER_MC_ENABLE_15 {TRUE} \
+   CONFIG.USER_MC_ENABLE_APB_01 {TRUE} \
+   CONFIG.USER_MEMORY_DISPLAY {8192} \
+   CONFIG.USER_PHY_ENABLE_08 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_09 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_10 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_11 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_12 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_13 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_14 {TRUE} \
+   CONFIG.USER_PHY_ENABLE_15 {TRUE} \
+   CONFIG.USER_SAXI_00 {true} \
+   CONFIG.USER_SAXI_01 {false} \
+   CONFIG.USER_SAXI_02 {false} \
+   CONFIG.USER_SAXI_03 {false} \
+   CONFIG.USER_SAXI_04 {false} \
+   CONFIG.USER_SAXI_05 {false} \
+   CONFIG.USER_SAXI_06 {false} \
+   CONFIG.USER_SAXI_07 {false} \
+   CONFIG.USER_SAXI_08 {true} \
+   CONFIG.USER_SAXI_09 {false} \
+   CONFIG.USER_SAXI_10 {false} \
+   CONFIG.USER_SAXI_11 {false} \
+   CONFIG.USER_SAXI_12 {false} \
+   CONFIG.USER_SAXI_13 {false} \
+   CONFIG.USER_SAXI_14 {false} \
+   CONFIG.USER_SAXI_15 {false} \
+   CONFIG.USER_SAXI_16 {false} \
+   CONFIG.USER_SAXI_17 {false} \
+   CONFIG.USER_SAXI_18 {false} \
+   CONFIG.USER_SAXI_19 {false} \
+   CONFIG.USER_SAXI_20 {false} \
+   CONFIG.USER_SAXI_21 {false} \
+   CONFIG.USER_SAXI_22 {false} \
+   CONFIG.USER_SAXI_23 {false} \
+   CONFIG.USER_SAXI_24 {false} \
+   CONFIG.USER_SAXI_25 {false} \
+   CONFIG.USER_SAXI_26 {false} \
+   CONFIG.USER_SAXI_27 {false} \
+   CONFIG.USER_SAXI_28 {false} \
+   CONFIG.USER_SAXI_29 {false} \
+   CONFIG.USER_SAXI_30 {false} \
+   CONFIG.USER_SAXI_31 {false} \
+   CONFIG.USER_SWITCH_ENABLE_01 {TRUE} \
+ ] $hbm_0
 	
 	
 	## APB CLOCKS and RESET
@@ -120,9 +169,11 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_08_ACLK} \
 	make_bd_intf_pins_external  [get_bd_intf_pins util_ds_buf_0/CLK_IN_D]
 	set_property name sysclk0 [get_bd_intf_ports CLK_IN_D_0]
 	connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins hbm_0/HBM_REF_CLK_0]
+	connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins hbm_0/HBM_REF_CLK_1]
 	### TODO: APB CLOCK Can't be the same as ACLK. Needs to be a different source
 	connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
+        connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
 	set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
 
@@ -195,5 +246,6 @@ connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_$HBMClkNm/dcm_
 
 #foreach Number of APB interfaces, one per stack
 connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn]
+connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn]
 
 save_bd_design
