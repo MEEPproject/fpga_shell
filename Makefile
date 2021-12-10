@@ -56,7 +56,7 @@ update_sha: $(ACCEL_DIR)
 	# Update the ea_url file with the actual accelerator sha
 	@$(SH_DIR)/update_sha.sh $(DEF_FILE)
 	# Update the YAML file:
-	$(SH_DIR)/extract_url.sh
+	#$(SH_DIR)/extract_url.sh
 
 yaml: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
