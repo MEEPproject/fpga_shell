@@ -232,7 +232,6 @@ if { $HBMReady != ""} {
         connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins util_vector_logic_0/Op2]
 	make_bd_pins_external  [get_bd_pins util_vector_logic_0/Res]
 	set_property name $HBMReady [get_bd_ports Res_0]
-        connect_bd_net [get_bd_ports $HBMReady] [get_bd_pins util_vector_logic_0/Res]
 }
 
 ########### RESET CONNECTIONS ################
