@@ -226,8 +226,13 @@ connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 ## It can be used when it has been defined in the definition file
 
 if { $HBMReady != ""} {
-	make_bd_pins_external  [get_bd_pins hbm_0/apb_complete_0]
-	set_property name $HBMReady [get_bd_ports apb_complete_0_0]
+	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_0
+        set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {and} CONFIG.LOGO_FILE {data/sym_andgate.png}] [get_bd_cells util_vector_logic_0]
+        connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins util_vector_logic_0/Op1]
+        connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins util_vector_logic_0/Op2]
+	make_bd_pins_external  [get_bd_pins util_vector_logic_0/Res]
+	set_property name $HBMReady [get_bd_ports Res_0]
+        connect_bd_net [get_bd_ports $HBMReady] [get_bd_pins util_vector_logic_0/Res]
 }
 
 ########### RESET CONNECTIONS ################
