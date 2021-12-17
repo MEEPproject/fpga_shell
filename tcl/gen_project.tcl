@@ -100,6 +100,10 @@ set_property  ip_repo_paths  $ip_dir_list [current_project]
 # This is how we call the top module in the meep_shell project. It may change if we want
 set_property top $g_top_name [current_fileset]
 
+# Set the incremental flow by default
+set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs synth_1]
+set_property write_incremental_synth_checkpoint false [get_runs synth_1]
+
 putcolors "Project generation ended successfully" $GREEN
 
 #source $root_dir/tcl/gen_bitstream.tcl

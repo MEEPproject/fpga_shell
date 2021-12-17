@@ -175,7 +175,12 @@ connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
         connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
 	set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
-	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP]
+	## One CATTRIP per stack, OR it
+        create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_1
+        set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {or} CONFIG.LOGO_FILE {data/sym_andgate.png}] [get_bd_cells util_vector_logic_1]
+        connect_bd_net [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP] [get_bd_pins util_vector_logic_0/Op1]
+        connect_bd_net [get_bd_pins hbm_0/DRAM_1_STAT_CATTRIP [get_bd_pins util_vector_logic_0/Op2]
+        connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins util_vector_logic_1/Res]
 
 ###################################################################
 ## Use protocol and data width converters blocks to translate 
