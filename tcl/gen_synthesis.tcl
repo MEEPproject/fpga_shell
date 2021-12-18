@@ -24,9 +24,26 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 		puts "Design synthesis failed, exiting ..."
 		exit 1
 	}
+	
+	file mkdir $g_root_dir/dcp
+	file mkdir $g_root_dir/reports
+
+
 
 	write_checkpoint -force $g_root_dir/dcp/synthesis.dcp
+	report_timing_summary -file $g_root_dir/reports/post_synth_timing_summary.rpt
+	report_utilization -file $g_root_dir/reports/post_synth_util.rpt
+	
+	# Run custom script to report critical timing paths
+	reportCriticalPaths $g_root_dir/reports/post_synth_critpath_report.csv
+	
+	## Synthesis log
+	file copy $g_project_dir/system.runs/synth_1/system.vds $g_root_dir/reports/synthesis.rpt
+	
+	## Add this into a open-while loop to parse line by line
+	#set UndrivenPins [regexp -all -inline {WARNING: [Synth 8-3295].*$} $line]
+	
+	
 }
 
 synthesis $g_root_dir $g_number_of_jobs
-
