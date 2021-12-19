@@ -31,8 +31,7 @@ stages:
 EA-build:
         stage: EA-initialization
         rules:
-            #- if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
-            #  when: on_success
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
         timeout: 2h
         tags: 
             - MEEP_FPGA
@@ -52,6 +51,8 @@ EA-build:
 
 synthesis:
         stage: synthesis
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
         needs:
             - EA-build
         timeout: 4h
@@ -69,7 +70,7 @@ synthesis:
             - make clean_accelerator clean_shell
             - >
               echo -e " EA URL --> gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
-              EA SHA --> $EMULATED_ACCELERATOR_SHA: 4ccf6cbd04bc1d84b8dd169bf0ede796fe441963
+              EA SHA --> $EMULATED_ACCELERATOR_SHA: 33ba163f87090637c7b6ae21f6bc6bf679750c96
               Vivado version --> $VIVADO_VERSION   \r\n
               Vivado path --> $VIVADO_PATH        \r\n
               Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
@@ -85,6 +86,9 @@ synthesis:
             
 implementation:
         stage: implementation
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
         needs:
             - synthesis
         timeout: 4h
@@ -110,6 +114,9 @@ implementation:
                 - reports
 bitstream:
         stage: bitstream
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
         needs:
             - synthesis
             - implementation
@@ -131,6 +138,9 @@ bitstream:
                 - tmp
 validation:
         stage: bitstream
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
         needs: 
             - implementation
         tags: 
@@ -144,6 +154,9 @@ validation:
 
 fpga-test:
         stage: fpga-test
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
         needs:
             - EA-build
             - bitstream
@@ -172,6 +185,9 @@ fpga-test:
 
 deploy-EA:
         stage: deploy
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
         tags:
             - MEEP_FPGA
         rules:
@@ -183,6 +199,7 @@ deploy-EA:
             - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
             - cp -r tmp/* $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         needs:
+            - EA-build
             - synthesis
             - implementation
             - bitstream
