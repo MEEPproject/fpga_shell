@@ -205,6 +205,7 @@ deploy-EA:
             - bitstream
             - fpga-test
         dependencies:
+            - EA-build
             - synthesis
             - implementation
             - bitstream
