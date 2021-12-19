@@ -15,13 +15,19 @@ proc implementation { g_root_dir } {
 	#opt_design -directive Explore
 	reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
 	
+	## TODO; Check as early as possible the pinout is correct
+	# report_drc -name drc_1 -ruledecks {default}
+	# Extract from here the UCIO-1 message
+	# "ports have no user assigned specific location"
+
+	
 	puts "Place design starting at:"
-	puts [ clock format [ clock seconds ] -format %m%d%Y ]
-	puts [ clock format [ clock seconds ] -format %H%M%S ]
-	place_design
+	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
+	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
+	place_design -directive Explore
 	puts "Place design Finished at:"
-	puts [ clock format [ clock seconds ] -format %m%d%Y ]
-	puts [ clock format [ clock seconds ] -format %H%M%S ]
+	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
+	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
 
 	report_clock_utilization -file $g_root_dir/reports/clock_util.rpt
 	
@@ -41,6 +47,9 @@ proc implementation { g_root_dir } {
 	# route_design -tns_cleanup
 	
 	## set pass [expr {[get_property SLACK [get_timing_paths]] >= 0}]
+	
+	#set critical_nets [get_nets -of [get_timing_paths -max_paths 85]]
+	#route_design -nets $critical_nets
 
 	
 	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	

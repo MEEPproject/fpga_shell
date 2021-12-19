@@ -236,6 +236,7 @@ proc smartPhysOptFlow { } {
 			}
 			if { $WNS >= 0.000 } {
 				puts "WNS is possitive, smartPhysOptFlow succeded"	
+				#INFO: [Vivado_Tcl 4-383] Design worst setup slack (WNS) is greater than or equal to 0.000 ns. Skipping all physical synthesis optimizations.
 				break
 			}			
 			
