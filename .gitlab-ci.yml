@@ -190,8 +190,6 @@ deploy-EA:
         
         tags:
             - MEEP_FPGA
-        rules:
-                #- if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
         before_script:
             - EANAME=$(grep -o ea_url.txt -e NAME.*$ | awk -F ':' '$2 {print $2}') ;\
               mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
