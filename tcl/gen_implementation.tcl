@@ -1,4 +1,5 @@
 source [pwd]/tcl/environment.tcl
+source $g_root_dir/tcl/impl_utils.tcl
 
 if { $::argc > 0 } {
  set g_root_dir $::argv
@@ -11,8 +12,8 @@ proc implementation { g_root_dir } {
 	file mkdir $g_root_dir/reports
 
 	open_checkpoint $g_root_dir/dcp/synthesis.dcp
-	opt_design
-	#opt_design -directive Explore
+	#opt_design
+	opt_design -directive Explore
 	reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
 	
 	## TODO; Check as early as possible the pinout is correct
@@ -32,16 +33,31 @@ proc implementation { g_root_dir } {
 	report_clock_utilization -file $g_root_dir/reports/clock_util.rpt
 	
 	# Optionally run optimization if there are timing violations after placement
-	if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0} {
-	 puts "Found setup timing violations => running physical optimization"
-	phys_opt_design
+	set i 0
+	set nloops 5
+	set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+	for {set i 0} {$i < $nloops} {incr i} {
+	 if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0} {
+	  puts "Found setup timing violations => running physical optimization"
+	  #phys_opt_design -directive AggressiveExplore
+	  #phys_opt_design -directive AggressiveFanoutOpt
+	  #phys_opt_design -directive AddRetime
+	  set CurrentDirective [lindex $physOptDirectives $i]
+	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+	  phys_opt_design -directive $CurrentDirective
+	  puts "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack"
+	  puts "Previous WNS: $PrevSlack"
+          set PrevSlack $CurrentSlack
+	 } else {
+	  puts "Skipping phys_opt phase as current slack is +$CurrentSlack"
+	 }
 	}
 	
 	# Examples on how use directives
 	# place_design -directive Explore
 	# phys_opt_design -directive AggressiveExplore
 	# phys_opt_design -directive AggressiveFanoutOpt
-	# phys_opt_design -directive AlternateReplication
+	# phys_opt_design -directive AddRetime
 	# route_design -directive Explore
 	# phys_opt_design -directive AggressiveExplore
 	# route_design -tns_cleanup
@@ -57,10 +73,12 @@ proc implementation { g_root_dir } {
 	report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
 
 	route_design
+
+        write_checkpoint -force $g_root_dir/dcp/implementation.dcp
 		
-	report_design_analysis -timing
-	report_design_analysis -complexity
-	report_design_analysis -congestion
+	report_design_analysis -timing -file $g_root_dir/reports/design_analysis_timing.rpt
+	report_design_analysis -complexity -file $g_root_dir/reports/design_analysis_complexity.rpt
+	report_design_analysis -congestion -file $g_root_dir/reports/design_analysis_congestion.rpt
 		
 	report_route_status -file $g_root_dir/reports/post_route_status.rpt
 	report_timing_summary -file $g_root_dir/reports/post_route_timing_summary.rpt
@@ -71,7 +89,7 @@ proc implementation { g_root_dir } {
 	report_drc -file $g_root_dir/reports/post_imp_drc.rpt
 	write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
 	
-	write_checkpoint -force $g_root_dir/dcp/implementation.dcp 
+	#write_checkpoint -force $g_root_dir/dcp/implementation.dcp 
 }
 
 	
