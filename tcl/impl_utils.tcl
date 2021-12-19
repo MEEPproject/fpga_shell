@@ -116,9 +116,9 @@ proc routeCriticalPaths { } {
 
 }
 
-proc smartFlow { } {
+proc smartPlaceFlow { } {
 
-	## Add SLR directives
+	## Added SLR directives
 	set directives "Explore \
 					WLDrivenBlockPlacement \
 					ExtraNetDelay_high \
@@ -127,7 +127,15 @@ proc smartFlow { } {
 					AltSpreadLogic_medium \
 					AltSpreadLogic_low \
 					ExtraPostPlacementOpt \
-					ExtraTimingOpt"
+					ExtraTimingOpt \
+					SSI_SpreadLogic_high \
+					SSI_SpreadLogic_low \
+					SSI_SpreadSLLs \
+					SSI_BalanceSLLs \
+					SSI_BalanceSLRs \
+					SSI_HighUtilSLRs \
+					EarlyBlockPlacement \
+					RQS"
 					
 	# empty list for results
 	set wns_results ""
@@ -136,7 +144,7 @@ proc smartFlow { } {
 
 	foreach oneDirective $directives {
 		# open post opt design checkpoint
-		open_checkpoint $PROJ_DIR/${PROJ_NM}_post_opt.dcp
+		open_checkpoint $g_root_dir/${PROJ_NM}_post_opt.dcp
 		# run place design with a different directive
 		place_design -directive $oneDirective
 		# append time elapsed message to time_msg list
@@ -155,6 +163,116 @@ proc smartFlow { } {
 		incr i
 	}
 
-
-
 }
+
+#------------------------------------------------------------------------
+# smartPhysOptFlow
+#------------------------------------------------------------------------
+# This process implements some ideas taken from the HWjedi:
+# https://hwjedi.wordpress.com/2017/02/09/vivado-non-project-mode-part-iii-phys-opt-looping/
+# Optimization after placement can be performed several times to enhance the chances of the
+# rooting step to be successful. This optimizations can be done back to back and several times,
+# theoritecally improving the overall picture prior route_design. It should be proven.
+#------------------------------------------------------------------------
+proc smartPhysOptFlow { } {
+
+	# Open PostPlace dcp
+	open_checkpoint $g_root_dir/dcp/post_place.dcp
+
+	# List of phys_opt_design directives
+		## Add SLR directives
+	set directives "Explore \
+					ExploreWithHoldFix  \
+					AggressiveExplore  \
+					AlternateReplication  \					  
+					AggressiveFanoutOpt \
+					AddRetime \
+					AlternateFlowWithRetiming \
+					RuntimeOptimized \
+					ExploreWithAggressiveHoldFix \
+					RQS \					
+					Default"
+					
+	set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
+	
+	set NLOOPS 5 
+	set TNS_PREV 0
+	set WNS_SRCH_STR "WNS="
+	set TNS_SRCH_STR "TNS="
+	set i 0
+	
+	if { $WNS < 0 } {
+		## Choose n number of directives and loop over then NLOOPS times
+		## This might or might not improve timing, need to be proven
+		## The vivado.log can be the only place to get the TNS
+		## Grep is quicker than call vivado timing paths
+		for {set i 0} {$i < $NLOOPS} {incr i} {
+			phys_opt_design -directive AggressiveExplore
+			set WNS [ exec grep $WNS_SRCH_STR vivado.log | tail -1 | sed -n -e "s/^.*$WNS_SRCH_STR//p" | cut -d\  -f 1]                                    
+			set TNS [ exec grep $TNS_SRCH_STR vivado.log | tail -1 | sed -n -e "s/^.*$TNS_SRCH_STR//p" | cut -d\  -f 1]
+			puts "WNS=$WNS"
+			puts "TNS=$TNS"
+			
+			if { $TNS == $TNS_PREV && $i > 0 } {
+				puts "TNS didn't improved further, stopping smartPhysOptFlow"	
+				break
+			}
+			if { $WNS >= 0.000 } {
+				puts "WNS is possitive, smartPhysOptFlow succeded"	
+				break
+			}			
+			
+			set TNS_PREV $TNS
+			
+			phys_opt_design -directive AggressiveFanoutOpt
+			set WNS [ exec grep $WNS_SRCH_STR vivado.log | tail -1 | sed -n -e "s/^.*$WNS_SRCH_STR//p" | cut -d\  -f 1]                                    
+			set TNS [ exec grep $TNS_SRCH_STR vivado.log | tail -1 | sed -n -e "s/^.*$TNS_SRCH_STR//p" | cut -d\  -f 1]
+			puts "WNS=$WNS"
+			puts "TNS=$TNS"
+			
+			if { $TNS == $TNS_PREV && $i > 0 } {
+				puts "TNS didn't improved further, stopping smartPhysOptFlow"	
+				break
+			}
+			if { $WNS >= 0.000 } {
+				puts "WNS is possitive, smartPhysOptFlow succeded"	
+				break
+			}			
+			
+			set TNS_PREV $TNS
+			
+			phys_opt_design -directive AlternateFlowWithRetiming
+			set WNS [ exec grep $WNS_SRCH_STR vivado.log | tail -1 | sed -n -e "s/^.*$WNS_SRCH_STR//p" | cut -d\  -f 1]                                    
+			set TNS [ exec grep $TNS_SRCH_STR vivado.log | tail -1 | sed -n -e "s/^.*$TNS_SRCH_STR//p" | cut -d\  -f 1]
+			puts "WNS=$WNS"
+			puts "TNS=$TNS"
+			
+			if { $TNS == $TNS_PREV && $i > 0 } {
+				puts "TNS didn't improved further, stopping smartPhysOptFlow"	
+				break
+			}
+			if { $WNS >= 0.000 } {
+				puts "WNS is possitive, smartPhysOptFlow succeded"	
+				break
+			}			
+			
+			set TNS_PREV $TNS
+
+		}
+	
+	} else {
+		puts "WNS is possitive, smartPhysOptFlow won't be run"	
+	}
+	
+}
+
+### opt_design directives
+
+# Explore
+# ExploreArea
+# ExploreSequentialArea
+# AddRemap
+# NoBramPowerOpt
+# ExploreWithRemap
+# RQS
+# Default
