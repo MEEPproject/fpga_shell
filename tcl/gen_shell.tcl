@@ -30,6 +30,7 @@ foreach dicEntry $ShellEnabledIntf {
 	if {[regexp -inline -all "HBM" $IntfName] ne "" } {
 		set HBMentry $dicEntry
 		source $g_root_dir/shell/shell_hbm.tcl		
+		set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
 	}
 
 	if {[regexp -inline -all "UART" $IntfName] ne "" } {
@@ -41,7 +42,9 @@ foreach dicEntry $ShellEnabledIntf {
 	if {[regexp -inline -all "ETHERNET" $IntfName] ne "" } {
 		set ETHentry $dicEntry
 		source $g_root_dir/shell/shell_ethernet.tcl
-		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet_${g_board_part}.xdc"		
+		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet_${g_board_part}.xdc"
+		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
+
 	}
 	if {[regexp -inline -all "AURORA" $IntfName] ne "" } {
 		set AURORAentry $dicEntry
@@ -66,8 +69,8 @@ source $g_root_dir/shell/shell_gpio.tcl
 
 ## TODO: Find the right place for this, as lools like the smartConnect
 ## needs to be present for this to get set
-set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
-set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
+#set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
+#set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
 
 ### TODO: Catch
 source $g_root_dir/shell/shell_memmap.tcl
