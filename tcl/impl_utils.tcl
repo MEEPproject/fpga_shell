@@ -267,13 +267,44 @@ proc smartPhysOptFlow { } {
 	
 }
 
-### opt_design directives
 
-# Explore
-# ExploreArea
-# ExploreSequentialArea
-# AddRemap
-# NoBramPowerOpt
-# ExploreWithRemap
-# RQS
-# Default
+set PlaceDirectives "Explore \
+	WLDrivenBlockPlacement \
+	ExtraNetDelay_high \
+	ExtraNetDelay_low \
+	AltSpreadLogic_high \
+	AltSpreadLogic_medium \
+	AltSpreadLogic_low \
+	ExtraPostPlacementOpt \
+	ExtraTimingOpt \
+	SSI_SpreadLogic_high \
+	SSI_SpreadLogic_low \
+	SSI_SpreadSLLs \
+	SSI_BalanceSLLs \
+	SSI_BalanceSLRs \
+	SSI_HighUtilSLRs \
+	EarlyBlockPlacement \
+	RQS"
+
+
+set PhysOptDirectives "Explore \
+	ExploreWithHoldFix  \
+	AggressiveExplore  \
+	AlternateReplication  \					  
+	AggressiveFanoutOpt \
+	AddRetime \
+	AlternateFlowWithRetiming \
+	RuntimeOptimized \
+	ExploreWithAggressiveHoldFix \
+	RQS \					
+	Default"
+
+
+set OptDesignDirectives "Explore \
+	ExploreArea \
+	ExploreSequentialArea \
+	AddRemap \
+	NoBramPowerOpt \
+	ExploreWithRemap \
+	RQS \
+	Default"
