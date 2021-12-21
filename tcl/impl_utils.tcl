@@ -1,4 +1,33 @@
 #------------------------------------------------------------------------
+# reportUnconnectedPins
+#------------------------------------------------------------------------
+# Summarizes the Vivado log section where it is shown what pins are 
+# unconnected/grounded, which is usually an error.
+#------------------------------------------------------------------------
+proc reportUnconnectedPins { fileName } {
+
+	#TODO: it must exists, catch error otherwise
+	global g_root_dir
+	
+	set reportFile $g_root_dir/reports/unconnectedPins.rpt
+
+	## Synthesis log
+	set fd_synth [open $fileName r]
+	set fd_report [open $reportFile w ]
+
+	while {[gets $fd_synth line] >= 0} {
+		
+		set UndrivenPins [regexp -all -inline {WARNING: [Synth 8-3295].*$} $line]
+		puts $fd_report $UndrivenPins
+		puts "$UndrivenPins"
+	}
+	
+	close $fd_synth
+	close $fd_report
+
+}
+
+#------------------------------------------------------------------------
 # reportCriticalPaths
 #------------------------------------------------------------------------
 # Assigns the results of the report_timing command to the

@@ -1,4 +1,5 @@
 source [pwd]/tcl/environment.tcl
+source $g_root_dir/tcl/impl_utils.tcl
 
 if { $::argc > 0 } {
  set g_project_dir $::argv
@@ -38,7 +39,11 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 	reportCriticalPaths $g_root_dir/reports/post_synth_critpath_report.csv
 	
 	## Synthesis log
-	file copy $g_project_dir/system.runs/synth_1/system.vds $g_root_dir/reports/synthesis.rpt
+	set synth_log $g_root_dir/reports/synthesis.rpt
+	
+	file copy $g_project_dir/system.runs/synth_1/system.vds $synth_log
+	
+	reportUnconnectedPins { $synth_log }
 	
 	## Add this into a open-while loop to parse line by line
 	#set UndrivenPins [regexp -all -inline {WARNING: [Synth 8-3295].*$} $line]
