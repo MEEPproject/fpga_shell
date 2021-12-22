@@ -4,7 +4,7 @@
 # Summarizes the Vivado log section where it is shown what pins are 
 # unconnected/grounded, which is usually an error.
 #------------------------------------------------------------------------
-proc reportUnconnectedPins { fileName } {
+proc reportUnconnectedPins { SynthLogFile } {
 
 	#TODO: it must exists, catch error otherwise
 	global g_root_dir
@@ -12,15 +12,26 @@ proc reportUnconnectedPins { fileName } {
 	set reportFile $g_root_dir/reports/unconnectedPins.rpt
 
 	## Synthesis log
-	set fd_synth [open $fileName r]
-	set fd_report [open $reportFile w ]
+	set fd_synth  [open $SynthLogFile r]
+	set fd_report [open $reportFile w  ]
+
+	set UndrivenPinDetected 0
 
 	while {[gets $fd_synth line] >= 0} {
 		
 		set UndrivenPins [regexp -all -inline {WARNING: \[Synth 8-3295\].*$} $line]
 		puts $fd_report $UndrivenPins
 		puts "$UndrivenPins"
+		if { $UndrivenPins != ""} {
+			set UndrivenPinDetected 1
+		}	
 	}
+
+	if { $UndrivenPinDetected == 0 } {
+		set OKMsg "No undriven pins were detected"
+		puts $OKMsg
+		puts $fd_report $OKMsg		
+	}	
 	
 	close $fd_synth
 	close $fd_report

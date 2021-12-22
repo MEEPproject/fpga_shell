@@ -23,12 +23,14 @@ proc implementation { g_root_dir } {
 
 	
 	puts "Place design starting at:"
-	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
-	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
+	set InitDate[ clock format [ clock seconds ] -format %d/%m/%Y ]
+	set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
+	puts "$InitTime on $InitDate"
 	place_design -directive Explore
 	puts "Place design Finished at:"
 	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
+	puts "\(started at $InitTime on $InitDate\)"
 
 	report_clock_utilization -file $g_root_dir/reports/clock_utilization.rpt
 	
@@ -45,6 +47,7 @@ proc implementation { g_root_dir } {
         ExploreWithAggressiveHoldFix \
         RQS \
         Default"
+	set fd_opt [open $g_root_dir/reports/opt_strategies.rpt "w"] 
 
 	set i 0
 	set nloops 8 
@@ -59,13 +62,22 @@ proc implementation { g_root_dir } {
 	  set CurrentDirective [lindex $PhysOptDirectives $i]
 	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	  phys_opt_design -directive $CurrentDirective
+	  puts "\r\n-------------------------"
 	  puts "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack"
 	  puts "Previous WNS: $PrevSlack"
+	  set OptMsg "Directive $CurrentDirective improved WNS by [expr abs($PrevSlack - $CurrentSlack)]ns"
+	  puts "$OptMsg"
+	  puts $fd_opt $OptMsg
           set PrevSlack $CurrentSlack
 	 } else {
-	  puts "Skipping phys_opt phase as current slack is +$CurrentSlack"
+	  set SkipMsg "Skipping phys_opt phase as current slack is +$CurrentSlack"
+	  puts "$SkipMsg"
+	  puts $fd_opt $SkipMsg
 	 }
+	 puts "-------------------------\r\n"
 	}
+
+	close $fd_opt
 	
 	# Examples on how use directives
 	# place_design -directive Explore
@@ -85,6 +97,13 @@ proc implementation { g_root_dir } {
 	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
 	report_utilization -file $g_root_dir/reports/post_place_utilization.rpt
 	report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
+
+	if { [expr abs($CurrentSlack) > 1.000 ] } {
+		puts "route_design will not be run as the WNS is above 1.000 "
+		puts "Implementation Failed. Check the timing reports to study how to improve timing"
+		## TODO: Quality of Results can be used as another criteria to not going further
+	        return 0
+	}
 
 	route_design
 
