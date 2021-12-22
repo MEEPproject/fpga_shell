@@ -138,7 +138,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					}
 					if { "${device}" == "ETHERNET" } {
                                                 dict set d_device IRQ [lindex $fields 7]
-                                        }
+					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}
@@ -279,6 +279,35 @@ proc GPIODefinition { DefinitionFile } {
 }
 
 ################################################################
+# Discover the asynchronous reset signal. This signal resets 
+# the whole shell but the PCIe interface.
+################################################################
+proc ARstDefinition { DefinitionFile } {
+
+	set fd_AccDef      [open $DefinitionFile "r"]
+	set d_rst ""
+	
+			
+	while {[gets $fd_AccDef line] >= 0} {
+		set line [string map {" " ""} $line]	
+		set line [string map {"\t" ""} $line]	
+		if {[regexp -inline -all {^ARST,} $line] ne ""} {
+			set fields [split $line ","]	
+			
+			set d_rst [dict create Name g_rst]
+			dict set d_rst Polarity  [lindex $fields 1]
+			dict set d_rst IntfLabel [lindex $fields 2]
+			
+			#putmeeps "Adding GPIO to the list: $d_gpio "
+		}		
+	}
+	
+	close $fd_AccDef
+
+	return $d_rst
+}
+
+################################################################
 # Get the EA name so it is shown later
 ################################################################
 proc GetEAname { DefinitionFile } {
@@ -320,6 +349,8 @@ if { $ParseRet == 2 } {
 
 set ClockList [ClocksDefinition $p_EAdefFile ]
 set GPIOList  [GPIODefinition $p_EAdefFile ]
+set ARSTDef   [ARstDefinition $p_EAdefFile ]
+
 
 putmeeps "GPIO List: $GPIOList"
 
@@ -334,6 +365,8 @@ Add2EnvFile $p_ShellEnvFile "set PortEnabledList $PortInt"
 Add2EnvFile $p_ShellEnvFile "set GPIOList \{$GPIOList\}"
 ## Add the Clock list to the environment file
 Add2EnvFile $p_ShellEnvFile "set ClockList \[list $ClockList\]"
+## Add the Async Reset to the environment file
+Add2EnvFile $p_ShellEnvFile "set ARSTDef \[list $ARSTDef\]"
 
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN

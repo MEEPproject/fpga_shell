@@ -62,7 +62,7 @@ foreach dicEntry $ShellEnabledIntf {
 	
 }
 
-#GEnerate IF GPIO
+#GEnerate IF GPIO: Inside the tcl
 
 source $g_root_dir/shell/shell_gpio.tcl
 
