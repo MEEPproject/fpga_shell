@@ -49,6 +49,7 @@ proc implementation { g_root_dir } {
 	set i 0
 	set nloops 8 
 	set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+	set PrevSlack $CurrentSlack
 	for {set i 0} {$i < $nloops} {incr i} {
 	 if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0} {
 	  puts "Found setup timing violations => running physical optimization"

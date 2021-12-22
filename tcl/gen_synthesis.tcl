@@ -42,7 +42,7 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 	## module name. It could be treated as a global variable either.
 	set synth_log $g_root_dir/reports/synthesis.rpt
 	
-	file copy $g_root_dir/project/system.runs/synth_1/system_top.vds $synth_log
+	file copy -force $g_root_dir/project/system.runs/synth_1/system_top.vds $synth_log
 	
 	reportUnconnectedPins $synth_log 
 	

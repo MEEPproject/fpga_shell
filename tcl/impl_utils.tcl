@@ -17,7 +17,7 @@ proc reportUnconnectedPins { fileName } {
 
 	while {[gets $fd_synth line] >= 0} {
 		
-		set UndrivenPins [regexp -all -inline {WARNING: [Synth 8-3295].*$} $line]
+		set UndrivenPins [regexp -all -inline {WARNING: \[Synth 8-3295\].*$} $line]
 		puts $fd_report $UndrivenPins
 		puts "$UndrivenPins"
 	}
