@@ -28,6 +28,7 @@ foreach clkObj $ClockList {
 		append ConfMMCMString "$ConfMMCM"
 	}
 	set ClkFreq  [dict get $clkObj ClkFreq]
+	set ClkName  [dict get $clkObj ClkName]
 	set ClkFreqMHz [expr $ClkFreq/1000000 ]
 	putmeeps "Configuring MMCM output $i: ${ClkFreqMHz}MHz"
 	set ConfMMCM "CONFIG.CLKOUT${i}_REQUESTED_OUT_FREQ ${ClkFreqMHz} "
@@ -37,6 +38,7 @@ foreach clkObj $ClockList {
 	append ConfMMCMString "$ConfMMCM"
 	incr i
 	incr n
+
 	
 	#Get the slowest clock and check if there is any below
 	#100MHz. If it doesn't, it needs to be created to source
@@ -120,6 +122,14 @@ if { $APBclkCandidate ne "" } {
 		if { $RstExist == 1 } {
 			connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
 		}
+
+		## Make the clocks external and user-usable
+		## User clocks
+		# TODO: we dont want the APB clock to be external and we do want the PCIe clock in case
+		# it is used as an interface
+                create_bd_port -dir O -type clk $ClkName
+                connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/CLK${n}]
+
 
 	}
   

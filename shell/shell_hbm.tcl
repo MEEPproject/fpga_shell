@@ -81,9 +81,9 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
    
-## User clock
-create_bd_port -dir O -type clk $HBMname
-connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
+## User clock: This should be done by the MMCM tcl
+#create_bd_port -dir O -type clk $HBMname
+#connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
 
 
 ## TODO: Make dependant of selected HBM channels number
