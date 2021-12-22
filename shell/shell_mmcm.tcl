@@ -117,7 +117,7 @@ if { $APBclkCandidate ne "" } {
 		### Create the reset list to be used later
 		connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/$ClkNum]
 		### TODO: connect DCM locked signal
-		if { RstExist == 1 } {
+		if { $RstExist == 1 } {
 			connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
 		}
 
