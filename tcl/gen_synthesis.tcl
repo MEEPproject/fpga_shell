@@ -41,7 +41,7 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 	## Synthesis log
 	set synth_log $g_root_dir/reports/synthesis.rpt
 	
-	file copy $g_project_dir/system.runs/synth_1/system.vds $synth_log
+	file copy $g_root_dir/project/system.runs/synth_1/system.vds $synth_log
 	
 	reportUnconnectedPins { $synth_log }
 	
