@@ -90,6 +90,15 @@ if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl}]} 
 	putmeeps "File project_options.tcl loaded"
 }
 
+## TODO: load the accelerator xdc file if it exists
+
+set acc_xdc_file $g_accel_dir/meep_shell/xdc/${EAname}.xdc
+
+if {[file exists $acc_xdc_file]} {
+	add_files -fileset [get_filesets constrs_1] "$acc_xdc_file"
+}
+
+
 # The accelerator needs to define its own repo paths and the main project ip_path can be overwritten. 
 # Need to define it again
 set ip_dir_list [get_property ip_repo_paths [current_project]]
