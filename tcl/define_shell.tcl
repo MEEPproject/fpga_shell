@@ -326,6 +326,7 @@ proc GetEAname { DefinitionFile } {
 		}		
 	}
 		
+    return $ModuleName
 }
 
 ###############################################################
@@ -350,6 +351,7 @@ if { $ParseRet == 2 } {
 set ClockList [ClocksDefinition $p_EAdefFile ]
 set GPIOList  [GPIODefinition $p_EAdefFile ]
 set ARSTDef   [ARstDefinition $p_EAdefFile ]
+set EAname    [GetEAname $p_EAdefFile ]
 
 
 putmeeps "GPIO List: $GPIOList"
@@ -367,6 +369,9 @@ Add2EnvFile $p_ShellEnvFile "set GPIOList \{$GPIOList\}"
 Add2EnvFile $p_ShellEnvFile "set ClockList \[list $ClockList\]"
 ## Add the Async Reset to the environment file
 Add2EnvFile $p_ShellEnvFile "set ARSTDef \[list $ARSTDef\]"
+## Add the EA name to the environment file
+Add2EnvFile $p_ShellEnvFile "set g_EAname $EAname"
+
 
 
 putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN

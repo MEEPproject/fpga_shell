@@ -30,11 +30,24 @@ proc implementation { g_root_dir } {
 	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
 
-	report_clock_utilization -file $g_root_dir/reports/clock_util.rpt
+	report_clock_utilization -file $g_root_dir/reports/clock_utilization.rpt
 	
 	# Optionally run optimization if there are timing violations after placement
+	
+	set PhysOptDirectives "Explore \
+        ExploreWithHoldFix  \
+        AggressiveExplore  \
+        AlternateReplication  \
+        AggressiveFanoutOpt \
+        AddRetime \
+        AlternateFlowWithRetiming \
+        RuntimeOptimized \
+        ExploreWithAggressiveHoldFix \
+        RQS \
+        Default"
+
 	set i 0
-	set nloops 5
+	set nloops 8 
 	set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	for {set i 0} {$i < $nloops} {incr i} {
 	 if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0} {
@@ -42,7 +55,7 @@ proc implementation { g_root_dir } {
 	  #phys_opt_design -directive AggressiveExplore
 	  #phys_opt_design -directive AggressiveFanoutOpt
 	  #phys_opt_design -directive AddRetime
-	  set CurrentDirective [lindex $physOptDirectives $i]
+	  set CurrentDirective [lindex $PhysOptDirectives $i]
 	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	  phys_opt_design -directive $CurrentDirective
 	  puts "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack"
@@ -69,7 +82,7 @@ proc implementation { g_root_dir } {
 
 	
 	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
-	report_utilization -file $g_root_dir/reports/post_place_util.rpt
+	report_utilization -file $g_root_dir/reports/post_place_utilization.rpt
 	report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
 
 	route_design
@@ -87,7 +100,8 @@ proc implementation { g_root_dir } {
 	report_timing -hold -file $g_root_dir/reports/timing_hold.rpt
 	report_power -file $g_root_dir/reports/post_route_power.rpt
 	report_drc -file $g_root_dir/reports/post_imp_drc.rpt
-	write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
+	# The netlist file below can size ~220MB, need to check if it is worth
+	#write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
 	
 	#write_checkpoint -force $g_root_dir/dcp/implementation.dcp 
 }

@@ -38,12 +38,13 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 	# Run custom script to report critical timing paths
 	reportCriticalPaths $g_root_dir/reports/post_synth_critpath_report.csv
 	
-	## Synthesis log
+	## Synthesis log. The "system_top" is hardcoded as it is always the shell top 
+	## module name. It could be treated as a global variable either.
 	set synth_log $g_root_dir/reports/synthesis.rpt
 	
-	file copy $g_root_dir/project/system.runs/synth_1/system.vds $synth_log
+	file copy $g_root_dir/project/system.runs/synth_1/system_top.vds $synth_log
 	
-	reportUnconnectedPins { $synth_log }
+	reportUnconnectedPins $synth_log 
 	
 	## Add this into a open-while loop to parse line by line
 	#set UndrivenPins [regexp -all -inline {WARNING: [Synth 8-3295].*$} $line]
