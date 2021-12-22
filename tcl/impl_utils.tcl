@@ -145,7 +145,9 @@ proc routeCriticalPaths { } {
 
 }
 
-proc smartPlaceFlow { } {
+proc smartPlaceFlow { root_dir } {
+
+	set g_root_dir $root_dir
 
 	## Added SLR directives
 	set directives "Explore \
@@ -173,7 +175,7 @@ proc smartPlaceFlow { } {
 
 	foreach oneDirective $directives {
 		# open post opt design checkpoint
-		open_checkpoint $g_root_dir/${PROJ_NM}_post_opt.dcp
+		open_checkpoint $g_root_dir/dcp/post_opt.dcp
 		# run place design with a different directive
 		place_design -directive $oneDirective
 		# append time elapsed message to time_msg list
@@ -191,6 +193,8 @@ proc smartPlaceFlow { } {
 		puts " "
 		incr i
 	}
+	
+	## TODO: Write to File
 
 }
 
