@@ -14,6 +14,7 @@ proc bitstream { g_root_dir } {
 	file mkdir $g_root_dir/bitstream
 	open_checkpoint $g_root_dir/dcp/implementation.dcp
 	write_bitstream -force ${g_root_dir}/bitstream/system.bit
+	write_debug_probes -no_partial_ltxfile -force $g_root_dir/bitstream/system.ltx
 }
 
 bitstream $g_root_dir

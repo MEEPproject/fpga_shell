@@ -1,9 +1,31 @@
+# Author: Daniel J.Mazure
+# Date: 05.12.2021
+# Description: GitLab CI configuration script.
+
+# Tests over the FPGA set to manual temporarily until one specific machine is devoted
+# to that task.
+#
+# The CI/CD flow generates a bitstream both for the targeted EA.
+
+
+variables:
+        #EMULATED_ACCELERATOR: openpiton
+        GIT_SUBMODULE_STRATEGY: recursive
+        NUMBER_OF_JOBS: "8"
+        FPGA_LOG_FILE: fpga.log
+        TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
+        QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
+        BITSTREAM: system_${CI_PIPELINE_ID}.bit
+        DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+
 stages:
     - EA-initialization
     - synthesis
     - implementation
+    - validation
     - bitstream
     - fpga-test
+<<<<<<< HEAD
 variables:
         EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
         EMULATED_ACCELERATOR_SHA: 823a24952cbc793472e9eee9b7fc6a636a7d28d0
@@ -15,87 +37,74 @@ variables:
         ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
         FPGA_LOG_FILE: fpga.log
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
+=======
+    - deploy
+>>>>>>> origin/develop/addExtReset
 
-download-binaries:
-        stage: EA-initialization
-        rules:
-            # The default is download the binaries from a successful job
-            - if: '$CI_PIPELINE_SOURCE == "push"'
-              when: on_success
-            - when: never
-        tags:
-            - MEEP_FPGA 
-        before_script:
-            - make clean    
-        
-        script:
-            - echo "$ARTIFACTS, $THIS_REPO, $LAST_BINARIES_JOB"
-            - source sh/get_artifacts.sh $THIS_REPO $LAST_BINARIES_JOB $ARTIFACTS
-            - unzip download.zip -d .
-            
-        artifacts:
-                #  untracked: true
-            expire_in: 1 day
-            paths:            
-                - binaries 
+        # This job can be extended from the EA itself...        
 EA-build:
         stage: EA-initialization
         rules:
-            - if: '$CI_PIPELINE_SOURCE == "merge_request_event"' 
-            #- if: '$CI_PIPELINE_SOURCE == "push"'
-            #  when: on_success
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
         timeout: 2h
         tags: 
             - MEEP_FPGA
         before_script:
-            - make clean
-            - git submodule update --init --recursive
-            - mkdir -p binaries
-            - source ./init_project.sh $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA            
-        script:
-            - source ./sh/accelerator_build.sh            
+            # This is a CI/CD requirement. Use a token-ed URL instead of the normal repo URL
+            - sh/load_module.sh $EMULATED_ACCELERATOR            
+            - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
+        script:    
+            - make initialize
+            - make binaries
         after_script:
             - cp -r accelerator/meep_shell/binaries/* binaries
         artifacts:
                 #  untracked: true
-          expire_in: never
           paths:            
             - binaries        
 
 synthesis:
         stage: synthesis
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        needs:
+            - EA-build
         timeout: 4h
         tags: 
             - MEEP_FPGA
         before_script:
-            - git submodule update --init --recursive
-            - source ./init_project.sh  $EMULATED_ACCELERATOR_REPO $EMULATED_ACCELERATOR_SHA
+            - sh/load_module.sh $EMULATED_ACCELERATOR
+            - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
         script:
-            - make vivado
+            - make initialize
+            - make project
             - make synthesis
         after_script:
-                - cp $(find . -wholename "*/synth_1/runme.log") ./synth.log
-                  # Maybe is interesting bring in all the IPs logs. For that, search only "runme.log"
-                - make clean_accelerator clean_shell
-                - >
-                 echo -e " EA URL --> $EMULATED_ACCELERATOR_REPO \r\n
-                 EA SHA --> $EMULATED_ACCELERATOR_SHA \r\n
-                 Vivado version --> $VIVADO_VERSION   \r\n
-                 Vivado path --> $VIVADO_PATH        \r\n
-                 Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
+            - mkdir tmp
+            - make clean_accelerator clean_shell
+            - >
+              echo -e " EA URL --> gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
+              EA SHA --> $EMULATED_ACCELERATOR_SHA: 33ba163f87090637c7b6ae21f6bc6bf679750c96
+              Vivado version --> $VIVADO_VERSION   \r\n
+              Vivado path --> $VIVADO_PATH        \r\n
+              Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
+            - cp cicd_log.txt tmp
+            - cp -r src/system_top.sv tmp
+            - cp -r tcl/shell_env.tcl tmp
+            - cp gen_system.tcl tmp/tcl
         artifacts:
           when: always
-          expire_in: 1 month
           paths:
-            - src/system_top.sv
-            - tcl/shell_env.tcl
-            - gen_system.tcl 
-            - synth.log
-            - dcp/synthesis.dcp
-            - cicd_log.txt
+            - tmp
+            - dcp
             
 implementation:
         stage: implementation
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
+        needs:
+            - synthesis
         timeout: 4h
         tags: 
             - MEEP_FPGA
@@ -114,26 +123,40 @@ implementation:
             when: on_success
             expire_in: 1 day
             paths:
+                - tmp
+                - dcp
                 - reports
-                - dcp/implementation.dcp                
 bitstream:
         stage: bitstream
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
+        needs:
+            - synthesis
+            - implementation
         tags: 
             - MEEP_FPGA             
         script:
             - make bitstream
         after_script:
             - mv bitstream/system.bit bitstream/$BITSTREAM
+            - mv bitstream/ tmp/
+            - mv dcp/ tmp/
         dependencies:
             - synthesis
             - implementation
         artifacts:
             when: always
-            expire_in: 1 month
+            expire_in: 1 day
             paths:
-                - bitstream
+                - tmp
 validation:
         stage: bitstream
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
+        needs: 
+            - implementation
         tags: 
             - MEEP_FPGA             
         script:
@@ -145,26 +168,60 @@ validation:
 
 fpga-test:
         stage: fpga-test
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
+        needs:
+            - EA-build
+            - bitstream
+        retry: 2
         tags: 
             - FPGA_TEST
         before_script:
-            - export PATH=$PATH:/home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
-            - /home/tools/scripts/givememyuart
+            - export PATH=$PATH:$QDMA_DRIVERS
+            - sudo $TOOLS_DIR/givememyuart
         script:
-            - sh/load_bitstream.sh qdma bitstream/$BITSTREAM
+            - sh/load_bitstream.sh qdma tmp/bitstream/$BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
-            - source sh/pcie_script.sh binaries/fw_payload.bin
-            - sleep 60            
-            - sudo pkill cat
+            # The EA script should provide the right script and the right binary
+            - source $ACC_DIR/scripts/$BOOT_SCRIPT binaries/fw_payload.bin
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG_FILE
+        after_script:
+            - cp $FPGA_LOG_FILE tmp
         dependencies:
             - EA-build
-            - download-binaries
             - bitstream
         artifacts:
             when: always
             paths:
-            - $FPGA_LOG_FILE
+            - tmp
+
+deploy-EA:
+        stage: deploy
+        rules:
+            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+        
+        tags:
+            - MEEP_FPGA
+        before_script:
+            - EANAME=$(grep -o ea_url.txt -e NAME.*$ | awk -F ':' '$2 {print $2}') ;\
+              mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
+        script:
+            - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
+            - cp -r tmp/* $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
+        needs:
+            - EA-build
+            - synthesis
+            - implementation
+            - bitstream
+            - fpga-test
+        dependencies:
+            - EA-build
+            - synthesis
+            - implementation
+            - bitstream
+            - fpga-test
+
 
 
