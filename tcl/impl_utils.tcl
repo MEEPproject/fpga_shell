@@ -39,6 +39,53 @@ proc reportUnconnectedPins { SynthLogFile } {
 }
 
 #------------------------------------------------------------------------
+# reportEarlyDRC
+#------------------------------------------------------------------------
+# Check as early as possible that all logical ports and all I/O
+# standards are specified.
+# This likely shouldn't happen as the Shell is "fixed", but it is
+# better to detect if that happen here than in the bitgen phase.
+#------------------------------------------------------------------------
+
+proc reportEarlyDRC { root_dir } {
+
+	set g_root_dir $root_dir
+
+        set drc_early_rpt $g_root_dir/reports/drc_early.rpt
+
+        report_drc -name drc_1 -ruledecks {default} -file $drc_early_rpt
+
+        set fd_drc [open $drc_early_rpt "r"]
+
+	set UnconstrainedPortMsg "Unconstrained Logical Port"
+        set UnspecifiedStdMsg  "Unspecified I/O Standard"
+
+	set Error 0
+	set UnconstrainedPort ""
+	set UnspecifiedStd ""
+
+        while {[gets $fd_drc line] >= 0} {
+
+                set UnconstrainedPort [regexp -all -inline "${UnconstrainedPortMsg}.*[1-9]+" $line]
+                set UnspecifiedStd    [regexp -all -inline "${UnspecifiedStdMsg}.*[1-9+]" $line]
+
+                if { $UnconstrainedPort != "" } {
+                        set Error 1
+			puts ${UnconstrainedPort}
+                }
+		if { $UnspecifiedStd != "" } {
+			set Error 1
+			puts ${UnspecifiedStd}
+		}
+        }
+
+	close $fd_drc
+
+	return $Error
+}
+
+
+#------------------------------------------------------------------------
 # reportCriticalPaths
 #------------------------------------------------------------------------
 # Assigns the results of the report_timing command to the
@@ -156,6 +203,15 @@ proc routeCriticalPaths { } {
 
 }
 
+#------------------------------------------------------------------------
+# smartPlaceFlow
+#------------------------------------------------------------------------
+# This procedure goes through ALL placement strategies to figure out
+# what is the one offering the minumum WNS. Is not designed to be part of
+# the normal flow, but to be run as a standalone to later apply the 
+# best placement directive to the subsequent runs.
+#------------------------------------------------------------------------
+
 proc smartPlaceFlow { root_dir } {
 
 	set g_root_dir $root_dir
@@ -183,6 +239,13 @@ proc smartPlaceFlow { root_dir } {
 	set wns_results ""
 	# empty list for time elapsed messages
 	set time_msg ""
+
+	if { [file exists $g_root_dir/dcp/post_opt.dcp] } {
+		puts "post synthesis optimization dcp exists"
+	} else {
+		opt_design
+	        write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
+	}
 
 	foreach oneDirective $directives {
 		# open post opt design checkpoint

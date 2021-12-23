@@ -12,15 +12,21 @@ proc implementation { g_root_dir } {
 	file mkdir $g_root_dir/reports
 
 	open_checkpoint $g_root_dir/dcp/synthesis.dcp
+
+	### Check as early as possible that all logical ports and all I/O
+	### standards are specified.
+	### This likely shouldn't happen as the Shell is "fixed", but it is
+	### better to detect if that happen here than in the bitgen phase.
+	if { [reportEarlyDRC $g_root_dir] == 1 } {
+		puts "Detected Unspecified Logic Levels or Unconstraiend ports."
+		puts "Implementation will not continue. Check the pinout."
+	}
+
 	#opt_design
 	opt_design -directive Explore
+        write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
 	reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
 	
-	## TODO; Check as early as possible the pinout is correct
-	# report_drc -name drc_1 -ruledecks {default}
-	# Extract from here the UCIO-1 message
-	# "ports have no user assigned specific location"
-
 	
 	puts "Place design starting at:"
 	set InitDate[ clock format [ clock seconds ] -format %d/%m/%Y ]
@@ -106,6 +112,8 @@ proc implementation { g_root_dir } {
 	}
 
 	route_design
+	## TODO: Directives can be added here to go the extra mile. E.g, the WNS is below -0.1 after 
+	## default routing
 
         write_checkpoint -force $g_root_dir/dcp/implementation.dcp
 		

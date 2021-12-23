@@ -1,4 +1,5 @@
 tcl/shell_env.tcl
+.Xil/
 project
 src/system_top.sv
 accelerator
@@ -13,3 +14,4 @@ ea_url.txt
 *.swp
 *.log
 *.dcp
+*.jou
