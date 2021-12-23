@@ -25,21 +25,7 @@ stages:
     - validation
     - bitstream
     - fpga-test
-<<<<<<< HEAD
-variables:
-        EMULATED_ACCELERATOR_REPO: https://gitlab-ci-token:$RTL_REPO_TOKEN@gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-        EMULATED_ACCELERATOR_SHA: 823a24952cbc793472e9eee9b7fc6a636a7d28d0
-        VIVADO_VERSION: "2020.1"
-        VIVADO_PATH: '/opt/Xilinx/Vivado/${VIVADO_VERSION}/settings64.sh'
-        THIS_REPO: "FPGA_implementations%2FAlveoU280%2Ffpga_shell"
-        LAST_BINARIES_JOB: "223418"
-        NUMBER_OF_JOBS: "8"
-        ARTIFACTS: gitlab-ci-token:$MEEP_ARTIFACT_TOKEN
-        FPGA_LOG_FILE: fpga.log
-        BITSTREAM: system_${CI_PIPELINE_ID}.bit
-=======
     - deploy
->>>>>>> origin/develop/addExtReset
 
         # This job can be extended from the EA itself...        
 EA-build:

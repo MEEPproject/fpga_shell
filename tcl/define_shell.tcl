@@ -317,10 +317,10 @@ proc GetEAname { DefinitionFile } {
 	set ModuleName ""
 	
 	while {[gets $fd_AccDef line] >= 0} {
-		if {[regexp -inline -all {^EAname,} $line] ne ""} {
-			set fields [split $line ","]
-			set ModuleName [lindex ModuleName 1]			
-			putwarnings "Found module name -$ModuleName- at line $i" 
+		if {[regexp -inline -all {^EANAME} $line] ne ""} {
+			set fields [split $line "="]
+			set ModuleName [lindex $fields 1]			
+			putmeeps "Found module name **$ModuleName** at line $i" 
 			incr i
 			break
 		}		

@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-EMULATED_ACCELERATOR_SHA: 823a24952cbc793472e9eee9b7fc6a636a7d28d0
-=======
 EMULATED_ACCELERATOR_NAME: OpenPiton
 EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
 EMULATED_ACCELERATOR_SHA: 4a82262047628dcaa0e0464851645495b2374cb4
 
->>>>>>> origin/develop/addExtReset

@@ -110,9 +110,12 @@ if { $APBclkCandidate ne "" } {
     
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
 
+  set n 0
+
 	foreach clkObj $ClockList {
 
-		set ClkNum [dict get $clkObj ClkNum]
+		set ClkNum  [dict get $clkObj ClkNum]
+		set ClkName [dict get $clkObj ClkName]
 
 		create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
 		connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
@@ -129,6 +132,7 @@ if { $APBclkCandidate ne "" } {
 		# it is used as an interface
                 create_bd_port -dir O -type clk $ClkName
                 connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/CLK${n}]
+		incr n
 
 
 	}
