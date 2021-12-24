@@ -13,8 +13,19 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 	set number_of_jobs $g_number_of_jobs
 	reset_run synth_1
 	launch_runs synth_1 -jobs ${g_number_of_jobs}
-	puts "Waiting for the Out Of Context IPs to be synthesized..."
+
+	puts "Waiting for the Out Of Context IPs (Block Design) to be synthesized."
+	puts "Task Started at:"
+        set InitDate[ clock format [ clock seconds ] -format %d/%m/%Y ]
+        set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
+        puts "$InitTime on $InitDate"
+
 	wait_on_run synth_1
+	
+        puts "Finished at:"
+        puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
+        puts [ clock format [ clock seconds ] -format %H:%M:%S ]
+
 	open_run synth_1
 
 	set status [get_property STATUS [get_runs synth_1]]

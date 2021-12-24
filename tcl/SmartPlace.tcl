@@ -9,5 +9,5 @@ if { $::argc > 0 } {
  exit -1
 }
 
-SmartPlaceFlow $g_root_dir
+smartPlaceFlow $g_root_dir
 

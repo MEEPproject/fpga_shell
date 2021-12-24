@@ -29,7 +29,7 @@ proc implementation { g_root_dir } {
 	
 	
 	puts "Place design starting at:"
-	set InitDate[ clock format [ clock seconds ] -format %d/%m/%Y ]
+	set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "$InitTime on $InitDate"
 	place_design -directive Explore

@@ -13,7 +13,6 @@ PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
 ACCEL_DIR    =  $(ROOT_DIR)/accelerator
 SYNTH_DCP    =  $(ROOT_DIR)/dcp/synthesis.dcp 
 IMPL_DCP     =  $(ROOT_DIR)/dcp/implementation.dcp 
-POSTOPT_DCP  =  $(ROOT_DIR)/dcp/post_opt.dcp
 BIT_FILE     =  $(ROOT_DIR)/bitstream/system.bit
 REPORT_DIR   =  $(ROOT_DIR)/reports
 YAML_FILE    =  $(ROOT_DIR)/.gitlab-ci.yml
@@ -89,7 +88,7 @@ $(BIT_FILE): $(IMPL_DCP)
 
 #### Special script to adquire the best placement strategy #####
 
-SmartPlace: $(POSTOPT_DCP)
+SmartPlace: $(SYNTH_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
 	
 validate: $(REPORT_DIR)

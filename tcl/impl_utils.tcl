@@ -218,23 +218,22 @@ proc smartPlaceFlow { root_dir } {
 
 	## Added SLR directives
 	set directives "Explore \
-					WLDrivenBlockPlacement \
-					ExtraNetDelay_high \
-					ExtraNetDelay_low \
-					AltSpreadLogic_high \
-					AltSpreadLogic_medium \
-					AltSpreadLogic_low \
-					ExtraPostPlacementOpt \
-					ExtraTimingOpt \
-					SSI_SpreadLogic_high \
-					SSI_SpreadLogic_low \
-					SSI_SpreadSLLs \
-					SSI_BalanceSLLs \
-					SSI_BalanceSLRs \
-					SSI_HighUtilSLRs \
-					EarlyBlockPlacement \
-					RQS"
-					
+		WLDrivenBlockPlacement \
+		ExtraNetDelay_high \
+		ExtraNetDelay_low \
+		AltSpreadLogic_high \
+		AltSpreadLogic_medium \
+		AltSpreadLogic_low \
+		ExtraPostPlacementOpt \
+		ExtraTimingOpt \
+		SSI_SpreadLogic_high \
+		SSI_SpreadLogic_low \
+		SSI_SpreadSLLs \
+		SSI_BalanceSLLs \
+		SSI_BalanceSLRs \
+		SSI_HighUtilSLRs \
+		EarlyBlockPlacement"
+
 	# empty list for results
 	set wns_results ""
 	# empty list for time elapsed messages
@@ -243,32 +242,89 @@ proc smartPlaceFlow { root_dir } {
 	if { [file exists $g_root_dir/dcp/post_opt.dcp] } {
 		puts "post synthesis optimization dcp exists"
 	} else {
+		open_checkpoint $g_root_dir/dcp/synthesis.dcp
 		opt_design
 	        write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
 	}
 
+
 	foreach oneDirective $directives {
 		# open post opt design checkpoint
 		open_checkpoint $g_root_dir/dcp/post_opt.dcp
-		# run place design with a different directive
+		# run place design with a different directive	
+		
+		puts "*******************************"
+                puts "Start @ [clock format [clock seconds] -format %H:%M:%S]"
+		puts "Running place_design -directive $oneDirective"
+		puts "*******************************"
+                set RefTime [clock seconds]
+
 		place_design -directive $oneDirective
+
 		# append time elapsed message to time_msg list
-		lappend time_msg [exec grep "place_design: Time (s):" vivado.log | tail -1]
+                puts "*******************************"
+		puts "Finish @ [clock format [clock seconds] -format %H:%M:%S]"
+                puts "*******************************"
+
+                set LapsedTime [getLapsedTime $RefTime]
+		puts "$LapsedTime"
+
+		lappend time_msg "place_design: Time : $LapsedTime" 
 		# append wns result to our results list
 		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
-		append wns_results $WNS " "
+		append wns_results $WNS
 	}
 	
 	# print out results at end
+	
+	set resFile "$g_root_dir/reports/smartPlaceResults.txt"
+	set fd_res [open $resFile "w"]
+
+
 	set i 0
 	foreach oneDirective $directives {
-		puts "Post Place WNS with directive $oneDirective = [lindex $wns_results $i] "
-		puts [lindex $time_msg [expr $i*2]]
-		puts " "
+		set ResMsg0 "Post Place WNS with directive $oneDirective = [lindex $wns_results $i] "
+		set ResMsg1 [lindex $time_msg $i]
+		set ConstructMesg "$ResMsg0\r\n$ResMsg1\r\n\r\n"
+
+		puts "$fd_res $ConstructMsg"
+		puts "$ConstructMsg"
 		incr i
 	}
 	
-	## TODO: Write to File
+	close $fd_res
+}
+
+
+
+#------------------------------------------------------------------------
+# suggestionFlow
+#------------------------------------------------------------------------
+# This procedure goes through the RQS directive.
+# Vivado makes "suggestions". They can be stored on a file and applied
+# later in an iterative way.
+#------------------------------------------------------------------------
+proc suggestionFlow { root_dir } {
+
+	set g_root_dir $root_dir
+
+	# open dcp
+	# opt_design
+	# place_design
+
+	report_qor_assessment -file postsynth.rpt
+	report_methodology -file methodology.rpt
+
+	report_qor_suggestions
+	### This is run after a design is implemented.
+	### Analyzes it and apply timing things in the next
+	### loop. Touches properties and switches
+
+	### In fact, it can be run after everystage, to loop
+	### over it applying the suggestions.
+	write_qor_suggestions -file qor.sgs
+	read_qor_suggestions -file qor.sgs
+
 
 }
 
@@ -280,6 +336,7 @@ proc smartPlaceFlow { root_dir } {
 # Optimization after placement can be performed several times to enhance the chances of the
 # rooting step to be successful. This optimizations can be done back to back and several times,
 # theoritecally improving the overall picture prior route_design. It should be proven.
+# The best directive can be stored and user later in the implementation flow if it exists
 #------------------------------------------------------------------------
 proc smartPhysOptFlow { } {
 
@@ -289,16 +346,15 @@ proc smartPhysOptFlow { } {
 	# List of phys_opt_design directives
 		## Add SLR directives
 	set directives "Explore \
-					ExploreWithHoldFix  \
-					AggressiveExplore  \
-					AlternateReplication  \					  
-					AggressiveFanoutOpt \
-					AddRetime \
-					AlternateFlowWithRetiming \
-					RuntimeOptimized \
-					ExploreWithAggressiveHoldFix \
-					RQS \					
-					Default"
+			ExploreWithHoldFix  \
+			AggressiveExplore  \
+			AlternateReplication  \					  
+			AggressiveFanoutOpt \
+			AddRetime \
+			AlternateFlowWithRetiming \
+			RuntimeOptimized \
+			ExploreWithAggressiveHoldFix \
+			Default"
 					
 	set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
 	
@@ -372,6 +428,29 @@ proc smartPhysOptFlow { } {
 		puts "WNS is possitive, smartPhysOptFlow won't be run"	
 	}
 	
+}
+
+
+
+#------------------------------------------------------------------------
+## GetTimeRef
+##------------------------------------------------------------------------
+## This process returns a time stamp comparison, the actual against the 
+## the one is passed as a parameter
+##------------------------------------------------------------------------
+
+proc getLapsedTime { ReferenceTime } {
+
+        #set ActualTime [ clock format [ clock seconds ] -format %H:%M:%S ]
+        #set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
+
+	set ActualTime [clock seconds]
+
+	set LapsedTime [expr $ActualTime - $ReferenceTime]
+
+	## Check if this can be done:
+	return [clock format $LapsedTime -format %H:%M:%S -gmt true]
+
 }
 
 
