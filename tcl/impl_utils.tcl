@@ -272,7 +272,7 @@ proc smartPlaceFlow { root_dir } {
 		lappend time_msg "place_design: Time : $LapsedTime" 
 		# append wns result to our results list
 		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
-		append wns_results $WNS
+		lappend wns_results $WNS
 	}
 	
 	# print out results at end
@@ -285,9 +285,9 @@ proc smartPlaceFlow { root_dir } {
 	foreach oneDirective $directives {
 		set ResMsg0 "Post Place WNS with directive $oneDirective = [lindex $wns_results $i] "
 		set ResMsg1 [lindex $time_msg $i]
-		set ConstructMesg "$ResMsg0\r\n$ResMsg1\r\n\r\n"
+		set ConstructMsg "$ResMsg0\r\n$ResMsg1\r\n\r\n"
 
-		puts "$fd_res $ConstructMsg"
+		puts $fd_res $ConstructMsg
 		puts "$ConstructMsg"
 		incr i
 	}
@@ -312,8 +312,8 @@ proc suggestionFlow { root_dir } {
 	# opt_design
 	# place_design
 
-	report_qor_assessment -file postsynth.rpt
-	report_methodology -file methodology.rpt
+	report_qor_assessment -file $g_root_dir/reports/postsynth.rpt
+	report_methodology -file $g_root_dir/reports/methodology.rpt
 
 	report_qor_suggestions
 	### This is run after a design is implemented.
@@ -322,8 +322,8 @@ proc suggestionFlow { root_dir } {
 
 	### In fact, it can be run after everystage, to loop
 	### over it applying the suggestions.
-	write_qor_suggestions -file qor.sgs
-	read_qor_suggestions -file qor.sgs
+	write_qor_suggestions -file $g_root_dir/reports/qor.sgs
+	read_qor_suggestions -file $g_root_dir/reports/qor.sgs
 
 
 }

@@ -23,10 +23,16 @@ proc implementation { g_root_dir } {
 	}
 
 	#opt_design
+	# opt_design can be called with switches: opt_design -retarget -sweep
+	# For example, a congested design may benefit from skipping the remap option.
+	# By default, opt_design does: -retarget -sweep -remap -propconst -resynth_area
+	# Non-default: -area_mode -effort_level <arg>  -verbose
 	opt_design -directive Explore
         write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
 	reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
-	
+
+	# Optional Power Optimization
+	#power_opt_design	
 	
 	puts "Place design starting at:"
 	set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
