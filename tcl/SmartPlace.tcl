@@ -9,5 +9,15 @@ if { $::argc > 0 } {
  exit -1
 }
 
-smartPlaceFlow $g_root_dir
+# Call the exhaustivePlaceFLow procedure. The procedure itself
+# creates a txt file with a summary of the exploration, and returns
+# the directive that yields the most favorable WNS. Then, a file
+# containing directives is edited to add it.
+
+set bestPlaceDirective [exhaustivePlaceFlow $g_root_dir]
+set directivesFile $g_root_dir/shell/directives.tcl
+set fd_dve [open $directivesFile "a"]
+puts $fd_dve "set g_place_directive $bestPlaceDirective"
+close $fd_dve
+
 

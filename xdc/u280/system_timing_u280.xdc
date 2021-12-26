@@ -1,5 +1,5 @@
 create_clock -period 10.000 -name SYSCLK_0      [get_ports sysclk0_clk_p]
-#create_clock -period 10.000 -name SYSCLK_1      [get_ports sysclk1_clk_p]
+create_clock -period 10.000 -name SYSCLK_1      [get_ports sysclk1_clk_p]
 
 create_clock -period 10.000 -name  pcie_refclk [get_ports pcie_refclk_clk_p]
 

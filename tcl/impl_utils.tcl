@@ -1,4 +1,32 @@
 #------------------------------------------------------------------------
+# reportDelayModel
+#------------------------------------------------------------------------
+# Identify the Longest Logic Delay Paths in the design, in terms of timing
+# and not necessarily levels of logig. For example, unregistered Block RAMS
+# have very large clock to out delay. The most efficient method of 
+# identifying these long paths is run a timing report post-synthesis with
+# the routing estimates set to none. For more details, refer
+# to Xilinx UG906 (v2021.2), page 286
+#------------------------------------------------------------------------
+proc reportDelayMode { } {
+
+	#Review the timing results to identify any failing paths. If there are paths that fail to meet timing
+	#without any routing delay, these paths will be impossible to meet timing with actual routing
+
+	set_delay_model -interconnect none
+
+	## Check also the high_fanout_nets post-synthesis. This is also optimized after phys_opt_design
+	
+	report_high_fanout_nets -load_types -max_nets 100
+	
+
+}
+
+
+
+
+
+#------------------------------------------------------------------------
 # reportUnconnectedPins
 #------------------------------------------------------------------------
 # Summarizes the Vivado log section where it is shown what pins are 
@@ -204,7 +232,7 @@ proc routeCriticalPaths { } {
 }
 
 #------------------------------------------------------------------------
-# smartPlaceFlow
+# exhaustivePlaceFlow
 #------------------------------------------------------------------------
 # This procedure goes through ALL placement strategies to figure out
 # what is the one offering the minumum WNS. Is not designed to be part of
@@ -212,7 +240,7 @@ proc routeCriticalPaths { } {
 # best placement directive to the subsequent runs.
 #------------------------------------------------------------------------
 
-proc smartPlaceFlow { root_dir } {
+proc exhaustivePlaceFlow { root_dir } {
 
 	set g_root_dir $root_dir
 
@@ -246,12 +274,17 @@ proc smartPlaceFlow { root_dir } {
 		opt_design
 	        write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
 	}
-
+	
+	set prevWNS 0.000
+	set WNS 0.000
+	set bestPlaceDirective ""
 
 	foreach oneDirective $directives {
 		# open post opt design checkpoint
 		open_checkpoint $g_root_dir/dcp/post_opt.dcp
 		# run place design with a different directive	
+		
+                set prevWNS $WNS	
 		
 		puts "*******************************"
                 puts "Start @ [clock format [clock seconds] -format %H:%M:%S]"
@@ -273,11 +306,20 @@ proc smartPlaceFlow { root_dir } {
 		# append wns result to our results list
 		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
 		lappend wns_results $WNS
+                puts "Post Place WNS with directive $oneDirective = $WNS "
+                puts "*******************************"
+
+		
+		if { [expr $WNS > $prevWNS] } {			
+			set bestPlaceDirective $oneDirective
+			puts "Best directive is now $bestPlaceDirective, WNS=$WNS"
+		}
+
 	}
 	
 	# print out results at end
 	
-	set resFile "$g_root_dir/reports/smartPlaceResults.txt"
+	set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
 	set fd_res [open $resFile "w"]
 
 
@@ -293,6 +335,8 @@ proc smartPlaceFlow { root_dir } {
 	}
 	
 	close $fd_res
+
+	return $bestPlaceDirective
 }
 
 

@@ -6,7 +6,7 @@ if { $::argc > 0 } {
  puts "Root directory is $g_root_dir"
 }
 
-proc implementation { g_root_dir } {
+proc implementation { g_root_dir g_place_directive} {
 
 	## It is assumed a dcp folder containing the synthesis dcp already exists
 	file mkdir $g_root_dir/reports
@@ -22,6 +22,9 @@ proc implementation { g_root_dir } {
 		puts "Implementation will not continue. Check the pinout."
 	}
 
+
+	report_methodology -file $g_root_dir/reports/post_synth_methodology.rpt
+
 	#opt_design
 	# opt_design can be called with switches: opt_design -retarget -sweep
 	# For example, a congested design may benefit from skipping the remap option.
@@ -33,18 +36,22 @@ proc implementation { g_root_dir } {
 
 	# Optional Power Optimization
 	#power_opt_design	
+	# TODO: Add a time stamp from here to the end of the process, so it can be compared
+	# with other configurations -Vivado flow or when the place directive is set after
+	# getting it with ExhaustivePlaceFlow
 	
 	puts "Place design starting at:"
 	set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "$InitTime on $InitDate"
-	place_design -directive Explore
+	place_design -directive $g_place_directive
 	puts "Place design Finished at:"
 	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "\(started at $InitTime on $InitDate\)"
 
 	report_clock_utilization -file $g_root_dir/reports/clock_utilization.rpt
+        report_methodology -file $g_root_dir/reports/post_place_methodology.rpt
 	
 	# Optionally run optimization if there are timing violations after placement
 	
@@ -75,14 +82,15 @@ proc implementation { g_root_dir } {
 	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	  phys_opt_design -directive $CurrentDirective
 	  puts "\r\n-------------------------"
-	  puts "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack"
-	  puts "Previous WNS: $PrevSlack"
+	  set Msg0 "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack\r\nPrevious WNS: $PrevSlack"
+	  puts $Msg0
+	  puts $fd_opt $Msg0
 	  set OptMsg "Directive $CurrentDirective improved WNS by [expr abs($PrevSlack - $CurrentSlack)]ns"
 	  puts "$OptMsg"
 	  puts $fd_opt $OptMsg
           set PrevSlack $CurrentSlack
 	 } else {
-	  set SkipMsg "Skipping phys_opt phase as current slack is +$CurrentSlack"
+	  set SkipMsg "Skipping phys_opt phase \($CurrentDirective\) as current slack is +${CurrentSlack}ns"
 	  puts "$SkipMsg"
 	  puts $fd_opt $SkipMsg
 	 }
@@ -122,14 +130,17 @@ proc implementation { g_root_dir } {
 	## default routing
 
         write_checkpoint -force $g_root_dir/dcp/implementation.dcp
+
+        report_methodology -file $g_root_dir/reports/post_route_methodology.rpt
 		
 	report_design_analysis -timing -file $g_root_dir/reports/design_analysis_timing.rpt
+	report_design_analysis -max_paths 50 -setup -file $g_root_dir/reports/design_analysis_setup.rpt
 	report_design_analysis -complexity -file $g_root_dir/reports/design_analysis_complexity.rpt
 	report_design_analysis -congestion -file $g_root_dir/reports/design_analysis_congestion.rpt
 		
 	report_route_status -file $g_root_dir/reports/post_route_status.rpt
 	report_timing_summary -file $g_root_dir/reports/post_route_timing_summary.rpt
-	report_timing_summary -delay_type min_max -report_unconstrained -warn_on_violation -check_timing_verbose -input_pins -routable_nets -file "${g_root_dir}/reports/timing_summary.rpt"
+	report_timing_summary -delay_type min_max -report_unconstrained -warn_on_violation -check_timing_verbose -input_pins -routable_nets -file ${g_root_dir}/reports/timing_summary.rpt
 	report_timing -setup -file $g_root_dir/reports/timing_setup.rpt
 	report_timing -hold -file $g_root_dir/reports/timing_hold.rpt
 	report_power -file $g_root_dir/reports/post_route_power.rpt
@@ -137,9 +148,20 @@ proc implementation { g_root_dir } {
 	# The netlist file below can size ~220MB, need to check if it is worth
 	#write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
 	
-	#write_checkpoint -force $g_root_dir/dcp/implementation.dcp 
+	# TODO: opt_phys_route for the Last Mile? |WNS| < -0.2ns
 }
 
+
+# Optionaly add a place directive as an argument.
+
+set directivesFile $g_root_dir/shell/directives.tcl]
+set g_place_directive "Explore"
+
+# SmartPlace.tcl script creates a directives file when called.
+
+if {[file exists $directivesFile]} {
+	source $directivesFile
+}
 	
-implementation $g_root_dir 
+implementation $g_root_dir $g_place_directive
 
