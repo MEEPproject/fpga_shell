@@ -277,6 +277,7 @@ proc exhaustivePlaceFlow { root_dir } {
 	
 	set prevWNS 0.000
 	set WNS 0.000
+	set bestWNS 0.000
 	set bestPlaceDirective ""
 
 	foreach oneDirective $directives {
@@ -310,8 +311,9 @@ proc exhaustivePlaceFlow { root_dir } {
                 puts "*******************************"
 
 		
-		if { [expr $WNS > $prevWNS] } {			
+		if { [expr $WNS > $bestWNS] } {			
 			set bestPlaceDirective $oneDirective
+			set bestWNS $WNS
 			puts "Best directive is now $bestPlaceDirective, WNS=$WNS"
 		}
 
