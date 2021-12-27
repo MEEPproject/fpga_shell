@@ -72,13 +72,15 @@ proc implementation { g_root_dir g_place_directive} {
 	set nloops 8 
 	set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	set PrevSlack $CurrentSlack
-	for {set i 0} {$i < $nloops} {incr i} {
+	for {set i 0} {$i < $nloops} {incr i} {		
+
+	 set CurrentDirective [lindex $PhysOptDirectives $i]
+
 	 if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0} {
 	  puts "Found setup timing violations => running physical optimization"
 	  #phys_opt_design -directive AggressiveExplore
 	  #phys_opt_design -directive AggressiveFanoutOpt
 	  #phys_opt_design -directive AddRetime
-	  set CurrentDirective [lindex $PhysOptDirectives $i]
 	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	  phys_opt_design -directive $CurrentDirective
 	  puts "\r\n-------------------------"
