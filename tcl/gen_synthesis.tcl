@@ -16,7 +16,7 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 
 	puts "Waiting for the Out Of Context IPs (Block Design) to be synthesized."
 	puts "Task Started at:"
-        set InitDate[ clock format [ clock seconds ] -format %d/%m/%Y ]
+        set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
         set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
         puts "$InitTime on $InitDate"
 
