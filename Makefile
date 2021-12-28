@@ -95,7 +95,7 @@ validate: $(REPORT_DIR)
 	$(SH_DIR)/check_reports.sh
 
 clean: 
-	rm -rf project dcp reports accelerator src binaries	
+	rm -rf project dcp reports accelerator src binaries ip	
 	
 clean_project:
 	rm -rf project

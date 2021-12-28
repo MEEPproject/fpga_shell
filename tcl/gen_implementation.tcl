@@ -6,8 +6,9 @@ if { $::argc > 0 } {
  puts "Root directory is $g_root_dir"
 }
 
-proc implementation { g_root_dir g_place_directive} {
+proc implementation { g_root_dir g_place_directive g_route_directive} {
 
+	set RefTime [clock seconds]
 	## It is assumed a dcp folder containing the synthesis dcp already exists
 	file mkdir $g_root_dir/reports
 
@@ -31,6 +32,12 @@ proc implementation { g_root_dir g_place_directive} {
 	# By default, opt_design does: -retarget -sweep -remap -propconst -resynth_area
 	# Non-default: -area_mode -effort_level <arg>  -verbose
 	opt_design -directive Explore
+
+	# Store the Lapsed time up to opt_desing finish
+	set Lapsed2optTime [getLapsedTime $RefTime]
+	puts "Lapsed time after opt_design: $Lapsed2optTime"
+	puts "--------------------------------------"
+
         write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
 	reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
 
@@ -45,10 +52,18 @@ proc implementation { g_root_dir g_place_directive} {
 	set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "$InitTime on $InitDate"
 	place_design -directive $g_place_directive
+
+	set Lapsed2placeTime [getLapsedTime $RefTime] 
+	puts "Lapsed time after place_design: $Lapsed2placeTime"
+        puts "--------------------------------------"
+
+	puts "------------------------"
 	puts "Place design Finished at:"
 	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "\(started at $InitTime on $InitDate\)"
+	puts "Directive used: $g_place_directive"
+	puts "------------------------"
 
 	report_clock_utilization -file $g_root_dir/reports/clock_utilization.rpt
         report_methodology -file $g_root_dir/reports/post_place_methodology.rpt
@@ -76,13 +91,11 @@ proc implementation { g_root_dir g_place_directive} {
 
 	 set CurrentDirective [lindex $PhysOptDirectives $i]
 
-	 if {[get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]] < 0} {
+	 if { [expr $CurrentSlack < 0] } {
 	  puts "Found setup timing violations => running physical optimization"
-	  #phys_opt_design -directive AggressiveExplore
-	  #phys_opt_design -directive AggressiveFanoutOpt
-	  #phys_opt_design -directive AddRetime
-	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	  phys_opt_design -directive $CurrentDirective
+	  # Get the Slack after the optimization
+	  set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	  puts "\r\n-------------------------"
 	  set Msg0 "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack\r\nPrevious WNS: $PrevSlack"
 	  puts $Msg0
@@ -100,6 +113,10 @@ proc implementation { g_root_dir g_place_directive} {
 	}
 
 	close $fd_opt
+
+	set Lapsed2physOptTime [getLapsedTime $RefTime]
+	puts "Lapsed time after phys_opt_design: $Lapsed2physOptTime"
+        puts "--------------------------------------"
 	
 	# Examples on how use directives
 	# place_design -directive Explore
@@ -120,18 +137,29 @@ proc implementation { g_root_dir g_place_directive} {
 	report_utilization -file $g_root_dir/reports/post_place_utilization.rpt
 	report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
 
-	if { [expr abs($CurrentSlack) > 1.000 ] } {
+	if { [expr $CurrentSlack < -1.000 ] } {
 		puts "route_design will not be run as the WNS is above 1.000 "
 		puts "Implementation Failed. Check the timing reports to study how to improve timing"
 		## TODO: Quality of Results can be used as another criteria to not going further
-	        return 0
-	}
+	        return 0	
+	}	
 
-	route_design
-	## TODO: Directives can be added here to go the extra mile. E.g, the WNS is below -0.1 after 
-	## default routing
+	# TODO: Explore other routing strategies?
+	route_design -directive $g_route_directive
+
+	set Lapsed2routeTime [getLapsedTime $RefTime]
+	puts "Lapsed time after route_design: $Lapsed2routeTime"
+        puts "--------------------------------------"
 
         write_checkpoint -force $g_root_dir/dcp/implementation.dcp
+	## TODO: Directives can be added here to go the extra mile. E.g, the WNS is below -0.1 after 
+	## default routing
+        set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+
+	if { [expr $CurrentSlack < 0.000] && [expr $CurrentSlack > -0.200] } {
+                phys_opt_design -directive AggressiveExplore
+	        write_checkpoint -force $g_root_dir/dcp/implementation.dcp
+        }
 
         report_methodology -file $g_root_dir/reports/post_route_methodology.rpt
 		
@@ -146,11 +174,20 @@ proc implementation { g_root_dir g_place_directive} {
 	report_timing -setup -file $g_root_dir/reports/timing_setup.rpt
 	report_timing -hold -file $g_root_dir/reports/timing_hold.rpt
 	report_power -file $g_root_dir/reports/post_route_power.rpt
-	report_drc -file $g_root_dir/reports/post_imp_drc.rpt
+	report_drc -file $g_root_dir/reports/post_route_drc.rpt
 	# The netlist file below can size ~220MB, need to check if it is worth
 	#write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
-	
-	# TODO: opt_phys_route for the Last Mile? |WNS| < -0.2ns
+	# TODO: Create a filter to write only the VIOLATED nets
+	set Lapsed2ImplTime [getLapsedTime $RefTime]
+	puts "Lapsed Implementation time: $Lapsed2ImplTime"
+        puts "--------------------------------------"
+
+	####### The following lines are used to store the more relevant desingn parameters into a file ###
+	# Lapsed time for all steps
+	# Directives used
+	# WNS, TNS
+	# Failing paths, if they exist
+	# More?
 }
 
 
@@ -158,6 +195,7 @@ proc implementation { g_root_dir g_place_directive} {
 
 set directivesFile $g_root_dir/shell/directives.tcl]
 set g_place_directive "Explore"
+set g_route_directive "NoTimingRelaxation"
 
 # SmartPlace.tcl script creates a directives file when called.
 
@@ -165,5 +203,5 @@ if {[file exists $directivesFile]} {
 	source $directivesFile
 }
 	
-implementation $g_root_dir $g_place_directive
+implementation $g_root_dir $g_place_directive $g_route_directive
 
