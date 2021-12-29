@@ -193,7 +193,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 
 # Optionaly add a place directive as an argument.
 
-set directivesFile $g_root_dir/shell/directives.tcl]
+set directivesFile $g_root_dir/shell/directives.tcl
 set g_place_directive "Explore"
 set g_route_directive "NoTimingRelaxation"
 
@@ -201,7 +201,9 @@ set g_route_directive "NoTimingRelaxation"
 
 if {[file exists $directivesFile]} {
 	source $directivesFile
+	puts "Stored place directive $g_place_directive will be used"
 }
+
 	
 implementation $g_root_dir $g_place_directive $g_route_directive
 
