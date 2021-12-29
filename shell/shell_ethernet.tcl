@@ -83,7 +83,7 @@ connect_bd_net [get_bd_ports qsfp_4x_gtx_n] [get_bd_pins MEEP_100Gb_Ethernet_0/q
 connect_bd_net [get_bd_ports qsfp_4x_gtx_p] [get_bd_pins MEEP_100Gb_Ethernet_0/qsfp_4x_gtx_p]
 
 
-connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins clk_wiz_1/$ETHClkNm]
+connect_bd_net [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
 connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins MEEP_100Gb_Ethernet_0/s_axi_resetn]
 # Make External avoids passing the signal width to this point. The bus is created automatically
 make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]

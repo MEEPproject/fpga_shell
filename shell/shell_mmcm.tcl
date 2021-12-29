@@ -34,8 +34,8 @@ foreach clkObj $ClockList {
 	set ConfMMCM "CONFIG.CLKOUT${i}_REQUESTED_OUT_FREQ ${ClkFreqMHz} "
 	append ConfMMCMString "$ConfMMCM"
 	
-	set ConfMMCM "CONFIG.CLK_OUT${i}_PORT CLK${n} "
-	append ConfMMCMString "$ConfMMCM"
+	#set ConfMMCM "CONFIG.CLK_OUT${i}_PORT CLK${n} "
+	#append ConfMMCMString "$ConfMMCM"
 	incr i
 	incr n
 
@@ -110,7 +110,7 @@ if { $APBclkCandidate ne "" } {
     
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
 
-  set n 0
+  set n 1
 
 	foreach clkObj $ClockList {
 
@@ -120,7 +120,7 @@ if { $APBclkCandidate ne "" } {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
 		connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
 		### Create the reset list to be used later
-		connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/$ClkNum]
+		connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/clk_out${n}]
 		### TODO: connect DCM locked signal
 		if { $RstExist == 1 } {
 			connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
@@ -130,8 +130,8 @@ if { $APBclkCandidate ne "" } {
 		## User clocks
 		# TODO: we dont want the APB clock to be external and we do want the PCIe clock in case
 		# it is used as an interface
-                create_bd_port -dir O -type clk $ClkName
-                connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/CLK${n}]
+        create_bd_port -dir O -type clk $ClkName
+        connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/clk_out${n}]
 		incr n
 
 

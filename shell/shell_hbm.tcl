@@ -46,6 +46,11 @@ set HBMuserWidth [dict get $HBMentry AxiUserWidth]
 ## converter to HBM. Hardcoded to 0
 set HBMuserWidth 0
 
+#[get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
+set HBMClockPin [get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
+set APBClockPin [get_bd_pins rst_ea_$APBclk/slowest_sync_clk]
+
+
 putmeeps "Creating HBM instance..."
 ### TODO: Support different user widths per AXI channel
 ### TODO: Region, prot and others can be extracted as the other widths
@@ -81,11 +86,6 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
    
-## User clock: This should be done by the MMCM tcl
-#create_bd_port -dir O -type clk $HBMname
-#connect_bd_net [get_bd_ports $HBMname] [get_bd_pins clk_wiz_1/$HBMClkNm]
-
-
 ## TODO: Make dependant of selected HBM channels number
   # Create instance: hbm_0, and set properties
   set hbm_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0 ]
@@ -171,9 +171,9 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 	connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins hbm_0/HBM_REF_CLK_0]
 	connect_bd_net [get_bd_pins util_ds_buf_0/IBUF_OUT] [get_bd_pins hbm_0/HBM_REF_CLK_1]
 	### TODO: APB CLOCK Can't be the same as ACLK. Needs to be a different source
-	connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] [get_bd_pins clk_wiz_1/$HBMClkNm]
-	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
-        connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] [get_bd_pins clk_wiz_1/$APBclk]
+	connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] $HBMClockPin
+	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] $APBClockPin
+    connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] $APBClockPin
 	set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 	## One CATTRIP per stack, OR it
 	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_2
@@ -191,12 +191,12 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 
 	create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_0
 	connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_0/S_AXI]
-	connect_bd_net [get_bd_pins axi_protocol_convert_0/aclk] [get_bd_pins clk_wiz_1/$HBMClkNm]
+	connect_bd_net [get_bd_pins axi_protocol_convert_0/aclk] $HBMClockPin
 	
 	## Width
 	if { $HBMdataWidth != 256 } {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0
-		connect_bd_net [get_bd_pins axi_dwidth_converter_0/s_axi_aclk] [get_bd_pins clk_wiz_1/$HBMClkNm]
+		connect_bd_net [get_bd_pins axi_dwidth_converter_0/s_axi_aclk] $HBMClockPin
 		#connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
 		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
 		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08]

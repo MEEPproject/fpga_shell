@@ -69,7 +69,7 @@ CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
    CONFIG.WUSER_WIDTH {0} \
    ] $brom_axi
 
- connect_bd_net [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins clk_wiz_1/$BROMClkNm]
+ connect_bd_net [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins rst_ea_$BROMClkNm/slowest_sync_clk]
  connect_bd_net [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins rst_ea_$BROMClkNm/peripheral_aresetn]
  
  connect_bd_net [get_bd_pins axi_bram_ctrl_0/bram_addr_a] [get_bd_pins axi_brom_0/addra]
