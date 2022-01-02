@@ -134,7 +134,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 
 	
 	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
-	report_utilization -file $g_root_dir/reports/post_place_utilization.rpt
+	report_utilization -hierarchical -file $g_root_dir/reports/utilization_hier.rpt
+	report_utilization -file $g_root_dir/reports/utilization_summary.rpt
+	report_utilization -slr -file $g_root_dir/reports/utilization_slr.rpt
 	report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
 
 	if { [expr $CurrentSlack < -1.000 ] } {
