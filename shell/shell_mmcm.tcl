@@ -8,7 +8,7 @@ set n 0
 set ConfMMCMString " "
 # 1GHz, arbitrarily High
 set slowestSyncCLK 1000000000
-set APBclkCandidate ""
+set APBclkCandidate "None"
 set RstExist 0
 
 if { $ARSTDef ne "" } {
@@ -58,9 +58,10 @@ foreach clkObj $ClockList {
 putmeeps "Slowest CLK: $slowestSyncCLKname, APBcandidate: $APBclkCandidate"
 
 ### An APB clock is added to the list if no candidate is found
+# TODO: What if HBM is not selected?
 set APBclk ""
 
-if { $APBclkCandidate ne "" } {
+if { $APBclkCandidate ne "None" } {
 	
 	set APBclk $APBclkCandidate
 	
@@ -89,8 +90,8 @@ if { $APBclkCandidate ne "" } {
 	set ConfMMCM "CONFIG.CLKOUT${numClk}_REQUESTED_OUT_FREQ 50 "
 	append ConfMMCMString "$ConfMMCM"
 	
-	set ConfMMCM "CONFIG.CLK_OUT${numClk}_PORT CLK[expr [llength ClockList]+1] "
-	append ConfMMCMString "$ConfMMCM"		
+	# set ConfMMCM "CONFIG.CLK_OUT${numClk}_PORT CLK[expr [llength ClockList]+1] "
+	# append ConfMMCMString "$ConfMMCM"		
 	
 }
 	
@@ -109,6 +110,10 @@ if { $APBclkCandidate ne "" } {
   set_property -dict $ClockParamList $clk_wiz_1
     
   connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
+  
+  # APBClockPin defaults to empty. It will be populated here by a new MMCM output or by
+  # an APBclkCandidate in the HBM script in case it exists.
+  set APBClockPin ""
 
   set n 1
 
@@ -116,24 +121,36 @@ if { $APBclkCandidate ne "" } {
 
 		set ClkNum  [dict get $clkObj ClkNum]
 		set ClkName [dict get $clkObj ClkName]
-
-		create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
-		connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
-		### Create the reset list to be used later
-		connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/clk_out${n}]
-		### TODO: connect DCM locked signal
-		if { $RstExist == 1 } {
-			connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
-		}
-
-		## Make the clocks external and user-usable
-		## User clocks
+		
 		# TODO: we dont want the APB clock to be external and we do want the PCIe clock in case
 		# it is used as an interface
-        create_bd_port -dir O -type clk $ClkName
-        connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/clk_out${n}]
-		incr n
+		
+		if { $ClkName != "APBclk" } {
 
+			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
+			connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
+			### Create the reset list to be used later
+			connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/clk_out${n}]
+			### TODO: connect DCM locked signal
+			if { $RstExist == 1 } {
+				connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
+			}
+
+			## Make the clocks external and user-usable
+			## User clocks
+			
+			create_bd_port -dir O -type clk $ClkName
+			connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/clk_out${n}]
+			
+			
+			incr n
+		} else {
+			# We know APB Clk, if it exists in the list, is the last one, so we can
+			# still use the index n to refer to the MMCM clock output
+			
+			set APBClockPin [get_bd_pins clk_wiz_1/clk_out${n}]
+
+		}
 
 	}
   

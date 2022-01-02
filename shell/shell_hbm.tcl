@@ -48,7 +48,11 @@ set HBMuserWidth 0
 
 #[get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
 set HBMClockPin [get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
-set APBClockPin [get_bd_pins rst_ea_$APBclk/slowest_sync_clk]
+
+if { $APBClockPin == "" } {
+	## APB candidate is an existing clock
+	set APBClockPin [get_bd_pins rst_ea_$APBclkCandidate/slowest_sync_clk]
+}
 
 
 putmeeps "Creating HBM instance..."
