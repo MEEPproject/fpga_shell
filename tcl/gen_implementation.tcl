@@ -21,10 +21,11 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	if { [reportEarlyDRC $g_root_dir] == 1 } {
 		puts "Detected Unspecified Logic Levels or Unconstraiend ports."
 		puts "Implementation will not continue. Check the pinout."
+		# TODO: Check if this is working commenting a physical top level pin
 	}
 
 
-	report_methodology -file $g_root_dir/reports/post_synth_methodology.rpt
+	#report_methodology -file $g_root_dir/reports/post_synth_methodology.rpt
 
 	#opt_design
 	# opt_design can be called with switches: opt_design -retarget -sweep
@@ -39,7 +40,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	puts "--------------------------------------"
 
         write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
-	reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
+	#reportCriticalPaths $g_root_dir/reports/post_opt_critpath_report.csv
 
 	# Optional Power Optimization
 	#power_opt_design	
@@ -65,8 +66,8 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	puts "Directive used: $g_place_directive"
 	puts "------------------------"
 
-	report_clock_utilization -file $g_root_dir/reports/clock_utilization.rpt
-        report_methodology -file $g_root_dir/reports/post_place_methodology.rpt
+	#report_clock_utilization -file $g_root_dir/reports/clock_utilization.rpt
+        #report_methodology -file $g_root_dir/reports/post_place_methodology.rpt
 	
 	# Optionally run optimization if there are timing violations after placement
 	
@@ -87,6 +88,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	set nloops 8 
 	set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	set PrevSlack $CurrentSlack
+
 	for {set i 0} {$i < $nloops} {incr i} {		
 
 	 set CurrentDirective [lindex $PhysOptDirectives $i]
@@ -134,10 +136,10 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 
 	
 	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
-	report_utilization -hierarchical -file $g_root_dir/reports/utilization_hier.rpt
-	report_utilization -file $g_root_dir/reports/utilization_summary.rpt
-	report_utilization -slr -file $g_root_dir/reports/utilization_slr.rpt
-	report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
+	#report_utilization -hierarchical -file $g_root_dir/reports/utilization_hier.rpt
+	#report_utilization -file $g_root_dir/reports/utilization_summary.rpt
+	#report_utilization -slr -file $g_root_dir/reports/utilization_slr.rpt
+	#report_timing_summary -file $g_root_dir/reports/post_place_timing_summary.rpt
 
 	if { [expr $CurrentSlack < -1.000 ] } {
 		puts "route_design will not be run as the WNS is above 1.000 "
@@ -163,20 +165,20 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	        write_checkpoint -force $g_root_dir/dcp/implementation.dcp
         }
 
-        report_methodology -file $g_root_dir/reports/post_route_methodology.rpt
+        #report_methodology -file $g_root_dir/reports/post_route_methodology.rpt
 		
-	report_design_analysis -timing -file $g_root_dir/reports/design_analysis_timing.rpt
-	report_design_analysis -max_paths 50 -setup -file $g_root_dir/reports/design_analysis_setup.rpt
-	report_design_analysis -complexity -file $g_root_dir/reports/design_analysis_complexity.rpt
-	report_design_analysis -congestion -file $g_root_dir/reports/design_analysis_congestion.rpt
+	#report_design_analysis -timing -file $g_root_dir/reports/design_analysis_timing.rpt
+	#report_design_analysis -max_paths 50 -setup -file $g_root_dir/reports/design_analysis_setup.rpt
+	#report_design_analysis -complexity -file $g_root_dir/reports/design_analysis_complexity.rpt
+	#report_design_analysis -congestion -file $g_root_dir/reports/design_analysis_congestion.rpt
 		
-	report_route_status -file $g_root_dir/reports/post_route_status.rpt
-	report_timing_summary -file $g_root_dir/reports/post_route_timing_summary.rpt
-	report_timing_summary -delay_type min_max -report_unconstrained -warn_on_violation -check_timing_verbose -input_pins -routable_nets -file ${g_root_dir}/reports/timing_summary.rpt
-	report_timing -setup -file $g_root_dir/reports/timing_setup.rpt
-	report_timing -hold -file $g_root_dir/reports/timing_hold.rpt
-	report_power -file $g_root_dir/reports/post_route_power.rpt
-	report_drc -file $g_root_dir/reports/post_route_drc.rpt
+	#report_route_status -file $g_root_dir/reports/post_route_status.rpt
+	#report_timing_summary -file $g_root_dir/reports/post_route_timing_summary.rpt
+	#report_timing_summary -delay_type min_max -report_unconstrained -warn_on_violation -check_timing_verbose -input_pins -routable_nets -file ${g_root_dir}/reports/timing_summary.rpt
+	#report_timing -setup -file $g_root_dir/reports/timing_setup.rpt
+	#report_timing -hold -file $g_root_dir/reports/timing_hold.rpt
+	#report_power -file $g_root_dir/reports/post_route_power.rpt
+	#report_drc -file $g_root_dir/reports/post_route_drc.rpt
 	# The netlist file below can size ~220MB, need to check if it is worth
 	#write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
 	# TODO: Create a filter to write only the VIOLATED nets

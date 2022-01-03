@@ -12,6 +12,7 @@ DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
 ACCEL_DIR    =  $(ROOT_DIR)/accelerator
 SYNTH_DCP    =  $(ROOT_DIR)/dcp/synthesis.dcp 
+PLACE_DCP    =  $(ROOT_DIR)/dcp/post_place.dcp 
 IMPL_DCP     =  $(ROOT_DIR)/dcp/implementation.dcp 
 BIT_FILE     =  $(ROOT_DIR)/bitstream/system.bit
 REPORT_DIR   =  $(ROOT_DIR)/reports
@@ -93,6 +94,17 @@ SmartPlace: $(SYNTH_DCP)
 	
 validate: $(REPORT_DIR)
 	$(SH_DIR)/check_reports.sh
+
+report_synth: $(SYNTH_DCP)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
+
+report_place: $(PLACE_DCP)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_place.tcl -tclargs $(ROOT_DIR)
+
+report_route: $(IMPL_DCP)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
+
+
 
 clean: 
 	rm -rf project dcp reports accelerator src binaries ip	
