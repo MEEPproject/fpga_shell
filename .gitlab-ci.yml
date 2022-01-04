@@ -6,17 +6,25 @@
 # to that task.
 #
 # The CI/CD flow generates a bitstream both for the targeted EA.
+# The Pipeline can be triggered if there is an update (rule "changes") in the
+# ea_url.txt file/folder
 
+include:
+  - local: cicd/setup.yml
 
-variables:
+variables: !reference [.setup, variables]
         #EMULATED_ACCELERATOR: openpiton
-        GIT_SUBMODULE_STRATEGY: recursive
-        NUMBER_OF_JOBS: "8"
-        FPGA_LOG_FILE: fpga.log
-        TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
-        QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
-        BITSTREAM: system_${CI_PIPELINE_ID}.bit
-        DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+        #GIT_SUBMODULE_STRATEGY: recursive
+        #NUMBER_OF_JOBS: "8"
+        #FPGA_LOG_FILE: fpga.log
+        #TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
+        #QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
+        #BITSTREAM: system_${CI_PIPELINE_ID}.bit
+        #DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+
+.default_rules:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /support/
 
 stages:
     - EA-initialization
@@ -31,14 +39,12 @@ stages:
 EA-build:
         stage: EA-initialization
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules]
         timeout: 2h
         tags: 
-            - MEEP_FPGA
+            - !reference [.setup, tags]
         before_script:
-            # This is a CI/CD requirement. Use a token-ed URL instead of the normal repo URL
-            - sh/load_module.sh $EMULATED_ACCELERATOR            
-            - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
+            - !reference [.setup, before_script] 
         script:    
             - make initialize
             - make binaries
@@ -52,15 +58,14 @@ EA-build:
 synthesis:
         stage: synthesis
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules] 
         needs:
             - EA-build
         timeout: 4h
         tags: 
-            - MEEP_FPGA
+            - !reference [.setup, tags]
         before_script:
-            - sh/load_module.sh $EMULATED_ACCELERATOR
-            - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
+            - !reference [.setup, before_script] 
         script:
             - make initialize
             - make project
@@ -68,12 +73,6 @@ synthesis:
         after_script:
             - mkdir tmp
             - make clean_accelerator clean_shell
-            - >
-              echo -e " EA URL --> gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
-              EA SHA --> $EMULATED_ACCELERATOR_SHA: 33ba163f87090637c7b6ae21f6bc6bf679750c96
-              Vivado version --> $VIVADO_VERSION   \r\n
-              Vivado path --> $VIVADO_PATH        \r\n
-              Commit time --> $CI_COMMIT_TIMESTAMP"  >>  cicd_log.txt                             
             - cp cicd_log.txt tmp
             - cp -r src/system_top.sv tmp
             - cp -r tcl/shell_env.tcl tmp
@@ -87,7 +86,7 @@ synthesis:
 implementation:
         stage: implementation
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules] 
         
         needs:
             - synthesis
@@ -115,7 +114,7 @@ implementation:
 bitstream:
         stage: bitstream
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules] 
         
         needs:
             - synthesis
@@ -139,7 +138,7 @@ bitstream:
 validation:
         stage: bitstream
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules] 
         
         needs: 
             - implementation
@@ -155,22 +154,21 @@ validation:
 fpga-test:
         stage: fpga-test
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules] 
         
         needs:
             - EA-build
             - bitstream
         retry: 2
         tags: 
-            - FPGA_TEST
+            - !reference [.fpga_test, tags]
         before_script:
-            - export PATH=$PATH:$QDMA_DRIVERS
-            - sudo $TOOLS_DIR/givememyuart
+            - !reference [.fpga_test, before_script]
         script:
             - sh/load_bitstream.sh qdma tmp/bitstream/$BITSTREAM
             - source sh/fpga_test.sh $FPGA_LOG_FILE                
             # The EA script should provide the right script and the right binary
-            - source $ACC_DIR/scripts/$BOOT_SCRIPT binaries/fw_payload.bin
+            - !reference [.fpga_test, script]
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG_FILE
         after_script:
@@ -186,7 +184,7 @@ fpga-test:
 deploy-EA:
         stage: deploy
         rules:
-            - if: ($CI_COMMIT_BRANCH == "production" || $CI_PIPELINE_SOURCE == "schedule")
+            - !reference [.setup, rules] 
         
         tags:
             - MEEP_FPGA
