@@ -40,22 +40,17 @@ proc synthesis { g_root_dir g_number_of_jobs} {
 	file mkdir $g_root_dir/dcp
 	file mkdir $g_root_dir/reports
 
-
-
 	write_checkpoint -force $g_root_dir/dcp/synthesis.dcp
-	report_timing_summary -file $g_root_dir/reports/post_synth_timing_summary.rpt
-	report_utilization -file $g_root_dir/reports/post_synth_util.rpt
-	
-	# Run custom script to report critical timing paths
-	reportCriticalPaths $g_root_dir/reports/post_synth_critpath_report.csv
 	
 	## Synthesis log. The "system_top" is hardcoded as it is always the shell top 
 	## module name. It could be treated as a global variable either.
-	set synth_log $g_root_dir/reports/synthesis.rpt
+	set synthLogPath $g_root_dir/reports/synthesis
+	set synthLog $synthLogPath/synthesis.rpt
+	file mkdir $synthLogPath
 	
-	file copy -force $g_root_dir/project/system.runs/synth_1/system_top.vds $synth_log
-	
-	reportUnconnectedPins $synth_log 
+	file copy -force $g_root_dir/project/system.runs/synth_1/system_top.vds $synthLog
+
+	reportUnconnectedPins $synthLog 
 	
 	## Add this into a open-while loop to parse line by line
 	#set UndrivenPins [regexp -all -inline {WARNING: [Synth 8-3295].*$} $line]
