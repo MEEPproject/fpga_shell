@@ -10,7 +10,7 @@ if { $::argc > 0 } {
 }
 
 
-proc reportSynth{ g_root_dir } {
+proc reportSynth { g_root_dir } {
 
 	set synthDir $g_root_dir/reports/synthesis
 

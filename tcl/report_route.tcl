@@ -1,4 +1,5 @@
 source [pwd]/tcl/environment.tcl
+source $g_root_dir/tcl/impl_utils.tcl
 
 if { $::argc > 0 } {
  set g_roo_dir $::argv
@@ -9,7 +10,7 @@ if { $::argc > 0 } {
 }
 
 
-proc reportRoute{ g_root_dir } {
+proc reportRoute { g_root_dir } {
 
 	set routeDir $g_root_dir/reports/post_route
 
