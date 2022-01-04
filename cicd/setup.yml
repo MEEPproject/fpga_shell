@@ -12,7 +12,7 @@
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
 
   rules:
-    if: $CI_COMMIT_BRANCH == "support"
+    if: $CI_COMMIT_BRANCH =~ "/^support/"
     
 
   before_script:
