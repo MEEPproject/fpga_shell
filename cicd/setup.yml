@@ -13,7 +13,7 @@
 
   rules:
     if: $CI_COMMIT_BRANCH == "support"
-    when: on_success
+    
 
   before_script:
     # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one. 
@@ -22,13 +22,12 @@
     - sh/load_module.sh $EMULATED_ACCELERATOR 
     - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
 
-  tags:
-    - MEEP_FPGA
+  tags: MEEP_FPGA
 
 .fpga_test:
-  tags:
-    # There is a special runner to run the HW test, that targets the correct board
+  tags: 
     - FPGA_TEST
+    # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - export PATH=$PATH:$QDMA_DRIVERS
     - sudo $TOOLS_DIR/givememyuart

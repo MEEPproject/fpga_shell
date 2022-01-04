@@ -24,7 +24,7 @@ variables: !reference [.setup, variables]
 
 .default_rules:
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /support/
+    - if: $CI_COMMIT_BRANCH == "support"
 
 stages:
     - EA-initialization
@@ -161,7 +161,7 @@ fpga-test:
             - bitstream
         retry: 2
         tags: 
-            - !reference [.fpga_test, tags]
+            - FPGA_TEST 
         before_script:
             - !reference [.fpga_test, before_script]
         script:
