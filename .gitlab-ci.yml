@@ -160,7 +160,7 @@ fpga-test:
             - EA-build
             - bitstream
         retry: 2
-        tags: !reference [.fpta_test, tags]            
+        tags: !reference [.fpga_test, tags]            
         before_script:
             - !reference [.fpga_test, before_script]
         script:
