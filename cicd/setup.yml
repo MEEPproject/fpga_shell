@@ -3,6 +3,7 @@
   variables: 
         EMULATED_ACCELERATOR: dvino
         FPGA_BOARD: u280
+        GIT_STRATEGY: clone
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
         FPGA_LOG_FILE: fpga.log
