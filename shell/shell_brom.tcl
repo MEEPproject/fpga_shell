@@ -91,7 +91,7 @@ putdebugs "Mem Range BROM: $BROMMemRange"
 
 assign_bd_address [get_bd_addr_segs {axi_bram_ctrl_0/S_AXI/Mem0 }]
 
-set_property offset $BROMbaseAddr [get_bd_addr_segs {$BROMintf/SEG_axi_bram_ctrl_0_Mem0}]
+set_property offset $BROMbaseAddr [get_bd_addr_segs $BROMintf/SEG_axi_bram_ctrl_0_Mem0]
 set_property range ${BROMMemRange}K [get_bd_addr_segs $BROMintf/SEG_axi_bram_ctrl_0_Mem0]
 
 
