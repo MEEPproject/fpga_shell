@@ -184,10 +184,10 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
         puts $fd_sum "* Route Directive used: $g_route_directive"
         puts $fd_sum "3. Lapsed timestamps to reach stages"
         puts $fd_sum "* Post synthesis optimization @ $Lapsed2optTime"
-	puts $fd_sum "* Post place @ $Lapsed2placeTime"
-        puts $fd_sum "* Post place optimization @ $Lapsed2physOptTime"
-        puts $fd_sum "* Post route @ $Lapsed2routeTime"
-        puts $fd_sum "* Post route Opt@ $Lapsed2ImplTime"
+	puts $fd_sum "* Post place                  @ $Lapsed2placeTime"
+        puts $fd_sum "* Post place optimization     @ $Lapsed2physOptTime"
+        puts $fd_sum "* Post route                  @ $Lapsed2routeTime"
+        puts $fd_sum "* Post route Opt              @ $Lapsed2ImplTime"
 
 	close $fd_sum
 }
