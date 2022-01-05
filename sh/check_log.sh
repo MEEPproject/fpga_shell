@@ -1,7 +1,8 @@
 #!/bin/bash
 
 INPUT_FILE=$1
-GOOD_STRING="Welcome to Buildroot"
+#GOOD_STRING="Welcome to Buildroot"
+GOOD_STRING=$2
 
 if [ ! -f "$INPUT_FILE" ]; then
        printf "Log file doesn't exist!\n"	

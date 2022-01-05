@@ -13,18 +13,7 @@
 # included file for clarity
 
 include:
-  - local: cicd/setup_openpiton.yml
-    rules:
-      - if: $CI_COMMIT_BRANCH == support/openpiton/cicd
-
-  - local: cicd/setup_acme.yml
-    rules:
-      - if: $CI_COMMIT_BRANCH == support/acme/cicd
-
-  - local: cicd/setup_dvino.yml
-    rules:
-      - if: $CI_COMMIT_BRANCH == support/dvino/cicd
-     
+  - local: cicd/support.yml
 
 variables: !reference [.setup, variables]
 
@@ -123,7 +112,7 @@ implementation:
             expire_in: 1 day
             paths:
                 - tmp
-                - dcp
+                - dcp/implementation.dcp
                 - reports
 bitstream:
         stage: bitstream
@@ -185,7 +174,7 @@ fpga-test:
             # The EA script should provide the right script and the right binary
             - !reference [.fpga_test, script]
             - echo "Checking FPGA log ..."
-            - sh/check_log.sh fpga_test.log 
+            - sh/check_log.sh fpga_test.log $VALID_MSG 
         after_script:
             - cp fpga_test.log tmp
         dependencies:
