@@ -19,7 +19,7 @@
 
 .default_rules:
   rules:
-    if: $CI_COMMIT_BRANCH == "support/$EMULATED_ACCELERATOR/cicd"
+    if: $CI_COMMIT_BRANCH == "support/acme/cicd"
 
 .default_tags:
   tags:
