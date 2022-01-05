@@ -9,8 +9,22 @@
 # The Pipeline can be triggered if there is an update (rule "changes") in the
 # ea_url.txt file/folder
 
+# Include the supported EA configuration files. This could be done in other 
+# included file for clarity
+
 include:
   - local: cicd/setup_openpiton.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH == support/openpiton/cicd
+
+  - local: cicd/setup_acme.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH == support/acme/cicd
+
+  - local: cicd/setup_dvino.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH == support/dvino/cicd
+     
 
 variables: !reference [.setup, variables]
 
