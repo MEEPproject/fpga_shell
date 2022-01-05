@@ -1,29 +1,29 @@
+# Use this file to configure your system. You can configure your system variables,
+# the tags for the runners, the specific scripts for your own EA to work, etc.
+# The FPGA board is also defined here [u280, u55c]
+# TODO: Do make initialize FPGA_BOARD to set up the proper board within the Shell
+
 
 .setup:
   variables: 
         EMULATED_ACCELERATOR: dvino
         FPGA_BOARD: u280
-        GIT_STRATEGY: clone
+        #GIT_STRATEGY: clone
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
-        FPGA_LOG_FILE: fpga.log
         TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
         QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
 
+
+.default_rules:
   rules:
-    if: $CI_COMMIT_BRANCH == "support/dvino/cicd"
-    
+    if: $CI_COMMIT_BRANCH == "support/$EMULATED_ACCELERATOR/cicd"
 
-  before_script:
-    # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one. 
-    # The load_module script loads the txt file in the support folder. 
-    # The extract_url script inserts the token into the repo URL.
-    - sh/load_module.sh $EMULATED_ACCELERATOR 
-    - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
-
-  tags: MEEP_FPGA
+.default_tags:
+  tags:
+    - MEEP_FPGA
 
 .fpga_test:
   tags: 
@@ -34,4 +34,4 @@
     - sudo $TOOLS_DIR/givememyuart
 
   script:
-    - source $ACC_DIR/scripts/$BOOT_SCRIPT binaries/fw_payload.bin
+    - source $BOOT_SCRIPT binaries/fw_payload.bin
