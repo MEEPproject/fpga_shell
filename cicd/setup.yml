@@ -21,7 +21,7 @@
     # The load_module script loads the txt file in the support folder. 
     # The extract_url script inserts the token into the repo URL.
     - sh/load_module.sh $EMULATED_ACCELERATOR 
-    - sh/extract_url.sh ea_url.txt $RTL_REPO_TOKEN
+    - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
 
   tags: MEEP_FPGA
 
