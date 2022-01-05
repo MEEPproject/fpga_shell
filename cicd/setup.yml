@@ -6,7 +6,7 @@
 
 .setup:
   variables: 
-        EMULATED_ACCELERATOR: dvino 
+        EMULATED_ACCELERATOR: acme 
         FPGA_BOARD: u280
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
@@ -14,7 +14,8 @@
         QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
-        BOOT_SCRIPT: /home/dmazure/workspace/boot_dvino.sh
+        BOOT_SCRIPT: /home/dmazure/pcie/linux_images/boot_lagarto.sh
+        LINUX_IMAGE: /home/dmazure/pcie/linux_images/osbi.bin
 
 
 .default_rules:
@@ -36,4 +37,4 @@
     - sudo $TOOLS_DIR/givememyuart
 
   script:
-    - source $BOOT_SCRIPT binaries/fw_payload.bin
+    - source $BOOT_SCRIPT $LINUX_IMAGE
