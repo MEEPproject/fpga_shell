@@ -141,6 +141,7 @@ bitstream:
             - mv bitstream/system.bit bitstream/$BITSTREAM
             - mv bitstream/ tmp/
             - mv dcp/ tmp/
+            - make clean_implementation
         dependencies:
             - synthesis
             - implementation
