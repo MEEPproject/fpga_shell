@@ -22,7 +22,7 @@
   variables: 
     - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
-    if: $CI_COMMIT_BRANCH == "support/$EANAME/cicd"
+    if: $CI_COMMIT_BRANCH =~ /^support/
 
 .default_tags:
   tags:
