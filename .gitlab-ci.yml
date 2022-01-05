@@ -10,7 +10,7 @@
 # ea_url.txt file/folder
 
 include:
-  - local: cicd/setup.yml
+  - local: cicd/setup_openpiton.yml
 
 variables: !reference [.setup, variables]
 
