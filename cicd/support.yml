@@ -1,0 +1,17 @@
+# Add here a list of supported EAs so they get included in the
+# CI/CD pipeline
+
+include:
+  - local: support/openpiton/setup_openpiton.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH == support/openpiton/cicd
+
+  - local: support/acme/setup_acme.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH == support/acme/cicd
+
+  - local: support/dvino/setup_dvino.yml
+    rules:
+      - if: $CI_COMMIT_BRANCH == support/dvino/cicd
+
+
