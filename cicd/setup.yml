@@ -8,7 +8,6 @@
   variables: 
         EMULATED_ACCELERATOR: acme 
         FPGA_BOARD: u280
-        #GIT_STRATEGY: clone
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
         TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
@@ -18,8 +17,10 @@
 
 
 .default_rules:
+  variables: 
+    - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
-    if: $CI_COMMIT_BRANCH == "support/acme/cicd"
+    if: $CI_COMMIT_BRANCH == "support/$EANAME/cicd"
 
 .default_tags:
   tags:
