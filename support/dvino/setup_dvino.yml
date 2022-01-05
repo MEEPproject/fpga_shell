@@ -15,7 +15,7 @@
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: /home/dmazure/workspace/boot_dvino.sh
-        LINUX_IMAGE: /home/dmazure/workspace/fw_payload.bin
+        LINUX_IMAGE: binaries/fw_payload.bin
         VALID_MSG: "Welcome to Buildroot"
 
 

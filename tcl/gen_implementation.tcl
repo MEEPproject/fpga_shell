@@ -115,21 +115,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	puts "Lapsed time after phys_opt_design: $Lapsed2physOptTime"
         puts "--------------------------------------"
 	
-	# Examples on how use directives
-	# place_design -directive Explore
-	# phys_opt_design -directive AggressiveExplore
-	# phys_opt_design -directive AggressiveFanoutOpt
-	# phys_opt_design -directive AddRetime
-	# route_design -directive Explore
-	# phys_opt_design -directive AggressiveExplore
-	# route_design -tns_cleanup
-	
-	## set pass [expr {[get_property SLACK [get_timing_paths]] >= 0}]
-	
 	#set critical_nets [get_nets -of [get_timing_paths -max_paths 85]]
 	#route_design -nets $critical_nets
 
-	
 	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
 
 	if { [expr $CurrentSlack < -1.000 ] } {
@@ -154,6 +142,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	if { [expr $CurrentSlack < 0.000] && [expr $CurrentSlack > -0.200] } {
                 phys_opt_design -directive AggressiveExplore
 	        write_checkpoint -force $g_root_dir/dcp/implementation.dcp
+	        set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
         }
 
 	# The netlist file below can size ~220MB, need to check if it is worth
@@ -169,6 +158,38 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	# WNS, TNS
 	# Failing paths, if they exist
 	# More?
+	
+        set fd_sum [open $g_root_dir/reports/summary.rpt "w"]
+
+	puts $fd_sum "======================================="
+	puts $fd_sum "== FPGA Shell implementation summary =="
+        puts $fd_sum "======================================="
+	puts $fd_sum "\r\n"
+	puts $fd_sum "1. Timing"
+
+        if { [expr $CurrentSlack < 0.000] } { 
+
+	  puts $fd_sum "* The design didn't meet timing"
+	  set WorstTimingPath [get_timing_paths -max_paths 1 -nworst 1 -setup]
+	  puts $fd_sum "Critical Path:\r\n$WorstTimingPath\r\n"
+
+	} else {
+          puts $fd_sum "* The design met timing"
+	}
+
+        puts $fd_sum "Design WNS=${CurrentSlack}ns"
+
+	puts $fd_sum "2. Directives"
+        puts $fd_sum "* Place Directive used: $g_place_directive"
+        puts $fd_sum "* Route Directive used: $g_route_directive"
+        puts $fd_sum "3. Lapsed timestamps to reach stages"
+        puts $fd_sum "* Post synthesis optimization @ $Lapsed2optTime"
+	puts $fd_sum "* Post place @ $Lapsed2placeTime"
+        puts $fd_sum "* Post place optimization @ $Lapsed2physOptTime"
+        puts $fd_sum "* Post route @ $Lapsed2routeTime"
+        puts $fd_sum "* Post route Opt@ $Lapsed2ImplTime"
+
+	close $fd_sum
 }
 
 

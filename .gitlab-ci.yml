@@ -75,7 +75,6 @@ synthesis:
             - make synthesis
         after_script:
             - mkdir tmp
-            - make clean_accelerator clean_shell
             - cp -r src/system_top.sv tmp
             - cp -r tcl/shell_env.tcl tmp
             - cp gen_system.tcl tmp/tcl
@@ -83,7 +82,7 @@ synthesis:
           when: always
           paths:
             - tmp
-            - dcp
+            - dcp/synthesis.dcp
             
 implementation:
         stage: implementation
@@ -111,7 +110,6 @@ implementation:
             when: on_success
             expire_in: 1 day
             paths:
-                - tmp
                 - dcp/implementation.dcp
                 - reports
 bitstream:
@@ -127,9 +125,6 @@ bitstream:
         script:
             - make bitstream
         after_script:
-            - mv bitstream/system.bit bitstream/$BITSTREAM
-            - mv bitstream/ tmp/
-            - mv dcp/ tmp/
             - make clean_implementation
         dependencies:
             - synthesis
@@ -138,7 +133,7 @@ bitstream:
             when: always
             expire_in: 1 day
             paths:
-                - tmp
+                - bitstream
 validation:
         stage: bitstream
         rules:
@@ -176,7 +171,7 @@ fpga-test:
             - echo "Checking FPGA log ..."
             - sh/check_log.sh fpga_test.log $VALID_MSG 
         after_script:
-            - cp fpga_test.log tmp
+            - mv fpga_test.log tmp
         dependencies:
             - EA-build
             - bitstream
@@ -196,6 +191,7 @@ deploy-EA:
               mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         script:
             - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
+            - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         needs:
             - EA-build
