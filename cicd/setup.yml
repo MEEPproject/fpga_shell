@@ -6,7 +6,7 @@
 
 .setup:
   variables: 
-        EMULATED_ACCELERATOR: acme 
+        EMULATED_ACCELERATOR: dvino 
         FPGA_BOARD: u280
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
@@ -14,6 +14,7 @@
         QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+        BOOT_SCRIPT: /home/dmazure/workspace/boot_dvino.sh
 
 
 .default_rules:
