@@ -164,7 +164,7 @@ fpga-test:
         before_script:
             - !reference [.fpga_test, before_script]
         script:
-            - sh/load_bitstream.sh qdma tmp/bitstream/$BITSTREAM
+            - sh/load_bitstream.sh qdma bitstream/system.bit
             - source sh/fpga_test.sh fpga_test.log                
             # The EA script should provide the right script and the right binary
             - !reference [.fpga_test, script]
@@ -191,6 +191,7 @@ deploy-EA:
               mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         script:
             - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
+            - mv bitstream/system.bit bitstream/$BITSTREAM
             - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         needs:
