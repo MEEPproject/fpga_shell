@@ -38,7 +38,7 @@ stages:
 .disable_git:
   extends: .setup
   variables:
-    GIT_STRATEGY: none
+          #GIT_STRATEGY: none
     GIT_SUBMODULE_STRATEGY: "none"
 
 EA-build:
