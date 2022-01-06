@@ -13,7 +13,7 @@
 # included file for clarity
 
 include:
-  - local: support/acme/setup_acme.yml
+  - local: cicd/support.yml
 
 variables: !reference [.setup, variables]
 
