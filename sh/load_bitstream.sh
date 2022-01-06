@@ -245,3 +245,4 @@ fi
 
 echo New PCIe devices loaded:
 lspci -vd 10ee:
+

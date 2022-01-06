@@ -1,12 +1,22 @@
 #!/bin/bash
 
 INPUT_FILE=$1
-#GOOD_STRING="Welcome to Buildroot"
 GOOD_STRING=$2
+
+echo "Checking FPGA log file..."
 
 if [ ! -f "$INPUT_FILE" ]; then
        printf "Log file doesn't exist!\n"	
        exit 1
+fi
+
+FILE_SIZE=$(ls -ltr $INPUT_FILE | nawk '{printf $5}')
+
+echo "File size is $FILE_SIZE bytes"
+
+if [ "$FILE_SIZE" -eq "0" ]; then
+	echo "FPGA Log is empty, something went wrong, finishing..."
+	exit 1
 fi
 
 ret=0
