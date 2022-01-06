@@ -2,6 +2,8 @@
 # the tags for the runners, the specific scripts for your own EA to work, etc.
 # The FPGA board is also defined here [u280, u55c]
 # TODO: Do make initialize FPGA_BOARD to set up the proper board within the Shell
+# TODO: Gitlab allows to include external yaml files. At some point, it can be
+#     : interesting for the EA to include its own .gitlab-ci.yml
 
 
 .setup:
