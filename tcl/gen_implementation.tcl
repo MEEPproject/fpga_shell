@@ -169,12 +169,12 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 
         if { [expr $CurrentSlack < 0.000] } { 
 
-	  puts $fd_sum "* The design didn't meet timing"
+	  puts $fd_sum "* Timing constraints are not met"
 	  set WorstTimingPath [get_timing_paths -max_paths 1 -nworst 1 -setup]
 	  puts $fd_sum "Critical Path:\r\n$WorstTimingPath\r\n"
 
 	} else {
-          puts $fd_sum "* The design met timing"
+          puts $fd_sum "* The design closed timing"
 	}
 
         puts $fd_sum "Design WNS=${CurrentSlack}ns"
