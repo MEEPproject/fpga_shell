@@ -16,7 +16,7 @@
         QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
-        BOOT_SCRIPT: accelerator/piton/tools/src/proto/alveou280/boot_linux.sh 
+        BOOT_SCRIPT: /home/dmazure/workspace/boot_fedora.sh 
         LINUX_IMAGE: ""
         VALID_MSG: "Welcome to the Fedora/RISC-V disk image"
 
