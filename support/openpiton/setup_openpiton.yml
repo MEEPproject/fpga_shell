@@ -25,7 +25,7 @@
   variables: 
     - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
-    if: $CI_COMMIT_BRANCH =~ /^support/
+    if: ($CI_COMMIT_BRANCH =~ /^support/ && $CI_COMMIT_MESSAGE !~ /^#WIP/)
 
 .default_tags:
   tags:

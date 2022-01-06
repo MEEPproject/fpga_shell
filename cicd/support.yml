@@ -8,11 +8,11 @@ include:
     #    rules:
     # - if: $CI_COMMIT_BRANCH == support/openpiton/cicd
     #
-    - local: support/acme/setup_acme.yml
+    # - local: support/acme/setup_acme.yml
     #rules:
     # - if: $CI_COMMIT_BRANCH == support/acme/cicd
     #
-    #- local: support/dvino/setup_dvino.yml
+    - local: support/dvino/setup_dvino.yml
     #rules:
     # - if: $CI_COMMIT_BRANCH == support/dvino/cicd
 
