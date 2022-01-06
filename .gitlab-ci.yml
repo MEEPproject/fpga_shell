@@ -13,7 +13,7 @@
 # included file for clarity
 
 include:
-  - local: cicd/support.yml
+  - local: support/openpiton/setup_openpiton.yml
 
 variables: !reference [.setup, variables]
 
