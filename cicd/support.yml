@@ -4,11 +4,11 @@
 # We comment/uncomment depending on the branch
 
 include:
-    #- local: support/openpiton/setup_openpiton.yml
+    - local: support/openpiton/setup_openpiton.yml
     #    rules:
     # - if: $CI_COMMIT_BRANCH == support/openpiton/cicd
     #
-    - local: support/acme/setup_acme.yml
+    #- local: support/acme/setup_acme.yml
     #rules:
     # - if: $CI_COMMIT_BRANCH == support/acme/cicd
     #
