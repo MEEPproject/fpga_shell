@@ -164,8 +164,8 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	puts $fd_sum "======================================="
 	puts $fd_sum "== FPGA Shell implementation summary =="
         puts $fd_sum "======================================="
-	puts $fd_sum "\r\n"
-	puts $fd_sum "1. Timing"
+	puts $fd_sum ""
+	puts $fd_sum "1. Timing:"
 
         if { [expr $CurrentSlack < 0.000] } { 
 
@@ -179,10 +179,10 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 
         puts $fd_sum "Design WNS=${CurrentSlack}ns"
 
-	puts $fd_sum "2. Directives"
+	puts $fd_sum "2. Directives:"
         puts $fd_sum "* Place Directive used: $g_place_directive"
         puts $fd_sum "* Route Directive used: $g_route_directive"
-        puts $fd_sum "3. Lapsed timestamps to reach stages"
+        puts $fd_sum "3. Lapsed timestamps to reach stages:"
         puts $fd_sum "* Post synthesis optimization @ $Lapsed2optTime"
 	puts $fd_sum "* Post place                  @ $Lapsed2placeTime"
         puts $fd_sum "* Post place optimization     @ $Lapsed2physOptTime"
