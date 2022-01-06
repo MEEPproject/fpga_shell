@@ -78,6 +78,8 @@ synthesis:
             - cp -r src/system_top.sv tmp
             - cp -r tcl/shell_env.tcl tmp
             - cp gen_system.tcl tmp/tcl
+            - echo -e "Artifacts:"; ls tmp; ls dcp
+
         artifacts:
           when: always
           paths:
@@ -102,6 +104,7 @@ implementation:
 
         after_script:
             - make clean_synthesis
+            - echo -e "Artifacts:"; ls dcp; ls reports
 
         dependencies:
             - synthesis
@@ -126,6 +129,7 @@ bitstream:
             - make bitstream
         after_script:
             - make clean_implementation
+            - echo -e "Artifacts:"; ls bitstream
         dependencies:
             - synthesis
             - implementation
@@ -172,6 +176,7 @@ fpga-test:
             - sh/check_log.sh fpga_test.log $VALID_MSG 
         after_script:
             - mv fpga_test.log tmp
+            - echo -e "Artifacts:"; ls tmp
         dependencies:
             - EA-build
             - bitstream
