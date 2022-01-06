@@ -10,6 +10,7 @@ dcp
 reports
 system.bit
 gen_system.tcl
+cicd/support.yml
 *.swp
 *.log
 *.dcp
