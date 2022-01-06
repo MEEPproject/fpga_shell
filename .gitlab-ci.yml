@@ -13,7 +13,7 @@
 # included file for clarity
 
 include:
-  - local: support/dvino/setup_dvino.yml
+  - local: cicd/support.yml
 
 variables: !reference [.setup, variables]
 
