@@ -175,8 +175,9 @@ fpga-test:
             - echo "Checking FPGA log ..."
             - sh/check_log.sh fpga_test.log $VALID_MSG 
         after_script:
+            - mkdir -p tmp
             - mv fpga_test.log tmp
-            - echo -e "Artifacts:"; ls tmp
+            - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
             - bitstream
@@ -192,8 +193,8 @@ deploy-EA:
         extends: .disable_git
         tags: !reference [.default_tags, tags]
         before_script:
-            - EANAME=$EMULATED_ACCELERATOR ;\
-              mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
+            - export EANAME=$EMULATED_ACCELERATOR
+            - mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         script:
             - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
             - mv bitstream/system.bit bitstream/$BITSTREAM
