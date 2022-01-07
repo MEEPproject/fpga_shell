@@ -69,6 +69,7 @@ synthesis:
         tags: !reference [.default_tags, tags]
         before_script:
             - *clone_ea
+            - ls binaries/
         script:
             - make initialize
             - make project
@@ -82,6 +83,8 @@ synthesis:
             - cp -r tcl/shell_env.tcl tmp
             - cp gen_system.tcl tmp/tcl
             - echo -e "Artifacts:"; ls tmp; ls dcp
+        dependencies:
+            - EA-build
 
         artifacts:
           when: always
