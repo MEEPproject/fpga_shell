@@ -19,7 +19,7 @@ proc reportRoute { g_root_dir } {
 	report_methodology -file $routeDir/methodology.rpt
         report_design_analysis -timing -extend -file $routeDir/design_analysis_timing.rpt
         report_design_analysis -max_paths 50 -setup -file $routeDir/design_analysis_setup.rpt
-        report_design_analysis -complexity -hierarchical -file $routeDir/design_analysis_complexity.rpt
+        report_design_analysis -complexity -file $routeDir/design_analysis_complexity.rpt
         report_design_analysis -congestion -file $routeDir/design_analysis_congestion.rpt
         report_route_status -file $routeDir/route_status.rpt
         report_timing_summary -file $routeDir/timing_summary.rpt
