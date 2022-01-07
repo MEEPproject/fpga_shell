@@ -3,5 +3,7 @@
 # Until Gitlab 14.2, rules for include can't be used.
 # We comment/uncomment depending on the branch
 
+include:
+    - local: support/openpiton/setup_acme.yml
 
 
