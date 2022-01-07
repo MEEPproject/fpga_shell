@@ -69,6 +69,7 @@ synthesis:
         tags: !reference [.default_tags, tags]
         before_script:
             - *clone_ea
+            - ls binaries/
         script:
             - make initialize
             - make project
@@ -82,6 +83,8 @@ synthesis:
             - cp -r tcl/shell_env.tcl tmp
             - cp gen_system.tcl tmp/tcl
             - echo -e "Artifacts:"; ls tmp; ls dcp
+        dependencies:
+            - EA-build
 
         artifacts:
           when: always
@@ -98,7 +101,7 @@ implementation:
 
         needs:
             - synthesis
-        timeout: 4h
+        timeout: 8h
         tags: !reference [.default_tags, tags]
         before_script:
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
@@ -198,13 +201,17 @@ deploy-EA:
         extends: .disable_git
         tags: !reference [.default_tags, tags]
         before_script:
+            - export TODAY=$(date +"%m%d%y")
             - export EANAME=$EMULATED_ACCELERATOR
-            - mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
+            - export EADIRNAME=${EANAME}_${TODAY}_${CI_COMMIT_SHORT_SHA}
+            - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
+            - mkdir -p $ABSDIR
         script:
-            - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
+            - date >> $ABSDIR/date.txt
+            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - mv bitstream/system.bit bitstream/$BITSTREAM
             - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
-            - cp -r tmp/* $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
+            - cp -r tmp/* $ABSDIR
         needs:
             - EA-build
             - synthesis
