@@ -2,11 +2,24 @@ source [pwd]/tcl/environment.tcl
 source $g_root_dir/tcl/impl_utils.tcl
 
 if { $::argc > 0 } {
- set g_root_dir $::argv
+
+ set g_root_dir [lindex $argv 0]
+ set g_dcp_on "true"
+
+} else { 
+ puts "Bad usage. This script needs to receive the root directory as an argument"
+ return 0
+} 
+
+if { $::argc > 1} { 
+
+ set g_dcp_off  [lindex $argv 1]
  puts "Root directory is $g_root_dir"
+ puts "Post opt and post place dcp generation is set to $g_dcp_on"
+
 }
 
-proc implementation { g_root_dir g_place_directive g_route_directive} {
+proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 
 	set RefTime [clock seconds]
 	## It is assumed a dcp folder containing the synthesis dcp already exists
@@ -38,7 +51,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	puts "Lapsed time after opt_design: $Lapsed2optTime"
 	puts "--------------------------------------"
 
-        write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
+	if { $g_dcp_on == "true" } {
+            write_checkpoint -force $g_root_dir/dcp/post_opt.dcp
+	}	
 
 	# Optional Power Optimization
 	#power_opt_design	
@@ -118,7 +133,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive} {
 	#set critical_nets [get_nets -of [get_timing_paths -max_paths 85]]
 	#route_design -nets $critical_nets
 
-	write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
+	if { $g_dcp_on == "true" } { 
+            write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
+	}	
 
 	if { [expr $CurrentSlack < -1.000 ] } {
 		puts "route_design will not be run as the WNS is above 1.000 "
@@ -207,5 +224,5 @@ if {[file exists $directivesFile]} {
 }
 
 	
-implementation $g_root_dir $g_place_directive $g_route_directive
+implementation $g_root_dir $g_place_directive $g_route_directive $g_dcp_on
 

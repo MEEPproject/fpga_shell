@@ -75,6 +75,9 @@ synthesis:
             - make synthesis
         after_script:
             - mkdir tmp
+            - cp shell_build.log tmp
+            - cp vivado.log tmp
+              cp vivado.jou tmp
             - cp -r src/system_top.sv tmp
             - cp -r tcl/shell_env.tcl tmp
             - cp gen_system.tcl tmp/tcl
@@ -100,7 +103,7 @@ implementation:
         before_script:
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
         script:
-            - make implementation
+            - make implementation DCP_ON=false
 
         after_script:
             - make clean_synthesis
@@ -113,7 +116,7 @@ implementation:
             when: on_success
             expire_in: 1 day
             paths:
-                - dcp/implementation.dcp
+                - dcp
                 - reports
 bitstream:
         stage: bitstream
@@ -125,6 +128,8 @@ bitstream:
             - synthesis
             - implementation
         tags: !reference [.default_tags, tags] 
+        before_script:
+            - ls dcp/
         script:
             - make bitstream
         after_script:
@@ -175,8 +180,9 @@ fpga-test:
             - echo "Checking FPGA log ..."
             - sh/check_log.sh fpga_test.log $VALID_MSG 
         after_script:
-            - mv fpga_test.log tmp
-            - echo -e "Artifacts:"; ls tmp
+            - mkdir -p tmp
+            - mv fpga_test.log tmp/
+            - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
             - bitstream
@@ -192,8 +198,8 @@ deploy-EA:
         extends: .disable_git
         tags: !reference [.default_tags, tags]
         before_script:
-            - EANAME=$EMULATED_ACCELERATOR ;\
-              mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
+            - export EANAME=$EMULATED_ACCELERATOR
+            - mkdir -p $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA
         script:
             - date >> $DEPLOY_DIR/$(EANAME)_$CI_COMMIT_SHORT_SHA/date.txt
             - mv bitstream/system.bit bitstream/$BITSTREAM
