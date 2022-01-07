@@ -4,8 +4,8 @@
 # We comment/uncomment depending on the branch
 
 include:
-      #- local: support/acme/setup.yml
+      - local: support/acme/setup.yml
       #- local: support/openpiton/setup.yml
-      - local: support/dvino/setup.yml
+      #- local: support/dvino/setup.yml
 
 
