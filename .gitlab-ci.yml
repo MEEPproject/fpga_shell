@@ -13,7 +13,7 @@
 # included file for clarity
 
 include:
-  - local: cicd/support.yml
+  - local: cicd/ealib.yml
 
 variables: !reference [.setup, variables]
 
