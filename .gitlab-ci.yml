@@ -176,7 +176,7 @@ fpga-test:
             - sh/check_log.sh fpga_test.log $VALID_MSG 
         after_script:
             - mkdir -p tmp
-            - mv fpga_test.log tmp
+            - mv fpga_test.log tmp/
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
