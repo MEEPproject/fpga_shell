@@ -9,7 +9,7 @@ set BROMdataWidth [dict get $BROMentry AxiDataWidth]
 set BROMidWidth   [dict get $BROMentry AxiIdWidth]
 set BROMUserWidth [dict get $BROMentry AxiUserWidth]
 
-set InitFilePath $g_root_dir/binaries/$BROMinitfile
+set InitFilePath binaries/$BROMinitfile
 
 #This needs to be extracted from the definition file, not set here would be needed
 if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {               
