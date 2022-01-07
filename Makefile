@@ -23,6 +23,7 @@ VIVADO_VER   ?= 2020.1
 VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
 VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
+DCP_ON       ?= 
 U280_PART    = "xcu280-fsvh2892-2L-e" 
 U55C_PART    = "xcu55c-fsvh2892-2L-e"  
 U280_BOARD   = "u280"
@@ -82,7 +83,7 @@ $(SYNTH_DCP):
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
 	
 $(BIT_FILE): $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
@@ -99,6 +100,7 @@ report_synth: $(SYNTH_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
 
 report_place: $(PLACE_DCP)
+	echo "Make sure you have run the implementation process with the DCP_ON option"
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_place.tcl -tclargs $(ROOT_DIR)
 
 report_route: $(IMPL_DCP)

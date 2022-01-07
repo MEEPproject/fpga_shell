@@ -14,7 +14,7 @@ set InitFilePath $g_accel_dir/meep_shell/binaries/$BROMinitfile
 #This needs to be extracted from the definition file, not set here would be needed
 if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {               
 	file copy -force $InitFilePath $g_root_dir/ip/axi_brom/src/initrom.mem
-	putmeeps "BROM init file copied!"	
+	putmeeps "BROM init file copied! \($InitFilePath\)"	
 } else {
 	putmeeps "BROM init file hasn't been provided!"
 	putmeeps "Consider to create it under EA/$InitFilePath folder"
