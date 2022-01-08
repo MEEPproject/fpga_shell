@@ -9,15 +9,21 @@ set BROMdataWidth [dict get $BROMentry AxiDataWidth]
 set BROMidWidth   [dict get $BROMentry AxiIdWidth]
 set BROMUserWidth [dict get $BROMentry AxiUserWidth]
 
-set InitFilePath binaries/$BROMinitfile
+set InitFilePath "$g_accel_dir/meep_shell/binaries/$BROMinitfile"
+set InitAltPath  "$g_root_dir/binaries/$BROMinitfile"
 
-#This needs to be extracted from the definition file, not set here would be needed
+# Thinking on the CI/CD, search also in a binaries folder which can be the 
+# result of a previous CI/CD stage, as artifact.
+
 if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {               
 	file copy -force $InitFilePath $g_root_dir/ip/axi_brom/src/initrom.mem
 	putmeeps "BROM init file copied! \($InitFilePath\)"	
+} elseif { [file exists $InitAltPath] == 1 &&  $BROMinitfile != "" } {
+	file copy -force $InitAltPath $g_root_dir/ip/axi_brom/src/initrom.mem
+	putmeeps "BROM init file copied! \($InitAltPath\)"
 } else {
-	putmeeps "BROM init file hasn't been provided!"
-	putmeeps "Consider to create it under EA/$InitFilePath folder"
+	putdebugs "BROM init file hasn't been provided!"
+	putdebugs "Consider to create it under $InitFilePath or $InitAltPath folder"
 }
 
 ### Initialize the IPs
