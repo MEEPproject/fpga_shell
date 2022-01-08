@@ -109,7 +109,10 @@ report_route: $(IMPL_DCP)
 
 
 clean: 
-	rm -rf project dcp reports accelerator src binaries ip	
+	rm -rf project dcp reports accelerator src ip	
+
+clean_binaries:
+	rm -rf binaries
 	
 clean_project:
 	rm -rf project
@@ -123,4 +126,8 @@ clean_synthesis:
 clean_implementation:
 	rm -rf dcp/implementation.dcp reports
 
+clean_bitstream:
+	rm -rf bitstream
+
+clean_all: clean clean_binaries clean_bitstream
 
