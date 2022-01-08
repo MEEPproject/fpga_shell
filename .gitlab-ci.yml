@@ -51,10 +51,9 @@ EA-build:
             - *clone_ea 
         script:    
             - make initialize
-              #- make binaries
+            - make binaries
         after_script:
-            - echo "olakase" >> binaries/bootrom.mem
-              #- cp -r accelerator/meep_shell/binaries/* binaries
+            - cp -r accelerator/meep_shell/binaries/* binaries
         artifacts:
                 #  untracked: true
           paths:            
