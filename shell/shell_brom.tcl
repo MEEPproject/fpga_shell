@@ -15,8 +15,6 @@ set InitAltPath  "$g_root_dir/binaries/$BROMinitfile"
 # Thinking on the CI/CD, search also in a binaries folder which can be the 
 # result of a previous CI/CD stage, as artifact.
 
-
-#This needs to be extracted from the definition file, not set here would be needed
 if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {               
 	file copy -force $InitFilePath $g_root_dir/ip/axi_brom/src/initrom.mem
 	putmeeps "BROM init file copied! \($InitFilePath\)"	
@@ -24,8 +22,8 @@ if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {
 	file copy -force $InitAltPath $g_root_dir/ip/axi_brom/src/initrom.mem
 	putmeeps "BROM init file copied! \($InitAltPath\)"
 } else {
-	putmeeps "BROM init file hasn't been provided!"
-	putmeeps "Consider to create it under $InitFilePath or $InitAltPath folder"
+	putdebugs "BROM init file hasn't been provided!"
+	putdebugs "Consider to create it under $InitFilePath or $InitAltPath folder"
 }
 
 ### Initialize the IPs
