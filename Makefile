@@ -39,8 +39,8 @@ u280:
 	$(SH_DIR)/extract_part.sh $(U280_PART) $(U280_BOARD)
 
 u55c:
-	$(SH_DIR)/extract_part.sh $(U55C_PART) $(U55C_BOARD)
-	echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.1"
+	@($(SH_DIR)/extract_part.sh $(U55C_PART) $(U55C_BOARD))
+	@(echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.1")
 
 initialize: clean $(ACCEL_DIR)
 

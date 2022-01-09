@@ -28,7 +28,7 @@ if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {
 
 ### Initialize the IPs
 putmeeps "Packaging BROM IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source ./ip/axi_brom/tcl/gen_project.tcl
+exec vivado -mode batch -nolog -nojournal -notrace -source ./ip/axi_brom/tcl/gen_project.tcl -tclargs $g_board_part
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
