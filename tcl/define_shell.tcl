@@ -86,6 +86,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
 
 				# Dont push to the user to number his interfaces when there is only one.							
+				# TODO: Parse $fields 3 to secuere that it is in fact a number
 				for {set i 0} {$i < [lindex $fields 3] } {incr i} {
 					if {[lindex $fields 3] == 1} {	
 						set n ""
