@@ -55,6 +55,8 @@
    CONFIG.pf3_bar0_prefetchable_qdma {true} \
    CONFIG.pf3_bar2_prefetchable_qdma {true} \
    CONFIG.pf3_msix_enabled_qdma {false} \
+   CONFIG.pl_link_cap_max_link_speed {8.0_GT/s} \
+   CONFIG.pl_link_cap_max_link_width {X16} \
    CONFIG.testname {mm} \
    CONFIG.tl_pf_enable_reg {1} \
  ] $qdma_0

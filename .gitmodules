@@ -4,3 +4,6 @@
 [submodule "ip/100GbEthernet"]
 	path = ip/100GbEthernet
 	url = ../ethernet_test.git
+[submodule "ip/aurora_dma"]
+	path = ip/aurora_dma
+	url = https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/aurora_user_interface.git
