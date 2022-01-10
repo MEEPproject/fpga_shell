@@ -7,3 +7,6 @@
 [submodule "ip/aurora_dma"]
 	path = ip/aurora_dma
 	url = https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/aurora_user_interface.git
+[submodule "ip/aurora_raw"]
+	path = ip/aurora_raw
+	url = https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/aurora_raw.git
