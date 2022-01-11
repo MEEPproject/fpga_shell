@@ -44,6 +44,7 @@ foreach dicEntry $ShellEnabledIntf {
 		source $g_root_dir/shell/shell_ethernet.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet_${g_board_part}.xdc"
 		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
+		# TODO: Check if ETHClkName is the right label. HBM uses "$HBMName"
 
 	}
 	if {[regexp -inline -all "AURORA" $IntfName] ne "" } {

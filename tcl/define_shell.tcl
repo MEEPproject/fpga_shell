@@ -140,6 +140,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					if { "${device}" == "ETHERNET" } {
                                                 dict set d_device IRQ [lindex $fields 7]
 					}
+					if { "${device}" == "AURORA" } {
+                                                dict set d_device Mode   [lindex $fields 6]
+                                                dict set d_device UsrClk [lindex $fields 8 8 8 8 8 8 8 8}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}
