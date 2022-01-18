@@ -41,3 +41,8 @@
 
   script:
     - source $BOOT_SCRIPT $LINUX_IMAGE
+  after_script:
+    - mkdir -p boot
+    - cp $BOOT_SCRIPT boot/
+    # image should be a binary artifact
+    - mv boot tmp/

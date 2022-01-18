@@ -185,6 +185,7 @@ fpga-test:
         after_script:
             - mkdir -p tmp
             - mv fpga_test.log tmp/
+            - !reference [.fpga_test, after_script]
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
