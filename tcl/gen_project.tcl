@@ -30,12 +30,10 @@ set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
     create_project $g_project_name $projec_dir -force -part $g_fpga_part
 }
-# Set project properties
-set obj [current_project]
-#set_property -name "board_part" -value "xilinx.com:au280:part0:1.1" -objects $obj
 
 #MEEP Phase 2 part
-#set_property -name "target_part" -value "xcvu47p-fsvh2892-2L-e" -objects $obj
+
+puts "\[MEEP\] **** MEEP Board: $g_board_part ****"
 
 # CHANGE DESIGN NAME HERE
 variable design_name
@@ -67,6 +65,9 @@ add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_p
 add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_${g_board_part}.xdc"
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
+
+#source $root_dir/accelerator/meep_shell/tcl/project_options.tcl
+
 if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl}]} {
 	puterrors "File project_options.tcl has not been loaded"
 } else {
