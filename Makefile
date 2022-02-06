@@ -42,7 +42,7 @@ u55c:
 	@($(SH_DIR)/extract_part.sh $(U55C_PART) $(U55C_BOARD))
 	@(echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.1")
 
-initialize: clean $(ACCEL_DIR)
+initialize: clean_all $(ACCEL_DIR)
 
 project: $(PROJECT_FILE)
 
