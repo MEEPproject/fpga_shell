@@ -17,3 +17,4 @@ gen_system.tcl
 *.jou
 #Vivado tmp files
 iter_*
+tcl/environment.tcl
