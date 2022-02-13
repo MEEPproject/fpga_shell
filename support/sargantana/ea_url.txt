@@ -1,4 +1,4 @@
 EMULATED_ACCELERATOR_NAME: sargantana
 EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
-EMULATED_ACCELERATOR_SHA: 7f5eac9b243b3fcb4a10e38d1681b7d5fa9b0583
+EMULATED_ACCELERATOR_SHA: ae1e1ca757bed8f6fc35fc39a8dac8f92b1f424a
 
