@@ -75,7 +75,7 @@ $(ACCEL_DIR):
 
 
 $(BINARIES_DIR):
-	$(SH_DIR)/accelerator_binaries.sh	
+	$(SH_DIR)/accelerator_bin.sh
 	mkdir -p $(BINARIES_DIR)
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
