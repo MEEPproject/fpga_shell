@@ -5,7 +5,7 @@ The MEEP Shell needs to be used with Vivado 2021.2. The board files for U280/U55
 
 It only works on Linux. There is no plan to add Windows support in the middle term. 
 
-The list of supported EAs so far (16/02/2022) is as follows:
+The list of supported EAs so far (17/02/2022) is as follows:
 
 dvino\
 sargantana\
