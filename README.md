@@ -7,14 +7,14 @@ It only works on Linux. There is no plan to add Windows support in the middle te
 
 The list of supported EAs so far (16/02/2022) is as follows:
 
-dvino
-sargantana
-acme
-openpiton  
+dvino\
+sargantana\
+acme\
+openpiton
 
 They can be generated using the correct initialization flag:
 
-make initialize LOAD_EA=dvino
-make initialize LOAD_EA=sargantana
-make initialize LOAD_EA=acme
-make initialize LOAD_EA=openpiton 
+make initialize LOAD_EA=dvino\
+make initialize LOAD_EA=sargantana\
+make initialize LOAD_EA=acme\
+make initialize LOAD_EA=openpiton
