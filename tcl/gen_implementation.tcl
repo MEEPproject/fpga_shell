@@ -141,7 +141,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 		puts "route_design will not be run as the WNS is above 1.000 "
 		puts "Implementation Failed. Check the timing reports to study how to improve timing"
 		## TODO: Quality of Results can be used as another criteria to not going further
-	        return 0	
+	        return 1	
 	}	
 
 	# TODO: Explore other routing strategies?
