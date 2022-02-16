@@ -75,12 +75,12 @@ $(ACCEL_DIR):
 
 
 $(BINARIES_DIR):
-	$(SH_DIR)/accelerator_build.sh	
+	$(SH_DIR)/accelerator_binaries.sh	
 	mkdir -p $(BINARIES_DIR)
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
-$(PROJECT_FILE): $(ACCEL_DIR) 	
-	#$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_meep.tcl
+$(PROJECT_FILE): $(ACCEL_DIR)
+	$(SH_DIR)/accelerator_build.sh ;\
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
