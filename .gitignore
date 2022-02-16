@@ -1,6 +1,7 @@
 tcl/shell_env.tcl
 .Xil/
-./ea_url.txt
+ea_url.txt
+!/support/*
 project
 src/system_top.sv
 accelerator

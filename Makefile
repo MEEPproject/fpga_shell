@@ -46,7 +46,7 @@ vcu128:
 	$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
 
 
-initialize: clean_all $(ACCEL_DIR)
+initialize: clean $(ACCEL_DIR)
 
 project: $(PROJECT_FILE)
 
@@ -75,12 +75,12 @@ $(ACCEL_DIR):
 
 
 $(BINARIES_DIR):
-	$(SH_DIR)/accelerator_build.sh	
+	$(SH_DIR)/accelerator_bin.sh
 	mkdir -p $(BINARIES_DIR)
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
-$(PROJECT_FILE): $(ACCEL_DIR) 	
-	#$(VIVADO_PATH) $(VIVADO_OPT) $(TCL_DIR)/gen_meep.tcl
+$(PROJECT_FILE): $(ACCEL_DIR)
+	$(SH_DIR)/accelerator_build.sh ;\
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
@@ -122,7 +122,10 @@ report_route: $(IMPL_DCP)
 
 
 clean: 
-	rm -rf project dcp reports accelerator src ip	
+	rm -rf project dcp reports accelerator src 	
+
+clean_ip:
+	rm -rf ip
 
 clean_binaries:
 	rm -rf binaries

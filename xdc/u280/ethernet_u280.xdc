@@ -99,4 +99,5 @@ set_property PACKAGE_PIN P42       [get_ports "qsfp_ref_clk_p"] ;# Bank 135 - MG
 #set_max_delay -datapath_only -from $rx_clk  -to $sys_clk [expr [get_property -min period $rx_clk ] * 0.9]
 #set_max_delay -datapath_only -from $rx_clk  -to $tx_clk  [expr [get_property -min period $rx_clk ] * 0.9]
 ## ================================
-  		
+
+set_false_path -from [get_pins {meep_shell_inst/MEEP_100Gb_Ethernet_0/inst/tx_rx_ctl_stat/U0/gpio_core_1/Dual.gpio_Data_Out_reg[*]/C}] 		

@@ -2,7 +2,7 @@
 
 OUTPUT_FILE=$1
 
-#stty -F /dev/ttyUSB2 115200
+stty -F /dev/ttyUSB2 115200 raw -echo
 cat < /dev/ttyUSB2 > $OUTPUT_FILE &
 
 echo "Sleep 5 minutes to let the UART output to be copied into the $OUTPUT_FILE file ..."

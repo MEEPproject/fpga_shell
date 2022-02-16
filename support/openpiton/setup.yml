@@ -2,6 +2,7 @@
 # the tags for the runners, the specific scripts for your own EA to work, etc.
 # The FPGA board is also defined here [u280, u55c]
 # TODO: Do make initialize FPGA_BOARD to set up the proper board within the Shell
+#     : The board may be passed as a ci variable during the commit.
 # TODO: Gitlab allows to include external yaml files. At some point, it can be
 #     : interesting for the EA to include its own .gitlab-ci.yml
 
@@ -25,7 +26,7 @@
   variables: 
     - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
-    if: ($CI_COMMIT_BRANCH =~ /^support/ && $CI_COMMIT_MESSAGE !~ /^#WIP/)
+    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
 .default_tags:
   tags:

@@ -8,6 +8,7 @@
 # The CI/CD flow generates a bitstream both for the targeted EA.
 # The Pipeline can be triggered if there is an update (rule "changes") in the
 # ea_url.txt file/folder
+# TODO: [Documentation] References are mandatory to exist in the EA included yml
 
 # Include the supported EA configuration files. This could be done in other 
 # included file for clarity
@@ -72,6 +73,7 @@ synthesis:
             - ls binaries/
         script:
             - make initialize
+            - make $FPGA_BOARD
             - make project
             - make synthesis
         after_script:
