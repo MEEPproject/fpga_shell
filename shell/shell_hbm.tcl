@@ -192,6 +192,7 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 ## Not convert if user interface is already 256 bits
 ###################################################################
 # TODO: HBM AXI Labels must be variables generated during the shell definition
+# TODO: All the blocks than shape the HBM pipe need to be labeled depending on the channel numbering
 
 	create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_0
 	connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_0/S_AXI]
@@ -205,7 +206,11 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
 		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
 	} else {
-		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08]
+		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_0
+		connect_bd_intf_net [get_bd_intf_pins rama_0/m_axi] [get_bd_intf_pins hbm_0/SAXI_08]
+		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins rama_0/s_axi]
+                connect_bd_net [get_bd_pins rama_0/axi_aclk] $HBMClockPin
+		connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins rama_0/axi_aresetn]
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
