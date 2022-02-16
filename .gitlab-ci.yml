@@ -106,7 +106,7 @@ implementation:
         before_script:
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
         script:
-            - make implementation DCP_ON=false
+            - make ci_implementation DCP_ON=false
 
         after_script:
             - make clean_synthesis
@@ -134,7 +134,7 @@ bitstream:
         before_script:
             - ls dcp/
         script:
-            - make bitstream
+            - make ci_bitstream
         after_script:
             - make clean_implementation
             - echo -e "Artifacts:"; ls bitstream

@@ -91,6 +91,15 @@ $(IMPL_DCP): $(SYNTH_DCP)
 	
 $(BIT_FILE): $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	
+#### Special calls for the CI/CD, where the change on the artifact timestamp disables the use of the "requirements"
+
+ci_implementation: 
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
+	
+ci_bitstream: 
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	
 
 #### Special script to adquire the best placement strategy #####
 
