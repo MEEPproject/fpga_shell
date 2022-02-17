@@ -46,7 +46,7 @@ vcu128:
 	$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
 
 
-initialize: clean_all $(ACCEL_DIR)
+initialize: clean $(ACCEL_DIR)
 
 project: $(PROJECT_FILE)
 

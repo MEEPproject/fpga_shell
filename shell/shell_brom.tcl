@@ -22,8 +22,8 @@ if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {
 	file copy -force $InitAltPath $g_root_dir/ip/axi_brom/src/initrom.mem
 	putmeeps "BROM init file copied! \($InitAltPath\)"
 } else {
-	putdebugs "BROM init file hasn't been provided!"
-	putdebugs "Consider to create it under $InitFilePath or $InitAltPath folder"
+	puterrors "BROM init file hasn't been provided!"
+	puterrors "Consider to create it under $InitFilePath or $InitAltPath folder"
 }
 
 ### Initialize the IPs
