@@ -78,6 +78,7 @@ synthesis:
             - make synthesis
         after_script:
             - mkdir tmp
+            - cp -r binaries tmp 
             - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp
             - cp vivado.log tmp
