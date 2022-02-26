@@ -10,3 +10,6 @@
 [submodule "ip/aurora_raw"]
 	path = ip/aurora_raw
 	url = ../aurora_raw.git
+[submodule "ip/10GbEthernet"]
+	path = ip/10GbEthernet
+	url = https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/10gb_ethernet.git
