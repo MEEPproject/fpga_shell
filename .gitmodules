@@ -10,3 +10,6 @@
 [submodule "ip/aurora_raw"]
 	path = ip/aurora_raw
 	url = ../aurora_raw.git
+[submodule "ip/10GbEthernet"]
+	path = ip/10GbEthernet
+	url = ../10gb_ethernet.git

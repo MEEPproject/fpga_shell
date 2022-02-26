@@ -8,6 +8,7 @@
 # The CI/CD flow generates a bitstream both for the targeted EA.
 # The Pipeline can be triggered if there is an update (rule "changes") in the
 # ea_url.txt file/folder
+# TODO: [Documentation] References are mandatory to exist in the EA included yml
 
 # Include the supported EA configuration files. This could be done in other 
 # included file for clarity
@@ -58,6 +59,7 @@ EA-build:
                 #  untracked: true
           paths:            
             - binaries        
+            - ea_url.txt
 
 synthesis:
         stage: synthesis
@@ -77,9 +79,11 @@ synthesis:
             - make synthesis
         after_script:
             - mkdir tmp
+            - cp -r binaries tmp 
+            - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp
-            - cp vivado.log tmp
-              cp vivado.jou tmp
+            - cp $(find . -name "vivado.log") tmp
+              cp $(find . -name "vivado.jou") tmp
             - cp -r src/system_top.sv tmp
             - cp -r tcl/shell_env.tcl tmp
             - cp gen_system.tcl tmp/tcl

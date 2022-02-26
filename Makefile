@@ -122,7 +122,10 @@ report_route: $(IMPL_DCP)
 
 
 clean: 
-	rm -rf project dcp reports accelerator src ip	
+	rm -rf project dcp reports accelerator src 	
+
+clean_ip:
+	rm -rf ip
 
 clean_binaries:
 	rm -rf binaries

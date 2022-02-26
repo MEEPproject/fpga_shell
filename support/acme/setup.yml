@@ -24,7 +24,7 @@
   variables: 
     - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
-    if: ($CI_COMMIT_BRANCH =~ /^support/ && $CI_COMMIT_MESSAGE !~ /^#WIP/)
+   if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
 .default_tags:
   tags:
@@ -40,3 +40,9 @@
 
   script:
     - source $BOOT_SCRIPT $LINUX_IMAGE
+  after_script:
+    - mkdir -p boot
+    - cp $BOOT_SCRIPT boot/
+    # image should be a binary artifact
+    - mv boot tmp/
+

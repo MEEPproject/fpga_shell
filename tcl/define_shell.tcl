@@ -182,9 +182,11 @@ proc ClocksDefinition { DefinitionFile } {
 			if { [regexp -all -inline {^CLK.,} $line] ne "" } {	
 
 				set d_clock [dict create Name CLK${i}]
-				dict set d_clock ClkNum  [lindex $fields 0]
-				dict set d_clock ClkFreq [lindex $fields 1]
-				dict set d_clock ClkName [lindex $fields 2]
+				dict set d_clock ClkNum    [lindex $fields 0]
+				dict set d_clock ClkFreq   [lindex $fields 1]
+				dict set d_clock ClkName   [lindex $fields 2]
+				dict set d_clock ClkRst    [lindex $fields 3]
+				dict set d_clock ClkRstPol [lindex $fields 4]
 			
 				set RetList [lappend RetList $d_clock]
 				incr i	

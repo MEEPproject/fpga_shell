@@ -121,6 +121,9 @@ if { $APBclkCandidate ne "None" } {
 
 		set ClkNum  [dict get $clkObj ClkNum]
 		set ClkName [dict get $clkObj ClkName]
+
+		set RstSync [dict get $clkObj ClkRst]
+		set RstPol  [dict get $clkObj ClkRstPol]
 		
 		# TODO: we dont want the APB clock to be external and we do want the PCIe clock in case
 		# it is used as an interface
@@ -141,6 +144,19 @@ if { $APBclkCandidate ne "None" } {
 			
 			create_bd_port -dir O -type clk $ClkName
 			connect_bd_net [get_bd_ports $ClkName] [get_bd_pins clk_wiz_1/clk_out${n}]
+
+			## Create Synchronous Reset port
+
+			if { $RstSync != "" } {
+				create_bd_port -dir O -type rst $RstSync
+				# TODO: Make case insensitive
+				if { $RstPol == "HIGH"  } {
+					connect_bd_net [get_bd_ports $RstSync] [get_bd_pins rst_ea_$ClkNum/peripheral_reset]
+
+				} else {
+                                        connect_bd_net [get_bd_ports $RstSync] [get_bd_pins rst_ea_$ClkNum/peripheral_aresetn]
+				}
+			}
 			
 			
 			incr n

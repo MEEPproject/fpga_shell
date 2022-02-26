@@ -38,6 +38,8 @@
     - sudo $TOOLS_DIR/givememyuart
 
   script:
+    ## Workaround to solve a problem with openSBI compilation (2020/02/18)
+    - source $BOOT_SCRIPT /home/dmazure/workspace/openSBI_compilations/boot_dts_no_uart.bin
     - source $BOOT_SCRIPT $LINUX_IMAGE
   after_script:
     - mkdir -p boot
