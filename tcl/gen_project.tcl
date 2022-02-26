@@ -33,7 +33,7 @@ if { $list_projs eq "" } {
 
 #MEEP Phase 2 part
 
-puts "\[MEEP\] **** MEEP Board: $g_board_part ****"
+putcolors "**** MEEP Board: $g_board_part ****" $GREEN
 
 # CHANGE DESIGN NAME HERE
 variable design_name

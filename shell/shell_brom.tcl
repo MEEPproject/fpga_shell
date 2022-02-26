@@ -17,7 +17,7 @@ set InitAltPath  "$g_root_dir/binaries/$BROMinitfile"
 
 if { [file exists $InitFilePath] == 1 &&  $BROMinitfile != "" } {               
 	file copy -force $InitFilePath $g_root_dir/ip/axi_brom/src/initrom.mem
-	putmeeps "BROM init file copied! \($InitFilePath\)"	
+	putcolors "BROM init file copied! \($InitFilePath\)" $GREEN
 } elseif { [file exists $InitAltPath] == 1 &&  $BROMinitfile != "" } {
 	file copy -force $InitAltPath $g_root_dir/ip/axi_brom/src/initrom.mem
 	putmeeps "BROM init file copied! \($InitAltPath\)"
