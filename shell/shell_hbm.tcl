@@ -207,6 +207,8 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
 		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
 		connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins axi_protocol_convert_0/aresetn]
+		connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn] 
+
 	} else {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_0
 		connect_bd_intf_net [get_bd_intf_pins rama_0/m_axi] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
