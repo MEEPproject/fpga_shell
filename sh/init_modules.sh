@@ -17,13 +17,14 @@ bash -x $SH_DIR/gitsubmodules.sh $1 $2
 #Generic call to accelerator conf script. It should be meep_shell/accelerator_init.sh
 cd $ACC_DIR
 
-# Find the meep_shell directory
+# Find the meep_shell directory based on a typical shell file name
+# TODO: Probably checking for the whole set of meep shell files makes more sense
 MEEP_DIR=$(find $ROOT_DIR -name accelerator_def.csv -printf '%h\n' | sort -u)
 echo "[MEEP] INFO: The meepshell folder found at: $MEEP_DIR"
 # Create a symlink in the accelerator root directory
 # in case the user has not placed it there.
-if [ "$MEEPDIR" != $ACC_DIR/meep_shell ] ; then
- ln -sf $MEEP_DIR ./meep_shell
+if [ "$MEEP_DIR" != $ACC_DIR/meep_shell ] ; then
+ ln -sf $MEEP_DIR $ACC_DIR/meep_shell
  echo "[MEEP] INFO: SymLink to $MEEP_DIR created"
 else
  echo "[MEEP] INFO: The EA is already placed in the EA root directory"
