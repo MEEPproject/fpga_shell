@@ -34,7 +34,8 @@
 
 .fpga_test:
   tags: 
-    - FPGA_TEST
+  #- FPGA_TEST
+    - FPGA_${FPGA_BOARD}
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - export PATH=$PATH:$QDMA_DRIVERS
