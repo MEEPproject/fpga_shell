@@ -10,7 +10,7 @@
 .setup:
   variables: 
         EMULATED_ACCELERATOR: openpiton 
-        FPGA_BOARD: u280
+        FPGA_BOARD: u55c
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"
         TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
