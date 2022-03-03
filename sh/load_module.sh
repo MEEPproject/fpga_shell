@@ -18,7 +18,6 @@
 # Description: 
 
 
-#!/bin/bash
  
 MODULE=$1
 MODULE=${MODULE,,}
