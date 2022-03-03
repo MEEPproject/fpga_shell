@@ -13,12 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Author: Daniel J.Mazure, BSC-CNS
+# Author: Xavier Martorell, BSC-CNS
 # Date: 22.02.2022
 # Description: 
-
-
-#!/bin/bash
 
 INSTALL_PATH=/home/xavim/OmpSs
 #INSTALL_PATH=/opt/MEEP/drivers/
@@ -27,7 +24,7 @@ DMA_IP_DRIVERS=$INSTALL_PATH/dma_ip_drivers-`/bin/hostname`
 
 export PATH=$DMA_IP_DRIVERS/QDMA/linux-kernel/bin/:$PATH
 
-source /opt/Xilinx/Vivado/2020.1/settings64.sh
+source /opt/Xilinx/Vivado/2021.2/settings64.sh
 
 NQUEUES=2
 
