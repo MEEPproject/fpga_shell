@@ -26,12 +26,9 @@ source $g_root_dir/tcl/shell_env.tcl
 # Create the Vivado block desing structure & placeholder
 source $g_root_dir/shell/shell_base.tcl
 
-# Create the PCIe strucutre
-source $g_root_dir/shell/shell_qdma.tcl
 # Create the clock structure
 source $g_root_dir/shell/shell_mmcm.tcl
 # Added by definition
-add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/qdma_${g_board_part}.xdc"
 add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/hbm_${g_board_part}.xdc"
 
 ##if {[info exists $shellIntf]} 
@@ -39,6 +36,13 @@ add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/hbm_$
 foreach dicEntry $ShellEnabledIntf {
 
 	set IntfName [dict get $dicEntry Name]
+
+	if {[regexp -inline -all "PCIE" $IntfName] ne "" } {
+                set PCIEentry $dicEntry
+                source $g_root_dir/shell/shell_qdma.tcl
+                add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/qdma_${g_board_part}.xdc"
+        }
+
 		
 	if {[regexp -inline -all "DDR4" $IntfName] ne "" } {
 		set DDR4entry $dicEntry

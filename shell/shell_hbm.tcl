@@ -65,12 +65,22 @@ set HBMuserWidth [dict get $HBMentry AxiUserWidth]
 ## converter to HBM. Hardcoded to 0
 set HBMuserWidth 0
 
-#[get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
-set HBMClockPin [get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
+if { $HBMname == "PCIE_CLK"} {
+	set HBMClockPin $pcie_clk_pin
+        set HBMRstPin   $pcie_rst_pin
+} else {
+	set HBMClockPin [get_bd_pins rst_ea_$HBMClkNm/slowest_sync_clk]
+	set HBMRstPin [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn]
+}
 
 if { $APBClockPin == "" } {
 	## APB candidate is an existing clock
 	set APBClockPin [get_bd_pins rst_ea_$APBclkCandidate/slowest_sync_clk]
+}
+
+if { $APBRstPin == "" } {
+        ## APB candidate is an existing clock
+        set APBRstPin   [get_bd_pins rst_ea_$APBclkCandidate/peripheral_aresetn]
 }
 
 
@@ -195,7 +205,7 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 	### TODO: APB CLOCK Can't be the same as ACLK. Needs to be a different source
 	connect_bd_net [get_bd_pins hbm_0/AXI_08_ACLK] $HBMClockPin
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PCLK] $APBClockPin
-    connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] $APBClockPin
+	connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] $APBClockPin
 	set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 	## One CATTRIP per stack, OR it
 	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_2
@@ -222,22 +232,20 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
 		# TODO: RAMA might be not the best option for non-random accesss. 
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0
 		connect_bd_net [get_bd_pins axi_dwidth_converter_0/s_axi_aclk] $HBMClockPin
-		#connect_bd_net [get_bd_pins rst_ea_domain/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
 		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
 		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
-		connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins axi_protocol_convert_0/aresetn]
-		connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn] 
+		connect_bd_net $HMBRstPin [get_bd_pins axi_protocol_convert_0/aresetn]
+		connect_bd_net $HBMRstPin [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn] 
 
 	} else {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_0
 		connect_bd_intf_net [get_bd_intf_pins rama_0/m_axi] [get_bd_intf_pins hbm_0/SAXI_08${HBM_AXI_LABEL}]
 		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_0/s_axi]
                 connect_bd_net [get_bd_pins rama_0/axi_aclk] $HBMClockPin
-		connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins rama_0/axi_aresetn]
+		connect_bd_net $HBMRstPin [get_bd_pins rama_0/axi_aresetn]
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
-	## Actually, we are using an AXI interconnect, not optimal
 	if { $PCIeDMA eq "yes"} {
 
 		set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_00_ACLK} CONFIG.USER_SAXI_00 {true}] [get_bd_cells hbm_0]
@@ -281,13 +289,11 @@ if { $HBMReady != ""} {
 
 ### HBM Interface, list of resets connections
 #foreach Number of HBM Channels
-connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins hbm_0/AXI_08_ARESET_N]
-#connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins axi_protocol_convert_0/aresetn]
-#connect_bd_net [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn] [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn]
+connect_bd_net $HBMRstPin [get_bd_pins hbm_0/AXI_08_ARESET_N]
 connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_$HBMClkNm/dcm_locked]
 
 #foreach Number of APB interfaces, one per stack
-connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn]
-connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] [get_bd_pins rst_ea_$HBMClkNm/peripheral_aresetn]
+connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] $APBRstPin 
+connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] $APBRstPin
 
 save_bd_design

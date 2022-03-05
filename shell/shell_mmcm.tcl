@@ -133,6 +133,7 @@ if { $APBclkCandidate ne "None" } {
   # APBClockPin defaults to empty. It will be populated here by a new MMCM output or by
   # an APBclkCandidate in the HBM script in case it exists.
   set APBClockPin ""
+  set APBRstPin ""
 
   set n 1
 
@@ -184,6 +185,10 @@ if { $APBclkCandidate ne "None" } {
 			# still use the index n to refer to the MMCM clock output
 			
 			set APBClockPin [get_bd_pins clk_wiz_1/clk_out${n}]
+			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_apb
+                        connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_apb/ext_reset_in]
+			set APBRstPin [get_bd_pins rst_apb/peripheral_aresetn]
+
 
 		}
 

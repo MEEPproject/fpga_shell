@@ -78,7 +78,7 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 # Parse the EA interfaces and create the shell environment file.
 # Returns a dictionary of the following Shell available interfaces:
 # set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
-# *HBM will be returned as HBMn, where n is a channel identificator
+# *HBM will be returned as HBMn, where n is a channel identifier
 # TODO: Choosing to what HBM pseudochannel to be connected
 # TODO: Choose different clocks for different instances of the same interface.
 ################################################################
@@ -140,8 +140,24 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							dict set d_device SyncClk $ClkList
 						}
 					}
+					## If the interface is synchronous to the PCIe CLK, create an special case
+					if { [lindex $fields 4] == "PCIE_CLK" } {
+						set ClkFreq 250000000
+						set ClkName "PCIE_CLK"
+						set ClkList [list Freq $ClkFreq Name $ClkName]
+						putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+						dict set d_device SyncClk $ClkList
+
+					}
 					
 					### Device-dependant settings
+					if { "${device}" == "PCIE" } {
+						dict set d_device IntfLabel  [lindex $fields 2]
+						dict set d_device ClkName    [lindex $fields 4]
+                                                dict set d_device RstName    [lindex $fields 5]
+						dict set d_device Mode       [lindex $fields 6]
+						dict set d_device SliceRegEn [lindex $fields 7]
+					}	
 					if { "${device}" == "UART" } {
 						dict set d_device Mode [lindex $fields 6]	
 						dict set d_device IRQ  [lindex $fields 7]	
@@ -161,7 +177,8 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					}
 					if { "${device}" == "AURORA" } {
                                                 dict set d_device Mode   [lindex $fields 6]
-                                                dict set d_device UsrClk [lindex $fields 8 8 8 8 8 8 8 8}
+                                                dict set d_device UsrClk [lindex $fields 8]
+					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
 			}

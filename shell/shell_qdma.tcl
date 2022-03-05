@@ -16,6 +16,10 @@
 # Date: 22.02.2022
 # Description: 
 
+set PCIEifname [dict get $PCIEentry IntfLabel]
+set PCIeDMA    [dict get $PCIEentry Mode]
+set PCIeClkNm  [dict get $PCIEentry ClkName]
+set PCIeRstNm  [dict get $PCIEentry RstName]
 
   
   
@@ -100,5 +104,25 @@
   connect_bd_net -net vdd_0_dout [get_bd_pins qdma_0/qsts_out_rdy] [get_bd_pins qdma_0/tm_dsc_sts_rdy] [get_bd_pins vdd_0/dout]
   connect_bd_net -net util_ds_buf_IBUF_DS_ODIV2 [get_bd_pins qdma_0/sys_clk] [get_bd_pins util_ds_buf/IBUF_DS_ODIV2]
   connect_bd_net -net util_ds_buf_IBUF_OUT [get_bd_pins qdma_0/sys_clk_gt] [get_bd_pins util_ds_buf/IBUF_OUT]
+
+
+   if { $PCIeDMA != "yes" } {
+
+ 	  # AXI interface exposed to the EA, along the pcie_axi_clk and the reset signal
+	   make_bd_intf_pins_external  [get_bd_intf_pins qdma_0/M_AXI]
+	   set_property name $PCIEifname [get_bd_intf_ports M_AXI_0]
+	   #Clock and reset
+	   make_bd_pins_external  [get_bd_pins qdma_0/axi_aclk]
+	   make_bd_pins_external  [get_bd_pins qdma_0/axi_aresetn]
+
+	   set_property name $PCIeClkNm [get_bd_ports axi_aclk_0]
+	   set_property name $PCIeRstNm [get_bd_ports axi_aresetn_0]
+	   #TODO: Add register slice option to relax timing
+
+   }
+
+set pcie_clk_pin  [get_bd_pins qdma_0/axi_aclk]
+set pcie_rst_pin [get_bd_pins qdma_0/axi_aresetn]
+
 
 save_bd_design

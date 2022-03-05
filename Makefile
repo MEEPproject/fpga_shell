@@ -107,7 +107,7 @@ SmartPlace: $(SYNTH_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
 	
 validate: $(REPORT_DIR)
-	$(SH_DIR)/check_reports.sh
+	$(SH_DIR)/check_timing.sh
 
 report_synth: $(SYNTH_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
