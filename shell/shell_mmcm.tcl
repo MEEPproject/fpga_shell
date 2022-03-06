@@ -124,6 +124,10 @@ if { $APBclkCandidate ne "None" } {
   
   putdebugs "MMCM configuration: $ClockParamList"
 
+  #Depends on the board
+  set sysclk1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sysclk1 ]
+  set resetn [ create_bd_port -dir I -type rst resetn ]
+
   #Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
   set_property -dict $ClockParamList $clk_wiz_1

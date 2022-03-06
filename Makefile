@@ -35,10 +35,10 @@ U55C_BOARD   = "u55c"
 #.DEFAULT_GOAL := initialize
 all: initialize binaries project synthesis implementation validate bitstream
 
-u280:
+u280: clean
 	$(SH_DIR)/extract_part.sh $(U280_BOARD) 
 
-u55c:
+u55c: clean
 	@($(SH_DIR)/extract_part.sh $(U55C_BOARD)) 
 	@(echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.2")
 
@@ -79,7 +79,7 @@ $(BINARIES_DIR):
 	mkdir -p $(BINARIES_DIR)
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
-$(PROJECT_FILE): $(ACCEL_DIR)
+$(PROJECT_FILE): clean_ip $(ACCEL_DIR)
 	$(SH_DIR)/accelerator_build.sh ;\
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
@@ -121,16 +121,17 @@ report_route: $(IMPL_DCP)
 
 
 
-clean: 
-	rm -rf project dcp reports accelerator src 	
+clean: clean_ip clean_project
+	rm -rf dcp reports src 	
 
-clean_ip:
-	rm -rf ip
+clean_ip: 
+	cd ip/100GbEthernet; make clean
+	cd ip/aurora_raw; make clean
 
 clean_binaries:
 	rm -rf binaries
 	
-clean_project:
+clean_project: clean_ip 
 	rm -rf project
 	
 clean_accelerator:
@@ -146,4 +147,5 @@ clean_bitstream:
 	rm -rf bitstream
 
 clean_all: clean clean_binaries clean_bitstream
+	rm -rf accelerator
 

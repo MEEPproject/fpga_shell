@@ -32,13 +32,7 @@ set PCIeRstNm  [dict get $PCIEentry RstName]
   set_property -dict [ list \
    CONFIG.POLARITY {ACTIVE_LOW} \
  ] $pcie_perstn
-  set resetn [ create_bd_port -dir I -type rst resetn ]
 
-
-  #Depends on the board
-  set sysclk1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sysclk1 ]
-  
-  
  
   # Create instance: qdma_0, and set properties
   set qdma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:qdma:4.0 qdma_0 ]

@@ -153,10 +153,10 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					### Device-dependant settings
 					if { "${device}" == "PCIE" } {
 						dict set d_device IntfLabel  [lindex $fields 2]
-						dict set d_device ClkName    [lindex $fields 4]
-                                                dict set d_device RstName    [lindex $fields 5]
-						dict set d_device Mode       [lindex $fields 6]
-						dict set d_device SliceRegEn [lindex $fields 7]
+						dict set d_device ClkName    [lindex $fields 5]
+                                                dict set d_device RstName    [lindex $fields 6]
+						dict set d_device Mode       [lindex $fields 7]
+						dict set d_device SliceRegEn [lindex $fields 8]
 					}	
 					if { "${device}" == "UART" } {
 						dict set d_device Mode [lindex $fields 6]	
@@ -166,8 +166,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							dict set d_device AxiIntf "no"						
 						} 
 					}
-					if { "${device}" == "HBM" || "${device}" == "DDR4" } {
+					if { "${device}" == "HBM" } {
 						dict set d_device CalibDone [lindex $fields 6]	
+						dict set d_device EnChannel [lindex $fields 7]
 					}
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
@@ -251,7 +252,10 @@ proc parse_definiton_file { DefinitionFile } {
 			set ret 1
 		}	
 		if {[regexp -inline -all {yes,.*} $line] ne ""} {
-			if {[regexp -inline -all {CLK\d} $line] eq ""} {
+                        if {[regexp -inline -all {PCIE_CLK} $line] != ""} {
+			putmeeps "The interface is synchronous to PCIe CLK"
+
+			} elseif {[regexp -inline -all {CLK\d} $line] eq ""} {
 			puterrors "The interface is enabled but doesn't have a valid clock.\
 			\r\n\tDetected in line: $line"
 			set ret 2
