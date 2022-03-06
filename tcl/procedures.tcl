@@ -87,18 +87,21 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 
 	while {[gets $fd_mod line] >= 0} {
 	
-	# Loof for the module name. Expecting something similar to a wrapper.
+	# Look for the module name. Expecting something similar to a wrapper.
 	# Use a condition to not do it in every line once it has been discovered.
 		if { $moduleParsed == 0} {
+
 		# module system_wrapper returns a single word separated by spaces
-			set moduleDef [regexp -inline -all {\ymodule\y\s[a-z|A-z|0-9]*} $line]
-			if { $moduleDef ne ""} {
+                        if { [regexp -inline -all {^\s*//} $line] == ""} {
+				set moduleDef [regexp -inline -all {\ymodule\y\s[a-z|A-z|0-9]*} $line]
+				if { $moduleDef ne ""} {
 			
-				set moduleName [join $moduleDef]
-				set moduleName [split $moduleName " "]
-				set moduleName [lindex $moduleName  1]
-				set moduleParsed 1
-				puts $fd_inst "$moduleName ${moduleName}_inst \( "
+					set moduleName [join $moduleDef]
+					set moduleName [split $moduleName " "]
+					set moduleName [lindex $moduleName  1]
+					set moduleParsed 1
+					puts $fd_inst "$moduleName ${moduleName}_inst \( "
+				}
 			}
 		} else {
 		
