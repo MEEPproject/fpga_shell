@@ -116,7 +116,7 @@ set_property top $g_top_name [current_fileset]
 set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs synth_1]
 set_property write_incremental_synth_checkpoint false [get_runs synth_1]
 
-putcolors "Project generation ended successfully" $GREEN
+putmeeps "Writing project tcl ..."
 
 #source $root_dir/tcl/gen_bitstream.tcl
 write_project_tcl -force -all_properties -dump_project_info -quiet -verbose "${root_dir}/gen_system.tcl"
@@ -124,4 +124,5 @@ putmeeps "Cleaning up..."
 file delete -force ${g_project_name}_def_val.txt
 file delete -force ${g_project_name}_dump.txt
 putmeeps "Done"
+putcolors "Project generation ended successfully" $GREEN
 exit
