@@ -197,6 +197,9 @@ if { $APBclkCandidate ne "None" } {
 		}
 
 	}
+
+
+ set MMCMLockedPin [get_bd_pins clk_wiz_1/locked]
   
 
  save_bd_design  
