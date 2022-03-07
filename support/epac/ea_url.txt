@@ -1,0 +1,4 @@
+EMULATED_ACCELERATOR_NAME: EPAC
+EMULATED_ACCELERATOR_REPO: https://epicore.bsc.es/gitlab/epac/epac_fpga.git 
+EMULATED_ACCELERATOR_SHA: 96ce705c8c73123b972acfcbb6c33faab2b2936f
+
