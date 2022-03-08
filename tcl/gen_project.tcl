@@ -86,6 +86,8 @@ set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
 
 #source $root_dir/accelerator/meep_shell/tcl/project_options.tcl
+# system_top is the top module in the meep_shell project. It may change if we want
+set_property top $g_top_name [current_fileset]
 
 if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl}]} {
 	puterrors "File project_options.tcl has not been loaded"
@@ -101,16 +103,10 @@ if {[file exists $acc_xdc_file]} {
 	add_files -fileset [get_filesets constrs_1] "$acc_xdc_file"
 }
 
+# Sanity checks
+update_ip_catalog -rebuild
+update_compile_order -fileset sources_1
 
-# The accelerator needs to define its own repo paths and the main project ip_path can be overwritten. 
-# Need to define it again
-set ip_dir_list [get_property ip_repo_paths [current_project]]
-lappend ip_dir_list $root_dir/ip
-	
-set_property  ip_repo_paths  $ip_dir_list [current_project]
-
-# This is how we call the top module in the meep_shell project. It may change if we want
-set_property top $g_top_name [current_fileset]
 
 # Set the incremental flow by default
 set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs synth_1]

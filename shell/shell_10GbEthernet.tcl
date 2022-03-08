@@ -119,6 +119,11 @@ connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_rstn] [get_bd_pins axi_clock
 connect_bd_net $APBClockPin [get_bd_pins MEEP_10Gb_Ethernet_0/init_clk]
 connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_0/locked]
 
+create_bd_port -dir O qsfp_oe_b
+create_bd_port -dir O qsfp_fs
+connect_bd_net [get_bd_ports qsfp_oe_b] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_oe_b]
+connect_bd_net [get_bd_ports qsfp_fs] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_fs]
+
 save_bd_design
 ## Create the Shell interface to the RTL
 ## CAUTION: The user can't specify USER, QOS and REGION signal for this interface
@@ -164,6 +169,8 @@ connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_rstn] [get_bd_pins axi_dwidt
 set_property name qsfp_4x_grx_p [get_bd_ports qsfp_1x_grx_p]
 set_property name qsfp_4x_grx_n [get_bd_ports qsfp_1x_grx_n]
 
+set_property name qsfp_4x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
+set_property name qsfp_4x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
 
 
 save_bd_design

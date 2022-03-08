@@ -27,7 +27,9 @@ file mkdir $g_root_dir/src
 source $g_root_dir/tcl/procedures.tcl
 source $g_root_dir/tcl/shell_env.tcl
 
+set g_head_file   $g_root_dir/misc/header.sv
 set g_top_file    $g_root_dir/src/system_top.sv
+set g_htmp_file   $g_root_dir/tmp/header_tmp.sv 
 set g_mod_file    $g_root_dir/tmp/mod_tmp.sv
 set g_inst_file   $g_root_dir/tmp/inst_tmp.sv
 set g_tmp_file	  $g_root_dir/tmp/top_tmp.sv
@@ -114,10 +116,10 @@ close $fd_inst
 # The EA will be entirely connected to the MEEP Shell.
 # EA ports <---> EA wires
 
-set fd_mod   [open $g_acc_file      "r"]
-set fd_inst    [open $g_eamap_file "w"]
-set fd_wire   [open $g_wire_file     "w"]
-set fd_shell  [open $g_shell_file     "w"]
+set fd_mod   [open $g_acc_file   "r"]
+set fd_inst  [open $g_eamap_file "w"]
+set fd_wire  [open $g_wire_file  "w"]
+set fd_shell [open $g_shell_file "w"]
 
 parse_module $fd_mod $fd_inst $fd_wire $fd_shell
 
@@ -173,6 +175,21 @@ fcopy $fd_acc $fd_top
 puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
+
+# Add the header to the top file
+# To do so, concatenate the top to the head
+# and rename
+
+set fd_head       [open $g_head_file  "r"]
+set fd_htmp       [open $g_htmp_file  "w"]
+set fd_top        [open $g_top_file   "r"]
+fcopy $fd_head $fd_htmp
+fcopy $fd_top $fd_htmp
+close $fd_head
+close $fd_htmp
+close $fd_top
+
+file copy -force $g_htmp_file $g_top_file
 
 putcolors "MEEP SHELL RTL top created" $GREEN
 
