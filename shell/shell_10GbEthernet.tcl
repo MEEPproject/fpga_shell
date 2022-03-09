@@ -21,6 +21,7 @@ set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
 set ETHClkName [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
+set ETHqsfp    [dict get $ETHenrty qsfpPort]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -41,7 +42,7 @@ putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/10GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part
+exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/10GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp
 putmeeps "... Done."
 update_ip_catalog -rebuild
 

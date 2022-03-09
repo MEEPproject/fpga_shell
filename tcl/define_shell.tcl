@@ -174,8 +174,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device InitFile [lindex $fields 6]	
 					}
 					if { "${device}" == "ETHERNET" } {
-						dict set d_device GbEth [lindex $fields 6]
-                                                dict set d_device IRQ   [lindex $fields 7]
+						dict set d_device GbEth     [lindex $fields 6]
+                                                dict set d_device IRQ       [lindex $fields 7]
+						dict set d_device qsfpPort  [lindex $fields 8]
 					}
 					if { "${device}" == "AURORA" } {
                                                 dict set d_device Mode   [lindex $fields 6]
