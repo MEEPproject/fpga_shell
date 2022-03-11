@@ -115,6 +115,10 @@ set PortList [lappend PortList $g_pcie_file]
 
    }
 
+	# This variable is used in shell_hbm.tcl
+	set PCIeDMAdone 0
+
+
 set pcie_clk_pin  [get_bd_pins qdma_0/axi_aclk]
 set pcie_rst_pin [get_bd_pins qdma_0/axi_aresetn]
 

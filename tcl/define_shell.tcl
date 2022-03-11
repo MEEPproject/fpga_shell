@@ -113,6 +113,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						set n $i
 					}
 					set d_device [dict create Name g_${device}${n}]
+					set d_device [dict create DevNum ${n}]					
 					dict set d_device IntfLabel [lindex $fields 2]${n}
 					# Create empty fields to be filled later
 					dict set d_device SyncClk   [lindex $fields 4] Freq ""
@@ -154,7 +155,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					if { "${device}" == "PCIE" } {
 						dict set d_device IntfLabel  [lindex $fields 2]
 						dict set d_device ClkName    [lindex $fields 5]
-                                                dict set d_device RstName    [lindex $fields 6]
+						dict set d_device RstName    [lindex $fields 6]
 						dict set d_device Mode       [lindex $fields 7]
 						dict set d_device SliceRegEn [lindex $fields 8]
 					}	

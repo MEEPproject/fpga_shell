@@ -105,8 +105,11 @@ if { $PCIeDMA != "yes" } {
 	set PCIeHBM "true"
 
 }
-  # Create instance: hbm_0, and set properties
-  set hbm_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0 ]
+
+# Create HBM instance if doesn't exsists already
+if { [info exists hbm_inst] == 0 } {
+  # Create instance: hbm_inst, and set properties
+  set hbm_inst [ create_bd_cell -type ip -vlnv xilinx.com:ip:hbm:1.0 hbm_0 ]
   set_property -dict [ list \
    CONFIG.USER_APB_EN {false} \
    CONFIG.USER_CLK_SEL_LIST0 {AXI_00_ACLK} \
@@ -179,9 +182,9 @@ if { $PCIeDMA != "yes" } {
    CONFIG.USER_SAXI_30 {false} \
    CONFIG.USER_SAXI_31 $PCIeHBM \
    CONFIG.USER_SWITCH_ENABLE_01 {TRUE} \
- ] $hbm_0
+ ] $hbm_inst
 	
-	
+}
 	## APB CLOCKS and RESET
 	
 	if { $APBclk eq "" } {
@@ -201,11 +204,11 @@ if { $PCIeDMA != "yes" } {
 	connect_bd_net [get_bd_pins hbm_0/APB_1_PCLK] $APBClockPin
 	set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
 	## One CATTRIP per stack, OR it
-	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_2
-	set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {or} CONFIG.LOGO_FILE {data/sym_orgate.png}] [get_bd_cells util_vector_logic_2]
-	connect_bd_net [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP] [get_bd_pins util_vector_logic_2/Op1]
-	connect_bd_net [get_bd_pins hbm_0/DRAM_1_STAT_CATTRIP] [get_bd_pins util_vector_logic_2/Op2]
-	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins util_vector_logic_2/Res]
+	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 hbm_cattrip_or
+	set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {or} CONFIG.LOGO_FILE {data/sym_orgate.png}] [get_bd_cells hbm_cattrip_or]
+	connect_bd_net [get_bd_pins hbm_0/DRAM_0_STAT_CATTRIP] [get_bd_pins hbm_cattrip_or/Op1]
+	connect_bd_net [get_bd_pins hbm_0/DRAM_1_STAT_CATTRIP] [get_bd_pins hbm_cattrip_or/Op2]
+	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_cattrip_or/Res]
 
 
 ###################################################################
@@ -215,50 +218,54 @@ if { $PCIeDMA != "yes" } {
 ###################################################################
 # TODO: HBM AXI Labels must be variables generated during the shell definition
 # TODO: All the blocks than shape the HBM pipe need to be labeled depending on the channel numbering
+# NEED TO ENABLE THE RIGHT HBM CHANNEL!!
+	set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 AXI_${HBMChNum}_ACLK CONFIG.USER_SAXI_${HBMChNum} {true}] [get_bd_cells hbm_0]
 
 	## Width
 	if { $HBMdataWidth != 256 } {
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_0
-	        connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_0/S_AXI]
-        	connect_bd_net [get_bd_pins axi_protocol_convert_0/aclk] $HBMClockPin
+		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_${HBMChNum}
+	    connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/S_AXI]
+        connect_bd_net [get_bd_pins axi_protocol_convert_${HBMChNum}/aclk] $HBMClockPin
 		# The protocol converter is not needed if the RAMA IP is used.
 		# TODO: RAMA might be not the best option for non-random accesss. 
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0
-		connect_bd_net [get_bd_pins axi_dwidth_converter_0/s_axi_aclk] $HBMClockPin
-		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_0/S_AXI]
-		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-		connect_bd_net $HBMRstPin [get_bd_pins axi_protocol_convert_0/aresetn]
-		connect_bd_net $HBMRstPin [get_bd_pins axi_dwidth_converter_0/s_axi_aresetn] 
+		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_${HBMChNum}
+		connect_bd_net [get_bd_pins axi_dwidth_converter_${HBMChNum}/s_axi_aclk] $HBMClockPin
+		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/M_AXI] [get_bd_intf_pins axi_dwidth_converter_${HBMChNum}/S_AXI]
+		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_${HBMChNum}/M_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+		connect_bd_net $HBMRstPin [get_bd_pins axi_protocol_convert_${HBMChNum}/aresetn]
+		connect_bd_net $HBMRstPin [get_bd_pins axi_dwidth_converter_${HBMChNum}/s_axi_aresetn] 
 
 	} else {
-		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_0
-		connect_bd_intf_net [get_bd_intf_pins rama_0/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_0/s_axi]
-                connect_bd_net [get_bd_pins rama_0/axi_aclk] $HBMClockPin
-		connect_bd_net $HBMRstPin [get_bd_pins rama_0/axi_aresetn]
+		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
+		connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_${HBMChNum}/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
+        connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
+		connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
-	if { $PCIeDMA eq "yes"} {
+	## PCIeDMAdone is set on shell_qdma.tcl
+	if { $PCIeDMA eq "yes" && $PCIeDMAdone == 0} {
 
 		set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_31_ACLK} CONFIG.USER_SAXI_31 {true}] [get_bd_cells hbm_0]
 
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_1
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_1
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_register_slice:2.1 axi_register_slice_0
-		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_1/M_AXI] [get_bd_intf_pins axi_dwidth_converter_1/S_AXI]
-		connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] [get_bd_intf_pins axi_protocol_convert_1/S_AXI]
+		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_31
+		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_31
+		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_register_slice:2.1 axi_register_slice_31
+		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_31/M_AXI] [get_bd_intf_pins axi_dwidth_converter_31/S_AXI]
+		connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] [get_bd_intf_pins axi_protocol_convert_31/S_AXI]
 		connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins hbm_0/AXI_31_ACLK]
 		connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins hbm_0/AXI_31_ARESET_N]
-		connect_bd_net [get_bd_pins axi_dwidth_converter_1/s_axi_aresetn] [get_bd_pins qdma_0/axi_aresetn]
-		connect_bd_net [get_bd_pins axi_protocol_convert_1/aresetn] [get_bd_pins qdma_0/axi_aresetn]
-		connect_bd_net [get_bd_pins axi_dwidth_converter_1/s_axi_aclk] [get_bd_pins qdma_0/axi_aclk]
-		connect_bd_net [get_bd_pins axi_protocol_convert_1/aclk] [get_bd_pins qdma_0/axi_aclk]
-		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_1/M_AXI] [get_bd_intf_pins axi_register_slice_0/S_AXI]
+		connect_bd_net [get_bd_pins axi_dwidth_converter_31/s_axi_aresetn] [get_bd_pins qdma_0/axi_aresetn]
+		connect_bd_net [get_bd_pins axi_protocol_convert_31/aresetn] [get_bd_pins qdma_0/axi_aresetn]
+		connect_bd_net [get_bd_pins axi_dwidth_converter_31/s_axi_aclk] [get_bd_pins qdma_0/axi_aclk]
+		connect_bd_net [get_bd_pins axi_protocol_convert_31/aclk] [get_bd_pins qdma_0/axi_aclk]
+		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_31/M_AXI] [get_bd_intf_pins axi_register_slice_31/S_AXI]
 		connect_bd_intf_net [get_bd_intf_pins axi_register_slice_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
-		connect_bd_net [get_bd_pins axi_register_slice_0/aclk] [get_bd_pins qdma_0/axi_aclk]
-		connect_bd_net [get_bd_pins axi_register_slice_0/aresetn] [get_bd_pins qdma_0/axi_aresetn]
-		set_property -dict [list CONFIG.USE_AUTOPIPELINING {1}] [get_bd_cells axi_register_slice_0]		
+		connect_bd_net [get_bd_pins axi_register_slice_31/aclk] [get_bd_pins qdma_0/axi_aclk]
+		connect_bd_net [get_bd_pins axi_register_slice_31/aresetn] [get_bd_pins qdma_0/axi_aresetn]
+		set_property -dict [list CONFIG.USE_AUTOPIPELINING {1}] [get_bd_cells axi_register_slice_31]	
+		set PCIeDMAdone 1
 	}
 
 
@@ -267,9 +274,9 @@ if { $PCIeDMA != "yes" } {
 
 if { $HBMReady != ""} {
 	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 util_vector_logic_0
-        set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {and} CONFIG.LOGO_FILE {data/sym_andgate.png}] [get_bd_cells util_vector_logic_0]
-        connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins util_vector_logic_0/Op1]
-        connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins util_vector_logic_0/Op2]
+    set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {and} CONFIG.LOGO_FILE {data/sym_andgate.png}] [get_bd_cells util_vector_logic_0]
+    connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins util_vector_logic_0/Op1]
+    connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins util_vector_logic_0/Op2]
 	make_bd_pins_external  [get_bd_pins util_vector_logic_0/Res]
 	set_property name $HBMReady [get_bd_ports Res_0]
 }
