@@ -92,23 +92,31 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}
    ] $eth_axi
 
 
-create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_n
-create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_p
+#create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_n
+#create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_p
 
-create_bd_port -dir O -from 0 -to 0 -type data qsfp_1x_gtx_n
-create_bd_port -dir O -from 0 -to 0 -type data qsfp_1x_gtx_p
+#create_bd_port -dir O -from 0 -to 0 -type data qsfp_1x_gtx_n
+#create_bd_port -dir O -from 0 -to 0 -type data qsfp_1x_gtx_p
 
-create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_n
-create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_p
+#create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_n
+#create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_p
 
-connect_bd_net [get_bd_ports qsfp_ref_clk_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk_clk_p]
-connect_bd_net [get_bd_ports qsfp_ref_clk_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk_clk_n]
+make_bd_intf_pins_external  [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk]
+set_property name qsfp${QSFP}_ref [get_bd_intf_ports qsfp_refclk_0]
 
-connect_bd_net [get_bd_ports qsfp_1x_grx_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_grx_n]
-connect_bd_net [get_bd_ports qsfp_1x_grx_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_grx_p]
+make_bd_intf_pins_external  [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x]
+set_property name qsfp${QSFP}_1x [get_bd_intf_ports qsfp_1x_0]
 
-connect_bd_net [get_bd_ports qsfp_1x_gtx_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_gtx_n]
-connect_bd_net [get_bd_ports qsfp_1x_gtx_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_gtx_p]
+set_property CONFIG.FREQ_HZ 1611328125 [get_bd_intf_ports /qsfp${QSFP}_ref]
+
+#connect_bd_net [get_bd_ports qsfp_ref_clk_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk_clk_p]
+#connect_bd_net [get_bd_ports qsfp_ref_clk_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk_clk_n]
+
+#connect_bd_net [get_bd_ports qsfp_1x_grx_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_grx_n]
+#connect_bd_net [get_bd_ports qsfp_1x_grx_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_grx_p]
+
+#connect_bd_net [get_bd_ports qsfp_1x_gtx_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_gtx_n]
+#connect_bd_net [get_bd_ports qsfp_1x_gtx_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_gtx_p]
 
 # Make External avoids passing the signal width to this point. The bus is created automatically
 create_bd_port -dir O -type intr $ETHirq
@@ -174,14 +182,14 @@ connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 
-set_property name qsfp${QSFP}_1x_grx_p [get_bd_ports qsfp_1x_grx_p]
-set_property name qsfp${QSFP}_1x_grx_n [get_bd_ports qsfp_1x_grx_n]
+#set_property name qsfp${QSFP}_1x_grx_p [get_bd_ports qsfp_1x_grx_p]
+#set_property name qsfp${QSFP}_1x_grx_n [get_bd_ports qsfp_1x_grx_n]
 
-set_property name qsfp${QSFP}_1x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
-set_property name qsfp${QSFP}_1x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
+#set_property name qsfp${QSFP}_1x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
+#set_property name qsfp${QSFP}_1x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
 
-set_property name qsfp${QSFP}_ref_clk_p [get_bd_ports qsfp_ref_clk_p]
-set_property name qsfp${QSFP}_ref_clk_n [get_bd_ports qsfp_ref_clk_n]
+#set_property name qsfp${QSFP}_ref_clk_p [get_bd_ports qsfp_ref_clk_p]
+#set_property name qsfp${QSFP}_ref_clk_n [get_bd_ports qsfp_ref_clk_n]
 
 
 
