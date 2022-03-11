@@ -54,9 +54,9 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 	set RetString ""
 	
 	foreach dicEntry $EnabledIntf {
-		#putmeeps "DEBUG ENTRY: $dicEntry"		
+		putmeeps "DEBUG ENTRY: $dicEntry"		
 		set EnIntfNameList [lappend EnIntfNameList [dict get $dicEntry Name]]		
-		#putmeeps "DEBUG PORTS: $EnIntfNameList"
+		putmeeps "DEBUG PORTS: $EnIntfNameList"
 	}
 	set EnIntfName [join $EnIntfNameList]
 
@@ -113,7 +113,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						set n $i
 					}
 					set d_device [dict create Name g_${device}${n}]
-					set d_device [dict create DevNum ${n}]					
+					
 					dict set d_device IntfLabel [lindex $fields 2]${n}
 					# Create empty fields to be filled later
 					dict set d_device SyncClk   [lindex $fields 4] Freq ""
@@ -170,6 +170,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					if { "${device}" == "HBM" } {
 						dict set d_device CalibDone [lindex $fields 6]	
 						dict set d_device EnChannel [lindex $fields 7]
+						dict set d_device DevNum ${n}
 					}
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	

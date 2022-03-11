@@ -21,7 +21,7 @@ set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
 set ETHClkName [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
-set ETHqsfp    [dict get $ETHenrty qsfpPort]
+set ETHqsfp    [dict get $ETHentry qsfpPort]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -55,7 +55,7 @@ if { $ETHqsfp == "qsfp0" } {
 }
 
 source $g_root_dir/ip/10GbEthernet/tcl/ip_properties.tcl
-create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet:$g_ip_version MEEP_10Gb_Ethernet_${QSFP}
+create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}:$g_ip_version MEEP_10Gb_Ethernet_${QSFP}
 
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
@@ -174,12 +174,16 @@ connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 
-# TODO: Rename qsfp_1x to qsfp_4x to avoid a mess with 100GbE files.
-set_property name qsfp${QSFP}_4x_grx_p [get_bd_ports qsfp_1x_grx_p]
-set_property name qsfp${QSFP}_4x_grx_n [get_bd_ports qsfp_1x_grx_n]
+set_property name qsfp${QSFP}_1x_grx_p [get_bd_ports qsfp_1x_grx_p]
+set_property name qsfp${QSFP}_1x_grx_n [get_bd_ports qsfp_1x_grx_n]
 
-set_property name qsfp${QSFP}_4x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
-set_property name qsfp${QSFP}_4x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
+set_property name qsfp${QSFP}_1x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
+set_property name qsfp${QSFP}_1x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
+
+set_property name qsfp${QSFP}_ref_clk_p [get_bd_ports qsfp_ref_clk_p]
+set_property name qsfp${QSFP}_ref_clk_n [get_bd_ports qsfp_ref_clk_n]
+
+
 
 
 save_bd_design

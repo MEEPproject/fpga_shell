@@ -69,6 +69,7 @@ yaml: $(YAML_FILE)
 	$(SH_DIR)/extract_url.sh
 
 $(ACCEL_DIR):
+	@(git submodule update --init --recursive)
 	$(SH_DIR)/load_module.sh $(LOAD_EA)
 	@(EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
 	$(SH_DIR)/init_modules.sh $$EA_GIT_URL $(EA_GIT_SHA))
