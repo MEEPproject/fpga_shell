@@ -37,7 +37,5 @@ putmeeps "Environment loaded from ${script_folder}"
 ### TODO: Add catch to every source
 putmeeps "Defining the shell environment file"
 source $g_root_dir/tcl/define_shell.tcl
-putmeeps "Generating the RTL top file ..."
-source $g_root_dir/tcl/gen_top.tcl
 putmeeps "Creating the project ..."
 source $g_root_dir/tcl/gen_project.tcl

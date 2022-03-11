@@ -21,7 +21,7 @@ set PCIeDMA    [dict get $PCIEentry Mode]
 set PCIeClkNm  [dict get $PCIEentry ClkName]
 set PCIeRstNm  [dict get $PCIEentry RstName]
 
-  
+set PortList [lappend PortList $g_pcie_file] 
   
   set pci_express_x16 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:pcie_7x_mgt_rtl:1.0 pci_express_x16 ]
 

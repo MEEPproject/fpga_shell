@@ -71,6 +71,14 @@ update_ip_catalog -rebuild
 	# }
 	source ${root_dir}/shell/gen_shell.tcl
 }	
+
+####################################################
+# GENERATE TOP FILE
+####################################################
+putmeeps "Generating the RTL top file ..."
+source $g_root_dir/tcl/gen_top.tcl
+
+
 ####################################################
 # MAIN FLOW
 ####################################################

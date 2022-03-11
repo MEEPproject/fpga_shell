@@ -75,15 +75,9 @@ close $fd_system
 # an existing template in the "interfaces" folder.
 # It receives a filtered list of present physical interfaces.
 
-foreach ifname $PortEnabledList {		
+foreach ifname $PortList {		
 	 
-	set g_file_name g_${ifname}_file
-	
-	# Dirty little trick to do variable substitution
-	# TODO: Use a dict or anything else, but modify this!!
-	#set g_file_path [subst $$g_file_name]
-	
-	add_interface  [subst $$g_file_name] $g_mod_file 
+	add_interface $ifname $g_mod_file 
 }
 
 # Close the top level module

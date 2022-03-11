@@ -20,6 +20,16 @@
 ## TODO: Cover repeated interfaces: 2 AURORA, 2 ETHERNET... etc.
 ## 	   : Incompatibilities: Can't use 2 Aurora and 2 Ethernet (Limited QSFP)
 
+set g_system_file   $g_root_dir/interfaces/system.sv
+set g_pcie_file     $g_root_dir/interfaces/pcie.sv
+set g_ddr4_file     $g_root_dir/interfaces/ddr4.sv
+set g_aurora0_file  $g_root_dir/interfaces/aurora0.sv
+set g_aurora1_file  $g_root_dir/interfaces/aurora1.sv
+set g_Eth0_file     $g_root_dir/interfaces/ethernet0.sv
+set g_Eth1_file     $g_root_dir/interfaces/ethernet1.sv
+set g_uart_file     $g_root_dir/interfaces/uart.sv
+
+
 # Source the shell definition parameters
 source $g_root_dir/tcl/shell_env.tcl
 
@@ -31,6 +41,12 @@ source $g_root_dir/shell/shell_mmcm.tcl
 # Added by definition
 add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/hbm_${g_board_part}.xdc"
 
+# Create a list with the physical ports file handler
+# When an interface is detected, the file path is added to the list
+# That list will be used to create the top level ports in the module
+# definition.
+
+set PortList [list]
 ##if {[info exists $shellIntf]} 
 
 foreach dicEntry $ShellEnabledIntf {
@@ -66,7 +82,7 @@ foreach dicEntry $ShellEnabledIntf {
 		set ETHentry $dicEntry
 		set ETHrate  [dict get $ETHentry GbEth]
 		source $g_root_dir/shell/shell_${ETHrate}Ethernet.tcl
-		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet_${g_board_part}.xdc"
+		#add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet${ETHrate}_${g_board_part}.xdc"
 		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
 		# TODO: Check if ETHClkName is the right label. HBM uses "$HBMName"
 

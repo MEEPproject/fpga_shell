@@ -46,8 +46,16 @@ exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/10GbEt
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
+if { $ETHqsfp == "qsfp0" } {
+        set QSFP "0"
+	set PortList [lappend PortList $g_Eth0_file]
+} else {
+        set QSFP "1"
+	set PortList [lappend PortLIst $g_Eth1_file]
+}
+
 source $g_root_dir/ip/10GbEthernet/tcl/ip_properties.tcl
-create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet:$g_ip_version MEEP_10Gb_Ethernet_0
+create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet:$g_ip_version MEEP_10Gb_Ethernet_${QSFP}
 
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
@@ -93,37 +101,37 @@ create_bd_port -dir O -from 0 -to 0 -type data qsfp_1x_gtx_p
 create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_n
 create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_p
 
-connect_bd_net [get_bd_ports qsfp_ref_clk_p] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_refclk_clk_p]
-connect_bd_net [get_bd_ports qsfp_ref_clk_n] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_refclk_clk_n]
+connect_bd_net [get_bd_ports qsfp_ref_clk_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk_clk_p]
+connect_bd_net [get_bd_ports qsfp_ref_clk_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk_clk_n]
 
-connect_bd_net [get_bd_ports qsfp_1x_grx_n] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_1x_grx_n]
-connect_bd_net [get_bd_ports qsfp_1x_grx_p] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_1x_grx_p]
+connect_bd_net [get_bd_ports qsfp_1x_grx_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_grx_n]
+connect_bd_net [get_bd_ports qsfp_1x_grx_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_grx_p]
 
-connect_bd_net [get_bd_ports qsfp_1x_gtx_n] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_1x_gtx_n]
-connect_bd_net [get_bd_ports qsfp_1x_gtx_p] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_1x_gtx_p]
+connect_bd_net [get_bd_ports qsfp_1x_gtx_n] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_gtx_n]
+connect_bd_net [get_bd_ports qsfp_1x_gtx_p] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x_gtx_p]
 
 # Make External avoids passing the signal width to this point. The bus is created automatically
 create_bd_port -dir O -type intr $ETHirq
 
-connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins MEEP_10Gb_Ethernet_0/interrupt]
+connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/interrupt]
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_clock_converter:2.1 axi_clock_converter_eth0
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_clock] [get_bd_pins axi_clock_converter_eth0/m_axi_aclk]
-connect_bd_intf_net [get_bd_intf_pins axi_clock_converter_eth0/M_AXI] [get_bd_intf_pins MEEP_10Gb_Ethernet_0/s_axi_lite]
-connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins axi_clock_converter_eth0/S_AXI]
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_clock_converter:2.1 axi_clock_converter_eth${QSFP}
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_pins axi_clock_converter_eth${QSFP}/m_axi_aclk]
+connect_bd_intf_net [get_bd_intf_pins axi_clock_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/s_axi_lite]
+connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins axi_clock_converter_eth${QSFP}/S_AXI]
 
- connect_bd_net [get_bd_pins axi_clock_converter_eth0/s_axi_aclk] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
- connect_bd_net [get_bd_pins axi_clock_converter_eth0/s_axi_aresetn] [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn]
+connect_bd_net [get_bd_pins axi_clock_converter_eth${QSFP}/s_axi_aclk] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
+connect_bd_net [get_bd_pins axi_clock_converter_eth${QSFP}/s_axi_aresetn] [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn]
 
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_rstn] [get_bd_pins axi_clock_converter_eth0/m_axi_aresetn]
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi_clock_converter_eth${QSFP}/m_axi_aresetn]
 
-connect_bd_net $APBClockPin [get_bd_pins MEEP_10Gb_Ethernet_0/init_clk]
-connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_0/locked]
+connect_bd_net $APBClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/init_clk]
+connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/locked]
 
-create_bd_port -dir O qsfp_oe_b
-create_bd_port -dir O qsfp_fs
-connect_bd_net [get_bd_ports qsfp_oe_b] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_oe_b]
-connect_bd_net [get_bd_ports qsfp_fs] [get_bd_pins MEEP_10Gb_Ethernet_0/qsfp_fs]
+create_bd_port -dir O qsfp${QSFP}_oe_b
+create_bd_port -dir O qsfp${QSFP}_fs
+connect_bd_net [get_bd_ports qsfp${QSFP}_oe_b] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_oe_b]
+connect_bd_net [get_bd_ports qsfp${QSFP}_fs] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_fs]
 
 save_bd_design
 ## Create the Shell interface to the RTL
@@ -143,35 +151,35 @@ set ETHMemRange [expr {2**$ETHaddrWidth/1024}]
 putdebugs "Base Addr ETH: $ETHbaseAddr"
 putdebugs "Mem Range ETH: $ETHMemRange"
 
-assign_bd_address [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/s_axi_lite/reg0 }]
+assign_bd_address [get_bd_addr_segs {MEEP_100Gb_Ethernet_${QSFP}/s_axi_lite/reg0 }]
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
 
 set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_30_ACLK} CONFIG.USER_SAXI_30 {true}] [get_bd_cells hbm_0]
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_converter_eth0
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_eth0
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_converter_eth${QSFP}
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_eth${QSFP}
 
-connect_bd_intf_net [get_bd_intf_pins MEEP_10Gb_Ethernet_0/M_AXI] [get_bd_intf_pins axi_dwidth_converter_eth0/S_AXI]
-connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_eth0/M_AXI] [get_bd_intf_pins axi_protocol_converter_eth0/S_AXI] 
-connect_bd_intf_net [get_bd_intf_pins axi_protocol_converter_eth0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}]
+connect_bd_intf_net [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/M_AXI] [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/S_AXI]
+connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins axi_protocol_converter_eth${QSFP}/S_AXI] 
+connect_bd_intf_net [get_bd_intf_pins axi_protocol_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}]
 
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_clock] [get_bd_pins axi_protocol_converter_eth0/aclk]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_clock] [get_bd_pins axi_dwidth_converter_eth0/s_axi_aclk]
-connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins MEEP_10Gb_Ethernet_0/gt_clock]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_pins axi_protocol_converter_eth${QSFP}/aclk]
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aclk]
+connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock]
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
 
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_rstn] [get_bd_pins axi_protocol_converter_eth0/aresetn]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_0/gt_rstn] [get_bd_pins axi_dwidth_converter_eth0/s_axi_aresetn]
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi_protocol_converter_eth${QSFP}/aresetn]
+connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aresetn]
 
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 
 # TODO: Rename qsfp_1x to qsfp_4x to avoid a mess with 100GbE files.
-set_property name qsfp_4x_grx_p [get_bd_ports qsfp_1x_grx_p]
-set_property name qsfp_4x_grx_n [get_bd_ports qsfp_1x_grx_n]
+set_property name qsfp${QSFP}_4x_grx_p [get_bd_ports qsfp_1x_grx_p]
+set_property name qsfp${QSFP}_4x_grx_n [get_bd_ports qsfp_1x_grx_n]
 
-set_property name qsfp_4x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
-set_property name qsfp_4x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
+set_property name qsfp${QSFP}_4x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
+set_property name qsfp${QSFP}_4x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
 
 
 save_bd_design

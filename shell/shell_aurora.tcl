@@ -21,11 +21,12 @@
 # only in the "dma" or "raw" part of the string, even for the PATH of the IPs. 
 
 set AuroraClkNm  [dict get $AURORAentry SyncClk Label]
-set AuroraFreq   [dict get $$AURORAentry SyncClk Freq]
-set Auroraname   [dict get $$AURORAentry SyncClk Name]
-set Auroraintf   [dict get $$AURORAentry IntfLabel]
-set AuroraMode   [dict get $$AURORAentry Mode]
-set AuroraUsrClk [dict get $$AURORAentry UsrClk]
+set AuroraFreq   [dict get $AURORAentry SyncClk Freq]
+set Auroraname   [dict get $AURORAentry SyncClk Name]
+set Auroraintf   [dict get $AURORAentry IntfLabel]
+set AuroraMode   [dict get $AURORAentry Mode]
+set AuroraUsrClk [dict get $AURORAentry UsrClk]
+set AuroraQSFP   [dict get $Auroraentry qsfpPort]
 
 set AuroraaddrWidth [dict get $$AURORAentry AxiAddrWidth]
 set AuroradataWidth [dict get $$AURORAentry AxiDataWidth]
@@ -43,6 +44,15 @@ if { $AuroraMode == "DMA" } {
        set AuroraMode "raw"
 }
 
+if { $AuroraQSFP == "qsfp0" } {
+        set QSFP "0"
+        set PortList [lappend PortList $g_aurora0_file]
+} else {
+        set QSFP "1"
+        set PortList [lappend PortLIst $g_aurora1_file]
+}
+
+
 
 ### Initialize the IPs
 putmeeps "Packaging Aurora IP..."
@@ -54,24 +64,24 @@ source $g_root_dir/ip/aurora_${AuroraMode}/tcl/project_options.tcl
 
 #TODO: The Numbering of the added cells need to be dependant on the number of QSFP interfaces the user has defined
 
-create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_aurora_${AuroraMode}:$g_ip_version aurora_${AuroraMode}_0
+create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_aurora_${AuroraMode}:$g_ip_version aurora_${AuroraMode}_${QSFP}
 
 # TODO: Again, there are several naming possibilities depending on the selected combination of QSFP devices
-make_bd_intf_pins_external  [get_bd_intf_pins aurora_raw_0/gt_refclk]
+make_bd_intf_pins_external  [get_bd_intf_pins aurora_${AuroraMode}_${QSFP}/gt_refclk]
 
 # Leverage from the APBCLK to connect the init CLK, as we know the former is always between 50-100MHz
-connect_bd_net [get_bd_pins aurora_raw_0/INIT_CLK] $APBClockPin
+connect_bd_net [get_bd_pins aurora_${AuroraMode}_${QSFP}/INIT_CLK] $APBClockPin
 # Active-high reset
-connect_bd_net [get_bd_pins rst_ea_${AuroraClkNm}/peripheral_reset] [get_bd_pins aurora_raw_0/RESET]
+connect_bd_net [get_bd_pins rst_ea_${AuroraClkNm}/peripheral_reset] [get_bd_pins aurora_${AuroraMode}_${QSFP}/RESET]
 
 # Connect to ground the self-testing capabilities. 
 # TODO: Add GPIO connections for these pins
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 aurora_gnd
 set_property -dict [list CONFIG.CONST_VAL {0}] [get_bd_cells aurora_gnd]
 
-connect_bd_net [get_bd_pins aurora_gnd/dout] [get_bd_pins aurora_raw_0/SIMULATE_FRAME_CHECK]
-connect_bd_net [get_bd_pins aurora_raw_0/SIMULATE_FRAME_GEN] [get_bd_pins aurora_gnd/dout]
-connect_bd_net [get_bd_pins aurora_raw_0/DATA_INJ] [get_bd_pins aurora_gnd/dout]
+connect_bd_net [get_bd_pins aurora_gnd/dout] [get_bd_pins aurora_${AuroraMode}_${QSFP}/SIMULATE_FRAME_CHECK]
+connect_bd_net [get_bd_pins aurora_${AuroraMode}_${QSFP}/SIMULATE_FRAME_GEN] [get_bd_pins aurora_gnd/dout]
+connect_bd_net [get_bd_pins aurora_${AuroraMode}_${QSFP}/DATA_INJ] [get_bd_pins aurora_gnd/dout]
 
 
 

@@ -16,8 +16,7 @@
 # Date: 22.02.2022
 # Description: 
 
-
-#uart_rxd/txd could be renamed depending on the uart interface name passed on def.txt
+set PortList [lappend PortList $g_uart_file]
 
 set g_UART_MODE   [dict get $UARTentry Mode]
 set g_UART_ifname [dict get $UARTentry IntfLabel]
