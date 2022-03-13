@@ -100,7 +100,7 @@ set PortList [lappend PortList $g_pcie_file]
   connect_bd_net -net util_ds_buf_IBUF_OUT [get_bd_pins qdma_0/sys_clk_gt] [get_bd_pins util_ds_buf/IBUF_OUT]
 
 
-   if { $PCIeDMA != "yes" } {
+   if { $PCIeDMA != "dma" } {
 
  	  # AXI interface exposed to the EA, along the pcie_axi_clk and the reset signal
 	   make_bd_intf_pins_external  [get_bd_intf_pins qdma_0/M_AXI]

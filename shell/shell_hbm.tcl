@@ -252,7 +252,7 @@ if { [info exists hbm_inst] == 0 } {
 
 	} else {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
-		connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_${HBMChNum}/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+		connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
 		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
         connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
 		connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
@@ -260,9 +260,11 @@ if { [info exists hbm_inst] == 0 } {
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
 	## PCIeDMAdone is set on shell_qdma.tcl
-	if { $PCIeDMA eq "yes" && $PCIeDMAdone == 0} {
+	save_bd_design
+	if { $PCIeDMA eq "dma" && $PCIeDMAdone == 0} {
 
-		set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 {AXI_31_ACLK} CONFIG.USER_SAXI_31 {true}] [get_bd_cells hbm_0]
+		# Between 16 and 31, SEL_LIST1 instead of SEL_LIST0
+		set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_31_ACLK} CONFIG.USER_SAXI_31 {true}] [get_bd_cells hbm_0]
 
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_31
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_31
@@ -276,7 +278,7 @@ if { [info exists hbm_inst] == 0 } {
 		connect_bd_net [get_bd_pins axi_dwidth_converter_31/s_axi_aclk] [get_bd_pins qdma_0/axi_aclk]
 		connect_bd_net [get_bd_pins axi_protocol_convert_31/aclk] [get_bd_pins qdma_0/axi_aclk]
 		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_31/M_AXI] [get_bd_intf_pins axi_register_slice_31/S_AXI]
-		connect_bd_intf_net [get_bd_intf_pins axi_register_slice_0/M_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
+		connect_bd_intf_net [get_bd_intf_pins axi_register_slice_31/M_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
 		connect_bd_net [get_bd_pins axi_register_slice_31/aclk] [get_bd_pins qdma_0/axi_aclk]
 		connect_bd_net [get_bd_pins axi_register_slice_31/aresetn] [get_bd_pins qdma_0/axi_aresetn]
 		set_property -dict [list CONFIG.USE_AUTOPIPELINING {1}] [get_bd_cells axi_register_slice_31]	
