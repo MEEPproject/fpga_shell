@@ -93,12 +93,12 @@ add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_p
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
 
-#source $root_dir/accelerator/meep_shell/tcl/project_options.tcl
 # system_top is the top module in the meep_shell project. It may change if we want
 set_property top $g_top_name [current_fileset]
 
-if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl}]} {
+if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl} ErrorMessage] } {
 	puterrors "File project_options.tcl has not been loaded"
+	puterrors "$ErrorMessage"
 } else {
 	putmeeps "File project_options.tcl loaded"
 }
