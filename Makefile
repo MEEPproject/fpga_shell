@@ -46,7 +46,7 @@ vcu128:
 	$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
 
 
-initialize: clean $(ACCEL_DIR)
+initialize: submodules clean $(ACCEL_DIR)
 
 project: $(PROJECT_FILE)
 
@@ -69,7 +69,6 @@ yaml: $(YAML_FILE)
 	$(SH_DIR)/extract_url.sh
 
 $(ACCEL_DIR):
-	@(git submodule update --init --recursive)
 	$(SH_DIR)/load_module.sh $(LOAD_EA)
 	@(EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
 	$(SH_DIR)/init_modules.sh $$EA_GIT_URL $(EA_GIT_SHA))
@@ -120,7 +119,8 @@ report_place: $(PLACE_DCP)
 report_route: $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
-
+submodules:	
+	@(git submodule update --init --recursive)
 
 clean: clean_ip clean_project
 	rm -rf dcp reports src 	

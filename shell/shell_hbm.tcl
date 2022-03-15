@@ -254,8 +254,15 @@ if { [info exists hbm_inst] == 0 } {
 		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
 		connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
 		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
-        connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
+	        connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
 		connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
+		# RAMA explicitly forbids this signals
+		set_property CONFIG.HAS_CACHE  0 [get_bd_intf_ports $HBMintf]
+                set_property CONFIG.HAS_LOCK   0 [get_bd_intf_ports $HBMintf]
+                set_property CONFIG.HAS_QOS    0 [get_bd_intf_ports $HBMintf]
+                set_property CONFIG.HAS_REGION 0 [get_bd_intf_ports $HBMintf]
+                set_property CONFIG.HAS_PROT   0 [get_bd_intf_ports $HBMintf]		
+
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
