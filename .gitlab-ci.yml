@@ -208,7 +208,7 @@ deploy-EA:
         tags: !reference [.default_tags, tags]
         before_script:
             - export TODAY=$(date +"%y%m%d")
-            - export EANAME=$EMULATED_ACCELERATOR
+            - export EANAME=$EMULATED_ACCELERATOR_${FPGA_BOARD}
             - export EADIRNAME=${EANAME}_${TODAY}_${CI_COMMIT_SHORT_SHA}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR
