@@ -29,6 +29,11 @@
   tags:
     - MEEP_FPGA
 
+.synth_default:
+   after_script:
+           - echo "DVINO: After script"
+
+
 .fpga_test:
   tags: 
     - FPGA_TEST

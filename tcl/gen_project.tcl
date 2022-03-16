@@ -99,6 +99,7 @@ set_property top $g_top_name [current_fileset]
 if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl} ErrorMessage] } {
 	puterrors "File project_options.tcl has not been loaded"
 	puterrors "$ErrorMessage"
+	return 1
 } else {
 	putmeeps "File project_options.tcl loaded"
 }

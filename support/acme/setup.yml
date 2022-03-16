@@ -27,6 +27,11 @@
   rules:
    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
+.synth_default:
+   after_script:
+        - cp $(find . -name "make_project.log") tmp/
+
+
 .default_tags:
   tags:
     - MEEP_FPGA

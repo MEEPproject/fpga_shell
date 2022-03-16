@@ -79,6 +79,7 @@ synthesis:
             - make synthesis
         after_script:
             - mkdir tmp
+            - !reference [.synth_default, after_script]
             - cp -r binaries tmp 
             - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp

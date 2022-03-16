@@ -32,6 +32,11 @@
   tags:
     - MEEP_FPGA
 
+.synth_default:
+   after_script:
+        - cp $(find . -name "make_project.log") tmp/
+
+
 .fpga_test:
   tags: 
   #- FPGA_TEST

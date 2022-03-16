@@ -32,6 +32,11 @@
   tags:
     - MEEP_FPGA
 
+.synth_desfault:
+   after_script:
+        - echo "EPAC: After script"
+
+
 .fpga_test:
   tags: 
   #- FPGA_TEST
