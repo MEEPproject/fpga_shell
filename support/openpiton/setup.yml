@@ -15,7 +15,7 @@
         NUMBER_OF_JOBS: "8"
         TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
         QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
-        BITSTREAM: system_${CI_PIPELINE_ID}_${FPGA_BOARD}.bit
+        BITSTREAM: system_${CI_PIPELINE_ID}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: /home/dmazure/workspace/boot_fedora.sh 
         LINUX_IMAGE: ""
