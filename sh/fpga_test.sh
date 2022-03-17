@@ -43,6 +43,9 @@ echo "Kill cat process ..."
 	cat $OUTPUT_FILE.error || ls
 }
 
+#Add a carriage return
+echo -e "\r\n" >> $OUTPUT_FILE
+
 echo "FPGA Test completed."
 
 ls -l $OUTPUT_FILE

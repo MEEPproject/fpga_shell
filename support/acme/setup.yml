@@ -13,12 +13,11 @@
         NUMBER_OF_JOBS: "8"
         TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
         QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
-        BITSTREAM: system_${CI_PIPELINE_ID}.bit
+        BITSTREAM: system_${CI_PIPELINE_ID}_{FPGA_BOARD}.bit
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: /home/dmazure/pcie/linux_images/boot_lagarto.sh
         LINUX_IMAGE: /home/dmazure/pcie/linux_images/osbi.bin
         VALID_MSG: "Welcome to Buildroot"
-        # OpenPiton+Lagarto (ACME) still doesn't get to user space
 
 
 .default_rules:

@@ -78,14 +78,14 @@ synthesis:
             - make project
             - make synthesis
         after_script:
-            - mkdir tmp
+            - mkdir -p tmp/project
             - !reference [.synth_default, after_script]
             - cp -r binaries tmp 
             - cp ea_url.txt tmp/EA_info.txt
-            - cp shell_build.log tmp
-            - cp -r src/system_top.sv tmp
-            - cp -r tcl/shell_env.tcl tmp
-            - cp gen_system.tcl tmp/tcl
+            - cp shell_build.log tmp/project/
+            - cp -r src/system_top.sv tmp/project/
+            - cp -r tcl/shell_env.tcl tmp/project/
+            - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
         dependencies:
             - EA-build
@@ -207,7 +207,7 @@ deploy-EA:
         tags: !reference [.default_tags, tags]
         before_script:
             - export TODAY=$(date +"%y%m%d")
-            - export EANAME=$EMULATED_ACCELERATOR_${FPGA_BOARD}
+            - export EANAME=${FPGA_BOARD}_${EMULATED_ACCELERATOR}
             - export EADIRNAME=${EANAME}_${TODAY}_${CUSTOM_MSG}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR
