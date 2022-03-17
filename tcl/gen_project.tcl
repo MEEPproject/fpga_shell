@@ -96,6 +96,9 @@ source $root_dir/tcl/gen_runs.tcl
 # system_top is the top module in the meep_shell project. It may change if we want
 set_property top $g_top_name [current_fileset]
 
+# Placeholder for the EA IP directory list.
+set ip_ea_dir [list]
+
 if { [catch {source $root_dir/accelerator/meep_shell/tcl/project_options.tcl} ErrorMessage] } {
 	puterrors "File project_options.tcl has not been loaded"
 	puterrors "$ErrorMessage"
@@ -111,6 +114,14 @@ set acc_xdc_file $g_accel_dir/meep_shell/xdc/${EAname}.xdc
 if {[file exists $acc_xdc_file]} {
 	add_files -fileset [get_filesets constrs_1] "$acc_xdc_file"
 }
+
+# Update the list of IP directories. The EA creates a list
+# of directories under ip_ea_dir variable.
+# TODO: Document this.
+set ip_dir_list [get_property ip_repo_paths [current_project]]
+set ip_dir_list [concat $ip_dir_list $ip_ea_dir]
+set_property  ip_repo_paths  $ip_dir_list [current_project]
+
 
 # Sanity checks
 update_ip_catalog -rebuild
