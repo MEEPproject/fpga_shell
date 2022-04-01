@@ -48,7 +48,7 @@ vcu128:
 
 initialize: submodules clean $(ACCEL_DIR)
 
-project: $(PROJECT_FILE)
+project: clean_synthesis $(PROJECT_FILE)
 
 binaries: $(BINARIES_DIR)
 
@@ -126,8 +126,9 @@ clean: clean_ip clean_project
 	rm -rf dcp reports src 	
 
 clean_ip: 
-	cd ip/100GbEthernet; make clean
-	cd ip/aurora_raw; make clean
+	@(cd ip/100GbEthernet; make clean)
+	@(cd ip/aurora_raw; make clean)
+	@(cd ip/10GbEthernet; make clean)
 
 clean_binaries:
 	rm -rf binaries
