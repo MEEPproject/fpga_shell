@@ -9,12 +9,12 @@ set_property -dict {LOC AA54 } [get_ports qsfp1_1x_grx_n] ; # MGTYRXN0_131 GTYE4
 set_property -dict {LOC AA44 } [get_ports qsfp1_1x_gtx_p] ; # MGTYTXP0_131 GTYE4_CHANNEL_X0Y40 / GTYE4_COMMON_X0Y10
 set_property -dict {LOC AA45 } [get_ports qsfp1_1x_gtx_n] ; # MGTYTXN0_131 GTYE4_CHANNEL_X0Y40 / GTYE4_COMMON_X0Y10
 
-set_property -dict {LOC AB42 } [get_ports qsfp1_refclk_clk_p] ; # MGTREFCLK1P_131 from SI5394B
-set_property -dict {LOC AB43 } [get_ports qsfp1_refclk_clk_n] ;
+set_property -dict {LOC AB42 } [get_ports qsfp1_ref_clk_p] ; # MGTREFCLK1P_131 from SI5394B
+set_property -dict {LOC AB43 } [get_ports qsfp1_ref_clk_n] ;
 
 
 # 161.1328125 MHz MGT reference clock (from SI5394B)
-create_clock -period 6.206 -name qsfp_refclk [get_ports qsfp1_refclk_clk_p]
+create_clock -period 6.206 -name qsfp1_refclk [get_ports qsfp1_ref_clk_p]
 
 #set_false_path -from [get_pins -hierarchical -filter {NAME =~ interrupt*/C}]
 

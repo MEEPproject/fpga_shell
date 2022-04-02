@@ -54,6 +54,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 		puts "Detected Unspecified Logic Levels or Unconstraiend ports."
 		puts "Implementation will not continue. Check the pinout."
 		# TODO: Check if this is working commenting a physical top level pin
+		exit 1
 	}
 
 
