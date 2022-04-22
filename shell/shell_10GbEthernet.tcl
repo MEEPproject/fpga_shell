@@ -76,7 +76,7 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}
    CONFIG.HAS_REGION {0} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {0} \
-   CONFIG.ID_WIDTH $ETHidWidth \
+   CONFIG.ID_WIDTH {0} \
    CONFIG.MAX_BURST_LENGTH {1} \
    CONFIG.NUM_READ_OUTSTANDING {1} \
    CONFIG.NUM_READ_THREADS {1} \
@@ -126,7 +126,16 @@ connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/in
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_clock_converter:2.1 axi_clock_converter_eth${QSFP}
 connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_pins axi_clock_converter_eth${QSFP}/m_axi_aclk]
 connect_bd_intf_net [get_bd_intf_pins axi_clock_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/s_axi_lite]
-connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins axi_clock_converter_eth${QSFP}/S_AXI]
+
+if { $ETHdataWidth == 64 } {
+    connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins axi_clock_converter_eth${QSFP}/S_AXI]
+} else {
+    create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_eth${QSFP}in
+    connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}in/S_AXI]
+    connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}in/M_AXI] [get_bd_intf_pins axi_clock_converter_eth${QSFP}/S_AXI]
+    connect_bd_net [get_bd_pins axi_dwidth_converter_eth${QSFP}in/s_axi_aclk] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
+    connect_bd_net [get_bd_pins axi_dwidth_converter_eth${QSFP}in/s_axi_aresetn] [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn]
+}
 
 connect_bd_net [get_bd_pins axi_clock_converter_eth${QSFP}/s_axi_aclk] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
 connect_bd_net [get_bd_pins axi_clock_converter_eth${QSFP}/s_axi_aresetn] [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn]
