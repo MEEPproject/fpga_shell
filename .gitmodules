@@ -1,0 +1,3 @@
+[submodule "ip/10GbEthernet"]
+	path = ip/10GbEthernet
+	url = https://github.com/MEEPproject/10GbEthernet.git
