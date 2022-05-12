@@ -60,7 +60,8 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
 
-  set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf ]
+
+  set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $ETHaddrWidth \
    CONFIG.ARUSER_WIDTH {0} \
@@ -68,28 +69,29 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}
    CONFIG.BUSER_WIDTH {0} \
    CONFIG.DATA_WIDTH $ETHdataWidth \
    CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST {0} \
-   CONFIG.HAS_CACHE {0} \
-   CONFIG.HAS_LOCK {0} \
-   CONFIG.HAS_PROT {0} \
-   CONFIG.HAS_QOS {0} \
-   CONFIG.HAS_REGION {0} \
+   CONFIG.HAS_BURST {1} \
+   CONFIG.HAS_CACHE {1} \
+   CONFIG.HAS_LOCK {1} \
+   CONFIG.HAS_PROT {1} \
+   CONFIG.HAS_QOS {1} \
+   CONFIG.HAS_REGION {1} \
    CONFIG.HAS_RRESP {1} \
-   CONFIG.HAS_WSTRB {0} \
-   CONFIG.ID_WIDTH {0} \
-   CONFIG.MAX_BURST_LENGTH {1} \
+   CONFIG.HAS_WSTRB {1} \
+   CONFIG.ID_WIDTH $ETHidWidth \
+   CONFIG.MAX_BURST_LENGTH {64} \
    CONFIG.NUM_READ_OUTSTANDING {1} \
    CONFIG.NUM_READ_THREADS {1} \
    CONFIG.NUM_WRITE_OUTSTANDING {1} \
    CONFIG.NUM_WRITE_THREADS {1} \
-   CONFIG.PROTOCOL {AXI4LITE} \
+   CONFIG.PROTOCOL {AXI4} \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
    CONFIG.RUSER_WIDTH {0} \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
+   CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
    ] $eth_axi
+
 
 
 #create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_n
@@ -144,6 +146,12 @@ connect_bd_intf_net -boundary_type upper [get_bd_intf_pins $ethInterconnect/M00_
 
 connect_bd_net $APBClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/init_clk]
 connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/locked]
+
+create_bd_port -dir O -type rst ${ETHintf}_arstn
+connect_bd_net [get_bd_pins /MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_ports ${ETHintf}_arstn]
+
+create_bd_port -dir O -type clk ${ETHintf}_aclk
+connect_bd_net [get_bd_pins /MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_ports ${ETHintf}_aclk]
 
 create_bd_port -dir O qsfp${QSFP}_oe_b
 create_bd_port -dir O qsfp${QSFP}_fs
