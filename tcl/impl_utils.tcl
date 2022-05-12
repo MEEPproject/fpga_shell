@@ -301,6 +301,8 @@ proc exhaustivePlaceFlow { root_dir } {
 	set bestPlaceDirective ""
 
         set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
+	# Create the directory if it didn't exists already
+	file mkdir $g_root_dir/reports
 	# Clean previous results, if they exists
 	if { [file exists $resFile] } {
 		file delete -force $resFile
