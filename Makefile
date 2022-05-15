@@ -126,8 +126,8 @@ clean: clean_ip clean_project
 	rm -rf dcp reports src 	
 
 clean_ip: 
-	@(cd ip/100GbEthernet; make clean)
-	@(cd ip/aurora_raw; make clean)
+#	@(cd ip/100GbEthernet; make clean)
+#	@(cd ip/aurora_raw; make clean)
 	@(cd ip/10GbEthernet; make clean)
 
 clean_binaries:

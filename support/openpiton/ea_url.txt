@@ -1,4 +1,4 @@
 EMULATED_ACCELERATOR_NAME: OpenPiton
-EMULATED_ACCELERATOR_REPO: https://github.com/MEEPproject/openpiton.git
+EMULATED_ACCELERATOR_REPO: git@github.com:MEEPproject/openpiton.git
 EMULATED_ACCELERATOR_SHA: 162dd451c4b8288f707425e1c531baebbb2d91da
 
