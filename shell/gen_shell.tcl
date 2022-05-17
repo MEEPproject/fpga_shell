@@ -81,6 +81,7 @@ foreach dicEntry $ShellEnabledIntf {
 	if {[regexp -inline -all "ETHERNET" $IntfName] ne "" } {
 		set ETHentry $dicEntry
 		set ETHrate  [dict get $ETHentry GbEth]
+		set ETHqsfp  [dict get $ETHentry qsfpPort]
 		source $g_root_dir/shell/shell_${ETHrate}Ethernet.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet${ETHrate}_${ETHqsfp}_${g_board_part}.xdc"
 		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
