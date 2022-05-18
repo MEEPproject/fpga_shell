@@ -46,12 +46,15 @@ exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/10GbEt
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
+
 if { $ETHqsfp == "qsfp0" } {
         set QSFP "0"
 	set PortList [lappend PortList $g_Eth0_file]
-} else if { $ETHqsfp == "qsfp1" } {
+} elseif { $ETHqsfp == "qsfp1" } {
         set QSFP "1"
 	set PortList [lappend PortLIst $g_Eth1_file]
+} else {
+	set QSFP "PCIe"
 }
 
 source $g_root_dir/ip/10GbEthernet/tcl/ip_properties.tcl
@@ -103,11 +106,15 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}
 #create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_n
 #create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_p
 
-if { $ETHqsfp != "pcieEth"} {
+set RstPinCore [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
+
+if { $ETHqsfp != "pcie"} {
 
 set ipClock "gt_clock"
 set ipRst "gt_rstn"
 set ipLocked "locked"
+
+set ipClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock]
 
 make_bd_intf_pins_external  [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk]
 set_property name qsfp${QSFP}_ref [get_bd_intf_ports qsfp_refclk_0]
@@ -123,12 +130,22 @@ connect_bd_net [get_bd_ports qsfp${QSFP}_oe_b] [get_bd_pins MEEP_10Gb_Ethernet_$
 connect_bd_net [get_bd_ports qsfp${QSFP}_fs] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_fs]
 
 connect_bd_net $APBClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/init_clk]
+connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipLocked]
+
+set RstPinIP   [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]  
 
 } else {
 
 	set ipClock "clock"
-	set ipRst "resetn"
+	set ipClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock]
+	#set ipRst "resetn"
+	set ipRst "async_resetn"
 	set ipLocked "async_resetn"
+
+	connect_bd_net $pcie_clk_pin $ipClockPin
+	connect_bd_net $pcie_rst_pin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]
+
+	set RstPinIP $pcie_rst_pin
 
 }
 # Make External avoids passing the signal width to this point. The bus is created automatically
@@ -141,21 +158,19 @@ set ethInterconnect axi_interconnect_eth${QSFP}
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 $ethInterconnect
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] -boundary_type upper [get_bd_intf_pins $ethInterconnect/S00_AXI]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock] [get_bd_pins $ethInterconnect/ACLK]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock] [get_bd_pins $ethInterconnect/M00_ACLK]
+connect_bd_net $ipClockPin [get_bd_pins $ethInterconnect/ACLK]
+connect_bd_net $ipClockPin [get_bd_pins $ethInterconnect/M00_ACLK]
 
-connect_bd_net [get_bd_pins $ethInterconnect/S00_ACLK] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
-connect_bd_net [get_bd_pins $ethInterconnect/M01_ACLK] [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
+connect_bd_net [get_bd_pins $ethInterconnect/S00_ACLK] $RstPinCore
+connect_bd_net [get_bd_pins $ethInterconnect/M01_ACLK] $RstPinCore
 
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]  [get_bd_pins $ethInterconnect/ARESETN]
+connect_bd_net $RstPinIP  [get_bd_pins $ethInterconnect/ARESETN]
 connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins $ethInterconnect/S00_ARESETN]
 
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]  [get_bd_pins $ethInterconnect/M00_ARESETN]
+connect_bd_net $RstPinIP [get_bd_pins $ethInterconnect/M00_ARESETN]
 connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins $ethInterconnect/M01_ARESETN] 
 
 connect_bd_intf_net -boundary_type upper [get_bd_intf_pins $ethInterconnect/M00_AXI] [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/s_axi_lite]
-
-connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipLocked]
 
 create_bd_port -dir O -type rst ${ETHintf}_arstn
 connect_bd_net [get_bd_pins /MEEP_10Gb_Ethernet_${QSFP}/$ipRst] [get_bd_ports ${ETHintf}_arstn]
