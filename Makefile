@@ -24,8 +24,10 @@ VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
 VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 DCP_ON       ?= 
+U200_PART    = "xcu200-fsgd2104-2-e"
 U280_PART    = "xcu280-fsvh2892-2L-e" 
 U55C_PART    = "xcu55c-fsvh2892-2L-e"  
+U200_BOARD   = "u200"
 U280_BOARD   = "u280"
 U55C_BOARD   = "u55c"
 #SHELL := /bin/bash
@@ -34,6 +36,9 @@ U55C_BOARD   = "u55c"
 
 #.DEFAULT_GOAL := initialize
 all: initialize binaries project synthesis implementation validate bitstream
+
+u200: clean
+	$(SH_DIR)/extract_part.sh $(U200_BOARD)
 
 u280: clean
 	$(SH_DIR)/extract_part.sh $(U280_BOARD) 

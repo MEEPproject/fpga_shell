@@ -172,6 +172,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device EnChannel [lindex $fields 7]
 						dict set d_device DevNum ${n}
 					}
+                                        if { "${device}" == "DDR4" } {
+         				        dict set d_device ClkName   [lindex $fields 5]
+                                                dict set d_device CalibDone [lindex $fields 6]
+                                                dict set d_device EnChannel [lindex $fields 7]
+                                                dict set d_device DevNum ${n}
+                                        }
+
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
 					}
