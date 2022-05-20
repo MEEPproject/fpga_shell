@@ -1,4 +1,3 @@
 EMULATED_ACCELERATOR_NAME: OpenPiton
 EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
-EMULATED_ACCELERATOR_SHA: d7cd574cd4838ea313c5da7df32fd3c45773df2e
-
+EMULATED_ACCELERATOR_SHA: c89b0eb7b9fdd8cd0ad9bcdc7b909cffe62dc677
