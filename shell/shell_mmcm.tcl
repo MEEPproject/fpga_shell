@@ -113,10 +113,12 @@ if { $APBclkCandidate ne "None" } {
 	# append ConfMMCMString "$ConfMMCM"		
 	
 }
+
+# BOARD_FREQ is defined in the environment file.
 	
    set ClockParamList [list CONFIG.PRIM_SOURCE {Differential_clock_capable_pin} \
    CONFIG.USE_RESET {false} \
-   CONFIG.PRIM_IN_FREQ {100.000} \
+   CONFIG.PRIM_IN_FREQ $BOARD_FREQ \
    CONFIG.USE_LOCKED {true} \
    ]
 

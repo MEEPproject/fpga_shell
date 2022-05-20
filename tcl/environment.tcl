@@ -52,7 +52,9 @@ set DebugEnable "False"
 if { $g_board_part == "u200" }  {
    set g_fpga_part "xcu200-fsgd2104-2-e"
    set pcieBlockLoc "X1Y2"
+   set BOARD_FREQ "156.250"
 } else {
    set pcieBlockLoc "X1Y0"
+   set BOARD_FREQ "100.000"
 }
 
