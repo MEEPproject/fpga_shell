@@ -58,3 +58,29 @@ if { $g_board_part == "u200" }  {
    set BOARD_FREQ "100.000"
 }
 
+if { "$g_board_part" eq "u55c" } {
+	set HBM_AXI_LABEL "_8HI"
+} else {
+	set HBM_AXI_LABEL ""
+}
+
+
+if { $g_board_part == "u200"} { 
+    
+	set ddr_freq "3334"
+	set FREQ_HZ  "300000000" 
+    set ddr_part "MTA18ASF2G72PZ-2G4"
+
+} elseif { $g_board_part == "u280" } {
+
+	# Placeholders, need to be reviewed
+	set ddr_freq "3334"
+	set FREQ_HZ "100000000"
+
+
+} elseif { $g_board_part == "vcu128"} {
+
+}
+  
+
+

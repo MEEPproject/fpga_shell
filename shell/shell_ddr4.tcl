@@ -17,16 +17,6 @@
 # Description: 
 
 
-#Make the configurations needed depending on the flexibility the Shell wants to provide.
-# For instance, pick between targets:
-
-if { "$g_board_part" eq "u55c" } {
-	set DDR4_AXI_LABEL "_8HI"
-} else {
-	set DDR4_AXI_LABEL ""
-}
-
-
 putwarnings $DDR4entry
 
 set DDR4ClkNm  [dict get $DDR4entry SyncClk Label]
@@ -81,24 +71,7 @@ set ddr4_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm
    ] $ddr4_axi4
 
 
-if { $g_board_part == "u200"} { 
-    
-	set ddr_freq "3334"
-	set FREQ_HZ  "300000000" 
-
-} elseif { $g_board_part == "u280" } {
-
-	# Placeholders, need to be reviewed
-	set ddr_freq "3334"
-	set FREQ_HZ "100000000"
-
-
-} elseif { $g_board_part == "vcu128"} {
-
-}
-  
   set ddr_dev ddr4_${DDR4ChNum}
-  set ddr_part "MTA18ASF2G72PZ-2G4"
 	
   # Create instance: ddr4_0, and set properties
   set ddr4_inst [ create_bd_cell -type ip -vlnv xilinx.com:ip:ddr4:2.2 $ddr_dev ]
@@ -155,6 +128,11 @@ connect_bd_net [get_bd_pins axi_interconnect_pcie2ddr/S01_ACLK] [get_bd_pins ddr
 create_bd_port -dir O -type clk c0_ddr4_ui_clk
 connect_bd_net $ddrUiClkPin [get_bd_ports c0_ddr4_ui_clk]
 set_property name $DDR4ClkNm [get_bd_ports c0_ddr4_ui_clk]
+
+# IMPORTANT: GET the UI clock frequency to propagate its value to the incoming associated AXI interface (generally, mem_axi4)
+# set intfFreq [get_property CONFIG.FREQ_HZ [get_bd_pins $ddrUiClkPin]]
+# set_property CONFIG.FREQ_HZ $intfFreq [get_bd_intf_ports /sysclk${DDR4ChNum}]
+# Connnect the DDR4 AXI Lite interface to the same PCIe interconnect.
 
 # Resets
 

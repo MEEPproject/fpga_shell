@@ -172,12 +172,12 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device EnChannel [lindex $fields 7]
 						dict set d_device DevNum ${n}
 					}
-                                        if { "${device}" == "DDR4" } {
-         				        dict set d_device ClkName   [lindex $fields 5]
-                                                dict set d_device CalibDone [lindex $fields 6]
-                                                dict set d_device EnChannel [lindex $fields 7]
-                                                dict set d_device DevNum ${n}
-                                        }
+                    if { "${device}" == "DDR4" } {
+         			    dict set d_device ClkName   [lindex $fields 5]
+                        dict set d_device CalibDone [lindex $fields 6]
+                        dict set d_device EnChannel [lindex $fields 7]
+                        dict set d_device DevNum ${n}
+                    }
 
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
@@ -263,9 +263,10 @@ proc parse_definiton_file { DefinitionFile } {
 			set ret 1
 		}	
 		if {[regexp -inline -all {yes,.*} $line] ne ""} {
-                        if {[regexp -inline -all {PCIE_CLK} $line] != ""} {
+            if {[regexp -inline -all {PCIE_CLK} $line] != ""} {
 			putmeeps "The interface is synchronous to PCIe CLK"
-
+			} elseif {[regexp -inline -all {DDR_CLK} $line] != ""} {
+			putmeeps "The interface is synchronous to DDR CLK"
 			} elseif {[regexp -inline -all {CLK\d} $line] eq ""} {
 			puterrors "The interface is enabled but doesn't have a valid clock.\
 			\r\n\tDetected in line: $line"

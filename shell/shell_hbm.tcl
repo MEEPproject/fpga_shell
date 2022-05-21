@@ -20,13 +20,6 @@
 #Make the configurations needed depending on the flexibility the Shell wants to provide.
 # For instance, pick between targets:
 
-if { "$g_board_part" eq "u55c" } {
-	set HBM_AXI_LABEL "_8HI"
-} else {
-	set HBM_AXI_LABEL ""
-}
-
-
 putwarnings $HBMentry
 
 set HBMClkNm  [dict get $HBMentry SyncClk Label]
