@@ -150,6 +150,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device SyncClk $ClkList
 
 					}
+					if { [lindex $fields 4] == "DDR_CLK" } {
+						set ClkFreq 300000000
+                                                set ClkName "DDR_CLK"
+                                                set ClkList [list Freq $ClkFreq Name $ClkName]
+                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                                                dict set d_device SyncClk $ClkList					
+					}
 					
 					### Device-dependant settings
 					if { "${device}" == "PCIE" } {
@@ -172,12 +179,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device EnChannel [lindex $fields 7]
 						dict set d_device DevNum ${n}
 					}
-                    if { "${device}" == "DDR4" } {
-         			    dict set d_device ClkName   [lindex $fields 5]
-                        dict set d_device CalibDone [lindex $fields 6]
-                        dict set d_device EnChannel [lindex $fields 7]
-                        dict set d_device DevNum ${n}
-                    }
+  	                                if { "${device}" == "DDR4" } {
+						dict set d_device IntfLabel [lindex $fields 2]
+         	                                dict set d_device ClkName   "ui_clk"
+				                dict set d_device CalibDone [lindex $fields 6]
+                                                dict set d_device EnChannel [lindex $fields 7]
+                                                dict set d_device DevNum ${n}
+                                        }
 
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	

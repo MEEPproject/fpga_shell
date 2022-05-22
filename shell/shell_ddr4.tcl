@@ -19,7 +19,6 @@
 
 putwarnings $DDR4entry
 
-set DDR4ClkNm  [dict get $DDR4entry SyncClk Label]
 set DDR4Freq   [dict get $DDR4entry SyncClk Freq]
 set DDR4name   [dict get $DDR4entry SyncClk Name]
 set DDR4intf   [dict get $DDR4entry IntfLabel]
@@ -127,6 +126,7 @@ connect_bd_net [get_bd_pins axi_interconnect_pcie2ddr/S01_ACLK] [get_bd_pins ddr
 
 create_bd_port -dir O -type clk c0_ddr4_ui_clk
 connect_bd_net $ddrUiClkPin [get_bd_ports c0_ddr4_ui_clk]
+
 set_property name $DDR4ClkNm [get_bd_ports c0_ddr4_ui_clk]
 
 # IMPORTANT: GET the UI clock frequency to propagate its value to the incoming associated AXI interface (generally, mem_axi4)

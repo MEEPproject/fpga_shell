@@ -64,7 +64,7 @@ foreach dicEntry $ShellEnabledIntf {
 		set DDR4entry $dicEntry
 		source $g_root_dir/shell/shell_ddr4.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ddr4_${g_board_part}.xdc"
-        set_property CONFIG.ASSOCIATED_BUSIF $DDR4intf [get_bd_ports /$DDR4name]		
+                set_property CONFIG.ASSOCIATED_BUSIF $DDR4intf [get_bd_ports /$DDR4ClkNm]
 	} 
 	
 	if {[regexp -inline -all "HBM" $IntfName] ne "" } {

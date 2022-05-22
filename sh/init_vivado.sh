@@ -21,7 +21,7 @@
 #!/bin/bash
 #sh/define_shell.sh
 LOG_FILE=shell_build.log
-VIVADO_XLNX=$1
+VIVADO_XLNX=$(which vivado)
 
 if [ "$VIVADO_XLNX" = "" ]; then
 	echo -e "\r\n"
