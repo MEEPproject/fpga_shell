@@ -127,15 +127,17 @@ if { $APBclkCandidate ne "None" } {
   putdebugs "MMCM configuration: $ClockParamList"
 
   #Depends on the board
-  set sysclk1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sysclk1 ]
   set resetn [ create_bd_port -dir I -type rst resetn ]
 
   #Create instance: clk_wiz_1, and set properties
   set clk_wiz_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_1 ]
   set_property -dict $ClockParamList $clk_wiz_1
     
-  connect_bd_intf_net [get_bd_intf_ports sysclk1] [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
-  
+  make_bd_intf_pins_external  [get_bd_intf_pins clk_wiz_1/CLK_IN1_D]
+  # TODO: Change to a more descriptive name, e.g ext_clk
+  set_property name sysclk1 [get_bd_intf_ports CLK_IN1_D_0]
+
+
   # APBClockPin defaults to empty. It will be populated here by a new MMCM output or by
   # an APBclkCandidate in the HBM script in case it exists.
   set APBClockPin ""
