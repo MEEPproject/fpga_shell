@@ -58,7 +58,7 @@ set PortList [lappend PortList $g_pcie_file]
    CONFIG.en_axi_st_qdma {false} \
    CONFIG.flr_enable {true} \
    CONFIG.mode_selection {Advanced} \
-   CONFIG.pcie_blk_locn {PCIE4C_X1Y0} \
+   CONFIG.pcie_blk_locn ${pcieBlockLoc} \
    CONFIG.select_quad {GTY_Quad_227} \
    CONFIG.pf0_ari_enabled {true} \
    CONFIG.pf0_bar0_prefetchable_qdma {true} \

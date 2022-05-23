@@ -19,7 +19,7 @@
 
 #script_version 1 
 set g_vivado_version [version -short]
-set g_board_part "u55c"
+set g_board_part u200
 set g_fpga_part xc${g_board_part}-fsvh2892-2L-e
 set g_project_name system      
 set g_root_dir    [pwd]                     
@@ -47,3 +47,40 @@ set PCIeDMA "yes"
 # Enable debug messages
 ##################################################################
 set DebugEnable "False"
+
+# u200 has not the same FPGA naming as u280, u55c or vcu128
+if { $g_board_part == "u200" }  {
+   set g_fpga_part "xcu200-fsgd2104-2-e"
+   set pcieBlockLoc "X1Y2"
+   set BOARD_FREQ "156.250"
+} else {
+   set pcieBlockLoc "X1Y0"
+   set BOARD_FREQ "100.000"
+}
+
+if { "$g_board_part" eq "u55c" } {
+	set HBM_AXI_LABEL "_8HI"
+} else {
+	set HBM_AXI_LABEL ""
+}
+
+
+if { $g_board_part == "u200"} { 
+    
+	set ddr_freq "3334"
+	set FREQ_HZ  "300000000" 
+    set ddr_part "MTA18ASF2G72PZ-2G4"
+
+} elseif { $g_board_part == "u280" } {
+
+	# Placeholders, need to be reviewed
+	set ddr_freq "3334"
+	set FREQ_HZ "100000000"
+
+
+} elseif { $g_board_part == "vcu128"} {
+
+}
+  
+
+

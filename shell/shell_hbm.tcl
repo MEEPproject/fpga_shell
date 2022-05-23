@@ -20,13 +20,6 @@
 #Make the configurations needed depending on the flexibility the Shell wants to provide.
 # For instance, pick between targets:
 
-if { "$g_board_part" eq "u55c" } {
-	set HBM_AXI_LABEL "_8HI"
-} else {
-	set HBM_AXI_LABEL ""
-}
-
-
 putwarnings $HBMentry
 
 set HBMClkNm  [dict get $HBMentry SyncClk Label]
@@ -238,9 +231,9 @@ if { [info exists hbm_inst] == 0 } {
 
 	## Width
 	if { $HBMdataWidth != 256 } {
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_${HBMChNum}
-	    connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/S_AXI]
-        connect_bd_net [get_bd_pins axi_protocol_convert_${HBMChNum}/aclk] $HBMClockPin
+                create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_${HBMChNum}
+                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/S_AXI]
+                connect_bd_net [get_bd_pins axi_protocol_convert_${HBMChNum}/aclk] $HBMClockPin
 		# The protocol converter is not needed if the RAMA IP is used.
 		# TODO: RAMA might be not the best option for non-random accesss. 
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_${HBMChNum}
@@ -272,23 +265,26 @@ if { [info exists hbm_inst] == 0 } {
 
 		# Between 16 and 31, SEL_LIST1 instead of SEL_LIST0
 		set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_31_ACLK} CONFIG.USER_SAXI_31 {true}] [get_bd_cells hbm_0]
-
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_31
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_31
+		create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_pcie_dma
 		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_register_slice:2.1 axi_register_slice_31
-		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_31/M_AXI] [get_bd_intf_pins axi_dwidth_converter_31/S_AXI]
-		connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] [get_bd_intf_pins axi_protocol_convert_31/S_AXI]
-		connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins hbm_0/AXI_31_ACLK]
-		connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins hbm_0/AXI_31_ARESET_N]
-		connect_bd_net [get_bd_pins axi_dwidth_converter_31/s_axi_aresetn] [get_bd_pins qdma_0/axi_aresetn]
-		connect_bd_net [get_bd_pins axi_protocol_convert_31/aresetn] [get_bd_pins qdma_0/axi_aresetn]
-		connect_bd_net [get_bd_pins axi_dwidth_converter_31/s_axi_aclk] [get_bd_pins qdma_0/axi_aclk]
-		connect_bd_net [get_bd_pins axi_protocol_convert_31/aclk] [get_bd_pins qdma_0/axi_aclk]
-		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_31/M_AXI] [get_bd_intf_pins axi_register_slice_31/S_AXI]
+
+		set_property -dict [list CONFIG.NUM_SI {1}] [get_bd_cells smartconnect_pcie_dma]
+                #get_property [list CONFIG.NUM_MI] [get_bd_cells smartconnect_pcie_dma]
+
+		connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] [get_bd_intf_pins smartconnect_pcie_dma/S00_AXI]
+		connect_bd_net $pcie_clk_pin [get_bd_pins smartconnect_pcie_dma/aclk]
+                connect_bd_net $pcie_rst_pin [get_bd_pins smartconnect_pcie_dma/aresetn]
+
+		connect_bd_net $pcie_clk_pin [get_bd_pins hbm_0/AXI_31_ACLK]
+		connect_bd_net $pcie_rst_pin [get_bd_pins hbm_0/AXI_31_ARESET_N]
+
 		connect_bd_intf_net [get_bd_intf_pins axi_register_slice_31/M_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
-		connect_bd_net [get_bd_pins axi_register_slice_31/aclk] [get_bd_pins qdma_0/axi_aclk]
-		connect_bd_net [get_bd_pins axi_register_slice_31/aresetn] [get_bd_pins qdma_0/axi_aresetn]
+		connect_bd_net [get_bd_pins axi_register_slice_31/aclk] $pcie_clk_pin
+		connect_bd_net [get_bd_pins axi_register_slice_31/aresetn] $pcie_rst_pin
 		set_property -dict [list CONFIG.USE_AUTOPIPELINING {1}] [get_bd_cells axi_register_slice_31]	
+
+                connect_bd_intf_net [get_bd_intf_pins smartconnect_pcie_dma/M00_AXI] [get_bd_intf_pins axi_register_slice_31/S_AXI]
+
 		set PCIeDMAdone 1
 	}
 

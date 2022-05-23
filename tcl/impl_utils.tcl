@@ -255,7 +255,7 @@ proc routeCriticalPaths { } {
 #------------------------------------------------------------------------
 # This procedure goes through ALL placement strategies to figure out
 # what is the one offering the minumum WNS. Is not designed to be part of
-# the normal flow, but to be run as a standalone to later apply the 
+# the normal flow, but to be run as a standalone to latterly apply the 
 # best placement directive to the subsequent runs.
 #------------------------------------------------------------------------
 
@@ -285,6 +285,7 @@ proc exhaustivePlaceFlow { root_dir } {
 	set wns_results ""
 	# empty list for time elapsed messages
 	set time_msg ""
+	set AppliedDirective [list]
 
 	if { [file exists $g_root_dir/dcp/post_opt.dcp] } {
 		puts "post synthesis optimization dcp exists"
@@ -298,6 +299,14 @@ proc exhaustivePlaceFlow { root_dir } {
 	set WNS 0.000
 	set bestWNS 0.000
 	set bestPlaceDirective ""
+
+        set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
+	# Create the directory if it didn't exists already
+	file mkdir $g_root_dir/reports
+	# Clean previous results, if they exists
+	if { [file exists $resFile] } {
+		file delete -force $resFile
+	}
 
 	foreach oneDirective $directives {
 		# open post opt design checkpoint
@@ -327,25 +336,41 @@ proc exhaustivePlaceFlow { root_dir } {
 		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
 		lappend wns_results $WNS
                 puts "Post Place WNS with directive $oneDirective = $WNS "
-                puts "*******************************"
+		lappend AppliedDirective $oneDirective
 
+		# Open file to append 
+                set fd_res [open $resFile "a+"]
+		# append time elapsed message to time_msg list
+                puts $fd_res "*******************************"
+                puts $fd_res "Finish @ [clock format [clock seconds] -format %H:%M:%S]"
+                puts $fd_res "*******************************"
+                puts $fd_res "Post Place WNS with directive $oneDirective = $WNS "
 		
 		if { [expr $WNS > $bestWNS] } {			
 			set bestPlaceDirective $oneDirective
 			set bestWNS $WNS
-			puts "Best directive is now $bestPlaceDirective, WNS=$WNS"
+			puts $fd_res "Best directive is now $bestPlaceDirective, WNS=$WNS"
+		}
+		# Close the file
+                close $fd_res
+
+		if { [expr $WNS > 0]} {
+			puts "WNS is possitive, the searching will finish now"
+			break;
 		}
 
 	}
 	
 	# print out results at end
 	
-	set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
-	set fd_res [open $resFile "w"]
+	set fd_res [open $resFile "a"]
 
+	puts $fd_res "\r\nSummary:"
+	puts $fd_res "-------"
 
 	set i 0
-	foreach oneDirective $directives {
+	foreach oneDirective $AppliedDirective {		
+
 		set ResMsg0 "Post Place WNS with directive $oneDirective = [lindex $wns_results $i] "
 		set ResMsg1 [lindex $time_msg $i]
 		set ConstructMsg "$ResMsg0\r\n$ResMsg1\r\n\r\n"
