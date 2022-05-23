@@ -158,7 +158,11 @@ connect_bd_net [get_bd_ports resetn] [get_bd_pins ${ddrResetBlock}/ext_reset_in]
 # Workaround to the uneeded AXIL DDR ctrl
 make_bd_intf_pins_external  [get_bd_intf_pins ddr4_${DDR4ChNum}/C0_DDR4_S_AXI_CTRL]
 
-
+# Create the HBM cattrip ground connection
+set hbm_cattrip [ create_bd_port -dir O -from 0 -to 0 hbm_cattrip ]
+create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 gnd_cattrip
+set_property -dict [list CONFIG.CONST_VAL {0}] [get_bd_cells gnd_cattrip]
+connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins gnd_cattrip/dout]
 
 save_bd_design
 

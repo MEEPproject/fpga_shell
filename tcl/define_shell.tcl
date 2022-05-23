@@ -181,7 +181,8 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					}
   	                                if { "${device}" == "DDR4" } {
 						dict set d_device IntfLabel [lindex $fields 2]
-         	                                dict set d_device ClkName   "ui_clk"
+         	                                #dict set d_device ClkName   "ui_clk"
+						dict set d_device ClkName   [lindex $fields 8]
 				                dict set d_device CalibDone [lindex $fields 6]
                                                 dict set d_device EnChannel [lindex $fields 7]
                                                 dict set d_device DevNum ${n}
