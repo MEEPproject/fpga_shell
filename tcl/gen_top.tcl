@@ -38,16 +38,6 @@ set g_shell_file  $g_root_dir/tmp/shell_tmp.sv
 set g_eamap_file  $g_root_dir/tmp/ea_top_tmp.sv
 set g_acc_file	  $g_acc_dir/meep_shell/accelerator_mod.sv
 
-# The files are hard-coded. TODO: Make it dependand on the XDC board file
-set g_system_file   $g_root_dir/interfaces/system.sv
-set g_pcie_file     $g_root_dir/interfaces/pcie.sv
-set g_ddr4_file     $g_root_dir/interfaces/ddr4.sv
-set g_aurora_file   $g_root_dir/interfaces/aurora.sv
-set g_ethernet_file $g_root_dir/interfaces/ethernet.sv
-set g_uart_file     $g_root_dir/interfaces/uart.sv
-#set g_axi_file      $g_root_dir/interfaces/axi_intf.sv
-#set g_axiLi_file    $g_root_dir/interfaces/axilite_intf.sv
-
 
 # if HBM is set to no, HBMCATTRIP needs to be forced to '0'.
 # There is a better option, set HBMCATTRIP as pulldown in the constraints.

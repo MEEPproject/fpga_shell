@@ -32,7 +32,7 @@ set g_uart_file     $g_root_dir/interfaces/uart.sv
 # Create a list with the physical ports file handler
 # When an interface is detected, the file path is added to the list
 # That list will be used to create the top level ports in the module
-# definition.
+# definition. The list is updated inside the shell_<inft>.tcl files
 
 set PortList [list]
 
