@@ -34,6 +34,8 @@ set DDR4userWidth [dict get $DDR4entry AxiUserWidth]
 ## converter to DDR4. Hardcoded to 0
 set DDR4userWidth 0
 
+set PortList [lappend PortList $g_ddr4_file]
+
 
 putmeeps "Creating DDR4 instance..."
 ### TODO: Region, prot and others can be extracted as the other widths
