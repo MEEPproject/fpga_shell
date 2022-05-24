@@ -215,6 +215,45 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	return $EnabledIntf
 }
 
+################################################################
+# Parse the enabled interfaces againts the target board
+################################################################
+proc ParseBoard { Board Interfaces} {
+
+	set flagHBM  0
+	set flagDDR4 0
+
+	foreach device $Interfaces {
+
+	set IntfName [dict get $device Name]
+	# Actually, the only limitation is that U55C doesn't have a DDR4 device.
+	    if { "${IntfName}" == "g_DDR4" } {
+	    # Check that the target board is not the U55C (no DDR)
+		set flagDDR4 1
+
+	        if { "${Board}" == "u55c" } {
+                    puterrors "Wrong target: Alveo u55c doesn't feature DDR4"
+                    exit 1
+        	}
+            }
+	    if { "${IntfName}" == "g_HBM"} {
+
+		set flagHBM 1
+
+		if { "${Board}" == "u200" } {
+		    puterrors "Wrong target: Alveo u200 doesn't feature HBM"
+		    exit 1
+		}
+	    }
+        }
+
+	if { [expr {$flagHBM + $flagDDR4} > 1] } {
+             puterrors "Currently, the MEEP Shell doesn't support DDR4 and HBM both used at the same time"
+	     exit 1
+	}
+}
+
+
 
 ################################################################
 # Parse the EA clocks. Create a list of clocks, frequencies and names
@@ -426,6 +465,8 @@ putmeeps "GPIO List: $GPIOList"
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile $p_EAmodFile]
 
 set PortInt [PortInterfaceDefinition $PortInterfacesList $EnabledIntf]
+
+ParseBoard $g_board_part $EnabledIntf
 
 putmeeps "$PortInt"
 ## Add the Port Interface list to the environment file

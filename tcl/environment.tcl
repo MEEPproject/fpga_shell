@@ -19,7 +19,7 @@
 
 #script_version 1 
 set g_vivado_version [version -short]
-set g_board_part u200
+set g_board_part u280
 set g_fpga_part xc${g_board_part}-fsvh2892-2L-e
 set g_project_name system      
 set g_root_dir    [pwd]                     
@@ -54,7 +54,7 @@ if { $g_board_part == "u200" }  {
    set pcieBlockLoc "X1Y2"
    set BOARD_FREQ "156.250"
 } else {
-   set pcieBlockLoc "X1Y0"
+   set pcieBlockLoc "PCIE4C_X1Y0"
    set BOARD_FREQ "100.000"
 }
 
