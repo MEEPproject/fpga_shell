@@ -50,6 +50,9 @@ set PortList [lappend PortList $g_pcie_file]
    CONFIG.PF3_SRIOV_FIRST_VF_OFFSET {0} \
    CONFIG.SRIOV_CAP_ENABLE {true} \
    CONFIG.SRIOV_FIRST_VF_OFFSET {4} \
+   CONFIG.coreclk_freq {250} \
+   CONFIG.pl_link_cap_max_link_speed {5.0_GT/s} \
+   CONFIG.axi_data_width {256_bit} \
    CONFIG.barlite_mb_pf0 {1} \
    CONFIG.barlite_mb_pf1 {0} \
    CONFIG.barlite_mb_pf2 {0} \
@@ -72,7 +75,6 @@ set PortList [lappend PortList $g_pcie_file]
    CONFIG.pf3_bar0_prefetchable_qdma {true} \
    CONFIG.pf3_bar2_prefetchable_qdma {true} \
    CONFIG.pf3_msix_enabled_qdma {false} \
-   CONFIG.pl_link_cap_max_link_speed {8.0_GT/s} \
    CONFIG.pl_link_cap_max_link_width {X16} \
    CONFIG.testname {mm} \
    CONFIG.tl_pf_enable_reg {1} \
