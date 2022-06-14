@@ -49,6 +49,11 @@ proc reportRoute { g_root_dir } {
         report_drc -file $routeDir/drc.rpt
 	reportCriticalPaths $routeDir/critical_path_report.csv
 
+        report_utilization -hierarchical -file $routeDir/utilization_hier.rpt
+        report_utilization -file $routeDir/utilization_summary.rpt
+        report_utilization -slr -file $routeDir/utilization_slr.rpt
+
+
 }
 
 reportRoute $g_root_dir
