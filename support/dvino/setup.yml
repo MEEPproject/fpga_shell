@@ -51,9 +51,9 @@
     # image should be a binary artifact
     - mv boot tmp/
 
-.baremetal-tests:
+.baremetal_tests:
   tags: 
-    - BAREMETAL-TESTS
+    - BAREMETAL_TESTS
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - export PATH=$PATH:$QDMA_DRIVERS
