@@ -208,6 +208,8 @@ baremetal-tests:
         needs:
             - EA-build
             - bitstream
+        retry: 2
+        tags: !reference [.baremetal-tests, tags]  
         before_script:
             - !reference [.baremetal-tests, before_script]
             - cd accelerator/sw/benchmarks/baremetal/apps
