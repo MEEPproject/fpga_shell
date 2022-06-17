@@ -201,7 +201,7 @@ fpga-test:
             - tmp
 
 baremetal-tests:
-        stage: baremetal-test
+        stage: baremetal-tests
         rules:
             - !reference [.default_rules, rules] 
         extends: .disable_git        
