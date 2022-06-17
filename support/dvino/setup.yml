@@ -52,7 +52,7 @@
     - mv boot tmp/
 
 .baremetal_tests:
-  tags: 
+  needs: 
     - FPGA_TEST
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
