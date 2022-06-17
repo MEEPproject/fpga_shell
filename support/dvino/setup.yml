@@ -16,6 +16,7 @@
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: /home/dmazure/workspace/boot_dvino.sh
         LINUX_IMAGE: binaries/fw_payload.bin
+        BM_BINARIES: accelerator/sw/benchmarks/baremetal/apps/test/FpuMicroKernel/bin/FpuMicroKernel.bin
         VALID_MSG: "Welcome to Buildroot"
 
 
@@ -50,3 +51,18 @@
     # image should be a binary artifact
     - mv boot tmp/
 
+.baremetal-tests:
+  tags: 
+    - BAREMETAL-TESTS
+    # There is a special runner to run the HW test, that targets the correct board
+  before_script:
+    - export PATH=$PATH:$QDMA_DRIVERS
+    - sudo $TOOLS_DIR/givememyuart
+
+  script:
+    - source $BOOT_SCRIPT $BM_BINARIES
+  after_script:
+    - mkdir -p boot
+    - cp $BOOT_SCRIPT boot/
+    # image should be a binary artifact
+    - mv boot tmp/

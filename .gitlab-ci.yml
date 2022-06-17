@@ -26,6 +26,7 @@ stages:
     - validation
     - bitstream
     - fpga-test
+    - baremetal-tests
     - deploy
 
 .clone_ea: &clone_ea 
@@ -198,6 +199,40 @@ fpga-test:
             when: always
             paths:
             - tmp
+
+baremetal-tests:
+        stage: baremetal-test
+        rules:
+            - !reference [.default_rules, rules] 
+        extends: .disable_git        
+        needs:
+            - EA-build
+            - bitstream
+        before_script:
+            - !reference [.baremetal-tests, before_script]
+            - cd accelerator/sw/benchmarks/baremetal/apps
+            - source configuration
+            - make clean
+            - make all
+        script:
+        # Load the baremetal binaries
+            - !reference [.baremetal-tests, script]
+            - source sh/fpga_test.sh bm_test.log
+        after_script:
+            - mkdir -p tmp
+            - mv bm_test.log tmp/
+            - !reference [.baremetal-tests, after_script]
+            - echo -e "Artifacts:"; ls tmp/
+        dependencies:
+            - EA-build
+            - bitstream
+            - fpga_test
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+
 
 deploy-EA:
         stage: deploy
