@@ -53,7 +53,7 @@
 
 .baremetal_tests:
   tags: 
-    - BAREMETAL_TESTS
+    - FPGA_TEST
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - export PATH=$PATH:$QDMA_DRIVERS
