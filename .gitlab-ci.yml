@@ -208,6 +208,7 @@ baremetal-tests:
         needs:
             - EA-build
             - bitstream
+            - fpga-test
         retry: 2
         tags: !reference [.fpga_test, tags]  
         before_script:
@@ -228,8 +229,7 @@ baremetal-tests:
         dependencies:
             - EA-build
             - bitstream
-            - fpga-test
-        artifacts:
+                    artifacts:
             when: always
             paths:
             - tmp
