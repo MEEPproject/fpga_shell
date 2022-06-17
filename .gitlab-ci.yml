@@ -229,7 +229,7 @@ baremetal-tests:
         dependencies:
             - EA-build
             - bitstream
-                    artifacts:
+        artifacts:
             when: always
             paths:
             - tmp
