@@ -209,26 +209,26 @@ baremetal-tests:
             - EA-build
             - bitstream
         retry: 2
-        tags: !reference [.baremetal-tests, tags]  
+        tags: !reference [.baremetal_tests, tags]  
         before_script:
-            - !reference [.baremetal-tests, before_script]
+            - !reference [.baremetal_tests, before_script]
             - cd accelerator/sw/benchmarks/baremetal/apps
             - source configuration
             - make clean
             - make all
         script:
         # Load the baremetal binaries
-            - !reference [.baremetal-tests, script]
+            - !reference [.baremetal_tests, script]
             - source sh/fpga_test.sh bm_test.log
         after_script:
             - mkdir -p tmp
             - mv bm_test.log tmp/
-            - !reference [.baremetal-tests, after_script]
+            - !reference [.baremetal_tests, after_script]
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
             - bitstream
-            - fpga_test
+            - fpga-test
         artifacts:
             when: always
             paths:
