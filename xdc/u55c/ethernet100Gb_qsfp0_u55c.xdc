@@ -1,7 +1,7 @@
 # Physicall constraints
 
-set_property PACKAGE_PIN AD43       [get_ports "qsfp_ref_clk_n"] ;# Bank 130 - MGTREFCLK0N_130, platform: io_clk_gtyquad_refclk0_01_clk_n
-set_property PACKAGE_PIN AD42       [get_ports "qsfp_ref_clk_p"] ;# Bank 130 - MGTREFCLK0P_130, platform: io_clk_gtyquad_refclk0_01_clk_p
+set_property PACKAGE_PIN AD43       [get_ports "qsfp_ref_clk_n"] ;# Bank 130 - MGTREFCLK0N_130
+set_property PACKAGE_PIN AD42       [get_ports "qsfp_ref_clk_p"] ;# Bank 130 - MGTREFCLK0P_130
 
 
 # Timing constraints
