@@ -15,7 +15,7 @@
 
 include:
   - local: cicd/ealib.yml
-  - local: accelerator/.gitlad-ci.yml
+  - remote: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino/-/blob/fd3090a5ce26602b0543f8cd847950716545cdb6/.gitlab-ci.yml
 
 variables: !reference [.setup, variables]
 
@@ -27,7 +27,7 @@ stages:
     - validation
     - bitstream
     - fpga-test
-    - baremetal-tests
+    - test
     - deploy
 
 .clone_ea: &clone_ea 
