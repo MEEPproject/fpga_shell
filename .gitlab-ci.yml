@@ -15,6 +15,7 @@
 
 include:
   - local: cicd/ealib.yml
+  - local: accelerator/.gitlad-ci.yml
 
 variables: !reference [.setup, variables]
 
@@ -200,39 +201,39 @@ fpga-test:
             paths:
             - tmp
 
-baremetal-tests:
-        stage: baremetal-tests
-        rules:
-            - !reference [.default_rules, rules] 
-        extends: .disable_git        
-        needs:
-            - EA-build
-            - bitstream
-            - fpga-test
-        retry: 2
-        tags: !reference [.fpga_test, tags]  
-        before_script:
-            - !reference [.fpga_test, before_script]
-            - cd accelerator/sw/benchmarks/baremetal/apps
-            - source configuration
-            - make clean
-            - make all
-        script:
-        # Load the baremetal binaries
-            - !reference [.fpga_test, script]
-            - source sh/fpga_test.sh bm_test.log
-        after_script:
-            - mkdir -p tmp
-            - mv bm_test.log tmp/
-            - !reference [.fpga_test, after_script]
-            - echo -e "Artifacts:"; ls tmp/
-        dependencies:
-            - EA-build
-            - bitstream
-        artifacts:
-            when: always
-            paths:
-            - tmp
+# baremetal-tests:
+#         stage: baremetal-tests
+#         rules:
+#             - !reference [.default_rules, rules] 
+#         extends: .disable_git        
+#         needs:
+#             - EA-build
+#             - bitstream
+#             - fpga-test
+#         retry: 2
+#         tags: !reference [.fpga_test, tags]  
+#         before_script:
+#             - !reference [.fpga_test, before_script]
+#             - cd accelerator/sw/benchmarks/baremetal/apps
+#             - source configuration
+#             - make clean
+#             - make all
+#         script:
+#         # Load the baremetal binaries
+#             - !reference [.fpga_test, script]
+#             - source sh/fpga_test.sh bm_test.log
+#         after_script:
+#             - mkdir -p tmp
+#             - mv bm_test.log tmp/
+#             - !reference [.fpga_test, after_script]
+#             - echo -e "Artifacts:"; ls tmp/
+#         dependencies:
+#             - EA-build
+#             - bitstream
+#         artifacts:
+#             when: always
+#             paths:
+#             - tmp
 
 
 
