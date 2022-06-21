@@ -16,8 +16,8 @@
 include:
   - local: cicd/ealib.yml
   - project: meep/rtl_designs/meep_dvino
-    ref: develop/fpga_benchmarks
-    file: .gitlab-ci.yml
+    ref: d54b2e10850db0bbcd8fb7ac1fc0fa4be5e68e60
+    file: '.gitlab-ci.yml'
  
 
 variables: !reference [.setup, variables]
@@ -91,7 +91,7 @@ synthesis:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - 'echo -e "Artifacts:"; ls tmp; ls dcp'
         dependencies:
             - EA-build
 
