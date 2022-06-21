@@ -91,7 +91,7 @@ synthesis:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            
+            - echo -e "Artifacts"; ls tmp; ls dcp
         dependencies:
             - EA-build
 
