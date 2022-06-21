@@ -16,7 +16,7 @@
 include:
   - local: cicd/ealib.yml
   - project: meep/rtl_designs/meep_dvino
-    ref: d54b2e10850db0bbcd8fb7ac1fc0fa4be5e68e60
+    ref: d1a8390e8800be2496abf8e9ba95c75d73fb9ea3
     file: '.gitlab-ci.yml'
  
 
