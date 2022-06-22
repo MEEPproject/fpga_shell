@@ -60,7 +60,7 @@ bitstream: $(BIT_FILE)
 
 bm_binaries: 
 	cd $(ACCEL_DIR)/sw/benchmarks/baremetal/apps
-	source configuration
+	source configuration.sh
 	make clean 
 	make all 
 	make binaries
