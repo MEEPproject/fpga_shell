@@ -59,7 +59,6 @@ implementation: $(IMPL_DCP)
 bitstream: $(BIT_FILE)
 
 bm_binaries:
-	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps prueba
 	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps clean
 	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps all
 	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps binaries
