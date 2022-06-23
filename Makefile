@@ -58,13 +58,10 @@ implementation: $(IMPL_DCP)
 
 bitstream: $(BIT_FILE)
 
-bm_binaries: 
-	cd $(ACCEL_DIR)/sw/benchmarks/baremetal/apps
-	source configuration.sh
-	make clean 
-	make all 
-	make binaries
-
+bm_binaries:
+	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps clean
+	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps all
+	${MAKE} -C $(ACCEL_DIR)/sw/benchmarks/baremetal/apps binaries
 update_sha: $(ACCEL_DIR)
 	# Update the ea_url file with the actual accelerator sha
 	@$(SH_DIR)/update_sha.sh $(DEF_FILE)
