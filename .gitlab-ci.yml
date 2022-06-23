@@ -16,7 +16,7 @@
 include:
   - local: cicd/ealib.yml
   - project: meep/rtl_designs/meep_dvino
-    ref: fa4d94207cb6cb259ac03b36b31e8d9b33970c12
+    ref: dbe23a329336d74c61a343b23276eea32c865aeb
     file: '.gitlab-ci.yml'
  
 
@@ -57,7 +57,6 @@ EA-build:
             - *clone_ea 
         script:    
             - make initialize
-            - make binaries
             - make bm_binaries
             
         after_script:
