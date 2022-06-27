@@ -235,14 +235,14 @@ deploy-EA:
             - implementation
             - bitstream
             - fpga-test
-            - test
+            
         dependencies:
             - EA-build
             - synthesis
             - implementation
             - bitstream
             - fpga-test
-            - test
+            
 
 
 
