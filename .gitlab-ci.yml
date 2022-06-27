@@ -228,18 +228,21 @@ deploy-EA:
             - mv bitstream/system.bit bitstream/$BITSTREAM
             - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $ABSDIR
+            - cp -r bin/* $ABSDIR
         needs:
             - EA-build
             - synthesis
             - implementation
             - bitstream
             - fpga-test
+            - test
         dependencies:
             - EA-build
             - synthesis
             - implementation
             - bitstream
             - fpga-test
+            - test
 
 
 
