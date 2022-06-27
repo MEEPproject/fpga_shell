@@ -32,7 +32,7 @@ set g_uart_file     $g_root_dir/interfaces/uart.sv
 # Create a list with the physical ports file handler
 # When an interface is detected, the file path is added to the list
 # That list will be used to create the top level ports in the module
-# definition.
+# definition. The list is updated inside the shell_<inft>.tcl files
 
 set PortList [list]
 
@@ -63,7 +63,8 @@ foreach dicEntry $ShellEnabledIntf {
 	if {[regexp -inline -all "DDR4" $IntfName] ne "" } {
 		set DDR4entry $dicEntry
 		source $g_root_dir/shell/shell_ddr4.tcl
-		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ddr4_${g_board_part}.xdc"		
+		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ddr4_${g_board_part}.xdc"
+                set_property CONFIG.ASSOCIATED_BUSIF $DDR4intf [get_bd_ports /$DDR4ClkNm]
 	} 
 	
 	if {[regexp -inline -all "HBM" $IntfName] ne "" } {
@@ -83,7 +84,12 @@ foreach dicEntry $ShellEnabledIntf {
 		set ETHrate  [dict get $ETHentry GbEth]
 		set ETHqsfp  [dict get $ETHentry qsfpPort]
 		source $g_root_dir/shell/shell_${ETHrate}Ethernet.tcl
+
+		if { $ETHqsfp != "pcie" } {
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ethernet${ETHrate}_${ETHqsfp}_${g_board_part}.xdc"
+	        } else {
+		source $g_root_dir/shell/shell_eth2pci.tcl
+		}	
 		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
 		# TODO: Check if ETHClkName is the right label. HBM uses "$HBMName"
 		# TODO: Physicall QSFP constrains can be part of the IP

@@ -150,6 +150,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device SyncClk $ClkList
 
 					}
+					if { [lindex $fields 4] == "DDR_CLK" } {
+						set ClkFreq 300000000
+                                                set ClkName "DDR_CLK"
+                                                set ClkList [list Freq $ClkFreq Name $ClkName]
+                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                                                dict set d_device SyncClk $ClkList					
+					}
 					
 					### Device-dependant settings
 					if { "${device}" == "PCIE" } {
@@ -172,6 +179,15 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device EnChannel [lindex $fields 7]
 						dict set d_device DevNum ${n}
 					}
+  	                                if { "${device}" == "DDR4" } {
+						dict set d_device IntfLabel [lindex $fields 2]
+         	                                #dict set d_device ClkName   "ui_clk"
+						dict set d_device ClkName   [lindex $fields 8]
+				                dict set d_device CalibDone [lindex $fields 6]
+                                                dict set d_device EnChannel [lindex $fields 7]
+                                                dict set d_device DevNum ${n}
+                                        }
+
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
 					}
@@ -198,6 +214,45 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	
 	return $EnabledIntf
 }
+
+################################################################
+# Parse the enabled interfaces againts the target board
+################################################################
+proc ParseBoard { Board Interfaces} {
+
+	set flagHBM  0
+	set flagDDR4 0
+
+	foreach device $Interfaces {
+
+	set IntfName [dict get $device Name]
+	# Actually, the only limitation is that U55C doesn't have a DDR4 device.
+	    if { "${IntfName}" == "g_DDR4" } {
+	    # Check that the target board is not the U55C (no DDR)
+		set flagDDR4 1
+
+	        if { "${Board}" == "u55c" } {
+                    puterrors "Wrong target: Alveo u55c doesn't feature DDR4"
+                    exit 1
+        	}
+            }
+	    if { "${IntfName}" == "g_HBM"} {
+
+		set flagHBM 1
+
+		if { "${Board}" == "u200" } {
+		    puterrors "Wrong target: Alveo u200 doesn't feature HBM"
+		    exit 1
+		}
+	    }
+        }
+
+	if { [expr {$flagHBM + $flagDDR4} > 1] } {
+             puterrors "Currently, the MEEP Shell doesn't support DDR4 and HBM both used at the same time"
+	     exit 1
+	}
+}
+
 
 
 ################################################################
@@ -256,9 +311,10 @@ proc parse_definiton_file { DefinitionFile } {
 			set ret 1
 		}	
 		if {[regexp -inline -all {yes,.*} $line] ne ""} {
-                        if {[regexp -inline -all {PCIE_CLK} $line] != ""} {
+            if {[regexp -inline -all {PCIE_CLK} $line] != ""} {
 			putmeeps "The interface is synchronous to PCIe CLK"
-
+			} elseif {[regexp -inline -all {DDR_CLK} $line] != ""} {
+			putmeeps "The interface is synchronous to DDR CLK"
 			} elseif {[regexp -inline -all {CLK\d} $line] eq ""} {
 			puterrors "The interface is enabled but doesn't have a valid clock.\
 			\r\n\tDetected in line: $line"
@@ -409,6 +465,8 @@ putmeeps "GPIO List: $GPIOList"
 set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAdefFile $p_ShellEnvFile $p_EAmodFile]
 
 set PortInt [PortInterfaceDefinition $PortInterfacesList $EnabledIntf]
+
+ParseBoard $g_board_part $EnabledIntf
 
 putmeeps "$PortInt"
 ## Add the Port Interface list to the environment file
