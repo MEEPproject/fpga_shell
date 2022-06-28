@@ -226,9 +226,8 @@ deploy-EA:
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - mv bitstream/system.bit bitstream/$BITSTREAM
-            - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
-            - cp -r tmp/* $ABSDIR
-            - cp -r bin/* $ABSDIR
+            - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/; mv bin tmp/
+            - cp -r tmp/* $ABSDIR            
         needs:
             - EA-build
             - synthesis
