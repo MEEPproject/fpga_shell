@@ -16,7 +16,7 @@
 include:
   - local: cicd/ealib.yml
   - project: meep/rtl_designs/meep_dvino
-    ref: fbaa56f20dad48a6d12d6314bde25e923fd39bc8
+    ref: develop/fpga_benchmarks
     file: '.gitlab-ci.yml'
  
 
