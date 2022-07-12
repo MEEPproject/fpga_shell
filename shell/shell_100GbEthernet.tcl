@@ -110,6 +110,12 @@ make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]
 set_property name $ETHirq [get_bd_ports intc_0]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
 
+create_bd_port -dir O -type rst ${ETHintf}_arstn
+connect_bd_net [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_resetn] [get_bd_ports ${ETHintf}_arstn]
+
+create_bd_port -dir O -type clk ${ETHintf}_aclk
+connect_bd_net [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_ports ${ETHintf}_aclk]
+
 save_bd_design
 ## Create the Shell interface to the RTL
 ## CAUTION: The user can't specify USER, QOS and REGION signal for this interface
