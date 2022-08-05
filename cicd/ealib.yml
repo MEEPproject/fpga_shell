@@ -6,19 +6,19 @@
 include:
       - local: support/acme/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/acme" || $CI_COMMIT_BRANCH == "master"
+                - if: $CI_COMMIT_BRANCH == "support/acme/cicd" || $CI_COMMIT_BRANCH == "master"
       - local: support/openpiton/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/openpiton"        
+                - if: $CI_COMMIT_BRANCH == "support/openpiton/cicd"        
       - local: support/dvino/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/dvino"        
+                - if: $CI_COMMIT_BRANCH == "support/dvino/cicd"        
       - local: support/sargantana/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/sargantana"        
+                - if: $CI_COMMIT_BRANCH == "support/sargantana/cicd"        
       - local: support/pronoc/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/pronoc"
+                - if: $CI_COMMIT_BRANCH == "support/pronoc/cicd"
         
 
 
