@@ -63,7 +63,7 @@ set eth_ip [list $ETHqsfp $g_ip_version ]
 
 # Load the hierarchy procedure and call it
 source $g_root_dir/shell/hier_ethernet.tcl
-create_hier_cell_ETHERNET $TopCell "Ethernet10Gb_${ETHqsfp}" $eth_ip
+create_hier_cell_Ethernet $TopCell "Ethernet10Gb_${ETHqsfp}" $eth_ip
 save_bd_design
 
 # ## This might be hardcoded to the IP AXI bus width parameters until 
