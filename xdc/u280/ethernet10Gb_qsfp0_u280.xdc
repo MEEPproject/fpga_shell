@@ -18,7 +18,7 @@ set_property -dict {LOC G32 IOSTANDARD LVCMOS18} [get_ports qsfp0_fs]
 #create_clock -period 6.400 -name qsfp0_mgt_refclk_1 [get_ports qsfp0_mgt_refclk_1_p]
 
 # 161.1328125 MHz MGT reference clock (from SI546, fs = 1)
-create_clock -period 6.206 -name qsfp_refclk [get_ports qsfp_refclk_clk_p]
+create_clock -period 6.206 -name qsfp0_refclk [get_ports qsfp0_ref_clk_p]
 
 set_false_path -to [get_ports {qsfp0_oe_b qsfp0_fs}]
 set_output_delay 0 [get_ports {qsfp0_oe_b qsfp0_fs}]
