@@ -190,34 +190,14 @@ assign_bd_address [get_bd_addr_segs {${EthHierName}/s_axi_lite/reg0 }]
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
 
-#set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_30_ACLK} CONFIG.USER_SAXI_30 {true}] [get_bd_cells hbm_0]
-#create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_converter_eth${QSFP}
-#create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_eth${QSFP}
+set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_30_ACLK} CONFIG.USER_SAXI_30 {true}] [get_bd_cells hbm_0]
 
-#connect_bd_intf_net [get_bd_intf_pins ${EthHierName}/M_AXI] [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/S_AXI]
-#connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins axi_protocol_converter_eth${QSFP}/S_AXI] 
-#connect_bd_intf_net [get_bd_intf_pins axi_protocol_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}]
 
-#connect_bd_net [get_bd_pins ${EthHierName}/gt_clock] [get_bd_pins axi_protocol_converter_eth${QSFP}/aclk]
-#connect_bd_net [get_bd_pins ${EthHierName}/gt_clock] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aclk]
-#connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins ${EthHierName}/gt_clock]
-#connect_bd_net [get_bd_pins ${EthHierName}/gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
-
-#connect_bd_net [get_bd_pins ${EthHierName}/gt_rstn] [get_bd_pins axi_protocol_converter_eth${QSFP}/aresetn]
-#connect_bd_net [get_bd_pins ${EthHierName}/gt_rstn] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aresetn]
+connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_m_axi] [get_bd_intf_pins hbm_0/SAXI_30]
 
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
-
-#set_property name qsfp${QSFP}_1x_grx_p [get_bd_ports qsfp_1x_grx_p]
-#set_property name qsfp${QSFP}_1x_grx_n [get_bd_ports qsfp_1x_grx_n]
-
-#set_property name qsfp${QSFP}_1x_gtx_p [get_bd_ports qsfp_1x_gtx_p]
-#set_property name qsfp${QSFP}_1x_gtx_n [get_bd_ports qsfp_1x_gtx_n]
-
-#set_property name qsfp${QSFP}_ref_clk_p [get_bd_ports qsfp_ref_clk_p]
-#set_property name qsfp${QSFP}_ref_clk_n [get_bd_ports qsfp_ref_clk_n]
-
-
 
 save_bd_design
