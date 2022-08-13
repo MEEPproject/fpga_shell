@@ -58,7 +58,13 @@ if { $ETHqsfp == "qsfp0" } {
 }
 
 source $g_root_dir/ip/10GbEthernet/tcl/ip_properties.tcl
-create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_10Gb_Ethernet_${ETHqsfp}:$g_ip_version MEEP_10Gb_Ethernet_${QSFP}
+# Create a list of IP parameters to pass it to the hierarchy generation procedure
+set eth_ip [list $ETHqsfp $g_ip_version ]
+
+# Load the hierarchy procedure and call it
+source $g_root_dir/shell/hier_ethernet.tcl
+create_hier_cell_ETHERNET $TopCell "Ethernet10Gb_${ETHqsfp}" $eth_ip
+save_bd_design
 
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
@@ -114,36 +120,38 @@ set ipClock "gt_clock"
 set ipRst "gt_rstn"
 set ipLocked "locked"
 
-set ipClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock]
+set EthIPName "MEEP_10Gb_Ethernet_${ETHqsfp}"
 
-make_bd_intf_pins_external  [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_refclk]
+set ipClockPin [get_bd_pins ${EthIPName}/$ipClock]
+
+make_bd_intf_pins_external  [get_bd_intf_pins ${EthIPName}/qsfp_refclk]
 set_property name qsfp${QSFP}_ref [get_bd_intf_ports qsfp_refclk_0]
 
-make_bd_intf_pins_external  [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_1x]
+make_bd_intf_pins_external  [get_bd_intf_pins ${EthIPName}/qsfp_1x]
 set_property name qsfp${QSFP}_1x [get_bd_intf_ports qsfp_1x_0]
 
 set_property CONFIG.FREQ_HZ 1611328125 [get_bd_intf_ports /qsfp${QSFP}_ref]
 
 create_bd_port -dir O qsfp${QSFP}_oe_b
 create_bd_port -dir O qsfp${QSFP}_fs
-connect_bd_net [get_bd_ports qsfp${QSFP}_oe_b] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_oe_b]
-connect_bd_net [get_bd_ports qsfp${QSFP}_fs] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/qsfp_fs]
+connect_bd_net [get_bd_ports qsfp${QSFP}_oe_b] [get_bd_pins ${EthIPName}/qsfp_oe_b]
+connect_bd_net [get_bd_ports qsfp${QSFP}_fs] [get_bd_pins ${EthIPName}/qsfp_fs]
 
-connect_bd_net $APBClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/init_clk]
-connect_bd_net $MMCMLockedPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipLocked]
+connect_bd_net $APBClockPin [get_bd_pins ${EthIPName}/init_clk]
+connect_bd_net $MMCMLockedPin [get_bd_pins ${EthIPName}/$ipLocked]
 
-set RstPinIP   [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]  
+set RstPinIP   [get_bd_pins ${EthIPName}/$ipRst]  
 
 } else {
 
 	set ipClock "clock"
-	set ipClockPin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock]
+	set ipClockPin [get_bd_pins ${EthIPName}/$ipClock]
 	#set ipRst "resetn"
 	set ipRst "async_resetn"
 	set ipLocked "async_resetn"
 
 	connect_bd_net $pcie_clk_pin $ipClockPin
-	connect_bd_net $pcie_rst_pin [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]
+	connect_bd_net $pcie_rst_pin [get_bd_pins ${EthIPName}/$ipRst]
 
 	set RstPinIP $pcie_rst_pin
 
@@ -152,7 +160,7 @@ set RstPinIP   [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]
 create_bd_port -dir O -type intr $ETHirq
 
 
-connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/interrupt]
+connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins ${EthIPName}/interrupt]
 
 set ethInterconnect axi_interconnect_eth${QSFP}
 
@@ -170,13 +178,13 @@ connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins $e
 connect_bd_net $RstPinIP [get_bd_pins $ethInterconnect/M00_ARESETN]
 connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins $ethInterconnect/M01_ARESETN] 
 
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins $ethInterconnect/M00_AXI] [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/s_axi_lite]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins $ethInterconnect/M00_AXI] [get_bd_intf_pins ${EthIPName}/s_axi_lite]
 
 create_bd_port -dir O -type rst ${ETHintf}_arstn
-connect_bd_net [get_bd_pins /MEEP_10Gb_Ethernet_${QSFP}/$ipRst] [get_bd_ports ${ETHintf}_arstn]
+connect_bd_net [get_bd_pins /${EthIPName}/$ipRst] [get_bd_ports ${ETHintf}_arstn]
 
 create_bd_port -dir O -type clk ${ETHintf}_aclk
-connect_bd_net [get_bd_pins /MEEP_10Gb_Ethernet_${QSFP}/$ipClock] [get_bd_ports ${ETHintf}_aclk]
+connect_bd_net [get_bd_pins /${EthIPName}/$ipClock] [get_bd_ports ${ETHintf}_aclk]
 
 
 save_bd_design
@@ -205,17 +213,17 @@ assign_bd_address [get_bd_addr_segs {MEEP_100Gb_Ethernet_${QSFP}/s_axi_lite/reg0
 #create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_converter_eth${QSFP}
 #create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_eth${QSFP}
 
-#connect_bd_intf_net [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/M_AXI] [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/S_AXI]
+#connect_bd_intf_net [get_bd_intf_pins ${EthIPName}/M_AXI] [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/S_AXI]
 #connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins axi_protocol_converter_eth${QSFP}/S_AXI] 
 #connect_bd_intf_net [get_bd_intf_pins axi_protocol_converter_eth${QSFP}/M_AXI] [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}]
 
-#connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_pins axi_protocol_converter_eth${QSFP}/aclk]
-#connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aclk]
-#connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_clock]
-#connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
+#connect_bd_net [get_bd_pins ${EthIPName}/gt_clock] [get_bd_pins axi_protocol_converter_eth${QSFP}/aclk]
+#connect_bd_net [get_bd_pins ${EthIPName}/gt_clock] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aclk]
+#connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins ${EthIPName}/gt_clock]
+#connect_bd_net [get_bd_pins ${EthIPName}/gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
 
-#connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi_protocol_converter_eth${QSFP}/aresetn]
-#connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/gt_rstn] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aresetn]
+#connect_bd_net [get_bd_pins ${EthIPName}/gt_rstn] [get_bd_pins axi_protocol_converter_eth${QSFP}/aresetn]
+#connect_bd_net [get_bd_pins ${EthIPName}/gt_rstn] [get_bd_pins axi_dwidth_converter_eth${QSFP}/s_axi_aresetn]
 
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
@@ -257,16 +265,16 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 $bramCtrlDMA
 set_property -dict [list CONFIG.SINGLE_PORT_BRAM {1} CONFIG.READ_LATENCY {4} CONFIG.DATA_WIDTH {64}] [get_bd_cells $bramCtrlDMA]
 
 
-connect_bd_intf_net [get_bd_intf_pins MEEP_10Gb_Ethernet_${QSFP}/M_AXI] [get_bd_intf_pins $bramCtrlDMA/S_AXI]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipClock] [get_bd_pins $bramCtrlDMA/s_axi_aclk]
-connect_bd_net [get_bd_pins MEEP_10Gb_Ethernet_${QSFP}/$ipRst]  [get_bd_pins $bramCtrlDMA/s_axi_aresetn]
+connect_bd_intf_net [get_bd_intf_pins ${EthIPName}/M_AXI] [get_bd_intf_pins $bramCtrlDMA/S_AXI]
+connect_bd_net [get_bd_pins ${EthIPName}/$ipClock] [get_bd_pins $bramCtrlDMA/s_axi_aclk]
+connect_bd_net [get_bd_pins ${EthIPName}/$ipRst]  [get_bd_pins $bramCtrlDMA/s_axi_aresetn]
 connect_bd_intf_net [get_bd_intf_pins $bramCtrlDMA/BRAM_PORTA] [get_bd_intf_pins $MemBlock/BRAM_PORTB]
 
 save_bd_design
 
-assign_bd_address -target_address_space /MEEP_10Gb_Ethernet_${QSFP}/M_AXI [get_bd_addr_segs $bramCtrlDMA/S_AXI/Mem0] -force
+assign_bd_address -target_address_space /${EthIPName}/M_AXI [get_bd_addr_segs $bramCtrlDMA/S_AXI/Mem0] -force
 
-set addressSegment  [get_bd_addr_segs MEEP_10Gb_Ethernet_${QSFP}/M_AXI/SEG_${bramCtrlDMA}_Mem0]
+set addressSegment  [get_bd_addr_segs ${EthIPName}/M_AXI/SEG_${bramCtrlDMA}_Mem0]
 
 set_property offset 0x0000000000080000 $addressSegment
 set_property range 512K $addressSegment

@@ -46,3 +46,6 @@ remove_files  $g_root_dir/$shell_dir/$shellBdFile
 create_bd_design -dir $g_project_dir $bdName
 #update_ip_catalog -rebuild
 
+# Set this variable to be used downstream
+set TopCell [current_bd_instance .]
+
