@@ -22,6 +22,7 @@
 #sh/define_shell.sh
 LOG_FILE=shell_build.log
 VIVADO_XLNX=$(which vivado)
+export FPGA_SHELL_ROOT=`pwd`
 
 if [ "$VIVADO_XLNX" = "" ]; then
 	echo -e "\r\n"
