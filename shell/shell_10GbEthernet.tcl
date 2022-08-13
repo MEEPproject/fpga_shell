@@ -17,9 +17,9 @@
 # Description: 
 
 
-set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
-set ETHClkName [dict get $ETHentry SyncClk Name]
+set ETHClkName [dict get $ETHentry ClkName]
+set ETHRstName [dict get $ETHentry RstName]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 
@@ -30,7 +30,6 @@ set ETHUserWidth [dict get $ETHentry AxiUserWidth]
 
 set ETHirq [dict get $ETHentry IRQ]
 
-putdebugs "ETHClkNm     $ETHClkNm    "
 putdebugs "ETHFreq      $ETHFreq     "
 putdebugs "ETHClkName   $ETHClkName  "
 putdebugs "ETHintf      $ETHintf     "
@@ -113,8 +112,6 @@ save_bd_design
 #create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_n
 #create_bd_port -dir I -type clk -freq_hz 100000000 qsfp_ref_clk_p
 
-set RstPinCore [get_bd_pins rst_ea_$ETHClkNm/slowest_sync_clk]
-
 if { $ETHqsfp != "pcie"} {
 
 set ipClock "eth_gt_user_clock"
@@ -163,10 +160,12 @@ connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins ${EthHierName}/eth_dma_irq]
 
 connect_bd_intf_net [get_bd_intf_ports ${ETHintf}] -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_axi_lite]
 
-set ETHClkOla "eth_axi_aclk"
 
-create_bd_port -dir O -type clk $ETHClkOla
-connect_bd_net [get_bd_ports ${ETHClkOla}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+create_bd_port -dir O -type clk $ETHClkName
+connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+
+create_bd_port -dir O -type rst $ETHRstName
+connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
 
 
 save_bd_design

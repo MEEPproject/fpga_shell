@@ -157,6 +157,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
                                                 putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
                                                 dict set d_device SyncClk $ClkList					
 					}
+					if { [lindex $fields 4] == "ETH_CLK" } {
+                                                set ClkFreq 1611328125
+                                                set ClkName "ETH_CLK"
+                                                set ClkList [list Freq $ClkFreq Name $ClkName]
+                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                                                dict set d_device SyncClk $ClkList
+                                        }
 					
 					### Device-dependant settings
 					if { "${device}" == "PCIE" } {
@@ -192,9 +199,12 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device InitFile [lindex $fields 6]	
 					}
 					if { "${device}" == "ETHERNET" } {
-						dict set d_device GbEth     [lindex $fields 6]
-                                                dict set d_device IRQ       [lindex $fields 7]
-						dict set d_device qsfpPort  [lindex $fields 8]
+                                                dict set d_device IntfLabel [lindex $fields 2]
+						dict set d_device ClkName   [lindex $fields 5]
+                                                dict set d_device RstName   [lindex $fields 6]
+						dict set d_device GbEth     [lindex $fields 7]
+                                                dict set d_device IRQ       [lindex $fields 8]
+						dict set d_device qsfpPort  [lindex $fields 9]
 					}
 					if { "${device}" == "AURORA" } {
                                                 dict set d_device Mode   [lindex $fields 6]
@@ -315,6 +325,8 @@ proc parse_definiton_file { DefinitionFile } {
 			putmeeps "The interface is synchronous to PCIe CLK"
 			} elseif {[regexp -inline -all {DDR_CLK} $line] != ""} {
 			putmeeps "The interface is synchronous to DDR CLK"
+			} elseif {[regexp -inline -all {ETH_CLK} $line] != ""} {
+                        putmeeps "The interface is synchronous to ETH CLK"
 			} elseif {[regexp -inline -all {CLK\d} $line] eq ""} {
 			puterrors "The interface is enabled but doesn't have a valid clock.\
 			\r\n\tDetected in line: $line"
