@@ -186,7 +186,10 @@ set ETHMemRange [expr {2**$ETHaddrWidth/1024}]
 putdebugs "Base Addr ETH: $ETHbaseAddr"
 putdebugs "Mem Range ETH: $ETHMemRange"
 
-assign_bd_address [get_bd_addr_segs {${EthHierName}/s_axi_lite/reg0 }]
+assign_bd_address [get_bd_addr_segs ${EthHierName}/axi_dma_0/S_AXI_LITE/Reg ]
+set_property offset $ETHbaseAddr [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
+set_property range $ETHMemRange [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
+
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
 
