@@ -198,7 +198,7 @@ set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_30_ACLK} CONFIG.USER_SAX
 
 connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
 connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_m_axi] [get_bd_intf_pins hbm_0/SAXI_30]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_m_axi] [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}]
 
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
