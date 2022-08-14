@@ -175,9 +175,11 @@ reports:
         needs:
             - implementation
         tags: !reference [.default_tags, tags]
+        before_script:
+            - ls; ls dcp
         script:
             - echo "Generate implementation reports..."
-            - make report_route
+            - make ci_report_route
         dependencies:
             - implementation
         artifacts:

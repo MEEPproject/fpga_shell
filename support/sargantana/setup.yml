@@ -40,7 +40,6 @@
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - export PATH=$PATH:$QDMA_DRIVERS
-    - sudo $TOOLS_DIR/givememyuart
 
   script:
     ## Workaround to solve a problem with openSBI compilation (2020/02/18)
