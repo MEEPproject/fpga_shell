@@ -127,6 +127,15 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				
 				set line [string map {\[ \ \[} $line]
 				set line [string map {\] \]\ } $line]
+
+				# Create a space between the signal definition and its comma to ease the next regexp
+				set line [string map {, \ ,} $line]
+				# Remove everything after the comma to help the following regexps
+		                set newline [regsub -line ",.*" $line ","]
+				if { $newline != ""} {
+					set line $newline
+				}
+
 				
 				# Join is used to remove the regexp returning braces. They are placed there
 				# by tcl to not to interpted returning brackets.
