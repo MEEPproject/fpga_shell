@@ -104,6 +104,9 @@ ci_implementation:
 	
 ci_bitstream: 
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+
+ci_report_route:
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 	
 
 #### Special script to adquire the best placement strategy #####

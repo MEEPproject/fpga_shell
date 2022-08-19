@@ -4,10 +4,21 @@
 # We comment/uncomment depending on the branch
 
 include:
-      #- local: support/acme/setup.yml
-      #- local: support/openpiton/setup.yml
-      #- local: support/dvino/setup.yml
-      #- local: support/sargantana/setup.yml
+      - local: support/acme/setup.yml
+        rules:
+                - if: $CI_COMMIT_BRANCH == "support/acme/cicd" || $CI_COMMIT_BRANCH == "master"
+      - local: support/openpiton/setup.yml
+        rules:
+                - if: $CI_COMMIT_BRANCH == "support/openpiton/cicd"        
+      - local: support/dvino/setup.yml
+        rules:
+                - if: $CI_COMMIT_BRANCH == "support/dvino/cicd"        
+      - local: support/sargantana/setup.yml
+        rules:
+                - if: $CI_COMMIT_BRANCH == "support/sargantana/cicd"        
       - local: support/pronoc/setup.yml
+        rules:
+                - if: $CI_COMMIT_BRANCH == "support/pronoc/cicd"
+        
 
 

@@ -21,12 +21,13 @@
 #!/bin/bash
 #sh/define_shell.sh
 LOG_FILE=shell_build.log
-VIVADO_XLNX=$(which vivado)
+VIVADO_XLNX=$1
+export FPGA_SHELL_ROOT=`pwd`
 
 if [ "$VIVADO_XLNX" = "" ]; then
 	echo -e "\r\n"
 	echo "[MEEP] INFO: Vivado Path not provided. Make sure you have it added to your PATH"
-	VIVADO_XLNX="vivado"
+	VIVADO_XLNX=$(which vivado)
 fi
 
 RED='\033[0;31m'

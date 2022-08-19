@@ -161,10 +161,32 @@ validation:
         tags: !reference [.default_tags, tags] 
         script:
             - echo "Checking implementation reports..." 
-            - make validate
+            - make validate            
         allow_failure: true            
         dependencies:
             - implementation
+
+              # Save time running the reports generation in parallel              
+reports:
+        stage: bitstream
+        rules:
+            - !reference [.default_rules, rules]        
+        extends: .disable_git
+        needs:
+            - implementation
+        tags: !reference [.default_tags, tags]
+        before_script:
+            - ls; ls dcp
+        script:
+            - echo "Generate implementation reports..."
+            - make ci_report_route
+        dependencies:
+            - implementation
+        artifacts:
+            when: always
+            paths:
+                - reports
+
 
 fpga-test:
         stage: fpga-test

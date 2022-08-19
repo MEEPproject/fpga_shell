@@ -1,6 +1,6 @@
 
 # Timing constraints
-set_false_path -from [get_pins -hierarchical -filter {NAME=~*Ethernet*interrupt*/C}]
+#set_false_path -from [get_pins -hierarchical -filter {NAME=~*Ethernet*interrupt*/C}]
 
 
 # QSFP28 Interfaces, QSFP_0, U55C
@@ -16,11 +16,9 @@ set_property -dict {LOC AD43 } [get_ports qsfp0_ref_clk_n] ;
 # 161.1328125 MHz MGT reference clock (from SI5394B)
 create_clock -period 6.206 -name qsfp0_refclk [get_ports qsfp0_ref_clk_p]
 
-
 #set_false_path -from [get_pins -hierarchical -filter {NAME =~ interrupt*/C}]
 # Following pin constraints are dummy. OE and FS signal outpus doesn't exist on U55C,
 # but we create connections to unused pins to keep compatibility with u280
-
 
 set_property -dict {LOC BL30 IOSTANDARD LVCMOS18} [get_ports qsfp0_oe_b]
 set_property -dict {LOC BN30 IOSTANDARD LVCMOS18} [get_ports qsfp0_fs]

@@ -19,7 +19,8 @@
 
 set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
-set ETHClkName [dict get $ETHentry SyncClk Name]
+set ETHClkName [dict get $ETHentry ClkName]
+set ETHRstName [dict get $ETHentry RstName]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 
@@ -110,11 +111,11 @@ make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]
 set_property name $ETHirq [get_bd_ports intc_0]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
 
-create_bd_port -dir O -type rst ${ETHintf}_arstn
-connect_bd_net [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_resetn] [get_bd_ports ${ETHintf}_arstn]
+create_bd_port -dir O -type clk $ETHClkName
+connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_clk]
 
-create_bd_port -dir O -type clk ${ETHintf}_aclk
-connect_bd_net [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_clk] [get_bd_ports ${ETHintf}_aclk]
+create_bd_port -dir O -type rst $ETHRstName
+connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_resetn]
 
 save_bd_design
 ## Create the Shell interface to the RTL
