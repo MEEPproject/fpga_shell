@@ -42,6 +42,7 @@ if { $ARSTDef ne "" } {
 foreach clkObj $ClockList {
 
 	### Spaces at the end of a string are necessary when using append
+	# CLKOUT1 is enabled by default, skip it. 0 doesn't exist.
 	if { $i > 1 } {
 		set ConfMMCM "CONFIG.CLKOUT${i}_USED true "
 		append ConfMMCMString "$ConfMMCM"
@@ -72,6 +73,13 @@ foreach clkObj $ClockList {
 			set APBclkCandidate [dict get $clkObj Name]
 		}
 	}
+	if { $currentClk == 125000000 } {
+		set ETHclkCandidate [dict get $clkObj Name]
+
+	}
+
+	putdebugs $ConfMMCM
+
 }
 
 putmeeps "Slowest CLK: $slowestSyncCLKname, APBcandidate: $APBclkCandidate"
@@ -79,6 +87,7 @@ putmeeps "Slowest CLK: $slowestSyncCLKname, APBcandidate: $APBclkCandidate"
 ### An APB clock is added to the list if no candidate is found
 # TODO: What if HBM is not selected?
 set APBclk ""
+set ETHinitCLK ""
 
 if { $APBclkCandidate ne "None" } {
 	
@@ -113,6 +122,23 @@ if { $APBclkCandidate ne "None" } {
 	# append ConfMMCMString "$ConfMMCM"		
 	
 }
+
+set EthInitClk [list "EthInitClk" 125000000]
+set NewMMCMconf [AddClk2MMCM $ClockList $ConfMMCMString $EthInitClk ]
+
+
+puterrors "HOLA QUE HACES"
+putdebugs $ClockList
+putdebugs [lindex $NewMMCMconf 0]
+
+putdebugs $ConfMMCMString
+putdebugs [lindex $NewMMCMconf 1]
+
+
+set ClockList [lindex $NewMMCMconf 0]
+set ConfMMCMString [lindex $NewMMCMconf 1]
+
+
 
 # BOARD_FREQ is defined in the environment file.
 	
@@ -156,7 +182,7 @@ if { $APBclkCandidate ne "None" } {
 		# TODO: we dont want the APB clock to be external and we do want the PCIe clock in case
 		# it is used as an interface
 		
-		if { $ClkName != "APBclk" } {
+		if { !($ClkName == "APBclk" || $ClkName == "EthInitClk")} {
 
 			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
 			connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
@@ -191,10 +217,13 @@ if { $APBclkCandidate ne "None" } {
 		} else {
 			# We know APB Clk, if it exists in the list, is the last one, so we can
 			# still use the index n to refer to the MMCM clock output
+			# TODO: Refactor this whole thing
+			set n [expr $n-1]
 			
 			set APBClockPin [get_bd_pins clk_wiz_1/clk_out${n}]
 			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_apb
                         connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_apb/ext_reset_in]
+			connect_bd_net $APBClockPin [get_bd_pins rst_apb/slowest_sync_clk]
 			set APBRstPin [get_bd_pins rst_apb/peripheral_aresetn]
 
 
@@ -202,8 +231,12 @@ if { $APBclkCandidate ne "None" } {
 
 	}
 
+ # TODO: Now we know Ethernet Init Clk is the last one, but this needs to be refactored
+ incr n
 
  set MMCMLockedPin [get_bd_pins clk_wiz_1/locked]
+ set EthInitClkPin [get_bd_pins clk_wiz_1/clk_out${n}]
+
   
 
  save_bd_design  

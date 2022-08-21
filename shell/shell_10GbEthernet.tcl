@@ -135,7 +135,7 @@ create_bd_port -dir O qsfp${QSFP}_fs
 connect_bd_net [get_bd_ports qsfp${QSFP}_oe_b] [get_bd_pins ${EthHierName}/${ETHqsfp}_oe_b]
 connect_bd_net [get_bd_ports qsfp${QSFP}_fs] [get_bd_pins ${EthHierName}/${ETHqsfp}_fs]
 
-connect_bd_net $APBClockPin [get_bd_pins ${EthHierName}/init_clk]
+connect_bd_net $EthInitClkPin [get_bd_pins ${EthHierName}/init_clk]
 connect_bd_net $MMCMLockedPin [get_bd_pins ${EthHierName}/$ipLocked]
 
 set RstPinIP   [get_bd_pins ${EthHierName}/$ipRst]  
