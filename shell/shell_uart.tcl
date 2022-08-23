@@ -80,6 +80,7 @@ if { $g_UART_MODE eq "simple"} {
 
 	make_bd_intf_pins_external  [get_bd_intf_pins $UartCoreName/S_AXI]
 	set_property name $g_UART_ifname [get_bd_intf_ports S_AXI_0]
+	set_property CONFIG.ADDR_WIDTH $UARTaddrWidth [get_bd_intf_ports /$g_UART_ifname]
 	set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /$g_UART_ifname]
 
 	#Deal with no IRQ scenario
