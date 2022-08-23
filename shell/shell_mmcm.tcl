@@ -126,8 +126,6 @@ if { $APBclkCandidate ne "None" } {
 set EthInitClk [list "EthInitClk" 125000000]
 set NewMMCMconf [AddClk2MMCM $ClockList $ConfMMCMString $EthInitClk ]
 
-
-puterrors "HOLA QUE HACES"
 putdebugs $ClockList
 putdebugs [lindex $NewMMCMconf 0]
 
@@ -137,7 +135,6 @@ putdebugs [lindex $NewMMCMconf 1]
 
 set ClockList [lindex $NewMMCMconf 0]
 set ConfMMCMString [lindex $NewMMCMconf 1]
-
 
 
 # BOARD_FREQ is defined in the environment file.

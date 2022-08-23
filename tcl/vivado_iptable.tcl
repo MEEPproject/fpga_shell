@@ -38,3 +38,7 @@ switch $g_board_part {
 		set HBMDensity "16GB"
 	}
 }
+
+set MEEPUart "meep-project.eu:MEEP:MEEP_PULP_UART:1.0"
+set XilinxUart "xilinx.com:ip:axi_uart16550:2.0"
+
