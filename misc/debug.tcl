@@ -1,5 +1,6 @@
 set attributes "\(* keep=\"TRUE\" *\) \(* mark_debug=\"TRUE\" *\) reg " 
 set clkProcess "always @\(posedge clk\) begin : p_debug"
+set header     "// ---------------- Debug Section ------------------- "
 
 set thisDir [pwd]
 
@@ -8,6 +9,8 @@ set g_deb_file "$thisDir/debug_out.txt"
 
 set fd_in   [open $g_sig_file "r"]
 set fd_out  [open $g_deb_file "w"]
+
+puts $fd_out $header
 
 set SignalList [list]
 
@@ -29,7 +32,10 @@ while {[gets $fd_in line] >= 0} {
 	set MyVector [regexp -all -inline {\[.+\]} $line]
 	set MyVector [string map {" " ""} $MyVector]
 	set MyVector [join $MyVector]
-				
+
+	# Add a heading space to prepare the next regexp
+	set space " "
+	set line ${space}${line}
 	set MySignal [regexp -inline -all {\s{1}[a-z|A-Z|0-9|-|_]+\s*,*$} $line]
 	set MySignal [string map {" " ""} $MySignal]
 	# Need to remove the comma, as there is no lookbehind regex in tcl
