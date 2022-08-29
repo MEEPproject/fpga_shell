@@ -13,3 +13,6 @@
 [submodule "ip/10GbEthernet"]
 	path = ip/10GbEthernet
 	url = ../10gb_ethernet.git
+[submodule "ip/uart_16650a"]
+	path = ip/uart_16650a
+	url = ../ariane_uart.git

@@ -29,37 +29,69 @@ set UARTaddrWidth [dict get $UARTentry AxiAddrWidth]
 
 putdebugs "UART? $g_UART_CLK"
 
+# Definded under tcl/vivado_ip_tables.tcl
+#set MEEPUart "meep-project.eu:MEEP:MEEP_PULP_UART:1.0"
+#set XilinxUart "xilinx.com:ip:axi_uart16550:2.0"
+
+if { $g_UART_MODE eq "xilinx" } {
+
+    set UartCoreName "axi_uart16550_0"
+    set UartCoreIP $XilinxUart
+
+} else {
+
+	# MEEP UART
+
+    set UartCoreName "MEEP_uart16650_0"
+    set UartCoreIP $MEEPUart
+
+    ### Initialize the IPs
+    putmeeps "Packaging UART IP..."
+    exec make -C "$g_root_dir/ip/uart_16650a" FPGA_BOARD=$g_board_part AXI_AWIDTH=$UARTaddrWidth
+    putmeeps "... Done."
+    update_ip_catalog -rebuild
+
+}
+
+    create_bd_port -dir I -type data rs232_rxd
+    create_bd_port -dir O -type data rs232_txd
+
+
 if { $g_UART_MODE eq "simple"} {
 
-	create_bd_port -dir I -type data rs232_rxd
-	create_bd_port -dir O -type data rs232_txd
 	create_bd_port -dir O -type data ${g_UART_ifname}_rxd
 	create_bd_port -dir I -type data ${g_UART_ifname}_txd
 	connect_bd_net [get_bd_ports ${g_UART_ifname}_txd] [get_bd_ports rs232_txd]
 	connect_bd_net [get_bd_ports rs232_rxd] [get_bd_ports ${g_UART_ifname}_rxd]
-}
 
-if { $g_UART_MODE eq "normal" } {
+} else {
 
-	create_bd_port -dir I -type data rs232_rxd
-	create_bd_port -dir O -type data rs232_txd	
-	create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uart16550:2.0 axi_uart16550_0
-	connect_bd_net [get_bd_ports rs232_rxd] [get_bd_pins axi_uart16550_0/sin]
-	connect_bd_net [get_bd_ports rs232_txd] [get_bd_pins axi_uart16550_0/sout]
-	#make_bd_pins_external  [get_bd_pins axi_uart16550_0/ip2intc_irpt]
-	connect_bd_net [get_bd_pins axi_uart16550_0/s_axi_aclk] [get_bd_pins rst_ea_$g_UARTClkPort/slowest_sync_clk]
-	connect_bd_net [get_bd_pins rst_ea_${g_UARTClkPort}/peripheral_aresetn] [get_bd_pins axi_uart16550_0/s_axi_aresetn]
+        set UARTbaseAddr [dict get $UARTentry BaseAddr]
+        set UARTMemRange [expr {2**$UARTaddrWidth/1024}]
 
-	# TODO: Deal with no IRQ scenario with if
+	putmeeps "Deploying $UartCoreName"
 
-	make_bd_intf_pins_external  [get_bd_intf_pins axi_uart16550_0/S_AXI]
+	save_bd_design
+	create_bd_cell -type ip -vlnv $UartCoreIP $UartCoreName
+	connect_bd_net [get_bd_ports rs232_rxd] [get_bd_pins $UartCoreName/sin]
+	connect_bd_net [get_bd_ports rs232_txd] [get_bd_pins $UartCoreName/sout]
+	connect_bd_net [get_bd_pins $UartCoreName/s_axi_aclk] [get_bd_pins rst_ea_$g_UARTClkPort/slowest_sync_clk]
+	connect_bd_net [get_bd_pins rst_ea_${g_UARTClkPort}/peripheral_aresetn] [get_bd_pins $UartCoreName/s_axi_aresetn]
+
+	make_bd_intf_pins_external  [get_bd_intf_pins $UartCoreName/S_AXI]
 	set_property name $g_UART_ifname [get_bd_intf_ports S_AXI_0]
+	set_property CONFIG.ADDR_WIDTH $UARTaddrWidth [get_bd_intf_ports /$g_UART_ifname]
+	set_property -dict [list CONFIG.G_ADDR_WIDTH $UARTaddrWidth] [get_bd_cells $UartCoreName]	
 	set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /$g_UART_ifname]
-	make_bd_pins_external  [get_bd_pins axi_uart16550_0/ip2intc_irpt]
-	set_property name $g_UART_irq [get_bd_ports ip2intc_irpt_0]
+
+	#Deal with no IRQ scenario
+	if { $g_UART_irq != "none" } {
+		make_bd_pins_external  [get_bd_pins $UartCoreName/ip2intc_irpt]
+		set_property name $g_UART_irq [get_bd_ports ip2intc_irpt_0]
+	}	
+
 	set_property CONFIG.ASSOCIATED_BUSIF ${g_UART_ifname} [get_bd_ports /$g_UART_CLK]
 	
-	#exclude_bd_addr_seg [get_bd_addr_segs axi_uart16550_0/S_AXI/Reg] -target_address_space [get_bd_addr_spaces $g_UART_ifname]
 	### UART memory map	
 	
 	set UARTbaseAddr [dict get $UARTentry BaseAddr]
@@ -69,9 +101,11 @@ if { $g_UART_MODE eq "normal" } {
 	putdebugs "UARTMemRange $UARTMemRange"
 	putdebugs "UARTaddrWidth $UARTaddrWidth"
 
-	assign_bd_address [get_bd_addr_segs {axi_uart16550_0/S_AXI/Reg }]
-	set_property range ${UARTMemRange}K [get_bd_addr_segs ${g_UART_ifname}/SEG_axi_uart16550_0_Reg]
-	set_property offset $UARTbaseAddr [get_bd_addr_segs ${g_UART_ifname}/SEG_axi_uart16550_0_Reg]
+	save_bd_design
+
+	assign_bd_address [get_bd_addr_segs {$UartCoreName/S_AXI/Reg }]
+	set_property range ${UARTMemRange}K [get_bd_addr_segs ${g_UART_ifname}/SEG_${UartCoreName}_Reg]
+	set_property offset $UARTbaseAddr   [get_bd_addr_segs ${g_UART_ifname}/SEG_${UartCoreName}_Reg]
 
 }
 
