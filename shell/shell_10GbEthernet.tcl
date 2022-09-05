@@ -51,7 +51,7 @@ if { $ETHqsfp == "qsfp0" } {
 	set PortList [lappend PortList $g_Eth0_file]
 } elseif { $ETHqsfp == "qsfp1" } {
         set QSFP "1"
-	set PortList [lappend PortLIst $g_Eth1_file]
+	set PortList [lappend PortList $g_Eth1_file]
 } else {
 	set QSFP "PCIe"
 }
