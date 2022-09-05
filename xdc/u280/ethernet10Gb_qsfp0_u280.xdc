@@ -1,5 +1,5 @@
-
 # QSFP28 Interfaces
+
 set_property -dict {LOC L53 } [get_ports qsfp0_1x_grx_p] ; # MGTYRXP0_134 GTYE4_CHANNEL_X0Y40 / GTYE4_COMMON_X0Y10
 set_property -dict {LOC L54 } [get_ports qsfp0_1x_grx_n] ; # MGTYRXN0_134 GTYE4_CHANNEL_X0Y40 / GTYE4_COMMON_X0Y10
 set_property -dict {LOC L48 } [get_ports qsfp0_1x_gtx_p] ; # MGTYTXP0_134 GTYE4_CHANNEL_X0Y40 / GTYE4_COMMON_X0Y10
