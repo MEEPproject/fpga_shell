@@ -283,6 +283,7 @@ proc exhaustivePlaceFlow { root_dir } {
 
 	# empty list for results
 	set wns_results ""
+	set TimingPaths [list]
 	# empty list for time elapsed messages
 	set time_msg ""
 	set AppliedDirective [list]
@@ -332,11 +333,13 @@ proc exhaustivePlaceFlow { root_dir } {
 		puts "$LapsedTime"
 
 		lappend time_msg "place_design: Time : $LapsedTime" 
+		set ThisTimingPath [get_timing_paths -max_paths 1 -nworst 1 -setup]
 		# append wns result to our results list
-		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
+		set WNS [ get_property SLACK $ThisTimingPath ]
 		lappend wns_results $WNS
                 puts "Post Place WNS with directive $oneDirective = $WNS "
 		lappend AppliedDirective $oneDirective
+		lappend TimingPaths $ThisTimingPath
 
 		# Open file to append 
                 set fd_res [open $resFile "a+"]
@@ -345,6 +348,8 @@ proc exhaustivePlaceFlow { root_dir } {
                 puts $fd_res "Finish @ [clock format [clock seconds] -format %H:%M:%S]"
                 puts $fd_res "*******************************"
                 puts $fd_res "Post Place WNS with directive $oneDirective = $WNS "
+		puts $fd_res "Worst Timing Path:"
+		puts $fd_res $TimingPath
 		
 		if { [expr $WNS > $bestWNS] } {			
 			set bestPlaceDirective $oneDirective

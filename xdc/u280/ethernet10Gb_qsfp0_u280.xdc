@@ -24,3 +24,5 @@ set_false_path -to [get_ports {qsfp0_oe_b qsfp0_fs}]
 set_output_delay 0 [get_ports {qsfp0_oe_b qsfp0_fs}]
 
 #set_false_path -from [get_pins -hierarchical -filter {NAME =~ interrupt*/C}]
+
+set_max_delay -from [get_pins meep_shell_inst/Ethernet10Gb_qsfp0/axi_dma_0/U0/I_AXI_DMA_REG_MODULE/GEN_MM2S_REGISTERS.GEN_INTROUT_ASYNC.PROC_REG_INTR2LITE/GENERATE_LEVEL_P_S_CDC.SINGLE_BIT.CROSS_PLEVEL_IN2SCNDRY_s_level_out_d4/C]  3.0
