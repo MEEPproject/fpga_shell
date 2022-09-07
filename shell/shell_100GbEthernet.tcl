@@ -47,6 +47,8 @@ exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbE
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
+set PortList [lappend PortList $g_Eth100Gb_file]
+
 source $g_root_dir/ip/100GbEthernet/tcl/project_options.tcl
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_version MEEP_100Gb_Ethernet_0
 
