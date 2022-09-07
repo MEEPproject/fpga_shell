@@ -494,4 +494,4 @@ Add2EnvFile $p_ShellEnvFile "set g_EAname $EAname"
 
 
 
-putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN
+putcolors "Shell environment file created on $p_ShellEnvFile" $GREEN

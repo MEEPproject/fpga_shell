@@ -129,3 +129,22 @@ update_ip_catalog -rebuild -scan_changes
 validate_bd_design
 
 save_bd_design 
+
+### Apply a list patches of patches if it exists
+# The patch list is a list of paths to block design tcl files.
+# The definition of this list is EA's responsability, that needs
+# to match the "g_patch_list" variable name, and use correct paths
+# It can be done under $accelerator_path/meep_shell/tcl/project_options.tcl
+
+if { [info exists g_patch_list] } { 
+    putmeeps "Applying shell patches ..."
+
+    foreach patch $g_patch_list {
+	# TODO: Catch
+	source $patch
+	putmeeps "Patch $patch applied"
+    }   
+    #TODO: Catch
+    validate_bd_design
+    save_bd_design
+}

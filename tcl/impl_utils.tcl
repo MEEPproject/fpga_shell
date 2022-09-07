@@ -299,7 +299,7 @@ proc exhaustivePlaceFlow { root_dir } {
 	set prevWNS 0.000
 	set WNS 0.000
 	set bestWNS 0.000
-	set bestPlaceDirective ""
+	set bestPlaceDirective "Explore"
 
         set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
 	# Create the directory if it didn't exists already

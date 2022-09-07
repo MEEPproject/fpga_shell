@@ -19,7 +19,6 @@ REPORT_DIR   =  $(ROOT_DIR)/reports
 YAML_FILE    =  $(ROOT_DIR)/.gitlab-ci.yml
 PROJECT_DIR  =  $(ROOT_DIR)/project
 BINARIES_DIR =  $(ROOT_DIR)/binaries
-SHELL_PATCH  := ""
 VIVADO_VER   ?= 2021.2
 VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
 VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
@@ -133,11 +132,6 @@ report_route: $(IMPL_DCP)
 submodules:	
 	@(git submodule update --init --recursive)
 
-#### Let the EA to apply post-shell pathches 
-
-shell_patch:
-	$(SH_DIR)/shell_patch.sh $(SHELL_PATCH)
-
 clean: clean_ip clean_project
 	rm -rf dcp reports src 	
 
@@ -155,7 +149,7 @@ clean_project: clean_ip
 clean_accelerator:
 	rm -rf accelerator
 
-clean_synthesis:	
+clean_synthesis: clean_implementation	
 	rm -rf dcp/synthesis.dcp
 
 clean_implementation:
