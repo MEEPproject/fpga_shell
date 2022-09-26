@@ -277,6 +277,8 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 	putmeeps "Inside properties: $axi_ifname"
 
 	while {[gets $fd_wire line] >= 0} { 
+
+		#TODO: Don't parse commented lines
 		
 				
 		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		

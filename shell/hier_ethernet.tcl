@@ -51,8 +51,8 @@ proc create_hier_cell_Ethernet { parentCell nameHier eth_ip } {
    CONFIG.c_addr_width {48} \
    CONFIG.c_include_mm2s_dre {1} \
    CONFIG.c_include_s2mm_dre {1} \
-   CONFIG.c_m_axi_mm2s_data_width {512} \
-   CONFIG.c_m_axi_s2mm_data_width {512} \
+   CONFIG.c_m_axi_mm2s_data_width {256} \
+   CONFIG.c_m_axi_s2mm_data_width {256} \
    CONFIG.c_m_axis_mm2s_tdata_width {64} \
    CONFIG.c_mm2s_burst_size {32} \
    CONFIG.c_s2mm_burst_size {32} \
@@ -76,6 +76,9 @@ proc create_hier_cell_Ethernet { parentCell nameHier eth_ip } {
   set_property -dict [ list \
    CONFIG.NUM_SI {1} \
  ] $smartconnect_0
+
+#create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_0
+# TODO: Ideally, we will clock the AXI Lite DMA interface with an user clock, so we can use the external reset associated to that clock, and reduce the timing requirement for the ethernet logic in the EA.  
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_irq
 
