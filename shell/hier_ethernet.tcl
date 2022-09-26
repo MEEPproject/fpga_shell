@@ -38,6 +38,7 @@ proc create_hier_cell_Ethernet { parentCell nameHier eth_ip } {
   create_bd_pin -dir O -type clk eth_gt_user_clock
   create_bd_pin -dir I -type clk init_clk
   create_bd_pin -dir I -type clk locked
+  create_bd_pin -dir I -type rst eth_ext_rstn
   create_bd_pin -dir O ${ETHqsfp}_fs
   create_bd_pin -dir O ${ETHqsfp}_oe_b
 
@@ -98,7 +99,6 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_irq
   save_bd_design
 
   # Create port connections
-  connect_bd_net -net ${EthIPName}_eth_gt_resetn [get_bd_pins ${EthIPName}/eth_gt_resetn] [get_bd_pins proc_sys_reset_eth/ext_reset_in]
   connect_bd_net -net ${EthIPName}_qsfp_refclk_fs [get_bd_pins ${ETHqsfp}_fs] [get_bd_pins ${EthIPName}/qsfp_refclk_fs]
   connect_bd_net -net ${EthIPName}_qsfp_refclk_oe_b [get_bd_pins ${ETHqsfp}_oe_b] [get_bd_pins ${EthIPName}/qsfp_refclk_oe_b]
   connect_bd_net -net clock_1 [get_bd_pins init_clk] [get_bd_pins ${EthIPName}/init_clk]
@@ -106,7 +106,9 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_irq
   connect_bd_net -net ethernet_alveo_0_eth_gt_user_clock [get_bd_pins eth_gt_user_clock] [get_bd_pins ${EthIPName}/eth_gt_user_clock] [get_bd_pins axi_dma_0/m_axi_mm2s_aclk] [get_bd_pins axi_dma_0/m_axi_s2mm_aclk] [get_bd_pins axi_dma_0/m_axi_sg_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_interconnect_0/S01_ACLK] [get_bd_pins axi_interconnect_0/S02_ACLK] [get_bd_pins proc_sys_reset_eth/slowest_sync_clk] [get_bd_pins axi_dma_0/s_axi_lite_aclk] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins smartconnect_0/aclk]
 
   connect_bd_net -net proc_sys_reset_eth_interconnect_aresetn [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins proc_sys_reset_eth/interconnect_aresetn]
-  connect_bd_net -net proc_sys_reset_eth_peripheral_aresetn [get_bd_pins eth_gt_rstn] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_0/S01_ARESETN] [get_bd_pins axi_interconnect_0/S02_ARESETN] [get_bd_pins proc_sys_reset_eth/peripheral_aresetn] [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins smartconnect_0/aresetn]
+  connect_bd_net -net proc_sys_reset_eth_peripheral_aresetn [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_interconnect_0/S01_ARESETN] [get_bd_pins axi_interconnect_0/S02_ARESETN] [get_bd_pins axi_dma_0/axi_resetn] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins smartconnect_0/aresetn] [get_bd_pins ${EthIPName}/eth_gt_resetn] 
+connect_bd_net [get_bd_pins eth_ext_rstn] [get_bd_pins proc_sys_reset_eth/ext_reset_in]
+
 
   connect_bd_net [get_bd_pins axi_dma_0/mm2s_introut] [get_bd_pins xlconcat_irq/In0]
   connect_bd_net [get_bd_pins axi_dma_0/s2mm_introut] [get_bd_pins xlconcat_irq/In1]

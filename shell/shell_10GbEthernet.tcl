@@ -167,6 +167,10 @@ connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_u
 create_bd_port -dir O -type rst $ETHRstName
 connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
 
+# TODO: This reset maybe need to be ORed with the External User reset
+connect_bd_net [get_bd_ports resetn] [get_bd_pins ${EthHierName}/eth_ext_rstn]
+
+
 
 save_bd_design
 ## Create the Shell interface to the RTL
