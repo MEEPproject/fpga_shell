@@ -22,6 +22,8 @@ set_property PACKAGE_PIN BB9              [get_ports {pci_express_x16_txp[13]} ]
 set_property PACKAGE_PIN BA11             [get_ports {pci_express_x16_txp[12]} ]                   ;# Bank 224 - MGTYTXP3_224
 set_property PACKAGE_PIN AR14             [get_ports pcie_refclk_clk_n ]                       ;# Bank 225 - MGTREFCLK0N_225
 set_property PACKAGE_PIN AR15             [get_ports pcie_refclk_clk_p ]                       ;# Bank 225 - MGTREFCLK0P_225
+## Create the PCIe Reference CLK
+create_clock -period 10.000 -name  pcie_refclk [get_ports pcie_refclk_clk_p]
 #set_property PACKAGE_PIN AP12             [get_ports "SYSCLK5_N"]                          ;# Bank 225 - MGTREFCLK1N_225
 #set_property PACKAGE_PIN AP13             [get_ports "SYSCLK5_P"]                          ;# Bank 225 - MGTREFCLK1P_225
 set_property PACKAGE_PIN AY3              [get_ports {pci_express_x16_rxn[11]} ]                   ;# Bank 225 - MGTYRXN0_225

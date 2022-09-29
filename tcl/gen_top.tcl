@@ -145,6 +145,7 @@ close $fd_mod
 
 set   fd_mod      [open $g_mod_file    "r"]
 # Create the top module boundaries
+puts  $fd_top "// Automatically generated file @$InitDate $InitTime\r\n"
 puts  $fd_top "module system_top"
 puts  $fd_top "   \("
 fcopy $fd_mod     $fd_top

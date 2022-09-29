@@ -369,6 +369,19 @@ proc Add2EnvFile {path2file addString} {
 	close $fd_file	
 }
 
+proc Add2ConstrFileList {path2file addStringList} {
+	
+	set fd_file [open $path2file "a"]
+
+	foreach StringIn $addStringList {
+	
+		puts $fd_file $StringIn
+
+	}
+	
+	close $fd_file	
+}
+
 proc AddClk2MMCM { ClockList ConfMMCMString NewClk} {
 
 	set ClkNameNew [lindex $NewClk 0]
