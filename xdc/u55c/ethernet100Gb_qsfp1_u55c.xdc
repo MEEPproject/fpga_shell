@@ -28,9 +28,9 @@ set_property USER_SLR_ASSIGNMENT SLR1 [get_cells "$tx_clk_units $rx_clk_units $e
 
 #--------------------------------------------
 # Timing constraints for clock domains crossings (CDC), which didn't apply automatically (e.g. for GPIO)
-set sys_clk [get_clocks -of_objects [get_pins -hierarchical MEEP_100Gb_Ethernet_0/s_axi_clk]]
-set tx_clk  [get_clocks -of_objects [get_pins -hierarchical eth100gb/gt_txusrclk2          ]]
-set rx_clk  [get_clocks -of_objects [get_pins -hierarchical eth100gb/gt_rxusrclk2          ]]
+set sys_clk [get_clocks -of_objects [get_pins -hierarchical Eth100GbSyst*/s_axi_clk]]
+set tx_clk  [get_clocks -of_objects [get_pins -hierarchical eth100gb/gt_txusrclk2  ]]
+set rx_clk  [get_clocks -of_objects [get_pins -hierarchical eth100gb/gt_rxusrclk2  ]]
 # set_false_path -from $xxx_clk -to $yyy_clk
 # controlling resync paths to be less than source clock period
 # (-datapath_only to exclude clock paths)
