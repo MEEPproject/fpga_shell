@@ -67,10 +67,10 @@ proc reportUnconnectedPins { SynthLogFile } {
 	while {[gets $fd_synth line] >= 0} {
 		
 		set UndrivenPins [regexp -all -inline {WARNING: \[Synth 8-3295\].*$} $line]
-		puts $fd_report $UndrivenPins
-		puts "$UndrivenPins"
 		if { $UndrivenPins != ""} {
 			set UndrivenPinDetected 1
+	                puts $fd_report $UndrivenPins
+        	        puts "$UndrivenPins"
 		}	
 	}
 
