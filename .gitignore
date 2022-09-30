@@ -20,3 +20,4 @@ gen_system.tcl
 iter_*
 tcl/environment.tcl
 tight_setup_hold_pins.txt
+system_timing_u*.xdc
