@@ -71,7 +71,7 @@ set dma_mm2s_irq_pin "meep_shell_inst/${EthHierName}/axi_dma_0/U0/I_AXI_DMA_REG_
 set dma_s2mm_irq_pin "meep_shell_inst/${EthHierName}/axi_dma_0/U0/I_AXI_DMA_REG_MODULE/GEN_S2MM_REGISTERS.GEN_INTROUT_ASYNC.PROC_REG_INTR2LITE/GENERATE_LEVEL_P_S_CDC.SINGLE_BIT.CROSS_PLEVEL_IN2SCNDRY_s_level_out_d4/C"
 
 set dma_mm2s_constr "set_max_delay -from \[get_pins $dma_mm2s_irq_pin\] 3.0"
-set dma_s2mm_constr "set_max_delay -from \[get_pins $dma_mm2s_irq_pin\] 3.0"
+set dma_s2mm_constr "set_max_delay -from \[get_pins $dma_s2mm_irq_pin\] 3.0"
 
 set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
 
