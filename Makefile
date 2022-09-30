@@ -24,6 +24,7 @@ VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
 VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 DCP_ON       ?= 
+QUICK_IMPL   ?=
 U200_PART    = "xcu200-fsgd2104-2-e"
 U280_PART    = "xcu280-fsvh2892-2L-e" 
 U55C_PART    = "xcu55c-fsvh2892-2L-e"  
@@ -92,7 +93,7 @@ $(SYNTH_DCP):
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
 	
 $(BIT_FILE): $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
