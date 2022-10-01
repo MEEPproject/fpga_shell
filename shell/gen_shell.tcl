@@ -92,7 +92,6 @@ foreach dicEntry $ShellEnabledIntf {
 		}	
 		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
 		# TODO: Check if ETHClkName is the right label. HBM uses "$HBMName"
-		# TODO: Physicall QSFP constrains can be part of the IP
 
 	}
 	if {[regexp -inline -all "AURORA" $IntfName] ne "" } {

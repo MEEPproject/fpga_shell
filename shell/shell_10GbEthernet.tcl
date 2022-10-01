@@ -16,7 +16,7 @@
 # Date: 22.02.2022
 # Description: 
 
-
+set ETHClkLab  [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
 set ETHClkName [dict get $ETHentry ClkName]
 set ETHRstName [dict get $ETHentry RstName]
@@ -30,6 +30,7 @@ set ETHUserWidth [dict get $ETHentry AxiUserWidth]
 
 set ETHirq [dict get $ETHentry IRQ]
 
+putdebugs "ETHClkLab    $ETHClkLab   "
 putdebugs "ETHFreq      $ETHFreq     "
 putdebugs "ETHClkName   $ETHClkName  "
 putdebugs "ETHintf      $ETHintf     "
@@ -165,7 +166,7 @@ set RstPinIP   [get_bd_pins ${EthHierName}/$ipRst]
 	set RstPinIP $pcie_rst_pin
 
 }
-# Make External avoids passing the signal width to this point. The bus is created automatically
+# Make External avoids passing the signal width at this point. The bus is created automatically
 create_bd_port -dir O -from 1 -to 0 -type intr $ETHirq
 connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins ${EthHierName}/eth_dma_irq]
 
@@ -173,10 +174,14 @@ connect_bd_intf_net [get_bd_intf_ports ${ETHintf}] -boundary_type upper [get_bd_
 
 
 create_bd_port -dir O -type clk $ETHClkName
-connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+#connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
 
 create_bd_port -dir O -type rst $ETHRstName
-connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
+#connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
+
+# Connect the defined ethernet CLK & RST to the DMA AXI IP, and also forward them to the EA
+connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_clk]   [get_bd_pins rst_ea_$ETHClkLab/slowest_sync_clk] [get_bd_ports ${ETHClkName}]
+connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_arstn] [get_bd_pins rst_ea_$ETHClkLab/peripheral_aresetn] [get_bd_ports ${ETHRstName}]
 
 # TODO: This reset maybe need to be ORed with the External User reset
 connect_bd_net [get_bd_ports resetn] [get_bd_pins ${EthHierName}/eth_ext_rstn]
