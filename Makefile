@@ -36,7 +36,7 @@ U55C_BOARD   = "u55c"
 .PHONY: clean clean_project clean_accelerator clean_synthesis clean_implementation clean_ci_cd
 
 #.DEFAULT_GOAL := initialize
-all: initialize binaries project synthesis implementation validate bitstream
+all: binaries project synthesis implementation validate bitstream
 
 u200: clean
 	$(SH_DIR)/extract_part.sh $(U200_BOARD)
@@ -140,6 +140,7 @@ clean_ip:
 	@(cd ip/100GbEthernet; make clean)
 	@(cd ip/aurora_raw; make clean)
 	@(cd ip/10GbEthernet; make clean)
+	@(cd ip/uart_16650a; make clean)
 
 clean_binaries:
 	rm -rf binaries

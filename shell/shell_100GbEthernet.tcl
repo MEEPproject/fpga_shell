@@ -19,8 +19,10 @@
 
 set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
-set ETHClkName [dict get $ETHentry SyncClk Name]
+set ETHClkName [dict get $ETHentry ClkName]
+set ETHRstName [dict get $ETHentry RstName]
 set ETHintf    [dict get $ETHentry IntfLabel]
+set ETHqsfp    [dict get $ETHentry qsfpPort]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -41,9 +43,11 @@ putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part
+exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp
 putmeeps "... Done."
 update_ip_catalog -rebuild
+
+set PortList [lappend PortList $g_Eth100Gb_file]
 
 source $g_root_dir/ip/100GbEthernet/tcl/project_options.tcl
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_version MEEP_100Gb_Ethernet_0
@@ -108,6 +112,12 @@ connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins ME
 make_bd_pins_external  [get_bd_pins MEEP_100Gb_Ethernet_0/intc]
 set_property name $ETHirq [get_bd_ports intc_0]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins MEEP_100Gb_Ethernet_0/S_AXI]
+
+create_bd_port -dir O -type clk $ETHClkName
+connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_clk]
+
+create_bd_port -dir O -type rst $ETHRstName
+connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins /MEEP_100Gb_Ethernet_0/s_axi_resetn]
 
 save_bd_design
 ## Create the Shell interface to the RTL
