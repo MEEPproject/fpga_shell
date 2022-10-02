@@ -1,4 +1,24 @@
 #!/bin/bash
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
+#!/bin/bash
 
 #we need to write here the .gitsubmodules file, so this process receives that
 #label as a parameter and the ci/cd can proceed. The accelerator is received.
@@ -17,13 +37,14 @@ bash -x $SH_DIR/gitsubmodules.sh $1 $2
 #Generic call to accelerator conf script. It should be meep_shell/accelerator_init.sh
 cd $ACC_DIR
 
-# Find the meep_shell directory
+# Find the meep_shell directory based on a typical shell file name
+# TODO: Probably checking for the whole set of meep shell files makes more sense
 MEEP_DIR=$(find $ROOT_DIR -name accelerator_def.csv -printf '%h\n' | sort -u)
 echo "[MEEP] INFO: The meepshell folder found at: $MEEP_DIR"
 # Create a symlink in the accelerator root directory
 # in case the user has not placed it there.
-if [ "$MEEPDIR" != $ACC_DIR/meep_shell ] ; then
- ln -sf $MEEP_DIR ./meep_shell
+if [ "$MEEP_DIR" != $ACC_DIR/meep_shell ] ; then
+ ln -sf $MEEP_DIR $ACC_DIR/meep_shell
  echo "[MEEP] INFO: SymLink to $MEEP_DIR created"
 else
  echo "[MEEP] INFO: The EA is already placed in the EA root directory"

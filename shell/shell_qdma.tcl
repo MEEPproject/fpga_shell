@@ -1,4 +1,27 @@
-  
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+set PCIEifname [dict get $PCIEentry IntfLabel]
+set PCIeDMA    [dict get $PCIEentry Mode]
+set PCIeClkNm  [dict get $PCIEentry ClkName]
+set PCIeRstNm  [dict get $PCIEentry RstName]
+
+set PortList [lappend PortList $g_pcie_file] 
   
   set pci_express_x16 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:pcie_7x_mgt_rtl:1.0 pci_express_x16 ]
 
@@ -9,13 +32,7 @@
   set_property -dict [ list \
    CONFIG.POLARITY {ACTIVE_LOW} \
  ] $pcie_perstn
-  set resetn [ create_bd_port -dir I -type rst resetn ]
 
-
-  #Depends on the board
-  set sysclk1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 sysclk1 ]
-  
-  
  
   # Create instance: qdma_0, and set properties
   set qdma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:qdma:4.0 qdma_0 ]
@@ -33,6 +50,9 @@
    CONFIG.PF3_SRIOV_FIRST_VF_OFFSET {0} \
    CONFIG.SRIOV_CAP_ENABLE {true} \
    CONFIG.SRIOV_FIRST_VF_OFFSET {4} \
+   CONFIG.coreclk_freq {250} \
+   CONFIG.pl_link_cap_max_link_speed {5.0_GT/s} \
+   CONFIG.axi_data_width {256_bit} \
    CONFIG.barlite_mb_pf0 {1} \
    CONFIG.barlite_mb_pf1 {0} \
    CONFIG.barlite_mb_pf2 {0} \
@@ -41,7 +61,7 @@
    CONFIG.en_axi_st_qdma {false} \
    CONFIG.flr_enable {true} \
    CONFIG.mode_selection {Advanced} \
-   CONFIG.pcie_blk_locn {PCIE4C_X1Y0} \
+   CONFIG.pcie_blk_locn ${pcieBlockLoc} \
    CONFIG.select_quad {GTY_Quad_227} \
    CONFIG.pf0_ari_enabled {true} \
    CONFIG.pf0_bar0_prefetchable_qdma {true} \
@@ -55,13 +75,14 @@
    CONFIG.pf3_bar0_prefetchable_qdma {true} \
    CONFIG.pf3_bar2_prefetchable_qdma {true} \
    CONFIG.pf3_msix_enabled_qdma {false} \
+   CONFIG.pl_link_cap_max_link_width {X16} \
    CONFIG.testname {mm} \
    CONFIG.tl_pf_enable_reg {1} \
  ] $qdma_0
 
 
  # Create instance: util_ds_buf, and set properties
-  set util_ds_buf [ create_bd_cell -type ip -vlnv xilinx.com:ip:util_ds_buf:2.1 util_ds_buf ]
+  set util_ds_buf [ create_bd_cell -type ip -vlnv $meep_util_ds_buf util_ds_buf ]
   set_property -dict [ list \
    CONFIG.C_BUF_TYPE {IBUFDSGTE} \
  ] $util_ds_buf
@@ -79,5 +100,29 @@
   connect_bd_net -net vdd_0_dout [get_bd_pins qdma_0/qsts_out_rdy] [get_bd_pins qdma_0/tm_dsc_sts_rdy] [get_bd_pins vdd_0/dout]
   connect_bd_net -net util_ds_buf_IBUF_DS_ODIV2 [get_bd_pins qdma_0/sys_clk] [get_bd_pins util_ds_buf/IBUF_DS_ODIV2]
   connect_bd_net -net util_ds_buf_IBUF_OUT [get_bd_pins qdma_0/sys_clk_gt] [get_bd_pins util_ds_buf/IBUF_OUT]
+
+
+   if { $PCIeDMA != "dma" } {
+
+ 	  # AXI interface exposed to the EA, along the pcie_axi_clk and the reset signal
+	   make_bd_intf_pins_external  [get_bd_intf_pins qdma_0/M_AXI]
+	   set_property name $PCIEifname [get_bd_intf_ports M_AXI_0]
+	   #Clock and reset
+	   make_bd_pins_external  [get_bd_pins qdma_0/axi_aclk]
+	   make_bd_pins_external  [get_bd_pins qdma_0/axi_aresetn]
+
+	   set_property name $PCIeClkNm [get_bd_ports axi_aclk_0]
+	   set_property name $PCIeRstNm [get_bd_ports axi_aresetn_0]
+	   #TODO: Add register slice option to relax timing
+
+   }
+
+	# This variable is used in shell_hbm.tcl
+	set PCIeDMAdone 0
+
+
+set pcie_clk_pin  [get_bd_pins qdma_0/axi_aclk]
+set pcie_rst_pin [get_bd_pins qdma_0/axi_aresetn]
+
 
 save_bd_design

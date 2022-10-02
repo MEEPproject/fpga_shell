@@ -1,0 +1,55 @@
+# Use this file to configure your system. You can configure your system variables,
+# the tags for the runners, the specific scripts for your own EA to work, etc.
+# The FPGA board is also defined here [u280, u55c]
+# TODO: Do make initialize FPGA_BOARD to set up the proper board within the Shell
+#     : The board may be passed as a ci variable during the commit.
+# TODO: Gitlab allows to include external yaml files. At some point, it can be
+#     : interesting for the EA to include its own .gitlab-ci.yml
+
+
+.setup:
+  variables: 
+        EMULATED_ACCELERATOR: pronoc 
+        FPGA_BOARD: u55c
+        GIT_SUBMODULE_STRATEGY: recursive
+        NUMBER_OF_JOBS: "8"
+        TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
+        QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
+        BITSTREAM: system_${CI_PIPELINE_ID}.bit
+        DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+        BOOT_SCRIPT: /home/dmazure/workspace/boot_fedora.sh 
+        LINUX_IMAGE: ""
+        VALID_MSG: "Welcome to the Fedora/RISC-V disk image"
+
+
+.default_rules:
+  variables: 
+    - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
+  rules:
+    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
+
+.default_tags:
+  tags:
+    - MEEP_FPGA
+
+.synth_default:
+   after_script:
+        - cp $(find . -name "make_project.log") tmp/
+
+
+.fpga_test:
+  tags: 
+  #- FPGA_TEST
+    - !reference [.setup, variables, FPGA_BOARD]
+    # There is a special runner to run the HW test, that targets the correct board
+  before_script:
+    - export PATH=$PATH:$QDMA_DRIVERS
+    - sudo $TOOLS_DIR/givememyuart
+
+  script:
+    - source $BOOT_SCRIPT $LINUX_IMAGE
+  after_script:
+    - mkdir -p boot
+    - cp $BOOT_SCRIPT boot/
+    # image should be a binary artifact
+    - mv boot tmp/

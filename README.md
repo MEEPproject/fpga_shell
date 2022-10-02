@@ -1,37 +1,34 @@
-To create a shell around the accelerator, fill the ea_url.txt file:
+Go to the MEEP wiki @ https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program for instructions about how 
+to use this SW.
 
-For instance, for Dvino, it will be:
+The MEEP Shell needs to be used with Vivado 2021.2. The board files for U280/U55C doesn't need to be installed.
 
-EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git 
-EMULATED_ACCELERATOR_SHA: 5476d2528d1c37521b80c018f3197f96c5b75fb8
+It only works on Linux. There is no plan to add Windows support in the middle term. 
 
-Both the Repository and the specific commit need to be provided.
+The list of supported EAs so far (17/02/2022) is as follows:
 
-After this, the flow is Makefile-based. In order to generate the design at your end, you need to:
+dvino\
+sargantana\
+acme\
+openpiton
 
-1) "make initialize", to clone the targeted accelerator. This is mandatory at least once.
-1.1) "make binaries" calls the EA internal processes to generate bootrom and the opensbi binaries.
-2) "make vivado", to create the vivado design. It will be created under ./project as "system.xpr"
-3) "make synthesis/implementation/bitstream", depending on how far in the design flow you desire to go.
-4) "make validation" will parse the reports generated in the implementation stage.
+They can be generated using the correct initialization flag:
 
-
-From the EA perspective, the accelerator def file should be used like shown below:
-
-DDR4,yes,<name>,<num_instance>,<syncCLK> #DDR4 used, name, more than one?, sync clock
-HBM,no,0,<name>,1,CLK0			#HBM, not used, number of channels, more options
-AURORA,no,raw,<name>			#Aurora, not used, raw/dma mode
-UART,yes,simple,rxd,txd			#UART, used, simple/full (full=implement the entire core), pinout
-ETHERNET,no,<name_rx> <name_tx>,#Ethernet, name of the interfaces
-CLK0,freq,<name>	   			#Clock0 provided by the shell, name of the connection
-CLK1,freq						#Clock1 provided by the shell, name of the connection
-RESET0,low,<name>
-
-Field 1 is always the name, field 4 is always the sync clk
-
-#There should be a table to map GPIO capabilities. The system could process it an d connect AXI GPIO (PCIe mapped) to custom signals (like the RISCV reset signal).
+make initialize LOAD_EA=dvino\
+make initialize LOAD_EA=sargantana\
+make initialize LOAD_EA=acme\
+make initialize LOAD_EA=openpiton
 
 
-#When there are more than one possible instance of the same interface
-#the interface needs to be appended with a number. e.g: UART, just one.
-#HBM 32, DDR4 up to 4 in U200, 2 in U280, 0 in U55C
+Developers guide:
+
+The MEEP FPGA Shell is built around the sh, shell and tcl folders. The sh folder 
+handle some automatic tasks during the whole flow, working closely with Makefiles. The tcl folder joints most of the Vivado calls, procedures and automated scripts. The shell folder is where all the different IPs that can be part of the Shell (depending on the selected configuration) are stored. 
+IPs are treated individually, in such a way there is no friction between different
+set ups, meaning that any combination of IPs can be set with no dependency
+or incompatibility between them. Which such approach, the Shell can be built 
+incrementaly, adding more pieces as they are needed. The only exception to this 
+are the shell_mmcm.tcl file, which configures the clock infrastructure for the 
+whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it 
+will be explained later. 
+

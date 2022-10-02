@@ -1,3 +1,22 @@
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
 set g_root_dir [pwd]
 
 set g_acc_dir $g_root_dir/accelerator
@@ -8,7 +27,9 @@ file mkdir $g_root_dir/src
 source $g_root_dir/tcl/procedures.tcl
 source $g_root_dir/tcl/shell_env.tcl
 
+set g_head_file   $g_root_dir/misc/header.sv
 set g_top_file    $g_root_dir/src/system_top.sv
+set g_htmp_file   $g_root_dir/tmp/header_tmp.sv 
 set g_mod_file    $g_root_dir/tmp/mod_tmp.sv
 set g_inst_file   $g_root_dir/tmp/inst_tmp.sv
 set g_tmp_file	  $g_root_dir/tmp/top_tmp.sv
@@ -16,16 +37,6 @@ set g_wire_file	  $g_root_dir/tmp/wire_tmp.sv
 set g_shell_file  $g_root_dir/tmp/shell_tmp.sv
 set g_eamap_file  $g_root_dir/tmp/ea_top_tmp.sv
 set g_acc_file	  $g_acc_dir/meep_shell/accelerator_mod.sv
-
-# The files are hard-coded. TODO: Make it dependand on the XDC board file
-set g_system_file   $g_root_dir/interfaces/system.sv
-set g_pcie_file     $g_root_dir/interfaces/pcie.sv
-set g_ddr4_file     $g_root_dir/interfaces/ddr4.sv
-set g_aurora_file   $g_root_dir/interfaces/aurora.sv
-set g_ethernet_file $g_root_dir/interfaces/ethernet.sv
-set g_uart_file     $g_root_dir/interfaces/uart.sv
-#set g_axi_file      $g_root_dir/interfaces/axi_intf.sv
-#set g_axiLi_file    $g_root_dir/interfaces/axilite_intf.sv
 
 
 # if HBM is set to no, HBMCATTRIP needs to be forced to '0'.
@@ -54,14 +65,9 @@ close $fd_system
 # an existing template in the "interfaces" folder.
 # It receives a filtered list of present physical interfaces.
 
-foreach ifname $PortEnabledList {		
+foreach ifname $PortList {		
 	 
-	set g_file_name g_${ifname}_file
-	
-	# Dirty little trick to do variable substitution
-	#set g_file_path [subst $$g_file_name]
-	
-	add_interface  [subst $$g_file_name] $g_mod_file 
+	add_interface $ifname $g_mod_file 
 }
 
 # Close the top level module
@@ -94,10 +100,10 @@ close $fd_inst
 # The EA will be entirely connected to the MEEP Shell.
 # EA ports <---> EA wires
 
-set fd_mod   [open $g_acc_file      "r"]
-set fd_inst    [open $g_eamap_file "w"]
-set fd_wire   [open $g_wire_file     "w"]
-set fd_shell  [open $g_shell_file     "w"]
+set fd_mod   [open $g_acc_file   "r"]
+set fd_inst  [open $g_eamap_file "w"]
+set fd_wire  [open $g_wire_file  "w"]
+set fd_shell [open $g_shell_file "w"]
 
 parse_module $fd_mod $fd_inst $fd_wire $fd_shell
 
@@ -139,6 +145,7 @@ close $fd_mod
 
 set   fd_mod      [open $g_mod_file    "r"]
 # Create the top module boundaries
+puts  $fd_top "// Automatically generated file @$InitDate $InitTime\r\n"
 puts  $fd_top "module system_top"
 puts  $fd_top "   \("
 fcopy $fd_mod     $fd_top
@@ -153,6 +160,21 @@ fcopy $fd_acc $fd_top
 puts  $fd_top    "\r\nendmodule"
 close $fd_acc
 close $fd_top
+
+# Add the header to the top file
+# To do so, concatenate the top to the head
+# and rename
+
+set fd_head       [open $g_head_file  "r"]
+set fd_htmp       [open $g_htmp_file  "w"]
+set fd_top        [open $g_top_file   "r"]
+fcopy $fd_head $fd_htmp
+fcopy $fd_top $fd_htmp
+close $fd_head
+close $fd_htmp
+close $fd_top
+
+file copy -force $g_htmp_file $g_top_file
 
 putcolors "MEEP SHELL RTL top created" $GREEN
 

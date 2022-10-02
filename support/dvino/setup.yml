@@ -23,11 +23,16 @@
   variables: 
     - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
-    if: ($CI_COMMIT_BRANCH =~ /^support/ && $CI_COMMIT_MESSAGE !~ /^#WIP/)
+    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
 .default_tags:
   tags:
     - MEEP_FPGA
+
+.synth_default:
+   after_script:
+           - echo "DVINO: After script"
+
 
 .fpga_test:
   tags: 
@@ -35,7 +40,12 @@
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - export PATH=$PATH:$QDMA_DRIVERS
-    - sudo $TOOLS_DIR/givememyuart
 
   script:
     - source $BOOT_SCRIPT $LINUX_IMAGE
+  after_script:
+    - mkdir -p boot
+    - cp $BOOT_SCRIPT boot/
+    # image should be a binary artifact
+    - mv boot tmp/
+

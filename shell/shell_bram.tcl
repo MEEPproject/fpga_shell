@@ -1,3 +1,22 @@
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
 set BRAMClkNm [dict get $BRAMentry SyncClk Label]
 set BRAMFreq  [dict get $BRAMentry SyncClk Freq]
 set BRAMname  [dict get $BRAMentry SyncClk Name]
@@ -8,10 +27,12 @@ set BRAMdataWidth [dict get $BRAMentry AxiDataWidth]
 set BRAMidWidth   [dict get $BRAMentry AxiIdWidth]
 set BRAMUserWidth [dict get $BRAMentry AxiUserWidth]
 
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0
+set bramCtrl ${BRAMintf}Ctrl
+
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 $bramCtrl
 
 set_property -dict [list CONFIG.DATA_WIDTH $BRAMdataWidth CONFIG.SINGLE_PORT_BRAM {1} \
-CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
+CONFIG.ECC_TYPE {0}] [get_bd_cells $bramCtrl]
 
 
 ## Create the Shell interface to the RTL
@@ -49,12 +70,14 @@ CONFIG.ECC_TYPE {0}] [get_bd_cells axi_bram_ctrl_0]
    CONFIG.WUSER_WIDTH {0} \
    ] $bram_axi
 
- connect_bd_net [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins rst_ea_$BRAMClkNm/slowest_sync_clk]
- connect_bd_net [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins rst_ea_$BRAMClkNm/peripheral_aresetn]
+ connect_bd_net [get_bd_pins $bramCtrl/s_axi_aclk] [get_bd_pins rst_ea_$BRAMClkNm/slowest_sync_clk]
+ connect_bd_net [get_bd_pins $bramCtrl/s_axi_aresetn] [get_bd_pins rst_ea_$BRAMClkNm/peripheral_aresetn]
  
- connect_bd_intf_net [get_bd_intf_ports $BRAMintf] [get_bd_intf_pins axi_bram_ctrl_0/S_AXI]
+ connect_bd_intf_net [get_bd_intf_ports $BRAMintf] [get_bd_intf_pins $bramCtrl/S_AXI]
+ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blkMem${bramCtrl}
+ connect_bd_intf_net [get_bd_intf_pins $bramCtrl/BRAM_PORTA] [get_bd_intf_pins blkMem${bramCtrl}/BRAM_PORTA]
 
- apply_bd_automation -rule xilinx.com:bd_rule:bram_cntlr -config {BRAM "Auto" }  [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA]
+
 
 ### Set Base Addresses to peripheral
 # BRAM
@@ -64,11 +87,11 @@ set BRAMMemRange [expr {2**$BRAMaddrWidth/1024}]
 putdebugs "Base Addr BRAM: $BRAMbaseAddr"
 putdebugs "Mem Range BRAM: $BRAMMemRange"
 
-assign_bd_address [get_bd_addr_segs {axi_bram_ctrl_0/S_AXI/Mem0 }]
+assign_bd_address [get_bd_addr_segs $bramCtrl/S_AXI/Mem0 ]
 
 putdebugs "BRAM INTF: $BRAMintf"
-set_property offset $BRAMbaseAddr   [get_bd_addr_segs $BRAMintf/SEG_axi_bram_ctrl_0_Mem0]
-set_property range ${BRAMMemRange}K [get_bd_addr_segs $BRAMintf/SEG_axi_bram_ctrl_0_Mem0]
+set_property offset $BRAMbaseAddr   [get_bd_addr_segs $BRAMintf/SEG_${bramCtrl}_Mem0]
+set_property range ${BRAMMemRange}K [get_bd_addr_segs $BRAMintf/SEG_${bramCtrl}_Mem0]
 
 save_bd_design
 

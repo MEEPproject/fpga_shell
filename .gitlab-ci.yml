@@ -8,6 +8,7 @@
 # The CI/CD flow generates a bitstream both for the targeted EA.
 # The Pipeline can be triggered if there is an update (rule "changes") in the
 # ea_url.txt file/folder
+# TODO: [Documentation] References are mandatory to exist in the EA included yml
 
 # Include the supported EA configuration files. This could be done in other 
 # included file for clarity
@@ -24,6 +25,7 @@ stages:
     - implementation
     - validation
     - bitstream
+    - fpga-program
     - fpga-test
     - deploy
 
@@ -58,6 +60,29 @@ EA-build:
                 #  untracked: true
           paths:            
             - binaries        
+            - ea_url.txt
+
+EA-sdk:
+        stage: synthesis
+        rules: 
+            - !reference [.default_rules, rules]
+        needs:
+            - EA-build
+        timeout: 4h
+        tags: !reference [.default_tags, tags]
+        before_script:
+            - mkdir -p sdk_output
+            - *clone_ea
+        script:
+            - !reference [.sdk_default, script]
+        after_script:
+            - !reference [.sdk_default, after_script]
+        dependencies:
+            - EA-build
+        artifacts:
+          when: always
+          paths:
+            - sdk_output
 
 synthesis:
         stage: synthesis
@@ -72,16 +97,18 @@ synthesis:
             - ls binaries/
         script:
             - make initialize
+            - make $FPGA_BOARD
             - make project
             - make synthesis
         after_script:
-            - mkdir tmp
-            - cp shell_build.log tmp
-            - cp vivado.log tmp
-              cp vivado.jou tmp
-            - cp -r src/system_top.sv tmp
-            - cp -r tcl/shell_env.tcl tmp
-            - cp gen_system.tcl tmp/tcl
+            - mkdir -p tmp/project
+            - !reference [.synth_default, after_script]
+            - cp -r binaries tmp 
+            - cp ea_url.txt tmp/EA_info.txt
+            - cp shell_build.log tmp/project/
+            - cp -r src/system_top.sv tmp/project/
+            - cp -r tcl/shell_env.tcl tmp/project/
+            - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
         dependencies:
             - EA-build
@@ -106,7 +133,7 @@ implementation:
         before_script:
             - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
         script:
-            - make implementation DCP_ON=false
+            - make ci_implementation DCP_ON=false
 
         after_script:
             - make clean_synthesis
@@ -134,7 +161,7 @@ bitstream:
         before_script:
             - ls dcp/
         script:
-            - make bitstream
+            - make ci_bitstream
         after_script:
             - make clean_implementation
             - echo -e "Artifacts:"; ls bitstream
@@ -150,17 +177,44 @@ validation:
         stage: bitstream
         rules:
             - !reference [.default_rules, rules] 
-        extends: .disable_git
-        
+        extends: .disable_git        
         needs: 
             - implementation
         tags: !reference [.default_tags, tags] 
         script:
             - echo "Checking implementation reports..." 
-            - make validate
+            - make validate            
         allow_failure: true            
         dependencies:
             - implementation
+
+              # Save time running the reports generation in parallel              
+reports:
+        stage: bitstream
+        rules:
+            - !reference [.default_rules, rules]        
+        extends: .disable_git
+        needs:
+            - implementation
+        tags: !reference [.default_tags, tags]
+        before_script:
+            - ls; ls dcp
+        script:
+            - echo "Generate implementation reports..."
+            - make ci_report_route
+        dependencies:
+            - implementation
+        artifacts:
+            when: always
+            paths:
+                - reports
+
+fpga-program:
+        stage: fpga-program        
+        script:
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
+        dependencies:            
+            - bitstream
 
 fpga-test:
         stage: fpga-test
@@ -170,13 +224,13 @@ fpga-test:
         
         needs:
             - EA-build
-            - bitstream
+            - fpga-program
         retry: 2
         tags: !reference [.fpga_test, tags]            
         before_script:
             - !reference [.fpga_test, before_script]
         script:
-            - sh/load_bitstream.sh qdma bitstream/system.bit
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
             # The EA script should provide the right script and the right binary
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh fpga_test.log
@@ -185,10 +239,11 @@ fpga-test:
         after_script:
             - mkdir -p tmp
             - mv fpga_test.log tmp/
+            - !reference [.fpga_test, after_script]
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
-            - bitstream
+            - fpga-program
         artifacts:
             when: always
             paths:
@@ -201,9 +256,9 @@ deploy-EA:
         extends: .disable_git
         tags: !reference [.default_tags, tags]
         before_script:
-            - export TODAY=$(date +"%m%d%y")
-            - export EANAME=$EMULATED_ACCELERATOR
-            - export EADIRNAME=${EANAME}_${TODAY}_${CI_COMMIT_SHORT_SHA}
+            - export TODAY=$(date +"%y%m%d")
+            - export EANAME=${FPGA_BOARD}_${EMULATED_ACCELERATOR}
+            - export EADIRNAME=${EANAME}_${TODAY}_${CUSTOM_MSG}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR
         script:
@@ -224,6 +279,3 @@ deploy-EA:
             - implementation
             - bitstream
             - fpga-test
-
-
-

@@ -1,3 +1,22 @@
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
 #------------------------------------------------------------------------
 # reportDelayModel
 #------------------------------------------------------------------------
@@ -48,10 +67,10 @@ proc reportUnconnectedPins { SynthLogFile } {
 	while {[gets $fd_synth line] >= 0} {
 		
 		set UndrivenPins [regexp -all -inline {WARNING: \[Synth 8-3295\].*$} $line]
-		puts $fd_report $UndrivenPins
-		puts "$UndrivenPins"
 		if { $UndrivenPins != ""} {
 			set UndrivenPinDetected 1
+	                puts $fd_report $UndrivenPins
+        	        puts "$UndrivenPins"
 		}	
 	}
 
@@ -236,7 +255,7 @@ proc routeCriticalPaths { } {
 #------------------------------------------------------------------------
 # This procedure goes through ALL placement strategies to figure out
 # what is the one offering the minumum WNS. Is not designed to be part of
-# the normal flow, but to be run as a standalone to later apply the 
+# the normal flow, but to be run as a standalone to latterly apply the 
 # best placement directive to the subsequent runs.
 #------------------------------------------------------------------------
 
@@ -264,8 +283,10 @@ proc exhaustivePlaceFlow { root_dir } {
 
 	# empty list for results
 	set wns_results ""
+	set TimingPaths [list]
 	# empty list for time elapsed messages
 	set time_msg ""
+	set AppliedDirective [list]
 
 	if { [file exists $g_root_dir/dcp/post_opt.dcp] } {
 		puts "post synthesis optimization dcp exists"
@@ -278,7 +299,15 @@ proc exhaustivePlaceFlow { root_dir } {
 	set prevWNS 0.000
 	set WNS 0.000
 	set bestWNS 0.000
-	set bestPlaceDirective ""
+	set bestPlaceDirective "Explore"
+
+        set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
+	# Create the directory if it didn't exists already
+	file mkdir $g_root_dir/reports
+	# Clean previous results, if they exists
+	if { [file exists $resFile] } {
+		file delete -force $resFile
+	}
 
 	foreach oneDirective $directives {
 		# open post opt design checkpoint
@@ -304,29 +333,49 @@ proc exhaustivePlaceFlow { root_dir } {
 		puts "$LapsedTime"
 
 		lappend time_msg "place_design: Time : $LapsedTime" 
+		set ThisTimingPath [get_timing_paths -max_paths 1 -nworst 1 -setup]
 		# append wns result to our results list
-		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
+		set WNS [ get_property SLACK $ThisTimingPath ]
 		lappend wns_results $WNS
                 puts "Post Place WNS with directive $oneDirective = $WNS "
-                puts "*******************************"
+		lappend AppliedDirective $oneDirective
+		lappend TimingPaths $ThisTimingPath
 
+		# Open file to append 
+                set fd_res [open $resFile "a+"]
+		# append time elapsed message to time_msg list
+                puts $fd_res "*******************************"
+                puts $fd_res "Finish @ [clock format [clock seconds] -format %H:%M:%S]"
+                puts $fd_res "*******************************"
+                puts $fd_res "Post Place WNS with directive $oneDirective = $WNS "
+		puts $fd_res "Worst Timing Path:"
+		puts $fd_res $TimingPath
 		
 		if { [expr $WNS > $bestWNS] } {			
 			set bestPlaceDirective $oneDirective
 			set bestWNS $WNS
-			puts "Best directive is now $bestPlaceDirective, WNS=$WNS"
+			puts $fd_res "Best directive is now $bestPlaceDirective, WNS=$WNS"
+		}
+		# Close the file
+                close $fd_res
+
+		if { [expr $WNS > 0]} {
+			puts "WNS is possitive, the searching will finish now"
+			break;
 		}
 
 	}
 	
 	# print out results at end
 	
-	set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
-	set fd_res [open $resFile "w"]
+	set fd_res [open $resFile "a"]
 
+	puts $fd_res "\r\nSummary:"
+	puts $fd_res "-------"
 
 	set i 0
-	foreach oneDirective $directives {
+	foreach oneDirective $AppliedDirective {		
+
 		set ResMsg0 "Post Place WNS with directive $oneDirective = [lindex $wns_results $i] "
 		set ResMsg1 [lindex $time_msg $i]
 		set ConstructMsg "$ResMsg0\r\n$ResMsg1\r\n\r\n"

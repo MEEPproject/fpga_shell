@@ -1,3 +1,22 @@
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
 namespace eval _tcl {
 proc get_script_folder {} {
    set script_path [file normalize [info script]]
@@ -11,6 +30,7 @@ set script_folder [_tcl::get_script_folder]
 putmeeps "The shell tcl will be sourced from ${script_folder}"
 
 source tcl/environment.tcl
+source $g_root_dir/tcl/vivado_iptable.tcl
 
 set shell_root $g_root_dir
 set bdName "meep_shell"
@@ -26,15 +46,6 @@ remove_files  $g_root_dir/$shell_dir/$shellBdFile
 create_bd_design -dir $g_project_dir $bdName
 #update_ip_catalog -rebuild
 
-################################################################
-# Check if script is running in correct Vivado version.
-################################################################
-set scripts_vivado_version 2020.1
-set current_vivado_version [version -short]
+# Set this variable to be used downstream
+set TopCell [current_bd_instance .]
 
-if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
-   puts ""
-   catch {common::send_gid_msg -ssname BD::TCL -id 2041 -severity "ERROR" "This script was generated using Vivado <$scripts_vivado_version> and is being run in <$current_vivado_version> of Vivado. Please run the script in Vivado <$scripts_vivado_version> then open the design in Vivado <$current_vivado_version>. Upgrade the design by running \"Tools => Report => Report IP Status...\", then run write_bd_tcl to create an updated script."}
-
-   return 1
-}

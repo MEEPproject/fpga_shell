@@ -1,10 +1,31 @@
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
 source [pwd]/tcl/environment.tcl
 source $g_root_dir/tcl/impl_utils.tcl
 
 if { $::argc > 0 } {
 
  set g_root_dir [lindex $argv 0]
- set g_dcp_on "true"
+ set g_dcp_on     "true"
+ set g_quick_impl "false"
+ puts "Root directory is $g_root_dir"
 
 } else { 
  puts "Bad usage. This script needs to receive the root directory as an argument"
@@ -13,13 +34,19 @@ if { $::argc > 0 } {
 
 if { $::argc > 1} { 
 
- set g_dcp_off  [lindex $argv 1]
- puts "Root directory is $g_root_dir"
+ set g_dcp_on  [lindex $argv 1]
  puts "Post opt and post place dcp generation is set to $g_dcp_on"
 
 }
 
-proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
+if { $::argc > 2} { 
+
+ set g_quick_impl  [lindex $argv 2]
+ puts "Fast Implementation is set to $g_quick_impl"
+
+}
+
+proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_quick_impl } {
 
 	set RefTime [clock seconds]
 	## It is assumed a dcp folder containing the synthesis dcp already exists
@@ -35,8 +62,23 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 		puts "Detected Unspecified Logic Levels or Unconstraiend ports."
 		puts "Implementation will not continue. Check the pinout."
 		# TODO: Check if this is working commenting a physical top level pin
+		exit 1
 	}
 
+
+	if { $g_quick_impl == "true" } {
+		set opt_design_directive "RuntimeOptimized"
+		set place_design_directive "Quick"
+		set phys_opt_design_directive "Default"
+		set route_design_directive "Quick"
+		set post_route_directive "Default"
+	} else {
+		set opt_design_directive "Explore"
+		set place_design_directive "$g_place_directive"
+		set phys_opt_design_directive "Default"
+		set route_design_directive "$g_route_directive"
+		set post_route_directive "AggressiveExplore"
+	}
 
 
 	#opt_design
@@ -45,6 +87,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 	# By default, opt_design does: -retarget -sweep -remap -propconst -resynth_area
 	# Non-default: -area_mode -effort_level <arg>  -verbose
 	opt_design -directive Explore
+	
 
 	# Store the Lapsed time up to opt_desing finish
 	set Lapsed2optTime [getLapsedTime $RefTime]
@@ -65,7 +108,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 	set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "$InitTime on $InitDate"
-	place_design -directive $g_place_directive
+	place_design -directive $place_design_directive
 
 	set Lapsed2placeTime [getLapsedTime $RefTime] 
 	puts "Lapsed time after place_design: $Lapsed2placeTime"
@@ -76,7 +119,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 	puts [ clock format [ clock seconds ] -format %d/%m/%Y ]
 	puts [ clock format [ clock seconds ] -format %H:%M:%S ]
 	puts "\(started at $InitTime on $InitDate\)"
-	puts "Directive used: $g_place_directive"
+	puts "Directive used: $place_design_directive"
 	puts "------------------------"
 
 	# Optionally run optimization if there are timing violations after placement
@@ -122,6 +165,10 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 	  puts $fd_opt $SkipMsg
 	 }
 	 puts "-------------------------\r\n"
+	 if {$g_quick_impl == "true" } {
+		# Don't run the optimization loop when quick flag is enabled. Break the foreach loop
+		break;
+	 }
 	}
 
 	close $fd_opt
@@ -137,37 +184,37 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
             write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
 	}	
 
-	if { [expr $CurrentSlack < -1.000 ] } {
+	if { [expr $CurrentSlack < -1.000 ] && $g_quick_impl != "true"} {
 		puts "route_design will not be run as the WNS is above 1.000 "
 		puts "Implementation Failed. Check the timing reports to study how to improve timing"
 		## TODO: Quality of Results can be used as another criteria to not going further
-	        return 0	
+	    return 1
 	}	
 
 	# TODO: Explore other routing strategies?
-	route_design -directive $g_route_directive
+	route_design -directive $route_design_directive
 
 	set Lapsed2routeTime [getLapsedTime $RefTime]
 	puts "Lapsed time after route_design: $Lapsed2routeTime"
-        puts "--------------------------------------"
+    puts "--------------------------------------"
 
-        write_checkpoint -force $g_root_dir/dcp/implementation.dcp
+    write_checkpoint -force $g_root_dir/dcp/implementation.dcp
 	## TODO: Directives can be added here to go the extra mile. E.g, the WNS is below -0.1 after 
 	## default routing
-        set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+    set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 
 	if { [expr $CurrentSlack < 0.000] && [expr $CurrentSlack > -0.200] } {
-                phys_opt_design -directive AggressiveExplore
+            phys_opt_design -directive $post_route_directive
 	        write_checkpoint -force $g_root_dir/dcp/implementation.dcp
 	        set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
-        }
+    }
 
 	# The netlist file below can size ~220MB, need to check if it is worth
 	#write_verilog -force $g_root_dir/reports/impl_netlist.v -mode timesim -sdf_anno true
 	# TODO: Create a filter to write only the VIOLATED nets
 	set Lapsed2ImplTime [getLapsedTime $RefTime]
 	puts "Lapsed Implementation time: $Lapsed2ImplTime"
-        puts "--------------------------------------"
+    puts "--------------------------------------"
 
 	####### The following lines are used to store the more relevant desingn parameters into a file ###
 	# Lapsed time for all steps
@@ -176,39 +223,40 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on} {
 	# Failing paths, if they exist
 	# More?
 	
-        set fd_sum [open $g_root_dir/reports/summary.rpt "w"]
+    set fd_sum [open $g_root_dir/reports/summary.rpt "w"]
 
 	puts $fd_sum "======================================="
 	puts $fd_sum "== FPGA Shell implementation summary =="
-        puts $fd_sum "======================================="
+    puts $fd_sum "======================================="
 	puts $fd_sum ""
 	puts $fd_sum "1. Timing:"
 
-        if { [expr $CurrentSlack < 0.000] } { 
+    if { [expr $CurrentSlack < 0.000] } { 
 
 	  puts $fd_sum "* Timing constraints are not met"
 	  set WorstTimingPath [get_timing_paths -max_paths 1 -nworst 1 -setup]
 	  puts $fd_sum "Critical Path:\r\n$WorstTimingPath\r\n"
 
 	} else {
-          puts $fd_sum "* The design closed timing"
+        puts $fd_sum "* The design closed timing"
 	}
 
-        puts $fd_sum "Design WNS=${CurrentSlack}ns"
+	puts $fd_sum "Design WNS=${CurrentSlack}ns"
 
 	puts $fd_sum "2. Directives:"
-        puts $fd_sum "* Place Directive used: $g_place_directive"
-        puts $fd_sum "* Route Directive used: $g_route_directive"
-        puts $fd_sum "3. Lapsed timestamps to reach stages:"
-        puts $fd_sum "* Post synthesis optimization @ $Lapsed2optTime"
+    puts $fd_sum "* Place Directive used: $place_design_directive"
+    puts $fd_sum "* Route Directive used: $route_design_directive"
+    puts $fd_sum "3. Lapsed timestamps to reach stages:"
+    puts $fd_sum "* Post synthesis optimization @ $Lapsed2optTime"
 	puts $fd_sum "* Post place                  @ $Lapsed2placeTime"
-        puts $fd_sum "* Post place optimization     @ $Lapsed2physOptTime"
-        puts $fd_sum "* Post route                  @ $Lapsed2routeTime"
-        puts $fd_sum "* Post route Opt              @ $Lapsed2ImplTime"
+    puts $fd_sum "* Post place optimization     @ $Lapsed2physOptTime"
+    puts $fd_sum "* Post route                  @ $Lapsed2routeTime"
+    puts $fd_sum "* Post route Opt              @ $Lapsed2ImplTime"
 
 	close $fd_sum
 }
 
+### MAIN PROGRAM
 
 # Optionaly add a place directive as an argument.
 
@@ -224,5 +272,5 @@ if {[file exists $directivesFile]} {
 }
 
 	
-implementation $g_root_dir $g_place_directive $g_route_directive $g_dcp_on
+implementation $g_root_dir $g_place_directive $g_route_directive $g_dcp_on $g_quick_impl
 

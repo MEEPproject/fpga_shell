@@ -34,3 +34,10 @@ set_property IOSTANDARD  LVCMOS18          [get_ports resetn] ;# Bank  65 VCCO -
 #set_property PACKAGE_PIN BK43     [get_ports "SYSCLK3_P"] ;# Bank  65 VCCO - VCC1V8   - IO_L11P_T1U_N8_GC_A10_D26_65
 #set_property PACKAGE_PIN BL10     [get_ports "SYSCLK2_N"] ;# Bank  68 VCCO - VCC1V8   - IO_L11N_T1U_N9_GC_68
 #set_property PACKAGE_PIN BK10     [get_ports "SYSCLK2_P"] ;# Bank  68 VCCO - VCC1V8   - IO_L11P_T1U_N8_GC_68
+
+#IMPORTANT: sysclk0 is sysclk2 in the u55c master xdc file. sysclk1 is sysclk3
+#For u280 compatibility reasons
+
+create_clock -period 10.000 -name SYSCLK_2      [get_ports sysclk0_clk_p]
+#create_clock -period 10.000 -name SYSCLK_3      [get_ports sysclk1_clk_p] 
+#create_clock -period 10.000 -name sysclk4      [get_ports sysclk2_clk_p]

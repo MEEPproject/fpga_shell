@@ -1,13 +1,47 @@
 #!/bin/bash
 
-INSTALL_PATH=/home/xavim/OmpSs
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+#
+#     http://www.solderpad.org/licenses/SHL-2.1
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Xavier Martorell, BSC-CNS
+# Date: 22.02.2022
+# Description:
+
+
+
+INSTALL_PATH=/home/tools
 #INSTALL_PATH=/opt/MEEP/drivers/
-LOAD_BITSTREAM=$INSTALL_PATH/load-bitstream-sudo
-DMA_IP_DRIVERS=$INSTALL_PATH/dma_ip_drivers-`/bin/hostname`
+LOAD_BITSTREAM=$INSTALL_PATH/scripts
+DMA_IP_DRIVERS=$INSTALL_PATH/drivers/`/bin/hostname`/dma_ip_drivers
 
 export PATH=$DMA_IP_DRIVERS/QDMA/linux-kernel/bin/:$PATH
 
-source /opt/Xilinx/Vivado/2020.1/settings64.sh
+if [ -x /opt/Xilinx/Vivado/2020.1/settings64.sh ]; then 
+   source /opt/Xilinx/Vivado/2020.1/settings64.sh
+elif [ -x /opt/Xilinx/Vivado/2021.2/settings64.sh ]; then
+   source /opt/Xilinx/Vivado/2021.2/settings64.sh
+fi
+
+# check that vivado is on the PATH
+
+vivado_path=`which vivado`
+
+if [  "x$vivado_path" == "x" ]; then
+	echo "ERROR: No Xilinx Vivado installation found!!"
+	echo "       Please load the vivado settings"
+	exit 1
+fi
 
 NQUEUES=2
 
@@ -21,14 +55,24 @@ fi
 if [ x$1 == x ]; then
 	echo Missing arguments
 	echo Usage: $0 [--dryrun] module-type bitstream-file.bit
-	echo "    module-types supported: xocl qdma"
+	echo "    module-types supported: xocl xdma qdma"
 	exit 1
 fi
 
 if [ $1 == xocl ]; then
 	load=xocl
+elif [ $1 == xdma ]; then
+	load=xdma
 elif [ $1 == qdma ]; then
 	load=qdma
+	# check that QDMA utilities are on the PATH
+        dmactl_path=`which dma-ctl`
+
+        if [ "x$dmactl_path" == "x" ]; then
+        	echo Please add the QDMA tools on the PATH
+        	exit 1
+	fi
+
 else
 	echo "Module type $1 not supported, or missing module type parameter"
 	exit 1
@@ -46,22 +90,7 @@ if [ ! -r $bitfile ]; then
 	exit 1
 fi
 
-# check that vivado is on the PATH
 
-vivado_path=`which vivado`
-
-if [  "x$vivado_path" == "x" ]; then
-	echo Please load the vivado settings
-	exit 1
-fi
-
-# check that QDMA utilities are on the PATH
-dmactl_path=`which dma-ctl`
-
-if [ "x$dmactl_path" == "x" ]; then
-	echo Please add the QDMA tools on the PATH
-	exit 1
-fi
 
 fpgajtag=`lsusb -vd 0403: 2>&1 | grep iSerial | awk ' { print $3; } '`
 
@@ -74,7 +103,7 @@ echo FPGA jtag detected: $fpgajtag
 
 current_modules=()
 
-for mod in xocl xclmgmt qdma_pf qdma_vf; do
+for mod in xocl xclmgmt qdma_pf qdma_vf xdma; do
    lsmod | grep "^$mod"
    if [ $? == 0 ]; then
       current_modules=(${current_modules[@]} $mod)
@@ -86,6 +115,11 @@ echo Modules currently loaded: ${current_modules[@]}
 for mod in ${current_modules[@]} ; do
 	   echo Removing module $mod: sudo rmmod $mod
 	   $dryrun || sudo rmmod $mod
+	   if [ $? != 0 ]; then
+		echo ERROR: Removing module $mod failed...
+		echo ... for security reasons, stopping the script
+		exit 1
+	   fi
 done
 
 
@@ -127,6 +161,7 @@ $dryrun || vivado -nolog -nojournal -mode batch \
 		exit 1
 	fi
 echo "Bitstream   $bitfile   loaded."
+killall hw_server
 #fi
 
 
@@ -147,6 +182,14 @@ case $load in
          lsmod | grep -i -e xocl -e xclmgmt
 	 echo "===== listing end ====="
         ;;
+   xdma) echo "Loading bitstreams for module xdma"
+         if [ ! -r $DMA_IP_DRIVERS/XDMA/linux-kernel/xdma/xdma.ko ]; then
+	    echo "Error xdma.ko does not exist or it is not readable"
+	    exit 1
+         fi
+	 echo "Loading module xdma.ko"
+         sudo insmod $DMA_IP_DRIVERS/XDMA/linux-kernel/xdma/xdma.ko
+        ;;
    qdma) echo -n Waiting... :
          sleep 4
          lsmod | grep qdma_pf
@@ -159,6 +202,12 @@ case $load in
          if [ $? == 0 ]; then
            echo "Unloading default qdma-vf.ko"
            sudo rmmod qdma_vf
+           sleep 3
+         fi
+         lsmod | grep xdma
+         if [ $? == 0 ]; then
+           echo "Unloading default xdma.ko"
+           sudo rmmod xdma
            sleep 3
          fi
 for dev in $(lspci -m -d 10ee:| cut -d' ' -f 1)
@@ -194,11 +243,14 @@ sleep 2
          sleep 4
 echo Rescanning pcie devices
 $dryrun || echo 1 | sudo dd of=/sys/bus/pci/rescan
+sleep 2
 ##if [ $dryrun == 0 ]; then
 ##	echo 1 | $LOAD_BITSTREAM/root-action rescan
 ##fi
         ;;
 esac
+
+$dryrun || echo 1 | sudo dd of=/sys/bus/pci/rescan
 
 if [ $load == qdma ]; then
 
@@ -212,6 +264,11 @@ $dev
    echo Creating queues on $devname
    echo sudo dd of=/sys/bus/pci/devices/0000:$dev/qdma/qmax
    $dryrun || echo $NQUEUES | sudo dd of=/sys/bus/pci/devices/0000:$dev/qdma/qmax
+   if [ $? != 0 ]; then
+      echo ERROR: Adding queue max in devices/0000:$dev/qdma failed...
+      echo ... for security reasons, stopping the script
+      exit 1
+   fi
 
    sleep 2
 
@@ -242,6 +299,12 @@ $dev
  done
 
 fi
+
+if [ $load == xdma ]; then
+        echo sudo chmod go+rw /dev/xdma0_h2c_0
+        $dryrun || sudo chmod go+rw /dev/xdma0_h2c_0
+fi
+
 
 echo New PCIe devices loaded:
 lspci -vd 10ee:

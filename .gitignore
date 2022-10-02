@@ -1,5 +1,7 @@
 tcl/shell_env.tcl
 .Xil/
+ea_url.txt
+#!/support/*
 project
 src/system_top.sv
 accelerator
@@ -14,3 +16,8 @@ gen_system.tcl
 *.log
 *.dcp
 *.jou
+#Vivado tmp files
+iter_*
+tcl/environment.tcl
+tight_setup_hold_pins.txt
+system_timing_u*.xdc

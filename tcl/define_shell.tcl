@@ -1,3 +1,22 @@
+# Copyright 2022 Barcelona Supercomputing Center-Centro Nacional de Supercomputación
+
+# Licensed under the Solderpad Hardware License v 2.1 (the "License");
+# you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
+# You may obtain a copy of the License at
+# 
+#     http://www.solderpad.org/licenses/SHL-2.1
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Author: Daniel J.Mazure, BSC-CNS
+# Date: 22.02.2022
+# Description: 
+
+
 #define_shell.tcl
 
 namespace eval _tcl {
@@ -29,15 +48,15 @@ set p_EAmodFile	    $g_acc_dir/meep_shell/accelerator_mod.sv
 ################################################################
 proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 
-	set PortEnabledList [list pcie]
+	set PortEnabledList [list]
 	
 	set EnIntfNameList [list]
 	set RetString ""
 	
 	foreach dicEntry $EnabledIntf {
-		#putmeeps "DEBUG ENTRY: $dicEntry"		
+		putmeeps "DEBUG ENTRY: $dicEntry"		
 		set EnIntfNameList [lappend EnIntfNameList [dict get $dicEntry Name]]		
-		#putmeeps "DEBUG PORTS: $EnIntfNameList"
+		putmeeps "DEBUG PORTS: $EnIntfNameList"
 	}
 	set EnIntfName [join $EnIntfNameList]
 
@@ -59,7 +78,7 @@ proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 # Parse the EA interfaces and create the shell environment file.
 # Returns a dictionary of the following Shell available interfaces:
 # set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART ]
-# *HBM will be returned as HBMn, where n is a channel identificator
+# *HBM will be returned as HBMn, where n is a channel identifier
 # TODO: Choosing to what HBM pseudochannel to be connected
 # TODO: Choose different clocks for different instances of the same interface.
 ################################################################
@@ -86,6 +105,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
 
 				# Dont push to the user to number his interfaces when there is only one.							
+				# TODO: Parse $fields 3 to secuere that it is in fact a number
 				for {set i 0} {$i < [lindex $fields 3] } {incr i} {
 					if {[lindex $fields 3] == 1} {	
 						set n ""
@@ -93,6 +113,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						set n $i
 					}
 					set d_device [dict create Name g_${device}${n}]
+					
 					dict set d_device IntfLabel [lindex $fields 2]${n}
 					# Create empty fields to be filled later
 					dict set d_device SyncClk   [lindex $fields 4] Freq ""
@@ -120,8 +141,38 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							dict set d_device SyncClk $ClkList
 						}
 					}
+					## If the interface is synchronous to the PCIe CLK, create an special case
+					if { [lindex $fields 4] == "PCIE_CLK" } {
+						set ClkFreq 250000000
+						set ClkName "PCIE_CLK"
+						set ClkList [list Freq $ClkFreq Name $ClkName]
+						putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+						dict set d_device SyncClk $ClkList
+
+					}
+					if { [lindex $fields 4] == "DDR_CLK" } {
+						set ClkFreq 300000000
+                                                set ClkName "DDR_CLK"
+                                                set ClkList [list Freq $ClkFreq Name $ClkName]
+                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                                                dict set d_device SyncClk $ClkList					
+					}
+					if { [lindex $fields 4] == "ETH_CLK" } {
+                                                set ClkFreq 1611328125
+                                                set ClkName "ETH_CLK"
+                                                set ClkList [list Freq $ClkFreq Name $ClkName]
+                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                                                dict set d_device SyncClk $ClkList
+                                        }
 					
 					### Device-dependant settings
+					if { "${device}" == "PCIE" } {
+						dict set d_device IntfLabel  [lindex $fields 2]
+						dict set d_device ClkName    [lindex $fields 5]
+						dict set d_device RstName    [lindex $fields 6]
+						dict set d_device Mode       [lindex $fields 7]
+						dict set d_device SliceRegEn [lindex $fields 8]
+					}	
 					if { "${device}" == "UART" } {
 						dict set d_device Mode [lindex $fields 6]	
 						dict set d_device IRQ  [lindex $fields 7]	
@@ -130,14 +181,35 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							dict set d_device AxiIntf "no"						
 						} 
 					}
-					if { "${device}" == "HBM" || "${device}" == "DDR4" } {
+					if { "${device}" == "HBM" } {
 						dict set d_device CalibDone [lindex $fields 6]	
+						dict set d_device EnChannel [lindex $fields 7]
+						dict set d_device DevNum ${n}
 					}
+  	                                if { "${device}" == "DDR4" } {
+						dict set d_device IntfLabel [lindex $fields 2]
+         	                                #dict set d_device ClkName   "ui_clk"
+						dict set d_device ClkName   [lindex $fields 8]
+				                dict set d_device CalibDone [lindex $fields 6]
+                                                dict set d_device EnChannel [lindex $fields 7]
+                                                dict set d_device DevNum ${n}
+                                        }
+
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
 					}
 					if { "${device}" == "ETHERNET" } {
-                                                dict set d_device IRQ [lindex $fields 7]
+                        dict set d_device IntfLabel [lindex $fields 2 ]
+                        dict set d_device ClkName   [lindex $fields 5 ]
+                        dict set d_device RstName   [lindex $fields 6 ]
+                        dict set d_device GbEth     [lindex $fields 7 ]
+                        dict set d_device IRQ       [lindex $fields 8 ]
+                        dict set d_device qsfpPort  [lindex $fields 9 ]
+                        dict set d_device dmaMem    [lindex $fields 10]
+					}
+					if { "${device}" == "AURORA" } {
+                                                dict set d_device Mode   [lindex $fields 6]
+                                                dict set d_device UsrClk [lindex $fields 8]
 					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
@@ -153,6 +225,45 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 	
 	return $EnabledIntf
 }
+
+################################################################
+# Parse the enabled interfaces againts the target board
+################################################################
+proc ParseBoard { Board Interfaces} {
+
+	set flagHBM  0
+	set flagDDR4 0
+
+	foreach device $Interfaces {
+
+	set IntfName [dict get $device Name]
+	# Actually, the only limitation is that U55C doesn't have a DDR4 device.
+	    if { "${IntfName}" == "g_DDR4" } {
+	    # Check that the target board is not the U55C (no DDR)
+		set flagDDR4 1
+
+	        if { "${Board}" == "u55c" } {
+                    puterrors "Wrong target: Alveo u55c doesn't feature DDR4"
+                    exit 1
+        	}
+            }
+	    if { "${IntfName}" == "g_HBM"} {
+
+		set flagHBM 1
+
+		if { "${Board}" == "u200" } {
+		    puterrors "Wrong target: Alveo u200 doesn't feature HBM"
+		    exit 1
+		}
+	    }
+        }
+
+	if { [expr {$flagHBM + $flagDDR4} > 1] } {
+             puterrors "Currently, the MEEP Shell doesn't support DDR4 and HBM both used at the same time"
+	     exit 1
+	}
+}
+
 
 
 ################################################################
@@ -178,9 +289,11 @@ proc ClocksDefinition { DefinitionFile } {
 			if { [regexp -all -inline {^CLK.,} $line] ne "" } {	
 
 				set d_clock [dict create Name CLK${i}]
-				dict set d_clock ClkNum  [lindex $fields 0]
-				dict set d_clock ClkFreq [lindex $fields 1]
-				dict set d_clock ClkName [lindex $fields 2]
+				dict set d_clock ClkNum    [lindex $fields 0]
+				dict set d_clock ClkFreq   [lindex $fields 1]
+				dict set d_clock ClkName   [lindex $fields 2]
+				dict set d_clock ClkRst    [lindex $fields 3]
+				dict set d_clock ClkRstPol [lindex $fields 4]
 			
 				set RetList [lappend RetList $d_clock]
 				incr i	
@@ -209,7 +322,13 @@ proc parse_definiton_file { DefinitionFile } {
 			set ret 1
 		}	
 		if {[regexp -inline -all {yes,.*} $line] ne ""} {
-			if {[regexp -inline -all {CLK\d} $line] eq ""} {
+            if {[regexp -inline -all {PCIE_CLK} $line] != ""} {
+			putmeeps "The interface is synchronous to PCIe CLK"
+			} elseif {[regexp -inline -all {DDR_CLK} $line] != ""} {
+			putmeeps "The interface is synchronous to DDR CLK"
+			} elseif {[regexp -inline -all {ETH_CLK} $line] != ""} {
+                        putmeeps "The interface is synchronous to ETH CLK"
+			} elseif {[regexp -inline -all {CLK\d} $line] eq ""} {
 			puterrors "The interface is enabled but doesn't have a valid clock.\
 			\r\n\tDetected in line: $line"
 			set ret 2
@@ -360,6 +479,8 @@ set EnabledIntf [ShellInterfaceDefinition $ShellInterfacesList $ClockList $p_EAd
 
 set PortInt [PortInterfaceDefinition $PortInterfacesList $EnabledIntf]
 
+ParseBoard $g_board_part $EnabledIntf
+
 putmeeps "$PortInt"
 ## Add the Port Interface list to the environment file
 Add2EnvFile $p_ShellEnvFile "set PortEnabledList $PortInt"
@@ -374,4 +495,4 @@ Add2EnvFile $p_ShellEnvFile "set g_EAname $EAname"
 
 
 
-putcolors "Shell enviroment file created on $p_ShellEnvFile" $GREEN
+putcolors "Shell environment file created on $p_ShellEnvFile" $GREEN
