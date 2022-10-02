@@ -274,13 +274,17 @@ deploy-EA:
             - cp -r tmp/* $ABSDIR
         needs:
             - EA-build
+            - EA-sdk
             - synthesis
             - implementation
             - bitstream
+            - reports
             - fpga-test
         dependencies:
             - EA-build
+            - EA-sdk
             - synthesis
             - implementation
             - bitstream
+            - reports
             - fpga-test

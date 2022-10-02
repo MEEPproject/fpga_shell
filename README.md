@@ -19,6 +19,11 @@ make initialize LOAD_EA=sargantana\
 make initialize LOAD_EA=acme\
 make initialize LOAD_EA=openpiton
 
+Push with GitLab variables:
+
+git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
+
+
 
 Developers guide:
 
