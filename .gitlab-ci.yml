@@ -40,7 +40,6 @@ stages:
 .disable_git:
   extends: .setup
   variables:
-          #GIT_STRATEGY: none
     GIT_SUBMODULE_STRATEGY: "none"
 
 EA-build:
@@ -48,6 +47,7 @@ EA-build:
         rules:
             - !reference [.default_rules, rules]
         timeout: 2h
+        extends: .custom_build_rules
         tags: !reference [.default_tags, tags]
         before_script:
             - *clone_ea 

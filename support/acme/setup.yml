@@ -64,3 +64,7 @@
     # image should be a binary artifact
     - mv boot tmp/
 
+# ACME can skip the EA-build job. 
+# TODO: This might be done via rules, but be careful with the dependences
+.custom_build_rules:
+  extends: .disable_git
