@@ -83,7 +83,7 @@ EA-sdk:
         artifacts:
           when: always
           paths:
-            - sdk_output
+            - binaries
 
 synthesis:
         stage: synthesis
@@ -229,7 +229,7 @@ fpga-test:
         extends: .disable_git
         
         needs:
-            - EA-build
+            - EA-sdk
             - fpga-program
         retry: 2
         tags: !reference [.fpga_test, tags]            
@@ -247,7 +247,7 @@ fpga-test:
             - !reference [.fpga_test, after_script]
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
-            - EA-build
+            - EA-sdk
             - fpga-program
         artifacts:
             when: always

@@ -38,7 +38,7 @@
     script:
       - make -C $SDK_DIR alveo.bin 
     after_script:
-      - cp $SDK_DIR/osbi_alveo.bin sdk_output/$LINUX_IMAGE
+      - cp $SDK_DIR/osbi_alveo.bin binaries/$LINUX_IMAGE
 
 .synth_default:
     after_script:
@@ -56,11 +56,11 @@
     - *qdma_drivers
 
   script:
-    - source $BOOT_SCRIPT $LINUX_IMAGE
+    - source $BOOT_SCRIPT binaries/$LINUX_IMAGE
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/
-    - cp $LINUX_IMAGE boot/
+    - cp binaries/$LINUX_IMAGE boot/
     # image should be a binary artifact
     - mv boot tmp/
 
