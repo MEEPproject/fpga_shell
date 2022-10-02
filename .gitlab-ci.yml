@@ -210,9 +210,15 @@ reports:
                 - reports
 
 fpga-program:
-        stage: fpga-program        
+        stage: fpga-program
+        retry: 2
+        tags: !reference [.fpga_test, tags]
+        before_script:
+            - !reference [.fpga_test, before_script]   
         script:
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
+        needs:
+            - bitstream
         dependencies:            
             - bitstream
 
@@ -230,7 +236,6 @@ fpga-test:
         before_script:
             - !reference [.fpga_test, before_script]
         script:
-            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
             # The EA script should provide the right script and the right binary
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh fpga_test.log
