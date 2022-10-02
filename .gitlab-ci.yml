@@ -25,6 +25,7 @@ stages:
     - implementation
     - validation
     - bitstream
+    - fpga-program
     - fpga-test
     - deploy
 
@@ -60,6 +61,28 @@ EA-build:
           paths:            
             - binaries        
             - ea_url.txt
+
+EA-sdk:
+        stage: synthesis
+        rules: 
+            - !reference [.default_rules, rules]
+        needs:
+            - EA-build
+        timeout: 4h
+        tags: !reference [.default_tags, tags]
+        before_script:
+            - mkdir -p sdk_output
+            - *clone_ea
+        script:
+            - !reference [.sdk_default, script]
+        after_script:
+            - !reference [.sdk_default, after_script]
+        dependencies:
+            - EA-build
+        artifacts:
+          when: always
+          paths:
+            - sdk_output
 
 synthesis:
         stage: synthesis
@@ -154,8 +177,7 @@ validation:
         stage: bitstream
         rules:
             - !reference [.default_rules, rules] 
-        extends: .disable_git
-        
+        extends: .disable_git        
         needs: 
             - implementation
         tags: !reference [.default_tags, tags] 
@@ -187,6 +209,12 @@ reports:
             paths:
                 - reports
 
+fpga-program:
+        stage: fpga-program        
+        script:
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
+        dependencies:            
+            - bitstream
 
 fpga-test:
         stage: fpga-test
@@ -196,13 +224,13 @@ fpga-test:
         
         needs:
             - EA-build
-            - bitstream
+            - fpga-program
         retry: 2
         tags: !reference [.fpga_test, tags]            
         before_script:
             - !reference [.fpga_test, before_script]
         script:
-            - sh/load_bitstream.sh qdma bitstream/system.bit
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
             # The EA script should provide the right script and the right binary
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh fpga_test.log
@@ -215,7 +243,7 @@ fpga-test:
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-build
-            - bitstream
+            - fpga-program
         artifacts:
             when: always
             paths:
@@ -251,6 +279,3 @@ deploy-EA:
             - implementation
             - bitstream
             - fpga-test
-
-
-

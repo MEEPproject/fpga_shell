@@ -10,15 +10,21 @@
         FPGA_BOARD: u280
         GIT_SUBMODULE_STRATEGY: recursive
         CUSTOM_MSG: ACME
-        NUMBER_OF_JOBS: "8"
-        TOOLS_DIR: /home/fpga-runnerMEEP/tools/scripts
-        QDMA_DRIVERS: /home/dmazure/git_repo/dma_ip_drivers/QDMA/linux-kernel/bin
         BITSTREAM: system_${CI_PIPELINE_ID}.bit
-        DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
-        BOOT_SCRIPT: /home/dmazure/pcie/linux_images/boot_lagarto.sh
-        LINUX_IMAGE: /home/dmazure/pcie/linux_images/osbi.bin
+        LINUX_IMAGE: osbi.bin
+        SDK_DIR: accelerator/sdk
         VALID_MSG: "Welcome to Buildroot"
+        # Local workstation Setup
+        NUMBER_OF_JOBS: "8"        
+        TOOLS_DIR: /home/tools/fpga-tools
+        DRIVERS_DIR: /home/tools/drivers
+        QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
+        DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+        BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
 
+.qdma_drivers: &qdma_drivers
+        - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
+        - "export PATH=$QDMA_APPS:$PATH"
 
 .default_rules:
   variables: 
@@ -26,10 +32,17 @@
   rules:
    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
-.synth_default:
-   after_script:
-        - cp $(find . -name "make_project.log") tmp/
+.sdk_default:
+    before_script:
+      - echo "SDK before script"
+    script:
+      - make -C $SDK_DIR alveo.bin 
+    after_script:
+      - cp $SDK_DIR/osbi_alveo.bin sdk_output/$LINUX_IMAGE
 
+.synth_default:
+    after_script:
+        - cp $(find . -name "make_project.log") tmp/
 
 .default_tags:
   tags:
@@ -40,7 +53,7 @@
     - FPGA_TEST
     # There is a special runner to run the HW test, that targets the correct board
   before_script:
-    - export PATH=$PATH:$QDMA_DRIVERS
+    - *qdma_drivers
 
   script:
     - source $BOOT_SCRIPT $LINUX_IMAGE

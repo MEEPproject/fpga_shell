@@ -1,24 +1,22 @@
 # Add here a list of supported EAs so they get included in the
 # CI/CD pipeline
-# Until Gitlab 14.2, rules for include can't be used.
-# We comment/uncomment depending on the branch
 
 include:
       - local: support/acme/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/acme/cicd" || $CI_COMMIT_BRANCH == "master"
+          - if: $CI_COMMIT_BRANCH == "support/acme/cicd" || $CI_COMMIT_BRANCH == "master"
       - local: support/openpiton/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/openpiton/cicd"        
+          - if: $CI_COMMIT_BRANCH == "support/openpiton/cicd"        
       - local: support/dvino/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/dvino/cicd"        
+          - if: $CI_COMMIT_BRANCH == "support/dvino/cicd"        
       - local: support/sargantana/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/sargantana/cicd"        
+          - if: $CI_COMMIT_BRANCH == "support/sargantana/cicd"        
       - local: support/pronoc/setup.yml
         rules:
-                - if: $CI_COMMIT_BRANCH == "support/pronoc/cicd"
+          - if: $CI_COMMIT_BRANCH == "support/pronoc/cicd"
         
 
 
