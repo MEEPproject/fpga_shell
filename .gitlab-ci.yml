@@ -137,7 +137,6 @@ implementation:
             - make ci_implementation DCP_ON=false
 
         after_script:
-            - make clean_synthesis
             - echo -e "Artifacts:"; ls dcp; ls reports
 
         dependencies:
