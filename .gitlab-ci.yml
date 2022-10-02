@@ -73,6 +73,7 @@ EA-sdk:
         before_script:
             - mkdir -p sdk_output
             - *clone_ea
+            - make initialize
         script:
             - !reference [.sdk_default, script]
         after_script:
