@@ -49,9 +49,6 @@
     - MEEP_FPGA
 
 .fpga_test:
-  tags: 
-  - !reference [.setup, variables, FPGA_BOARD]
-    # There is a special runner to run the HW test, that targets the correct board
   before_script:
     - *qdma_drivers
 

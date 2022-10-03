@@ -25,7 +25,6 @@ stages:
     - implementation
     - validation
     - bitstream
-    - fpga-program
     - fpga-test
     - deploy
 
@@ -209,34 +208,23 @@ reports:
             paths:
                 - reports
 
-fpga-program:
-        stage: fpga-program
-        retry: 2
-        tags: !reference [.fpga_test, tags]
-        before_script:
-            - !reference [.fpga_test, before_script]   
-        script:
-            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
-        needs:
-            - bitstream
-        dependencies:            
-            - bitstream
-
 fpga-test:
         stage: fpga-test
+        retry: 2
+        tags: !reference [.setup, variables, FPGA_BOARD]
         rules:
             - !reference [.default_rules, rules] 
         extends: .disable_git
         
         needs:
             - EA-sdk
-            - fpga-program
-        retry: 2
-        tags: !reference [.fpga_test, tags]            
+            - bitstream
+        retry: 2        
         before_script:
             - !reference [.fpga_test, before_script]
         script:
             # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh fpga_test.log
             - echo "Checking FPGA log ..."
@@ -248,7 +236,7 @@ fpga-test:
             - echo -e "Artifacts:"; ls tmp/
         dependencies:
             - EA-sdk
-            - fpga-program
+            - bitstream
         artifacts:
             when: always
             paths:
