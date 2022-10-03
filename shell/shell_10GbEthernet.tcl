@@ -42,7 +42,7 @@ putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/10GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp
+exec make -C "$g_root_dir/ip/10GbEthernet" $ETHqsfp FPGA_BOARD=$g_board_part
 putmeeps "... Done."
 update_ip_catalog -rebuild
 

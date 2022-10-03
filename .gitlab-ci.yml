@@ -212,7 +212,7 @@ fpga-test:
         stage: fpga-test
         retry: 2
         tags: 
-            - !reference [.setup, variables, FPGA_BOARD]
+            - $FPGA_BOARD
         rules:
             - !reference [.default_rules, rules] 
         extends: .disable_git
