@@ -90,7 +90,34 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
-   
+
+set HBMintfNC nc$HBMintf
+set hbmnc_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintfNC ]
+  set_property -dict [ list \
+   CONFIG.ADDR_WIDTH $HBMaddrWidth \
+   CONFIG.ARUSER_WIDTH $HBMuserWidth \
+   CONFIG.AWUSER_WIDTH $HBMuserWidth \
+   CONFIG.BUSER_WIDTH $HBMuserWidth \
+   CONFIG.DATA_WIDTH $HBMdataWidth \
+   CONFIG.HAS_BRESP {1} \
+   CONFIG.HAS_BURST {1} \
+   CONFIG.HAS_RRESP {1} \
+   CONFIG.HAS_WSTRB {1} \
+   CONFIG.ID_WIDTH $HBMidWidth \
+   CONFIG.MAX_BURST_LENGTH {16} \
+   CONFIG.NUM_READ_OUTSTANDING {1} \
+   CONFIG.NUM_READ_THREADS {1} \
+   CONFIG.NUM_WRITE_OUTSTANDING {1} \
+   CONFIG.NUM_WRITE_THREADS {1} \
+   CONFIG.PROTOCOL {AXI3} \
+   CONFIG.READ_WRITE_MODE {READ_WRITE} \
+   CONFIG.RUSER_BITS_PER_BYTE {0} \
+   CONFIG.RUSER_WIDTH $HBMuserWidth \
+   CONFIG.SUPPORTS_NARROW_BURST {1} \
+   CONFIG.WUSER_BITS_PER_BYTE {0} \
+   CONFIG.WUSER_WIDTH $HBMuserWidth \
+   ] $hbmnc_axi
+
 ## TODO: Make dependant of selected HBM channels number
 if { $PCIeDMA != "yes" } {
 	set PCIeHBM "false"
@@ -227,7 +254,9 @@ if { [info exists hbm_inst] == 0 } {
 # TODO: HBM AXI Labels must be variables generated during the shell definition
 # TODO: All the blocks than shape the HBM pipe need to be labeled depending on the channel numbering
 # NEED TO ENABLE THE RIGHT HBM CHANNEL!!
-	set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 AXI_${HBMChNum}_ACLK CONFIG.USER_SAXI_${HBMChNum} {true}] [get_bd_cells hbm_0]
+        set HBMChNC [format {%02d} [expr {$HBMChNum+1}]]
+	set_property -dict [list CONFIG.USER_SAXI_${HBMChNum} {true}] [get_bd_cells hbm_0]
+	set_property -dict [list CONFIG.USER_SAXI_${HBMChNC}  {true}] [get_bd_cells hbm_0]
 
 	## Width
 	if { $HBMdataWidth != 256 } {
@@ -256,6 +285,7 @@ if { [info exists hbm_inst] == 0 } {
                 set_property CONFIG.HAS_REGION 0 [get_bd_intf_ports $HBMintf]
                 set_property CONFIG.HAS_PROT   0 [get_bd_intf_ports $HBMintf]		
 
+                connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${HBMChNC}${HBM_AXI_LABEL}] [get_bd_intf_ports $HBMintfNC]
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it

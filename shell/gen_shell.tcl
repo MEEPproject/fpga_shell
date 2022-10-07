@@ -78,6 +78,9 @@ foreach dicEntry $ShellEnabledIntf {
 		set UARTentry $dicEntry
 		source $g_root_dir/shell/shell_uart.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/uart_${g_board_part}.xdc"		
+        connect_bd_net [get_bd_pins hbm_0/AXI_${HBMChNC}_ACLK]     [get_bd_pins rst_ea_$g_UARTClkPort/slowest_sync_clk  ]
+        connect_bd_net [get_bd_pins hbm_0/AXI_${HBMChNC}_ARESET_N] [get_bd_pins rst_ea_$g_UARTClkPort/peripheral_aresetn]
+        set_property CONFIG.ASSOCIATED_BUSIF "$g_UART_ifname:$HBMintfNC" [get_bd_ports /$g_UART_CLK]
 	}
 
 	if {[regexp -inline -all "ETHERNET" $IntfName] ne "" } {
