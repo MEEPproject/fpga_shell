@@ -13,21 +13,15 @@
 
 .bitstream_dependencies: 
   dependencies:
-  #  - "synthesis: [u280, acme]"
-  #  - "synthesis: [u55c, acme]"          
     - "implementation: [u280, acme]"
     - "implementation: [u55c, acme]"
 .fpga-test_dependencies:
   dependencies:
-   # - "synthesis: [u280, acme]"
-   # - "synthesis: [u55c, acme]"
-   # - "implementation: [u280, acme]"
-   # - "implementation: [u55c, acme]"
     - "EA-sdk: [u280, acme]"
     - "EA-sdk: [u55c, acme]"
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
-    #- "bitstream: [vcu128]"
+
 .deploy_dependencies:
   dependencies:
     - "bitstream: [u280, acme]"
