@@ -108,7 +108,7 @@ synthesis:
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_$EA_$FPGA_BOARD
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}
         artifacts:
           when: always
           paths:
@@ -122,20 +122,21 @@ implementation:
         #parallel: !reference [.multi_target, parallel]
         dependencies: !reference [.implementation_dependencies, dependencies]
         # As this is a matrix, rename the corresponding dcp 
-        before_script:            
-            - mv dcp/synthesis_$EA_FPGA_BOARD dcp/synthesis.dcp
+        before_script:           
+            - ls; ls dcp; tree 
+            - mv dcp/synthesis_${EA}_${FPGA_BOARD} dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_$EA_$FPGA_BOARD
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_$EA_$FPGA_BOARD
+            - mv reports reports_${EA}_${FPGA_BOARD}
         artifacts:
             when: always
             expire_in: 1 day
             paths:
                 - dcp
-                - reports_$EA_$FPGA_BOARD
+                - reports_${EA}_${FPGA_BOARD}
 
 bitstream:
         stage: bitstream
@@ -143,8 +144,8 @@ bitstream:
         extends: .common_conf        
         #parallel: !reference [.multi_target, parallel]
         before_script:
-            - mv dcp/implementation_$EA_FPGA_BOARD dcp/implementation.dcp
-            - ls dcp/
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_${FPGA_BOARD} dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
@@ -162,19 +163,19 @@ reports:
         extends: .bitstream_dependencies
         extends: .common_conf
         before_script:
-            - mv dcp/implementation_$EA_FPGA_BOARD dcp/implementation.dcp
-            - ls; ls dcp
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_${FPGA_BOARD} dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
         after_script:
-            - mv reports reports_$EA_$FPGA_BOARD
+            - mv reports reports_${EA}_${FPGA_BOARD}
 
         artifacts:
             when: always
             paths:
-                - reports_$EA_$FPGA_BOARD
+                - reports_${EA}_${FPGA_BOARD}
 
 fpga-test:
         stage: fpga-test
@@ -185,6 +186,7 @@ fpga-test:
         tags: 
             - $FPGA_BOARD        
         before_script:
+            - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
         script:
@@ -210,6 +212,7 @@ deploy-EA:
         extends: .fpga-test_dependencies
         extends: .common_conf
         before_script:
+            - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
             - export EADIRNAME=${TODAY}_${CUSTOM_MSG}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
