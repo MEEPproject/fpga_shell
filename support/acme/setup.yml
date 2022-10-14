@@ -10,7 +10,6 @@
         FPGA_BOARD: u280
         GIT_SUBMODULE_STRATEGY: recursive
         CUSTOM_MSG: 1x1_VAS_noVPU
-        BITSTREAM: system_${CI_PIPELINE_ID}.bit
         LINUX_IMAGE: osbi.bin
         SDK_DIR: accelerator/sdk
         VALID_MSG: "Welcome to Buildroot"

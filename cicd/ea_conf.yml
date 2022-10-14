@@ -7,23 +7,23 @@
               EA: [acme]
 
 .implementation_dependencies:              
-  dependencies:
+  needs:
     - "synthesis: [u280, acme]"
     - "synthesis: [u55c, acme]"
 
 .bitstream_dependencies: 
-  dependencies:
+  needs:
     - "implementation: [u280, acme]"
     - "implementation: [u55c, acme]"
 .fpga-test_dependencies:
-  dependencies:
+  needs:
     - "EA-sdk: [u280, acme]"
     - "EA-sdk: [u55c, acme]"
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
 
 .deploy_dependencies:
-  dependencies:
+  needs:
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
     #- "bitstream: [vcu128]"

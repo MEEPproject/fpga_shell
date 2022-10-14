@@ -120,7 +120,7 @@ implementation:
         extends: .implementation_dependencies 
         extends: .common_conf         
         #parallel: !reference [.multi_target, parallel]
-        dependencies: !reference [.implementation_dependencies, dependencies]
+        #dependencies: !reference [.implementation_dependencies, dependencies]
         # As this is a matrix, rename the corresponding dcp 
         before_script:           
             - ls; ls dcp; tree 
@@ -189,9 +189,10 @@ fpga-test:
             - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit
         script:
             # The EA script should provide the right script and the right binary
-            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
@@ -214,13 +215,12 @@ deploy-EA:
         before_script:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CUSTOM_MSG}
+            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_${CUSTOM_MSG}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR
         script:
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mv bitstream/system.bit bitstream/$BITSTREAM
             - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $ABSDIR
 
