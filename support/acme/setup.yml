@@ -27,8 +27,6 @@
         - "export PATH=$QDMA_APPS:$PATH"
 
 .default_rules:
-  variables: 
-    - EANAME: !reference [.setup, variables, EMULATED_ACCELERATOR]
   rules:
    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
@@ -60,8 +58,3 @@
     - cp binaries/$LINUX_IMAGE boot/
     # image should be a binary artifact
     - mv boot tmp/
-
-# ACME can skip the EA-build job. 
-# TODO: This might be done via rules, but be careful with the dependences
-.custom_build_rules:
-  extends: .disable_git
