@@ -47,7 +47,7 @@
     - !reference [.default_rules, rules]    
   variables:
     GIT_SUBMODULE_STRATEGY: "none"
-  #parallel: !reference [.multi_target, parallel]  
+  parallel: !reference [.multi_target, parallel]  
   timeout: 8h
   tags: !reference [.default_tags, tags] 
   # Don't block successfull builds in the matrix:

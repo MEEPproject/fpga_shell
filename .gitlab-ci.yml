@@ -37,8 +37,8 @@ stages:
     - synthesis
     - implementation
     - bitstream
-#   - fpga-test
-#   - deploy
+    - fpga-test
+    - deploy
 
 .clone_ea: &clone_ea 
     # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one.
@@ -51,6 +51,7 @@ stages:
 
 EA-init:
     rules: 
+        - when: manual
         - !reference [.default_rules, rules]
     tags: !reference [.default_tags, tags]
     stage: initialization
@@ -86,7 +87,9 @@ EA-sdk:
 synthesis:
         stage: synthesis
         extends: .common_conf
-        parallel: !reference [.multi_target, parallel]
+        variables:
+            GIT_SUBMODULE_STRATEGY: "recursive"
+        #parallel: !reference [.multi_target, parallel]
         before_script:
             - *clone_ea
             - ls binaries/
@@ -114,9 +117,9 @@ synthesis:
             
 implementation:
         stage: implementation
-        extends: .common_conf
-        extends: .implementation_dependencies  
-        parallel: !reference [.multi_target, parallel]
+        extends: .implementation_dependencies 
+        extends: .common_conf         
+        #parallel: !reference [.multi_target, parallel]
         dependencies: !reference [.implementation_dependencies, dependencies]
         # As this is a matrix, rename the corresponding dcp 
         before_script:            
@@ -136,9 +139,9 @@ implementation:
 
 bitstream:
         stage: bitstream
-        extends: .common_conf        
         extends: .bitstream_dependencies
-        parallel: !reference [.multi_target, parallel]
+        extends: .common_conf        
+        #parallel: !reference [.multi_target, parallel]
         before_script:
             - mv dcp/implementation_$EA_FPGA_BOARD dcp/implementation.dcp
             - ls dcp/
@@ -154,67 +157,67 @@ bitstream:
             paths:
                 - bitstream        
 
-# reports:
-#         stage: bitstream
-#         extends: .common_conf
-#         extends: .bitstream_dependencies
-#         before_script:
-#             - mv dcp/implementation_$EA_FPGA_BOARD dcp/implementation.dcp
-#             - ls; ls dcp
-#         script:
-#             - echo "Generate implementation reports..."
-#             - make ci_report_route
-#             - make validate  
-#         after_script:
-#             - mv reports reports_$EA_$FPGA_BOARD
+reports:
+        stage: bitstream
+        extends: .bitstream_dependencies
+        extends: .common_conf
+        before_script:
+            - mv dcp/implementation_$EA_FPGA_BOARD dcp/implementation.dcp
+            - ls; ls dcp
+        script:
+            - echo "Generate implementation reports..."
+            - make ci_report_route
+            - make validate  
+        after_script:
+            - mv reports reports_$EA_$FPGA_BOARD
 
-#         artifacts:
-#             when: always
-#             paths:
-#                 - reports_$EA_$FPGA_BOARD
+        artifacts:
+            when: always
+            paths:
+                - reports_$EA_$FPGA_BOARD
 
-# fpga-test:
-#         stage: fpga-test
-#         retry: 2
-#         extends: .common_conf
-#         extends: .fpga-test_dependencies
-#         # Overwrite tags to select the right board
-#         tags: 
-#             - $FPGA_BOARD        
-#         before_script:
-#             - !reference [.fpga_test, before_script]
-#             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-#         script:
-#             # The EA script should provide the right script and the right binary
-#             - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
-#             - !reference [.fpga_test, script]
-#             - source sh/fpga_test.sh $FPGA_LOG
-#             - echo "Checking FPGA log ..."
-#             - sh/check_log.sh $FPGA_LOG $VALID_MSG 
-#         after_script:
-#             - mkdir -p tmp
-#             - mv $FPGA_LOG tmp/
-#             - !reference [.fpga_test, after_script]
-#             - echo -e "Artifacts:"; ls tmp/
-#         allow_failure: false
-#         artifacts:
-#             when: always
-#             paths:
-#             - tmp
+fpga-test:
+        stage: fpga-test
+        retry: 2
+        extends: .fpga-test_dependencies
+        extends: .common_conf
+        # Overwrite tags to select the right board
+        tags: 
+            - $FPGA_BOARD        
+        before_script:
+            - !reference [.fpga_test, before_script]
+            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma bitstream/system.bit
+            - !reference [.fpga_test, script]
+            - source sh/fpga_test.sh $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG 
+        after_script:
+            - mkdir -p tmp
+            - mv $FPGA_LOG tmp/
+            - !reference [.fpga_test, after_script]
+            - echo -e "Artifacts:"; ls tmp/
+        allow_failure: false
+        artifacts:
+            when: always
+            paths:
+            - tmp
 
-# deploy-EA:
-#         stage: deploy
-#         extends: .common_conf
-#         extends: .fpga-test_dependencies
-#         before_script:
-#             - export TODAY=$(date +"%y%m%d")            
-#             - export EADIRNAME=${TODAY}_${CUSTOM_MSG}
-#             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
-#             - mkdir -p $ABSDIR
-#         script:
-#             - date >> $ABSDIR/date.txt
-#             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-#             - mv bitstream/system.bit bitstream/$BITSTREAM
-#             - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
-#             - cp -r tmp/* $ABSDIR
+deploy-EA:
+        stage: deploy
+        extends: .fpga-test_dependencies
+        extends: .common_conf
+        before_script:
+            - export TODAY=$(date +"%y%m%d")            
+            - export EADIRNAME=${TODAY}_${CUSTOM_MSG}
+            - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
+            - mkdir -p $ABSDIR
+        script:
+            - date >> $ABSDIR/date.txt
+            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
+            - mv bitstream/system.bit bitstream/$BITSTREAM
+            - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
+            - cp -r tmp/* $ABSDIR
 
