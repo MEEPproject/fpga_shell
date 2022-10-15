@@ -170,10 +170,9 @@ reports:
             - make ci_report_route
             - make validate  
         after_script:
-            - mkdir -p reports_tmp/${EA}_${FPGA_BOARD}
-            - mv reports/* reports_tmp/${EA}_${FPGA_BOARD}/
-            - rm -r reports
-            - mv reports_tmp reports            
+            - ls reports            
+            - mv reports reports_${EA}_${FPGA_BOARD}
+            - ls; tree            
         artifacts:
             when: always
             paths:
@@ -219,12 +218,14 @@ deploy-EA:
             - export TODAY=$(date +"%y%m%d")            
             - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_${CUSTOM_MSG}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
-            - mkdir -p $ABSDIR
-        script:
+            - mkdir -p $ABSDIR            
+        script:            
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
+            - mkdir -p tmp/reports; mv reports_${EA}_${FPGA_BOARD} tmp/reports/
+            - mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $ABSDIR
+        allow_failure: false
 
 # This job needs to put together all the bitstreams. No parallel jobs here.            
 release_job:
