@@ -21,6 +21,6 @@
 
 cd accelerator
 
-bash -x meep_shell/accelerator_build.sh
+bash -x meep_shell/accelerator_build.sh $1
 
 cd ..

@@ -8,6 +8,7 @@ EA_SHA       =  EMULATED_ACCELERATOR_SHA
 EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
 EA_GIT_SHA   = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
 EA_DIR       =  $(ROOT_DIR)/accelerator
+EA_PARAM     ?= 
 DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
 ACCEL_DIR    =  $(ROOT_DIR)/accelerator
@@ -86,7 +87,7 @@ $(BINARIES_DIR):
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR)
-	$(SH_DIR)/accelerator_build.sh ;\
+	$(SH_DIR)/accelerator_build.sh $(EA_PARAM) ;\
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):

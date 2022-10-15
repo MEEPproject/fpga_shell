@@ -4,36 +4,43 @@
     parallel:
         matrix:
             - FPGA_BOARD: [u55c,u280]
-              EA: [acme]
+              EA: [acme, openpiton]
 
 .implementation_needs:              
   needs:
     - "synthesis: [u280, acme]"
     - "synthesis: [u55c, acme]"
+    - "synthesis: [u280, openpiton]"
+    - "synthesis: [u55c, openpiton]"
 
 .bitstream_needs: 
   needs:
     - "implementation: [u280, acme]"
     - "implementation: [u55c, acme]"
+    - "implementation: [u280, openpiton]"
+    - "implementation: [u55c, openpiton]"
 .fpga-test_needs:
   needs:
     - EA-sdk
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
+    - "bitstream: [u280, openpiton]"
+    - "bitstream: [u55c, openpiton]"
 
 .deploy_needs:
   needs:
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
-    #- "bitstream: [vcu128]"
     - "fpga-test: [u280, acme]"
     - "fpga-test: [u55c, acme]"
-    #- "fpga-test: [vcu128]"
+    - "bitstream: [u280, openpiton]"
+    - "bitstream: [u55c, openpiton]"
+    - "fpga-test: [u280, openpiton]"
+    - "fpga-test: [u55c, openpiton]"
 
 .default_tags:
   tags:
     - MEEP_FPGA
-
 
 .common_conf:
   rules:

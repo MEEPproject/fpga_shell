@@ -92,7 +92,7 @@ synthesis:
         script:
             - make initialize
             - make $FPGA_BOARD
-            - make project
+            - make project $EA
             - make synthesis
         after_script:
             - mkdir -p tmp/project
@@ -236,7 +236,7 @@ release_job:
         extends: .fpga-test_needs
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
-         description: 'CICD release with bitstreams [acme] for Alveo U55C and Alveo U280'
+         description: 'CICD release with bitstreams [acme, openpiton] for Alveo U55C and Alveo U280'
          tag_name: '$CI_COMMIT_TAG'
          assets:
           links:
@@ -244,4 +244,8 @@ release_job:
               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_acme_u55c.bit
             - name: 'Bitstream__acme_U280'              
               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_acme_u280.bit
+            - name: 'Bitstream_openpiton_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_openpiton_u55c.bit
+            - name: 'Bitstream__openpiton_U280'              
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_openpiton_u280.bit
           
