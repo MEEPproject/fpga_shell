@@ -71,18 +71,15 @@ EA-sdk:
             - !reference [.default_rules, rules]
         timeout: 4h
         tags: !reference [.default_tags, tags]
-        before_script:
-            - mkdir -p sdk_output
+        before_script:            
             - *clone_ea
             - make initialize
+            - !reference [.sdk_default, before_script]
         script:
             - !reference [.sdk_default, script]
         after_script:
             - !reference [.sdk_default, after_script]
-        artifacts:
-          when: always
-          paths:
-            - binaries
+        artifacts: !reference [.sdk_default, artifacts]
 
 synthesis:
         stage: synthesis
@@ -178,6 +175,7 @@ reports:
             paths:
                 - reports_${EA}_${FPGA_BOARD}
 
+# The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test:
         stage: fpga-test
         retry: 2
@@ -190,7 +188,8 @@ fpga-test:
             - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit
+            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
+            - mkdir -p tmp        
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
@@ -198,11 +197,9 @@ fpga-test:
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG $VALID_MSG 
-        after_script:
-            - mkdir -p tmp
             - mv $FPGA_LOG tmp/
+        after_script:            
             - !reference [.fpga_test, after_script]
-            - echo -e "Artifacts:"; ls tmp/
         allow_failure: false
         artifacts:
             when: always

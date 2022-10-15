@@ -32,10 +32,15 @@
 .sdk_default:
     before_script:
       - echo "SDK before script"
+      - mkdir -p sdk_output
     script:
       - make -C $SDK_DIR alveo.bin 
     after_script:
-      - cp $SDK_DIR/osbi_alveo.bin binaries/$LINUX_IMAGE
+      - mv $SDK_DIR/osbi_alveo.bin sdk_output/$LINUX_IMAGE
+    artifacts:    
+      when: always
+      paths:
+        - sdk_output
 
 .synth_default:
     after_script:
@@ -47,13 +52,12 @@
 
 .fpga_test:
   before_script:
-    - *qdma_drivers
-
+    - *qdma_drivers    
   script:
-    - source $BOOT_SCRIPT binaries/$LINUX_IMAGE
+    - source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/
-    - cp binaries/$LINUX_IMAGE boot/
-    # image should be a binary artifact
-    - mv boot tmp/
+    - cp sdk_output/$LINUX_IMAGE boot/
+    - mv boot tmp/            
+    - echo -e "Artifacts:"; ls tmp/
