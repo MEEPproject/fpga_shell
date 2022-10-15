@@ -17,8 +17,7 @@
     - "implementation: [u55c, acme]"
 .fpga-test_needs:
   needs:
-    - "EA-sdk: [u280, acme]"
-    - "EA-sdk: [u55c, acme]"
+    - EA-sdk
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
 
