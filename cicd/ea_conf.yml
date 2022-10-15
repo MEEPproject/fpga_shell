@@ -6,23 +6,23 @@
             - FPGA_BOARD: [u55c,u280]
               EA: [acme]
 
-.implementation_dependencies:              
+.implementation_needs:              
   needs:
     - "synthesis: [u280, acme]"
     - "synthesis: [u55c, acme]"
 
-.bitstream_dependencies: 
+.bitstream_needs: 
   needs:
     - "implementation: [u280, acme]"
     - "implementation: [u55c, acme]"
-.fpga-test_dependencies:
+.fpga-test_needs:
   needs:
     - "EA-sdk: [u280, acme]"
     - "EA-sdk: [u55c, acme]"
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
 
-.deploy_dependencies:
+.deploy_needs:
   needs:
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"

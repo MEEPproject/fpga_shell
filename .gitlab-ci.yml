@@ -51,7 +51,7 @@ stages:
 
 EA-init:
     rules: 
-        - when: manual
+        #- when: manual
         - !reference [.default_rules, rules]
     tags: !reference [.default_tags, tags]
     stage: initialization
@@ -67,7 +67,7 @@ EA-sdk:
         # custom scripts
         stage: synthesis
         rules: 
-            - when: manual
+            #- when: manual
             - !reference [.default_rules, rules]
         timeout: 4h
         tags: !reference [.default_tags, tags]
@@ -89,7 +89,6 @@ synthesis:
         extends: .common_conf
         variables:
             GIT_SUBMODULE_STRATEGY: "recursive"
-        #parallel: !reference [.multi_target, parallel]
         before_script:
             - *clone_ea
             - ls binaries/
@@ -108,70 +107,73 @@ synthesis:
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
         artifacts:
           when: always
           paths:
             - tmp
-            - dcp
+            - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
             
 implementation:
         stage: implementation
-        extends: .implementation_dependencies 
+        extends: .implementation_needs
         extends: .common_conf         
-        #parallel: !reference [.multi_target, parallel]
-        #dependencies: !reference [.implementation_dependencies, dependencies]
-        # As this is a matrix, rename the corresponding dcp 
+        # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script:           
             - ls; ls dcp; tree 
-            - mv dcp/synthesis_${EA}_${FPGA_BOARD} dcp/synthesis.dcp
+            - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
             - mv reports reports_${EA}_${FPGA_BOARD}
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - dcp
+                - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
                 - reports_${EA}_${FPGA_BOARD}
 
 bitstream:
         stage: bitstream
-        extends: .bitstream_dependencies
+        extends: .bitstream_needs
         extends: .common_conf        
-        #parallel: !reference [.multi_target, parallel]
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD} dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
             - make clean_implementation
             - mv bitstream/system.bit bitstream/system_${EA}_${FPGA_BOARD}.bit
             - echo -e "Artifacts:"; ls bitstream
+            # Store the Job ID to identify later the path to the bitstream artifact
+            - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - bitstream        
+                - bitstream  
+            reports:
+             dotenv: gen_bitstream.env      
 
 reports:
         stage: bitstream
-        extends: .bitstream_dependencies
+        extends: .bitstream_needs
         extends: .common_conf
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD} dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
         after_script:
-            - mv reports reports_${EA}_${FPGA_BOARD}
-
+            - mkdir -p reports_tmp/${EA}_${FPGA_BOARD}
+            - mv reports/* reports_tmp/${EA}_${FPGA_BOARD}/
+            - rm -r reports
+            - mv reports_tmp reports            
         artifacts:
             when: always
             paths:
@@ -180,7 +182,7 @@ reports:
 fpga-test:
         stage: fpga-test
         retry: 2
-        extends: .fpga-test_dependencies
+        extends: .fpga-test_needs
         extends: .common_conf
         # Overwrite tags to select the right board
         tags: 
@@ -210,7 +212,7 @@ fpga-test:
 
 deploy-EA:
         stage: deploy
-        extends: .fpga-test_dependencies
+        extends: .fpga-test_needs
         extends: .common_conf
         before_script:
             - ls; ls dcp; tree  
@@ -224,3 +226,24 @@ deploy-EA:
             - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $ABSDIR
 
+# This job needs to put together all the bitstreams. No parallel jobs here.            
+release_job:
+        stage: deploy
+        tags: !reference [.default_tags, tags]
+        image: registry.gitlab.com/gitlab-org/release-cli:latest
+        rules:
+            - if: $CI_COMMIT_TAG # Run this job when a tag is created
+        script:
+            - echo "Running release job"
+        extends: .fpga-test_needs
+        release:
+         name: 'MEEP Release $CI_COMMIT_TAG'
+         description: 'CICD release with bitstreams [acme] for Alveo U55C and Alveo U280'
+         tag_name: '$CI_COMMIT_TAG'
+         assets:
+          links:
+            - name: 'Bitstream_acme_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_acme_u55c.bit
+            - name: 'Bitstream__acme_U280'              
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_acme_u280.bit
+          
