@@ -86,13 +86,14 @@ synthesis:
         extends: .common_conf
         variables:
             GIT_SUBMODULE_STRATEGY: "recursive"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_{FPGA_BOARD}
         before_script:
             - *clone_ea
             - ls binaries/
         script:
             - make initialize
             - make $FPGA_BOARD
-            - make project $EA
+            - make project EA_PARAM=$EA
             - make synthesis
         after_script:
             - mkdir -p tmp/project
