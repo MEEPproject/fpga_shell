@@ -152,18 +152,18 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					}
 					if { [lindex $fields 4] == "DDR_CLK" } {
 						set ClkFreq 300000000
-                                                set ClkName "DDR_CLK"
-                                                set ClkList [list Freq $ClkFreq Name $ClkName]
-                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
-                                                dict set d_device SyncClk $ClkList					
+                        set ClkName "DDR_CLK"
+                        set ClkList [list Freq $ClkFreq Name $ClkName]
+                        putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                        dict set d_device SyncClk $ClkList					
 					}
 					if { [lindex $fields 4] == "ETH_CLK" } {
-                                                set ClkFreq 1611328125
-                                                set ClkName "ETH_CLK"
-                                                set ClkList [list Freq $ClkFreq Name $ClkName]
-                                                putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
-                                                dict set d_device SyncClk $ClkList
-                                        }
+                        set ClkFreq 1611328125
+                        set ClkName "ETH_CLK"
+                        set ClkList [list Freq $ClkFreq Name $ClkName]
+                        putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+                        dict set d_device SyncClk $ClkList
+                        }
 					
 					### Device-dependant settings
 					if { "${device}" == "PCIE" } {
@@ -186,14 +186,14 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						dict set d_device EnChannel [lindex $fields 7]
 						dict set d_device DevNum ${n}
 					}
-  	                                if { "${device}" == "DDR4" } {
+  	                if { "${device}" == "DDR4" } {
 						dict set d_device IntfLabel [lindex $fields 2]
-         	                                #dict set d_device ClkName   "ui_clk"
+         	            #dict set d_device ClkName   "ui_clk"
 						dict set d_device ClkName   [lindex $fields 8]
-				                dict set d_device CalibDone [lindex $fields 6]
-                                                dict set d_device EnChannel [lindex $fields 7]
-                                                dict set d_device DevNum ${n}
-                                        }
+				        dict set d_device CalibDone [lindex $fields 6]
+                        dict set d_device EnChannel [lindex $fields 7]
+                        dict set d_device DevNum ${n}
+                    }
 
 					if { "${device}" == "BROM" } {
 						dict set d_device InitFile [lindex $fields 6]	
@@ -208,8 +208,8 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
                         dict set d_device dmaMem    [lindex $fields 10]
 					}
 					if { "${device}" == "AURORA" } {
-                                                dict set d_device Mode   [lindex $fields 6]
-                                                dict set d_device UsrClk [lindex $fields 8]
+                        dict set d_device Mode   [lindex $fields 6]
+                        dict set d_device UsrClk [lindex $fields 8]
 					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}

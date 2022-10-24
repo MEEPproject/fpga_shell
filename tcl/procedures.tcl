@@ -241,7 +241,7 @@ proc add_instance { g_fd g_fd_tmp } {
 			putmeeps "INFO: Empty line detected\r\n"
 			#putmeeps "Empty Line detected"
 		} elseif { [regexp -inline -all {hbm_cattrip} $line] ne "" } {
-			putmeeps "INFO: skipping hbm_cattrip port"
+			putdebugs "skipping hbm_cattrip port"
 			set NoCattrip 0
 			# hbm_cattrip is used manually to close the instance,
 			# so we don't want to make the connection here.
