@@ -1,10 +1,11 @@
 # Variable size of Matrix
+# TODO: This file could be auto-generated depending on the Matrix
 
 .multi_target:
     parallel:
         matrix:
             - FPGA_BOARD: [u55c,u280]
-              EA: [acme, openpiton]
+              EA: [acme, openpiton, pronoc]
 
 .implementation_needs:              
   needs:
@@ -12,6 +13,9 @@
     - "synthesis: [u55c, acme]"
     - "synthesis: [u280, openpiton]"
     - "synthesis: [u55c, openpiton]"
+    - "synthesis: [u280, pronoc]"
+    - "synthesis: [u55c, pronoc]"
+
 
 .bitstream_needs: 
   needs:
@@ -19,13 +23,19 @@
     - "implementation: [u55c, acme]"
     - "implementation: [u280, openpiton]"
     - "implementation: [u55c, openpiton]"
+    - "implementation: [u280, pronoc]"
+    - "implementation: [u55c, pronoc]"
+
 .fpga-test_needs:
   needs:
-    - EA-sdk
+          #- EA-sdk
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
     - "bitstream: [u280, openpiton]"
     - "bitstream: [u55c, openpiton]"
+    - "bitstream: [u280, pronoc]"
+    - "bitstream: [u55c, pronoc]"
+
 
 .deploy_needs:
   needs:
@@ -37,6 +47,11 @@
     - "bitstream: [u55c, openpiton]"
     - "fpga-test: [u280, openpiton]"
     - "fpga-test: [u55c, openpiton]"
+    - "bitstream: [u280, pronoc]"
+    - "bitstream: [u55c, pronoc]"
+    - "fpga-test: [u280, pronoc]"
+    - "fpga-test: [u55c, pronoc]"
+      
 
 .default_tags:
   tags:
@@ -53,3 +68,12 @@
   # Don't block successfull builds in the matrix:
   # This would benefit from variable dependencies/needs, but that's not supported
   allow_failure: true  
+
+
+.check_synth:
+  script:
+    - "[ ! -f dcp/synthesis.dcp ] && echo \"synthesis failed \" && exit 1"
+.check_impl:
+  script:
+    - "[ ! -f dcp/implementation.dcp ] && echo \"implementation failed \" && exit 1"
+

@@ -20,6 +20,8 @@
         QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
         DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
+        # TODO: Link with the SDK repo, set triggering policies
+        OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
 
 .qdma_drivers: &qdma_drivers
         - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
@@ -54,7 +56,8 @@
   before_script:
     - *qdma_drivers    
   script:
-    - source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
+          #- source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
+    - source $BOOT_SCRIPT $OSBI_DEPLOY_DIR
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/

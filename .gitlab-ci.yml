@@ -62,24 +62,24 @@ EA-init:
           paths:
             - binaries
 
-EA-sdk:
-        # No matrix for this job. The EA can configure its SDK via 
-        # custom scripts
-        stage: synthesis
-        rules: 
-            #- when: manual
-            - !reference [.default_rules, rules]
-        timeout: 4h
-        tags: !reference [.default_tags, tags]
-        before_script:            
-            - *clone_ea
-            - make initialize
-            - !reference [.sdk_default, before_script]
-        script:
-            - !reference [.sdk_default, script]
-        after_script:
-            - !reference [.sdk_default, after_script]
-        artifacts: !reference [.sdk_default, artifacts]
+# EA-sdk:
+#         # No matrix for this job. The EA can configure its SDK via 
+#         # custom scripts
+#         stage: synthesis
+#         rules: 
+#             #- when: manual
+#             - !reference [.default_rules, rules]
+#         timeout: 4h
+#         tags: !reference [.default_tags, tags]
+#         before_script:            
+#             - *clone_ea
+#             - make initialize
+#             - !reference [.sdk_default, before_script]
+#         script:
+#             - !reference [.sdk_default, script]
+#         after_script:
+#             - !reference [.sdk_default, after_script]
+#         artifacts: !reference [.sdk_default, artifacts]
 
 synthesis:
         stage: synthesis
@@ -95,6 +95,7 @@ synthesis:
             - make $FPGA_BOARD
             - make project EA_PARAM=$EA
             - make synthesis
+            - !reference [.check_synth, script]
         after_script:
             - mkdir -p tmp/project
             - !reference [.synth_default, after_script]
@@ -122,6 +123,7 @@ implementation:
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
+            - !reference [.check_impl, script]
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
@@ -175,6 +177,19 @@ reports:
             when: always
             paths:
                 - reports_${EA}_${FPGA_BOARD}
+
+# Trigger the sdk pipeline only if the synthesis was successfull
+EA-sdk:
+        stage: implementation
+        trigger: 
+            project: meep/meep-os/lagarto-openpiton-sdk
+            branch: develop/32bits
+            # A tag can be used instead of the name of a branch
+            # The osbi binay can't be grabbed as an artifact, use a path instead    
+        rules:
+            - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+            # Maybe we can enable pipelines only when the source is a trigger
+            # This can be useful to trigger the FPGA pipeline jobs when WP5/4 have releases
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test:
