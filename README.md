@@ -23,6 +23,7 @@ Push with GitLab variables:
 
 git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 
+make project EA_PARAMS=pronoc
 
 
 Developers guide:
