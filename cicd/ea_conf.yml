@@ -72,8 +72,17 @@
 
 .check_synth:
   script:
-    - "[ ! -f dcp/synthesis.dcp ] && echo \"synthesis failed \" && exit 1"
+    - |
+      if [ ! -f dcp/synthesis.dcp ]; then 
+        echo "dcp file has not been created"
+        exit 23; 
+      fi;
+      
 .check_impl:
   script:
-    - "[ ! -f dcp/implementation.dcp ] && echo \"implementation failed \" && exit 1"
+    - |
+      if [ ! -f dcp/implementation.dcp ]; then 
+        echo "dcp file has not been created"
+        exit 24; 
+      fi;
 
