@@ -87,7 +87,7 @@
         exit 24; 
       fi;
 
-.check_trigger:
+.update_sha:
   script:
     - |      
       if [ "x$COMMIT_SHA" != "x" ]; then

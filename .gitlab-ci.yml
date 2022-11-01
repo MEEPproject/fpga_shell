@@ -43,9 +43,11 @@ stages:
 .clone_ea: &clone_ea 
     # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one.
     # The load_module script loads the txt file in the support folder.
+    # The hidden job substitute the SHA in case this is a triggered pipeline 
     # The extract_url script inserts the token into the repo URL.
     - echo "Inserting the Gitlab token in the EA's URL"
     - sh/load_module.sh $EMULATED_ACCELERATOR
+    - !reference [.update_sha, script]
     - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
 
 
