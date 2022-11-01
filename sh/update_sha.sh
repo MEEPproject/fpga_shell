@@ -30,6 +30,11 @@ EA_SHA_BRANCH=$(git branch --show-current)
 EA_SHA_TMP=$(git rev-parse $EA_SHA_BRANCH)
 cd $ROOT_DIR
 
+if [ $# == "3" ]; then
+    EA_SHA_BRANCH=$2
+    EA_SHA_TMP=$3
+fi;
+
 echo "$EA_SHA: $EA_SHA_TMP"
 NEW_SHA="$EA_SHA: $EA_SHA_TMP"
 

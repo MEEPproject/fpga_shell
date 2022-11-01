@@ -62,25 +62,6 @@ EA-init:
           paths:
             - binaries
 
-# EA-sdk:
-#         # No matrix for this job. The EA can configure its SDK via 
-#         # custom scripts
-#         stage: synthesis
-#         rules: 
-#             #- when: manual
-#             - !reference [.default_rules, rules]
-#         timeout: 4h
-#         tags: !reference [.default_tags, tags]
-#         before_script:            
-#             - *clone_ea
-#             - make initialize
-#             - !reference [.sdk_default, before_script]
-#         script:
-#             - !reference [.sdk_default, script]
-#         after_script:
-#             - !reference [.sdk_default, after_script]
-#         artifacts: !reference [.sdk_default, artifacts]
-
 synthesis:
         stage: synthesis
         extends: .common_conf
@@ -179,11 +160,15 @@ reports:
                 - reports_${EA}_${FPGA_BOARD}
 
 # Trigger the sdk pipeline only if the synthesis was successfull
+# Likely, the sdk is the one triggering this CICD and not the other way around
+# This CICD can grab the binary (OpenSBI):
+# https://docs.gitlab.com/ee/ci/pipelines/downstream_pipelines.html#fetch-artifacts-from-an-upstream-pipeline
 EA-sdk:
         stage: implementation
         trigger: 
+        # trigger: meep/meep-os/lagarto-openpiton-sdk
             project: meep/meep-os/lagarto-openpiton-sdk
-            branch: develop/32bits
+            branch: master
             # A tag can be used instead of the name of a branch
             # The osbi binay can't be grabbed as an artifact, use a path instead    
         rules:
@@ -226,6 +211,8 @@ deploy-EA:
         stage: deploy
         extends: .fpga-test_needs
         extends: .common_conf
+        # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
+        when: on_success
         before_script:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
@@ -244,6 +231,7 @@ deploy-EA:
 release_job:
         stage: deploy
         tags: !reference [.default_tags, tags]
+        when: on_success
         image: registry.gitlab.com/gitlab-org/release-cli:latest
         rules:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created

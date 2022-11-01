@@ -59,7 +59,8 @@
 
 .common_conf:
   rules:
-    - !reference [.default_rules, rules]    
+    - !reference [.default_rules, rules]  
+    - if: $CI_PIPELINE_SOURCE == "pipeline"  
   variables:
     GIT_SUBMODULE_STRATEGY: "none"
   parallel: !reference [.multi_target, parallel]  
@@ -85,4 +86,11 @@
         echo "dcp file has not been created"
         exit 24; 
       fi;
+
+.check_trigger:
+  script:
+    - |      
+      if [ "x$COMMIT_SHA" != "x" ]; then
+        sh/update_sha ea_url.txt $COMMIT_REF $COMMIT_SHA
+      fi   
 
