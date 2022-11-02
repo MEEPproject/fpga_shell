@@ -34,7 +34,6 @@ variables: !reference [.setup, variables]
 
 
 stages:
-    - initialization
     - synthesis
     - implementation
     - bitstream
@@ -56,19 +55,6 @@ stages:
     - echo "After update_sha:"; cat ea_url.txt
 
 
-EA-init:
-    rules: 
-        #- when: manual
-        - !reference [.default_rules, rules]
-    tags: !reference [.default_tags, tags]
-    stage: initialization
-    script:
-        - mkdir -p binaries
-    artifacts:
-          when: always
-          paths:
-            - binaries
-
 synthesis:
         stage: synthesis
         extends: .common_conf
@@ -77,7 +63,6 @@ synthesis:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
             - *clone_ea
-            - ls binaries/
         script:
             - make initialize
             - make $FPGA_BOARD
@@ -87,7 +72,6 @@ synthesis:
         after_script:
             - mkdir -p tmp/project
             - !reference [.synth_default, after_script]
-            - cp -r binaries tmp 
             - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp/project/
             - cp -r src/system_top.sv tmp/project/
