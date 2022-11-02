@@ -48,8 +48,11 @@ stages:
     # The extract_url script inserts the token into the repo URL.
     - echo "Inserting the Gitlab token in the EA's URL"
     - sh/load_module.sh $EMULATED_ACCELERATOR
+    - echo "$COMMIT_SHA"; echo "Actual URL:"; cat ea_url.txt
     - !reference [.update_sha, script]
+    - echo "After update_sha:"; cat ea_url.txt
     - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
+    - echo "After update_sha:"; cat ea_url.txt
 
 
 EA-init:
