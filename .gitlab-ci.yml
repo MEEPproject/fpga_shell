@@ -91,6 +91,7 @@ synthesis:
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+        allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
           paths:
@@ -162,22 +163,6 @@ reports:
             paths:
                 - reports_${EA}_${FPGA_BOARD}
 
-# Trigger the sdk pipeline only if the synthesis was successfull
-# Likely, the sdk is the one triggering this CICD and not the other way around
-# This CICD can grab the binary (OpenSBI):
-# https://docs.gitlab.com/ee/ci/pipelines/downstream_pipelines.html#fetch-artifacts-from-an-upstream-pipeline
-EA-sdk:
-        stage: implementation
-        trigger: 
-        # trigger: meep/meep-os/lagarto-openpiton-sdk
-            project: meep/meep-os/lagarto-openpiton-sdk
-            branch: master
-            # A tag can be used instead of the name of a branch
-            # The osbi binay can't be grabbed as an artifact, use a path instead    
-        rules:
-            - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-            # Maybe we can enable pipelines only when the source is a trigger
-            # This can be useful to trigger the FPGA pipeline jobs when WP5/4 have releases
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test:

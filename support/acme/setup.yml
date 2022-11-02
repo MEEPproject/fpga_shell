@@ -61,6 +61,6 @@
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/
-    - cp sdk_output/$LINUX_IMAGE boot/
+    - cp $OSBI_DEPLOY_DIR boot/
     - mv boot tmp/            
     - echo -e "Artifacts:"; ls tmp/

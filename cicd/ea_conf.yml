@@ -28,7 +28,6 @@
 
 .fpga-test_needs:
   needs:
-          #- EA-sdk
     - "bitstream: [u280, acme]"
     - "bitstream: [u55c, acme]"
     - "bitstream: [u280, openpiton]"
@@ -91,6 +90,6 @@
   script:
     - |      
       if [ "x$COMMIT_SHA" != "x" ]; then
-        sh/update_sha ea_url.txt $COMMIT_REF $COMMIT_SHA
+        sh/update_sha.sh ea_url.txt $COMMIT_REF $COMMIT_SHA
       fi   
 
