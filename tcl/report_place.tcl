@@ -35,13 +35,13 @@ proc reportPlace { g_root_dir } {
 
 	file mkdir $postPlaceDir
 	open_checkpoint $g_root_dir/dcp/post_place.dcp
-        report_clock_utilization -file $postPlaceDir/clock_utilization.rpt
+    report_clock_utilization -file $postPlaceDir/clock_utilization.rpt
 	report_methodology -file $postPlaceDir/methodology.rpt
 	report_utilization -hierarchical -file $postPlaceDir/utilization_hier.rpt
 	report_utilization -file $postPlaceDir/utilization_summary.rpt
-        report_utilization -slr -file $postPlaceDir/utilization_slr.rpt
+    report_utilization -slr -file $postPlaceDir/utilization_slr.rpt
 	report_timing_summary -file $postPlaceDir/timing_summary.rpt
-        reportCriticalPaths $postPlaceDir/critical_path_report.csv
+    reportCriticalPaths $postPlaceDir/critical_path_report.csv
 }
 
 
