@@ -8,7 +8,9 @@ EA_SHA       =  EMULATED_ACCELERATOR_SHA
 EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
 EA_GIT_SHA   = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
 EA_DIR       =  $(ROOT_DIR)/accelerator
-EA_PARAM     ?= meep_dvino
+EA_PARAM     ?= 
+# EA_PARAM is related to the EA, to it can be parametrized from the Shell
+# For MEEP/ACME, the options are: lagarto, ariane, pronoc, meep_dvino @10/11/2022
 DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
 ACCEL_DIR    =  $(ROOT_DIR)/accelerator
