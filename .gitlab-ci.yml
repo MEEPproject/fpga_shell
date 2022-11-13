@@ -65,6 +65,7 @@ synthesis:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
             - *clone_ea
+            - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
         script:
             - make initialize
             - make $FPGA_BOARD
