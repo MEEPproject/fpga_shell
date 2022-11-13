@@ -58,7 +58,9 @@ stages:
 synthesis:
         stage: synthesis
         extends: .common_conf
+        interruptible: true
         variables:
+            GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
