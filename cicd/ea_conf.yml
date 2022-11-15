@@ -1,0 +1,95 @@
+# Variable size of Matrix
+# TODO: This file could be auto-generated depending on the Matrix
+
+.multi_target:
+    parallel:
+        matrix:
+            - FPGA_BOARD: [u55c,u280]
+              EA: [acme, ariane, pronoc]
+
+.implementation_needs:              
+  needs:
+    - "synthesis: [u280, acme]"
+    - "synthesis: [u55c, acme]"
+    - "synthesis: [u280, ariane]"
+    - "synthesis: [u55c, ariane]"
+    - "synthesis: [u280, pronoc]"
+    - "synthesis: [u55c, pronoc]"
+
+
+.bitstream_needs: 
+  needs:
+    - "implementation: [u280, acme]"
+    - "implementation: [u55c, acme]"
+    - "implementation: [u280, ariane]"
+    - "implementation: [u55c, ariane]"
+    - "implementation: [u280, pronoc]"
+    - "implementation: [u55c, pronoc]"
+
+.fpga-test_needs:
+  needs:
+    - "bitstream: [u280, acme]"
+    - "bitstream: [u55c, acme]"
+    - "bitstream: [u280, ariane]"
+    - "bitstream: [u55c, ariane]"
+    - "bitstream: [u280, pronoc]"
+    - "bitstream: [u55c, pronoc]"
+
+
+.deploy_needs:
+  needs:
+    - "bitstream: [u280, acme]"
+    - "bitstream: [u55c, acme]"
+    - "fpga-test: [u280, acme]"
+    - "fpga-test: [u55c, acme]"
+    - "bitstream: [u280, ariane]"
+    - "bitstream: [u55c, ariane]"
+    - "fpga-test: [u280, ariane]"
+    - "fpga-test: [u55c, ariane]"
+    - "bitstream: [u280, pronoc]"
+    - "bitstream: [u55c, pronoc]"
+    - "fpga-test: [u280, pronoc]"
+    - "fpga-test: [u55c, pronoc]"
+      
+
+.default_tags:
+  tags:
+    - MEEP_FPGA
+
+.common_conf:
+  rules:
+    - !reference [.default_rules, rules]  
+    - if: $CI_PIPELINE_SOURCE == "pipeline"  
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
+  parallel: !reference [.multi_target, parallel]  
+  timeout: 8h
+  tags: !reference [.default_tags, tags] 
+  # Don't block successfull builds in the matrix:
+  # This would benefit from variable dependencies/needs, but that's not supported
+  allow_failure: true  
+
+
+.check_synth:
+  script:
+    - |
+      if [ ! -f dcp/synthesis.dcp ]; then 
+        echo "dcp file has not been created"
+        exit 23; 
+      fi;
+      
+.check_impl:
+  script:
+    - |
+      if [ ! -f dcp/implementation.dcp ]; then 
+        echo "dcp file has not been created"
+        exit 24; 
+      fi;
+
+.update_sha:
+  script:
+    - |      
+      if [ "x$COMMIT_SHA" != "x" ]; then
+        sh/update_sha.sh ea_url.txt $COMMIT_REF $COMMIT_SHA
+      fi   
+

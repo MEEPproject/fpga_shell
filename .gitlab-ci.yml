@@ -14,16 +14,28 @@
 # included file for clarity
 
 include:
-  - local: cicd/ealib.yml
+  - local: cicd/ea_conf.yml
+  - local: support/acme/setup.yml
+
+
+workflow:
+    rules:
+        - !reference [.default_rules, rules]
+        - if: $CI_PIPELINE_SOURCE == "pipeline"
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+          when: never  
+        - if: $CI_COMMIT_TAG != null 
+        - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+          when: never # Pushing to main doesn't create pipelines unless there is a tag
+    
 
 variables: !reference [.setup, variables]
 
 
 stages:
-    - EA-initialization
     - synthesis
     - implementation
-    - validation
     - bitstream
     - fpga-test
     - deploy
@@ -31,191 +43,145 @@ stages:
 .clone_ea: &clone_ea 
     # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one.
     # The load_module script loads the txt file in the support folder.
+    # The hidden job substitute the SHA in case this is a triggered pipeline 
     # The extract_url script inserts the token into the repo URL.
     - echo "Inserting the Gitlab token in the EA's URL"
     - sh/load_module.sh $EMULATED_ACCELERATOR
+    - echo "$COMMIT_SHA"; echo "Actual URL:"; cat ea_url.txt
+    - echo "CommitREF is $COMMIT_REF"; echo "The commit SHA is $COMMIT_SHA"
+    - !reference [.update_sha, script]
+    - echo "After update_sha:"; cat ea_url.txt
     - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
+    - echo "After update_sha:"; cat ea_url.txt
 
-.disable_git:
-  extends: .setup
-  variables:
-          #GIT_STRATEGY: none
-    GIT_SUBMODULE_STRATEGY: "none"
-
-EA-build:
-        stage: EA-initialization
-        rules:
-            - !reference [.default_rules, rules]
-        timeout: 2h
-        tags: !reference [.default_tags, tags]
-        before_script:
-            - *clone_ea 
-        script:    
-            - make initialize
-            - make binaries
-        after_script:
-            - cp -r accelerator/meep_shell/binaries/* binaries
-        artifacts:
-                #  untracked: true
-          paths:            
-            - binaries        
-            - ea_url.txt
 
 synthesis:
         stage: synthesis
-        rules:
-            - !reference [.default_rules, rules] 
-        needs:
-            - EA-build
-        timeout: 4h
-        tags: !reference [.default_tags, tags]
+        extends: .common_conf
+        interruptible: true
+        retry: 1
+        variables:
+            GIT_STRATEGY: clone            
+            GIT_SUBMODULE_STRATEGY: "recursive"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
             - *clone_ea
-            - ls binaries/
+            - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
         script:
             - make initialize
             - make $FPGA_BOARD
-            - make project
+            - make project EA_PARAM=$EA
             - make synthesis
+            - !reference [.check_synth, script]
         after_script:
             - mkdir -p tmp/project
             - !reference [.synth_default, after_script]
-            - cp -r binaries tmp 
             - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp/project/
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-        dependencies:
-            - EA-build
-
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+        allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
           paths:
             - tmp
-            - dcp/synthesis.dcp
+            - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
             
 implementation:
         stage: implementation
-        rules:
-            - !reference [.default_rules, rules] 
-
-        extends: .disable_git
-
-        needs:
-            - synthesis
-        timeout: 8h
-        tags: !reference [.default_tags, tags]
-        before_script:
-            - echo -e "set g_number_of_jobs $NUMBER_OF_JOBS" >> tcl/environment.tcl
+        extends: .implementation_needs
+        extends: .common_conf         
+        # As this is a matrix, rename the corresponding dcp for make to recognize it 
+        before_script:           
+            - ls; ls dcp; tree 
+            - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
-
+            - !reference [.check_impl, script]
         after_script:
-            - make clean_synthesis
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-
-        dependencies:
-            - synthesis
-
+            - mv reports reports_${EA}_${FPGA_BOARD}
         artifacts:
-            when: on_success
+            when: always
             expire_in: 1 day
             paths:
-                - dcp
-                - reports
+                - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
+                - reports_${EA}_${FPGA_BOARD}
+
 bitstream:
         stage: bitstream
-        rules:
-            - !reference [.default_rules, rules] 
-        extends: .disable_git
-        
-        needs:
-            - synthesis
-            - implementation
-        tags: !reference [.default_tags, tags] 
+        extends: .bitstream_needs
+        extends: .common_conf        
         before_script:
-            - ls dcp/
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
             - make clean_implementation
+            - mv bitstream/system.bit bitstream/system_${EA}_${FPGA_BOARD}.bit
             - echo -e "Artifacts:"; ls bitstream
-        dependencies:
-            - synthesis
-            - implementation
+            # Store the Job ID to identify later the path to the bitstream artifact
+            - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - bitstream
-validation:
-        stage: bitstream
-        rules:
-            - !reference [.default_rules, rules] 
-        extends: .disable_git
-        
-        needs: 
-            - implementation
-        tags: !reference [.default_tags, tags] 
-        script:
-            - echo "Checking implementation reports..." 
-            - make validate            
-        allow_failure: true            
-        dependencies:
-            - implementation
+                - bitstream  
+            reports:
+             dotenv: gen_bitstream.env      
 
-              # Save time running the reports generation in parallel              
 reports:
         stage: bitstream
-        rules:
-            - !reference [.default_rules, rules]        
-        extends: .disable_git
-        needs:
-            - implementation
-        tags: !reference [.default_tags, tags]
+        extends: .bitstream_needs
+        extends: .common_conf
         before_script:
-            - ls; ls dcp
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
-        dependencies:
-            - implementation
+            - make validate  
+        after_script:
+            - ls reports            
+            - mv reports reports_${EA}_${FPGA_BOARD}
+            - ls; tree            
         artifacts:
             when: always
             paths:
-                - reports
+                - reports_${EA}_${FPGA_BOARD}
 
 
+# The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test:
         stage: fpga-test
-        rules:
-            - !reference [.default_rules, rules] 
-        extends: .disable_git
-        
-        needs:
-            - EA-build
-            - bitstream
         retry: 2
-        tags: !reference [.fpga_test, tags]            
+        extends: .fpga-test_needs
+        extends: .common_conf
+        # Overwrite tags to select the right board
+        tags: 
+            - $FPGA_BOARD        
         before_script:
+            - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
+            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
+            - mkdir -p tmp        
         script:
-            - sh/load_bitstream.sh qdma bitstream/system.bit
             # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - source sh/fpga_test.sh fpga_test.log
+            - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - sh/check_log.sh fpga_test.log $VALID_MSG 
-        after_script:
-            - mkdir -p tmp
-            - mv fpga_test.log tmp/
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG             
+        after_script:            
+            - mv $FPGA_LOG tmp
             - !reference [.fpga_test, after_script]
-            - echo -e "Artifacts:"; ls tmp/
-        dependencies:
-            - EA-build
-            - bitstream
+        allow_failure: false
         artifacts:
             when: always
             paths:
@@ -223,34 +189,47 @@ fpga-test:
 
 deploy-EA:
         stage: deploy
-        rules:
-            - !reference [.default_rules, rules] 
-        extends: .disable_git
-        tags: !reference [.default_tags, tags]
+        extends: .fpga-test_needs
+        extends: .common_conf
+        # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
+        when: on_success
         before_script:
-            - export TODAY=$(date +"%y%m%d")
-            - export EANAME=${FPGA_BOARD}_${EMULATED_ACCELERATOR}
-            - export EADIRNAME=${EANAME}_${TODAY}_${CUSTOM_MSG}
+            - ls; ls dcp; tree  
+            - export TODAY=$(date +"%y%m%d")            
+            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_${CUSTOM_MSG}
             - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
-            - mkdir -p $ABSDIR
-        script:
+            - mkdir -p $ABSDIR            
+        script:            
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mv bitstream/system.bit bitstream/$BITSTREAM
-            - mv reports tmp/ ; mv dcp tmp/ ; mv bitstream tmp/
+            - mkdir -p tmp/reports; mv reports_${EA}_${FPGA_BOARD} tmp/reports/
+            - mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $ABSDIR
-        needs:
-            - EA-build
-            - synthesis
-            - implementation
-            - bitstream
-            - fpga-test
-        dependencies:
-            - EA-build
-            - synthesis
-            - implementation
-            - bitstream
-            - fpga-test
+        allow_failure: false
 
-
-
+# This job needs to put together all the bitstreams. No parallel jobs here.            
+release_job:
+        stage: deploy
+        tags: !reference [.default_tags, tags]
+        when: on_success
+        image: registry.gitlab.com/gitlab-org/release-cli:latest
+        rules:
+            - if: $CI_COMMIT_TAG # Run this job when a tag is created
+        script:
+            - echo "Running release job"
+        extends: .fpga-test_needs
+        release:
+         name: 'MEEP Release $CI_COMMIT_TAG'
+         description: 'CICD release with bitstreams [acme, openpiton] for Alveo U55C and Alveo U280'
+         tag_name: '$CI_COMMIT_TAG'
+         assets:
+          links:
+            - name: 'Bitstream_acme_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_acme_u55c.bit
+            - name: 'Bitstream__acme_U280'              
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_acme_u280.bit
+            - name: 'Bitstream_openpiton_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_openpiton_u55c.bit
+            - name: 'Bitstream__openpiton_U280'              
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_openpiton_u280.bit
+          

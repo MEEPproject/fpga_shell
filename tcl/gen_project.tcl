@@ -63,6 +63,19 @@ set ip_dir_list [get_property ip_repo_paths [current_project]]
 lappend ip_dir_list $root_dir/ip
 set_property  ip_repo_paths  $ip_dir_list [current_project]
 
+# Save the timing constraint file to be edited later for the different selectable IPs (GPIO, Ethernet)
+# Hierarchy is fixed for the MEEP Shell. Each IP adds its own set of constraints to this file
+set TimingConstrFile "$root_dir/xdc/${g_board_part}/${g_project_name}_timing_${g_board_part}.xdc"
+set ILAConstrFile    "$root_dir/xdc/${g_board_part}/${g_project_name}_ila_${g_board_part}.xdc"
+set BoardConstrFile  "$root_dir/xdc/${g_board_part}/${g_project_name}_${g_board_part}.xdc"
+
+# Clean up from previous builds, and gereate it
+file delete -force $TimingConstrFile
+set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
+set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]
+# Initialize the file
+[Add2ConstrFileList $TimingConstrFile #$InitDate ]
+
 if { $g_useBlockDesign eq "Y" } {
 update_ip_catalog -rebuild
 	# if { [catch {source ${root_dir}/shell/gen_shell.tcl}] } {
@@ -87,14 +100,15 @@ set top_module "$root_dir/src/${g_top_name}.sv"
 set src_files [glob ${root_dir}/src/*]
 add_files ${src_files}
 # Add Constraint files to project
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_timing_${g_board_part}.xdc"
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_ila_${g_board_part}.xdc"
-add_files -fileset [get_filesets constrs_1] "$root_dir/xdc/${g_board_part}/${g_project_name}_${g_board_part}.xdc"
+add_files -fileset [get_filesets constrs_1] $TimingConstrFile
+add_files -fileset [get_filesets constrs_1] $ILAConstrFile
+add_files -fileset [get_filesets constrs_1] $BoardConstrFile
 set_property target_language Verilog [current_project]
 source $root_dir/tcl/gen_runs.tcl
 
 # system_top is the top module in the meep_shell project. It may change if we want
 set_property top $g_top_name [current_fileset]
+
 
 # Placeholder for the EA IP directory list.
 set ip_ea_dir [list]
@@ -122,6 +136,24 @@ set ip_dir_list [get_property ip_repo_paths [current_project]]
 set ip_dir_list [concat $ip_dir_list $ip_ea_dir]
 set_property  ip_repo_paths  $ip_dir_list [current_project]
 
+### Apply a list patches of patches if it exists
+# The patch list is a list of paths to block design tcl files.
+# The definition of this list is EA's responsability, that needs
+# to match the "g_patch_list" variable name, and use correct paths
+# It can be done under $accelerator_path/meep_shell/tcl/project_options.tcl
+
+if { [info exists g_patch_list] } {
+    putcolors "Applying shell patches ..." $CYAN
+
+    foreach patch $g_patch_list {
+        # TODO: Catch
+        source $patch
+        putcolors "Patch $patch applied" $CYAN
+    }
+    #TODO: Catch
+    validate_bd_design
+    save_bd_design
+}
 
 # Sanity checks
 update_ip_catalog -rebuild

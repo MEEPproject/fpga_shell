@@ -9,7 +9,7 @@
 
 .setup:
   variables: 
-        EMULATED_ACCELERATOR: openpiton 
+        EMULATED_ACCELERATOR: ariane
         FPGA_BOARD: u55c
         GIT_SUBMODULE_STRATEGY: recursive
         NUMBER_OF_JOBS: "8"

@@ -51,8 +51,10 @@ echo -e "[MEEP] ***************************************\r\n"
 
 EAURL=`grep -o ea_url.txt -e https.*$`
 EANAME=$(grep -o ea_url.txt -e NAME.*$ | awk -F ':' '$2 {print $2}')
+EASHA=$(grep -o ea_url.txt -e SHA.*$ | awk -F ':' '$2 {print $2}')
 
-echo -e "[MEEP] Emulated accelerator:$EANAME\r\n\r\n\t$GREEN $EAURL $NC\r\n"
+# Print the relevant information
+echo -e "[MEEP] Emulated accelerator:$EANAME\r\n\r\n\t$GREEN $EAURL $NC\r\n\r\n\tSHA: $EASHA"
 
 
 ### Call the main program

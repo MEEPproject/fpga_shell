@@ -8,6 +8,9 @@ EA_SHA       =  EMULATED_ACCELERATOR_SHA
 EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
 EA_GIT_SHA   = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
 EA_DIR       =  $(ROOT_DIR)/accelerator
+EA_PARAM     ?= 
+# EA_PARAM is related to the EA, to it can be parametrized from the Shell
+# For MEEP/ACME, the options are: lagarto, ariane, pronoc, meep_dvino @10/11/2022
 DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
 ACCEL_DIR    =  $(ROOT_DIR)/accelerator
@@ -24,6 +27,7 @@ VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
 VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 DCP_ON       ?= 
+QUICK_IMPL   ?=
 U200_PART    = "xcu200-fsgd2104-2-e"
 U280_PART    = "xcu280-fsvh2892-2L-e" 
 U55C_PART    = "xcu55c-fsvh2892-2L-e"  
@@ -85,14 +89,14 @@ $(BINARIES_DIR):
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR)
-	$(SH_DIR)/accelerator_build.sh ;\
+	$(SH_DIR)/accelerator_build.sh $(EA_PARAM) ;\
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
+	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
 	
 $(BIT_FILE): $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
@@ -127,6 +131,8 @@ report_place: $(PLACE_DCP)
 report_route: $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
+####
+
 submodules:	
 	@(git submodule update --init --recursive)
 
@@ -134,10 +140,10 @@ clean: clean_ip clean_project
 	rm -rf dcp reports src 	
 
 clean_ip: 
-	@(cd ip/100GbEthernet; make clean)
-	@(cd ip/aurora_raw; make clean)
-	@(cd ip/10GbEthernet; make clean)
-	@(cd ip/uart_16650a; make clean)
+	@(make -C ip/100GbEthernet clean)
+	@(make -C ip/aurora_raw clean)
+	@(make -C ip/10GbEthernet clean)
+	@(make -C ip/uart_16650a clean)
 
 clean_binaries:
 	rm -rf binaries
@@ -148,7 +154,7 @@ clean_project: clean_ip
 clean_accelerator:
 	rm -rf accelerator
 
-clean_synthesis:	
+clean_synthesis: clean_implementation	
 	rm -rf dcp/synthesis.dcp
 
 clean_implementation:

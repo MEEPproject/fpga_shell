@@ -27,13 +27,16 @@ ROOT_DIR=$(pwd)
 ACC_DIR=$ROOT_DIR/accelerator
 SH_DIR=$ROOT_DIR/sh
 
+EA_GIT_URL=$1
+EA_GIT_SHA=$2
+
 if [ "$#" -ne 2 ]; then
     echo "[MEEP] Error: Illegal number of parameters, terminating"
 	echo "[MEEP] INFO: Usage: generate.sh <accelerator_repo>"
 	return -1
 fi
 
-bash -x $SH_DIR/gitsubmodules.sh $1 $2
+bash -x $SH_DIR/gitsubmodules.sh $EA_GIT_URL $EA_GIT_SHA
 #Generic call to accelerator conf script. It should be meep_shell/accelerator_init.sh
 cd $ACC_DIR
 

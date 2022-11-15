@@ -18,9 +18,10 @@
 # Description: 
 
 
+#!/bin/bash
 
-cd accelerator
+SHELL_PATCH=$1
 
-bash -x meep_shell/accelerator_build.sh $1
+vivado -mode batch -nolog -nojournal -notrace -source $SHELL_PATCH
 
-cd ..
+#TODO: Accept a list of patches

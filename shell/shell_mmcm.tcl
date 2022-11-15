@@ -205,7 +205,7 @@ set ConfMMCMString [lindex $NewMMCMconf 1]
 					connect_bd_net [get_bd_ports $RstSync] [get_bd_pins rst_ea_$ClkNum/peripheral_reset]
 
 				} else {
-                                        connect_bd_net [get_bd_ports $RstSync] [get_bd_pins rst_ea_$ClkNum/peripheral_aresetn]
+                	connect_bd_net [get_bd_ports $RstSync] [get_bd_pins rst_ea_$ClkNum/peripheral_aresetn]
 				}
 			}
 			

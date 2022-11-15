@@ -1,0 +1,4 @@
+debug_rom_en
+debug_rom_req
+[63:0] debug_rom_addr
+[63:0] debug_rom_rdata

@@ -1,5 +1,5 @@
     // PCI express
-	input         pcie_refclk_clk_n    ,
+    input         pcie_refclk_clk_n    ,
     input         pcie_refclk_clk_p    ,
     input         pcie_perstn          ,		
     input  [15:0] pci_express_x16_rxn  ,

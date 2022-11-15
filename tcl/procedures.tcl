@@ -241,7 +241,7 @@ proc add_instance { g_fd g_fd_tmp } {
 			putmeeps "INFO: Empty line detected\r\n"
 			#putmeeps "Empty Line detected"
 		} elseif { [regexp -inline -all {hbm_cattrip} $line] ne "" } {
-			putmeeps "INFO: skipping hbm_cattrip port"
+			putdebugs "skipping hbm_cattrip port"
 			set NoCattrip 0
 			# hbm_cattrip is used manually to close the instance,
 			# so we don't want to make the connection here.
@@ -277,6 +277,8 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 	putmeeps "Inside properties: $axi_ifname"
 
 	while {[gets $fd_wire line] >= 0} { 
+
+		#TODO: Don't parse commented lines
 		
 				
 		if {[regexp -inline -all "${axi_ifname}_awaddr" $line] != "" } {		
@@ -363,6 +365,19 @@ proc Add2EnvFile {path2file addString} {
 	set fd_file [open $path2file "a"]
 	
 	puts $fd_file $addString
+	
+	close $fd_file	
+}
+
+proc Add2ConstrFileList {path2file addStringList} {
+	
+	set fd_file [open $path2file "a"]
+
+	foreach StringIn $addStringList {
+	
+		puts $fd_file $StringIn
+
+	}
 	
 	close $fd_file	
 }

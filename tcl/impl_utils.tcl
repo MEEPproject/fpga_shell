@@ -67,10 +67,10 @@ proc reportUnconnectedPins { SynthLogFile } {
 	while {[gets $fd_synth line] >= 0} {
 		
 		set UndrivenPins [regexp -all -inline {WARNING: \[Synth 8-3295\].*$} $line]
-		puts $fd_report $UndrivenPins
-		puts "$UndrivenPins"
 		if { $UndrivenPins != ""} {
 			set UndrivenPinDetected 1
+	                puts $fd_report $UndrivenPins
+        	        puts "$UndrivenPins"
 		}	
 	}
 
@@ -283,6 +283,7 @@ proc exhaustivePlaceFlow { root_dir } {
 
 	# empty list for results
 	set wns_results ""
+	set TimingPaths [list]
 	# empty list for time elapsed messages
 	set time_msg ""
 	set AppliedDirective [list]
@@ -298,7 +299,7 @@ proc exhaustivePlaceFlow { root_dir } {
 	set prevWNS 0.000
 	set WNS 0.000
 	set bestWNS 0.000
-	set bestPlaceDirective ""
+	set bestPlaceDirective "Explore"
 
         set resFile "$g_root_dir/reports/exhaustivePlaceResults.txt"
 	# Create the directory if it didn't exists already
@@ -332,11 +333,13 @@ proc exhaustivePlaceFlow { root_dir } {
 		puts "$LapsedTime"
 
 		lappend time_msg "place_design: Time : $LapsedTime" 
+		set ThisTimingPath [get_timing_paths -max_paths 1 -nworst 1 -setup]
 		# append wns result to our results list
-		set WNS [ get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup] ]
+		set WNS [ get_property SLACK $ThisTimingPath ]
 		lappend wns_results $WNS
                 puts "Post Place WNS with directive $oneDirective = $WNS "
 		lappend AppliedDirective $oneDirective
+		lappend TimingPaths $ThisTimingPath
 
 		# Open file to append 
                 set fd_res [open $resFile "a+"]
@@ -345,6 +348,8 @@ proc exhaustivePlaceFlow { root_dir } {
                 puts $fd_res "Finish @ [clock format [clock seconds] -format %H:%M:%S]"
                 puts $fd_res "*******************************"
                 puts $fd_res "Post Place WNS with directive $oneDirective = $WNS "
+		puts $fd_res "Worst Timing Path:"
+		puts $fd_res $TimingPath
 		
 		if { [expr $WNS > $bestWNS] } {			
 			set bestPlaceDirective $oneDirective

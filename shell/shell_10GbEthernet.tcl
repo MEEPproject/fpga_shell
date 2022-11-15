@@ -16,7 +16,7 @@
 # Date: 22.02.2022
 # Description: 
 
-
+set ETHClkLab  [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
 set ETHClkName [dict get $ETHentry ClkName]
 set ETHRstName [dict get $ETHentry RstName]
@@ -30,6 +30,7 @@ set ETHUserWidth [dict get $ETHentry AxiUserWidth]
 
 set ETHirq [dict get $ETHentry IRQ]
 
+putdebugs "ETHClkLab    $ETHClkLab   "
 putdebugs "ETHFreq      $ETHFreq     "
 putdebugs "ETHClkName   $ETHClkName  "
 putdebugs "ETHintf      $ETHintf     "
@@ -41,7 +42,7 @@ putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/10GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp
+exec make -C "$g_root_dir/ip/10GbEthernet" $ETHqsfp FPGA_BOARD=$g_board_part
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
@@ -51,7 +52,7 @@ if { $ETHqsfp == "qsfp0" } {
 	set PortList [lappend PortList $g_Eth0_file]
 } elseif { $ETHqsfp == "qsfp1" } {
         set QSFP "1"
-	set PortList [lappend PortLIst $g_Eth1_file]
+	set PortList [lappend PortList $g_Eth1_file]
 } else {
 	set QSFP "PCIe"
 }
@@ -66,9 +67,20 @@ set EthHierName "Ethernet10Gb_${ETHqsfp}"
 create_hier_cell_Ethernet $TopCell "${EthHierName}" $eth_ip
 save_bd_design
 
+## Add timing constraints to the timing constrains file
+set dma_mm2s_irq_pin "meep_shell_inst/${EthHierName}/axi_dma_0/U0/I_AXI_DMA_REG_MODULE/GEN_MM2S_REGISTERS.GEN_INTROUT_ASYNC.PROC_REG_INTR2LITE/GENERATE_LEVEL_P_S_CDC.SINGLE_BIT.CROSS_PLEVEL_IN2SCNDRY_s_level_out_d4/C"
+set dma_s2mm_irq_pin "meep_shell_inst/${EthHierName}/axi_dma_0/U0/I_AXI_DMA_REG_MODULE/GEN_S2MM_REGISTERS.GEN_INTROUT_ASYNC.PROC_REG_INTR2LITE/GENERATE_LEVEL_P_S_CDC.SINGLE_BIT.CROSS_PLEVEL_IN2SCNDRY_s_level_out_d4/C"
+
+set dma_mm2s_constr "set_max_delay -from \[get_pins $dma_mm2s_irq_pin\] 3.0"
+set dma_s2mm_constr "set_max_delay -from \[get_pins $dma_s2mm_irq_pin\] 3.0"
+
+set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
+
+[Add2ConstrFileList $TimingConstrFile $ConstrList]
+
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
-
+# TODO: Check what needs to be harcoded. DMA solutions doesn't give much flexibility
 
   set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
   set_property -dict [ list \
@@ -78,25 +90,25 @@ save_bd_design
    CONFIG.BUSER_WIDTH {0} \
    CONFIG.DATA_WIDTH $ETHdataWidth \
    CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST {1} \
-   CONFIG.HAS_CACHE {1} \
-   CONFIG.HAS_LOCK {1} \
-   CONFIG.HAS_PROT {1} \
-   CONFIG.HAS_QOS {1} \
-   CONFIG.HAS_REGION {1} \
+   CONFIG.HAS_BURST {0} \
+   CONFIG.HAS_CACHE {0} \
+   CONFIG.HAS_LOCK {0} \
+   CONFIG.HAS_PROT {0} \
+   CONFIG.HAS_QOS {0} \
+   CONFIG.HAS_REGION {0} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
    CONFIG.ID_WIDTH $ETHidWidth \
-   CONFIG.MAX_BURST_LENGTH {64} \
+   CONFIG.MAX_BURST_LENGTH {1} \
    CONFIG.NUM_READ_OUTSTANDING {1} \
    CONFIG.NUM_READ_THREADS {1} \
    CONFIG.NUM_WRITE_OUTSTANDING {1} \
    CONFIG.NUM_WRITE_THREADS {1} \
-   CONFIG.PROTOCOL {AXI4} \
+   CONFIG.PROTOCOL {AXI4LITE} \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
    CONFIG.RUSER_WIDTH {0} \
-   CONFIG.SUPPORTS_NARROW_BURST {1} \
+   CONFIG.SUPPORTS_NARROW_BURST {0} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
    ] $eth_axi
@@ -154,7 +166,7 @@ set RstPinIP   [get_bd_pins ${EthHierName}/$ipRst]
 	set RstPinIP $pcie_rst_pin
 
 }
-# Make External avoids passing the signal width to this point. The bus is created automatically
+# Make External avoids passing the signal width at this point. The bus is created automatically
 create_bd_port -dir O -from 1 -to 0 -type intr $ETHirq
 connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins ${EthHierName}/eth_dma_irq]
 
@@ -162,10 +174,18 @@ connect_bd_intf_net [get_bd_intf_ports ${ETHintf}] -boundary_type upper [get_bd_
 
 
 create_bd_port -dir O -type clk $ETHClkName
-connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+#connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
 
 create_bd_port -dir O -type rst $ETHRstName
-connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
+#connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
+
+# Connect the defined ethernet CLK & RST to the DMA AXI IP, and also forward them to the EA
+connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_clk]   [get_bd_pins rst_ea_$ETHClkLab/slowest_sync_clk] [get_bd_ports ${ETHClkName}]
+connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_arstn] [get_bd_pins rst_ea_$ETHClkLab/peripheral_aresetn] [get_bd_ports ${ETHRstName}]
+
+# TODO: This reset maybe need to be ORed with the External User reset
+connect_bd_net [get_bd_ports resetn] [get_bd_pins ${EthHierName}/eth_ext_rstn]
+
 
 
 save_bd_design
