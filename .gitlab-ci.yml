@@ -179,7 +179,7 @@ fpga-test:
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG $VALID_MSG             
         after_script:            
-            - mv $FPGA_LOG tmp
+            - mv $FPGA_LOG tmp/
             - !reference [.fpga_test, after_script]
         allow_failure: false
         artifacts:
