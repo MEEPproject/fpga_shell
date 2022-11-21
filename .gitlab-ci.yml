@@ -197,7 +197,7 @@ deploy-EA:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
             - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_${CUSTOM_MSG}
-            - export ABSDIR=$DEPLOY_DIR/$EADIRNAME
+            - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR            
         script:            
             - date >> $ABSDIR/date.txt

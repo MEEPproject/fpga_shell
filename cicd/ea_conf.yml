@@ -1,5 +1,9 @@
 # Variable size of Matrix
 # TODO: This file could be auto-generated depending on the Matrix
+# It turns out that dependencies are only needed to specify which job 
+# the artifacts should be downloaded from. It is not mandatory, as by
+# default, all artifacts are downloaded. Dependencies is an optimization.
+# Same applies for needs. It is not mandatory.
 
 .multi_target:
     parallel:

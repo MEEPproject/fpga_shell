@@ -18,7 +18,7 @@
         TOOLS_DIR: /home/tools/fpga-tools
         DRIVERS_DIR: /home/tools/drivers
         QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
-        DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+        SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
         # TODO: Link with the SDK repo, set triggering policies
         OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
