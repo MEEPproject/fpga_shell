@@ -90,7 +90,7 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
-
+   
 ## TODO: Make dependant of selected HBM channels number
 if { $PCIeDMA != "yes" } {
 	set PCIeHBM "false"
@@ -255,6 +255,7 @@ if { [info exists hbm_inst] == 0 } {
                 set_property CONFIG.HAS_QOS    0 [get_bd_intf_ports $HBMintf]
                 set_property CONFIG.HAS_REGION 0 [get_bd_intf_ports $HBMintf]
                 set_property CONFIG.HAS_PROT   0 [get_bd_intf_ports $HBMintf]		
+
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
