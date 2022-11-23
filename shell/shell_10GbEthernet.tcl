@@ -62,7 +62,7 @@ source $g_root_dir/ip/10GbEthernet/tcl/ip_properties.tcl
 set eth_ip [list $ETHqsfp $g_ip_version ]
 
 # Load the hierarchy procedure and call it
-source $g_root_dir/shell/hier_ethernet.tcl
+source $g_root_dir/shell/hier_10GbEthernet.tcl
 set EthHierName "Ethernet10Gb_${ETHqsfp}"
 create_hier_cell_Ethernet $TopCell "${EthHierName}" $eth_ip
 save_bd_design
