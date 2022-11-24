@@ -64,7 +64,7 @@ proc create_hier_cell_Ethernet { parentCell nameHier eth_ip } {
    CONFIG.c_sg_length_width {23} \
  ] $axi_dma_0
 
-  # Create instance: axi_interconnect_0, and set properties
+  # Create instance: axi_interconnect_0, and set properties - Scatther Gather bus plus MM2S and S2MM
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
   set_property -dict [ list \
    CONFIG.NUM_MI {1} \
@@ -74,7 +74,7 @@ proc create_hier_cell_Ethernet { parentCell nameHier eth_ip } {
   # Create instance: proc_sys_reset_eth, and set properties
   set proc_sys_reset_eth [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_eth ]
 
-  # Create instance: smartconnect_0, and set properties
+  # Create instance: smartconnect_0, and set properties - DMA configuration and CMAC configuration
   set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
   set_property -dict [ list \
    CONFIG.NUM_SI {2} \
@@ -90,7 +90,7 @@ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_irq
   connect_bd_intf_net -intf_net Conn1 [get_bd_intf_pins eth_dma_axi_lite] [get_bd_intf_pins smartconnect_0/S00_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins axi_dma_0/S_AXI_LITE] [get_bd_intf_pins smartconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net ${EthIPName}_ETH_RX_AXIS [get_bd_intf_pins ${EthIPName}/ETH_RX_AXIS] [get_bd_intf_pins axi_dma_0/S_AXIS_S2MM]
-  connect_bd_intf_net -intf_net ${EthIPName}_qsfp_1x [get_bd_intf_pins ${ETHqsfp}_1x] [get_bd_intf_pins ${EthIPName}/qsfp_1x]
+  connect_bd_intf_net -intf_net ${EthIPName}_qsfp_4x [get_bd_intf_pins ${ETHqsfp}_4x] [get_bd_intf_pins ${EthIPName}/qsfp_4x]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXIS_MM2S [get_bd_intf_pins ${EthIPName}/ETH_TX_AXIS] [get_bd_intf_pins axi_dma_0/M_AXIS_MM2S]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXI_MM2S [get_bd_intf_pins axi_dma_0/M_AXI_MM2S] [get_bd_intf_pins axi_interconnect_0/S01_AXI]
   connect_bd_intf_net -intf_net axi_dma_0_M_AXI_S2MM [get_bd_intf_pins axi_dma_0/M_AXI_S2MM] [get_bd_intf_pins axi_interconnect_0/S02_AXI]

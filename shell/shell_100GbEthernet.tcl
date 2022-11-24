@@ -121,7 +121,7 @@ set ipClock "eth_gt_user_clock"
 set ipRst "eth_gt_rstn"
 set ipLocked "locked"
 
-set EthHierName "Ethernet10Gb_${ETHqsfp}"
+set EthHierName "Ethernet100Gb_${ETHqsfp}"
 
 set ipClockPin [get_bd_pins ${EthHierName}/$ipClock]
 
@@ -203,7 +203,7 @@ set_property range $ETHMemRange [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
 
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
-
+# TODO: The HBM channel numbering should be tracked to avoid conflicts
 set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_30_ACLK} CONFIG.USER_SAXI_30 {true}] [get_bd_cells hbm_0]
 
 
