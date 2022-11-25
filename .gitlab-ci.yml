@@ -179,7 +179,7 @@ fpga-test:
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG $VALID_MSG             
         after_script:            
-            - mv $FPGA_LOG tmp/
+            - mv $FPGA_LOG tmp/$FPGA_LOG
             - !reference [.fpga_test, after_script]
         allow_failure: false
         artifacts:
@@ -189,10 +189,16 @@ fpga-test:
 
 deploy-EA:
         stage: deploy
-        extends: .fpga-test_needs
-        extends: .common_conf
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
+        rules:
+            - !reference [.default_rules, rules]  
+            - if: $CI_PIPELINE_SOURCE == "pipeline" 
+        variables:
+            GIT_SUBMODULE_STRATEGY: "none"
+            GIT_STRATEGY: "none"
+        timeout: 8h
+        tags: !reference [.default_tags, tags] 
         before_script:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
