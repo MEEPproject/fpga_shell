@@ -1,0 +1,66 @@
+# Use this file to configure your system. You can configure your system variables,
+# the tags for the runners, the specific scripts for your own EA to work, etc.
+# The FPGA board is also defined here [u280, u55c]
+# TODO: Do make initialize FPGA_BOARD to set up the proper board within the Shell
+
+
+.setup:
+  variables: 
+        EMULATED_ACCELERATOR: acme 
+        GIT_STRATEGY: clone
+        GIT_SUBMODULE_STRATEGY: recursive
+        CUSTOM_MSG: 1x1_VAS_noVPU
+        LINUX_IMAGE: osbi.bin
+        SDK_DIR: accelerator/sdk
+        VALID_MSG: "Welcome to Buildroot"
+        # Local workstation Setup
+        NUMBER_OF_JOBS: "8"        
+        TOOLS_DIR: /home/tools/fpga-tools
+        DRIVERS_DIR: /home/tools/drivers
+        QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
+        SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
+        BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
+        # TODO: Link with the SDK repo, set triggering policies
+        OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
+
+.qdma_drivers: &qdma_drivers
+        - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
+        - "export PATH=$QDMA_APPS:$PATH"
+
+.default_rules:
+  rules:
+   if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
+
+.sdk_default:
+    before_script:
+      - echo "SDK before script"
+      - mkdir -p sdk_output
+    script:
+      - make -C $SDK_DIR alveo.bin 
+    after_script:
+      - mv $SDK_DIR/osbi_alveo.bin sdk_output/$LINUX_IMAGE
+    artifacts:    
+      when: always
+      paths:
+        - sdk_output
+
+.synth_default:
+    after_script:
+        - cp $(find . -name "make_project.log") tmp/
+
+.default_tags:
+  tags:
+    - MEEP_FPGA
+
+.fpga_test:
+  before_script:
+    - *qdma_drivers    
+  script:
+          #- source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
+    - source $BOOT_SCRIPT $OSBI_DEPLOY_DIR
+  after_script:
+    - mkdir -p boot
+    - cp $BOOT_SCRIPT boot/
+    - cp $OSBI_DEPLOY_DIR boot/
+    - mv boot tmp/            
+    - echo -e "Artifacts:"; ls tmp/
