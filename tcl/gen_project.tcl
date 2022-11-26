@@ -136,6 +136,16 @@ set ip_dir_list [get_property ip_repo_paths [current_project]]
 set ip_dir_list [concat $ip_dir_list $ip_ea_dir]
 set_property  ip_repo_paths  $ip_dir_list [current_project]
 
+## Add a list of EA files if the EA has created the ea_flist variable
+
+if { [info exists g_ea_flist] } {
+    putcolors "Adding EA source files ..." $CYAN
+    add_files ${g_ea_flist}
+
+}
+
+
+
 ### Apply a list patches of patches if it exists
 # The patch list is a list of paths to block design tcl files.
 # The definition of this list is EA's responsability, that needs
