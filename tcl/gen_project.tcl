@@ -144,7 +144,21 @@ if { [info exists g_ea_flist] } {
 
 }
 
+# Create a list of IPs passed by the EA in a list variable
 
+if { [info exists g_ip_list] } {
+    putcolors "Adding the EA IPs ..." $CYAN
+
+    foreach oneIP $g_ip_list {
+        if { [catch {import_ip $oneIP} ErrorMessage] } {
+                puterrors "IP $oneIP has not been added"
+                puterrors "$ErrorMessage"
+                return 1
+        } else {
+                putcolors "IP $oneIP added" $CYAN
+        }
+    }
+}
 
 ### Apply a list patches of patches if it exists
 # The patch list is a list of paths to block design tcl files.
@@ -156,9 +170,13 @@ if { [info exists g_patch_list] } {
     putcolors "Applying shell patches ..." $CYAN
 
     foreach patch $g_patch_list {
-        # TODO: Catch
-        source $patch
-        putcolors "Patch $patch applied" $CYAN
+	if { [catch {source $patch} ErrorMessage] } {
+	        puterrors "Patch $patch has not been loaded"
+        	puterrors "$ErrorMessage"
+	        return 1
+	} else {
+	        putcolors "Patch $patch applied" $CYAN
+	}
     }
     #TODO: Catch
     validate_bd_design
