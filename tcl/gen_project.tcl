@@ -144,7 +144,7 @@ if { [info exists g_ea_flist] } {
 
 }
 
-# Create a list of IPs passed by the EA in a list variable
+# Add a list of xci files from an EA list if it exists
 
 if { [info exists g_ip_list] } {
     putcolors "Adding the EA IPs ..." $CYAN
@@ -159,6 +159,23 @@ if { [info exists g_ip_list] } {
         }
     }
 }
+
+# Add block designs from an EA list if it exists
+
+if { [info exists g_bd_list] } {
+    putcolors "Adding the EA BDs ..." $CYAN
+
+    foreach oneBD $g_bd_list {
+        if { [catch {import_ip $oneBD} ErrorMessage] } {
+                puterrors "BD $oneBD has not been added"
+                puterrors "$ErrorMessage"
+                return 1
+        } else {
+                putcolors "BD $oneIP added" $CYAN
+        }
+    }
+}
+
 
 ### Apply a list patches of patches if it exists
 # The patch list is a list of paths to block design tcl files.
