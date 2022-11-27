@@ -27,11 +27,22 @@ set g_UARTClkPort [dict get $UARTentry SyncClk Label]
 
 set UARTaddrWidth [dict get $UARTentry AxiAddrWidth]
 
-putdebugs "UART? $g_UART_CLK"
+# Default to non-empty value for the special case where
+# the UART is going to be used via PATCH. In this case,
+# there is no associated axi bus values comming from the EA.
+
+puterrors $UARTaddrWidth
+if { $UARTaddrWidth == "0" } {
+    set UARTaddrWidth "13"	
+}
+
+#putdebugs "UART? $g_UART_CLK"
 
 # Definded under tcl/vivado_ip_tables.tcl
 #set MEEPUart "meep-project.eu:MEEP:MEEP_PULP_UART:1.0"
 #set XilinxUart "xilinx.com:ip:axi_uart16550:2.0"
+
+
 
 if { $g_UART_MODE eq "xilinx" } {
 
@@ -40,7 +51,7 @@ if { $g_UART_MODE eq "xilinx" } {
 
 } else {
 
-	# MEEP UART
+    # MEEP UART
 
     set UartCoreName "MEEP_uart16650_0"
     set UartCoreIP $MEEPUart
