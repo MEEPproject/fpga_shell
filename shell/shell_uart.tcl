@@ -31,7 +31,6 @@ set UARTaddrWidth [dict get $UARTentry AxiAddrWidth]
 # the UART is going to be used via PATCH. In this case,
 # there is no associated axi bus values comming from the EA.
 
-puterrors $UARTaddrWidth
 if { $UARTaddrWidth == "0" } {
     set UARTaddrWidth "13"	
 }
