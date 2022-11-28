@@ -54,6 +54,10 @@ stages:
     - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
     - echo "After update_sha:"; cat ea_url.txt
 
+# EMULATED_ACCELERATOR might be an export variable instead of a GitLab one.
+# Then, before script can setup this bash variable depending on the value 
+# of the EA matrix/parallel value. This way we can clone other EAs 
+
 
 synthesis:
         stage: synthesis
@@ -202,13 +206,13 @@ deploy-EA:
         before_script:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_${CUSTOM_MSG}
+            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR            
         script:            
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_${EA}_${FPGA_BOARD} tmp/reports/
+            - mkdir -p tmp/reports; mv reports_* tmp/
             - mv dcp tmp/ ; mv bitstream tmp/
             - cp -r tmp/* $ABSDIR
         allow_failure: false
