@@ -46,7 +46,7 @@ set PCIeDMA "yes"
 ##################################################################
 # Enable debug messages
 ##################################################################
-set DebugEnable "True"
+set DebugEnable "False"
 
 # u200 has not the same FPGA naming as u280, u55c or vcu128
 if { $g_board_part == "u200" }  {
