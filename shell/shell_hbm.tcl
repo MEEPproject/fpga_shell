@@ -37,6 +37,9 @@ set HBMuserWidth [dict get $HBMentry AxiUserWidth]
 ## converter to HBM. Hardcoded to 0
 set HBMuserWidth 0
 
+
+set HBMChNum [formatHBMch HBMChNum]
+
 if { $HBMname == "PCIE_CLK"} {
 	set HBMClockPin $pcie_clk_pin
         set HBMRstPin   $pcie_rst_pin

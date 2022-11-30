@@ -430,3 +430,24 @@ proc AddClk2MMCM { ClockList ConfMMCMString NewClk} {
 
 
 }
+
+proc formatHBMch { HBMChannel } {
+
+	set HBMChannelFormatted $HBMChannel
+
+	putdebugs "HBM Channels Before: $HBMChNum"
+
+	if { [string length HBMChannel] == 1 } {
+		# Append a 0 for those values that are passed as a single number
+		# This makes the AXI HBM Connections easier.
+		set HBMChannelFormatted "0"$HBMChannel
+	}
+
+	if { [string length HBMChannel] > 2 } {
+		puterrors "HBM Channels with three or more digits doesn't make sense"
+	}
+
+	putdebugs "HBM Channels After: $HBMChNum"
+
+	return $HBMChannelFormatted
+}
