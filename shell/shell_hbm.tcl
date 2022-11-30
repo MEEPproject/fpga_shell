@@ -37,8 +37,8 @@ set HBMuserWidth [dict get $HBMentry AxiUserWidth]
 ## converter to HBM. Hardcoded to 0
 set HBMuserWidth 0
 
-
-set HBMChNum [formatHBMch HBMChNum]
+# Formatting HBM Channel numbering to be two digits long
+set HBMChNum [formatHBMch $HBMChNum]
 
 if { $HBMname == "PCIE_CLK"} {
 	set HBMClockPin $pcie_clk_pin
