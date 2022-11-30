@@ -28,6 +28,7 @@ set ConfMMCMString " "
 # 1GHz, arbitrarily High
 set slowestSyncCLK 1000000000
 set APBclkCandidate "None"
+set ETHclkCandidate "None"
 set RstExist 0
 
 if { $ARSTDef ne "" } {
