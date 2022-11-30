@@ -399,7 +399,7 @@ proc AddClk2MMCM { ClockList ConfMMCMString NewClk} {
 
     ### +2 because the list is at this point one element short and because
     ### The Clock wizard numeration differs and doesn't have a 0
-    set numClk [expr [llength ClockList] +1]
+    set numClk [expr [llength ClockList] + 0]
     set d_clock [dict create Name CLK${numClk}]
         
 	dict set d_clock ClkNum  CLK${numClk}
