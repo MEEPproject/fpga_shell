@@ -397,36 +397,54 @@ proc AddClk2MMCM { ClockList ConfMMCMString NewClk} {
 	putdebugs $NewClockList 
 	putdebugs $NewConfMMCMString 
 
-        ### +2 because the list is at this point one element short and because
-        ### The Clock wizard numeration differs and doesn't have a 0
-        set numClk [expr [llength ClockList] +2]
-        set d_clock [dict create Name CLK${numClk}]
+    ### +2 because the list is at this point one element short and because
+    ### The Clock wizard numeration differs and doesn't have a 0
+    set numClk [llength $ClockList]
+    set d_clock [dict create Name CLK${numClk}]
         
 	dict set d_clock ClkNum  CLK${numClk}
-        dict set d_clock ClkFreq $ClkFreqNew
-        dict set d_clock ClkName $ClkNameNew
+    dict set d_clock ClkFreq $ClkFreqNew
+    dict set d_clock ClkName $ClkNameNew
 	dict set d_clock ClkRst ""
 	dict set d_clock ClkRstPol ""
 
-        set NewClockList [lappend NewClockList $d_clock]
+    set NewClockList [lappend NewClockList $d_clock]
 
-        putdebugs "Adding $ClkNameNew Clk to the list: $NewClockList"
+    putdebugs "Adding $ClkNameNew Clk to the list: $NewClockList"
 
 	set ClkFreqMHz [expr $ClkFreqNew/1000000 ]
 
 	incr numClk	
 
-        set ConfMMCM "CONFIG.CLKOUT${numClk}_USED true "
-        append NewConfMMCMString "$ConfMMCM"
+    set ConfMMCM "CONFIG.CLKOUT${numClk}_USED true "
+    append NewConfMMCMString "$ConfMMCM"
 
-        set ConfMMCM "CONFIG.CLKOUT${numClk}_REQUESTED_OUT_FREQ $ClkFreqMHz "
-        append NewConfMMCMString "$ConfMMCM"
+    set ConfMMCM "CONFIG.CLKOUT${numClk}_REQUESTED_OUT_FREQ $ClkFreqMHz "
+    append NewConfMMCMString "$ConfMMCM"
 
 	set RetMMCM [list $NewClockList $NewConfMMCMString]
 
-        #set name [gets stdin]
+    #set name [gets stdin]
 
 	return $RetMMCM
 
 
+}
+
+proc formatHBMch { HBMChannel } {
+
+	set HBMChannelFormatted $HBMChannel
+
+	if { [string length $HBMChannel] == 1 } {
+		# Append a 0 for those values that are passed as a single number
+		# This makes the AXI HBM Connections easier.
+		putdebugs "Formatting HBM Channel numbering to be two digits long"
+		set HBMChannelFormatted "0${HBMChannel}"		
+	}
+
+	if { [string length $HBMChannel] > 2 } {
+		puterrors "HBM Channels with three or more digits doesn't make sense"
+	}
+
+	return $HBMChannelFormatted
 }

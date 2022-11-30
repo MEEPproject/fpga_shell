@@ -69,7 +69,7 @@ set TimingConstrFile "$root_dir/xdc/${g_board_part}/${g_project_name}_timing_${g
 set ILAConstrFile    "$root_dir/xdc/${g_board_part}/${g_project_name}_ila_${g_board_part}.xdc"
 set BoardConstrFile  "$root_dir/xdc/${g_board_part}/${g_project_name}_${g_board_part}.xdc"
 
-# Clean up from previous builds, and gereate it
+# Clean up from previous builds, and generate a new one
 file delete -force $TimingConstrFile
 set InitDate [ clock format [ clock seconds ] -format %d/%m/%Y ]
 set InitTime [ clock format [ clock seconds ] -format %H:%M:%S ]

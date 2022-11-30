@@ -28,6 +28,7 @@ set ConfMMCMString " "
 # 1GHz, arbitrarily High
 set slowestSyncCLK 1000000000
 set APBclkCandidate "None"
+set ETHclkCandidate "None"
 set RstExist 0
 
 if { $ARSTDef ne "" } {
@@ -59,7 +60,6 @@ foreach clkObj $ClockList {
 	incr i
 	incr n
 
-	
 	#Get the slowest clock and check if there is any below
 	#100MHz. If it doesn't, it needs to be created to source
 	#the HBM APB port.
@@ -84,58 +84,40 @@ foreach clkObj $ClockList {
 
 putmeeps "Slowest CLK: $slowestSyncCLKname, APBcandidate: $APBclkCandidate"
 
-### An APB clock is added to the list if no candidate is found
-# TODO: What if HBM is not selected?
 set APBclk ""
 set ETHinitCLK ""
 
-if { $APBclkCandidate ne "None" } {
-	
-	set APBclk $APBclkCandidate
-	
-	putmeeps "APB CLK: $APBclk"
-
+### An APB clock is added to the list if no candidate is found
+# TODO: What if HBM is not selected?
+if { $APBclkCandidate != "None" } {
+	set APBclk $APBclkCandidate	
+	putmeeps "APB CLK: $APBclk"	
 } else {
-	### +2 because the list is at this point one element short and because
-	### The Clock wizard numeration differs and doesn't have a 0
-	set numClk [expr [llength ClockList] +2]
-	set d_clock [dict create Name CLK${numClk}]
-	#a 50MHz clock needs to be created, default APB clock
-	# ClockList
-	dict set d_clock ClkNum  CLK${numClk}
-	dict set d_clock ClkFreq 50000000
-	dict set d_clock ClkName APBclk
-	
-	set APBclk "CLK[expr $numClk -1]"
-	
-	set ClockList [lappend ClockList $d_clock]	
-
-	putdebugs "Adding APB Clk to the list: $ClockList"
-	
-	set ConfMMCM "CONFIG.CLKOUT${numClk}_USED true "
-	append ConfMMCMString "$ConfMMCM"
-	
-	set ConfMMCM "CONFIG.CLKOUT${numClk}_REQUESTED_OUT_FREQ 50 "
-	append ConfMMCMString "$ConfMMCM"
-	
-	# set ConfMMCM "CONFIG.CLK_OUT${numClk}_PORT CLK[expr [llength ClockList]+1] "
-	# append ConfMMCMString "$ConfMMCM"		
-	
+	# The procedure [AddClk2MMCM] returns both the updated clock list and the MMCM configuration string
+	set APBclk [list "APBclk" 50000000]
+	set ClocksAndConf [AddClk2MMCM $ClockList $ConfMMCMString $APBclk ]
+	# Update the values
+	set ClockList [lindex $ClocksAndConf 0]
+	set ConfMMCMString [lindex $ClocksAndConf 1]
 }
 
-set EthInitClk [list "EthInitClk" 125000000]
-set NewMMCMconf [AddClk2MMCM $ClockList $ConfMMCMString $EthInitClk ]
+# If ethernet is enabled, and no candidate has been found --> Enable a extra 125MHz clock
+foreach dicEntry $ShellEnabledIntf {
+	if {[regexp -inline -all "ETHERNET" $dicEntry] ne "" } {
+		if { $ETHclkCandidate == "None" } {
+			set EthInitClk [list "EthInitClk" 125000000]		
+			set ClocksAndConf [AddClk2MMCM $ClockList $ConfMMCMString $EthInitClk ]
+			# Update the values
+			set ClockList [lindex $ClocksAndConf 0]
+			set ConfMMCMString [lindex $ClocksAndConf 1]
+		} else {
+			set EthInitClk $ETHclkCandidate
+		}
+	}
+}
 
 putdebugs $ClockList
-putdebugs [lindex $NewMMCMconf 0]
-
 putdebugs $ConfMMCMString
-putdebugs [lindex $NewMMCMconf 1]
-
-
-set ClockList [lindex $NewMMCMconf 0]
-set ConfMMCMString [lindex $NewMMCMconf 1]
-
 
 # BOARD_FREQ is defined in the environment file.
 	
@@ -166,7 +148,8 @@ set ConfMMCMString [lindex $NewMMCMconf 1]
   set APBClockPin ""
   set APBRstPin ""
 
-  set n 1
+# Start from 1, because the MMCM IP uses outputs numbered starting from 1
+  set n 1 
 
 	foreach clkObj $ClockList {
 
@@ -207,35 +190,26 @@ set ConfMMCMString [lindex $NewMMCMconf 1]
 				} else {
                 	connect_bd_net [get_bd_ports $RstSync] [get_bd_pins rst_ea_$ClkNum/peripheral_aresetn]
 				}
-			}
-			
-			
-			incr n
-		} else {
-			# We know APB Clk, if it exists in the list, is the last one, so we can
-			# still use the index n to refer to the MMCM clock output
-			# TODO: Refactor this whole thing
-			set n [expr $n-1]
+			}									
+		} elseif { $ClkName == "APBclk" } {
+
+			putdebugs "APB $n"
 			
 			set APBClockPin [get_bd_pins clk_wiz_1/clk_out${n}]
 			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_apb
-                        connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_apb/ext_reset_in]
+            connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_apb/ext_reset_in]
 			connect_bd_net $APBClockPin [get_bd_pins rst_apb/slowest_sync_clk]
 			set APBRstPin [get_bd_pins rst_apb/peripheral_aresetn]
 
-
+		} elseif { $ClkName == "EthInitClk" } {
+			set EthInitClkPin [get_bd_pins clk_wiz_1/clk_out${n}]
 		}
-
+		# Increase at the end
+		incr n
 	}
-
- # TODO: Now we know Ethernet Init Clk is the last one, but this needs to be refactored
- incr n
-
+# Store the locked pin to be used later
  set MMCMLockedPin [get_bd_pins clk_wiz_1/locked]
- set EthInitClkPin [get_bd_pins clk_wiz_1/clk_out${n}]
-
   
-
  save_bd_design  
 
 
