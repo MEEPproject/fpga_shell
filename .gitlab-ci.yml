@@ -96,7 +96,6 @@ synthesis:
             
 implementation:
         stage: implementation
-        extends: .implementation_needs
         extends: .common_conf         
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script:           
@@ -118,7 +117,6 @@ implementation:
 
 bitstream:
         stage: bitstream
-        extends: .bitstream_needs
         extends: .common_conf        
         before_script:
             - ls; ls dcp; tree 
@@ -141,7 +139,6 @@ bitstream:
 
 reports:
         stage: bitstream
-        extends: .bitstream_needs
         extends: .common_conf
         before_script:
             - ls; ls dcp; tree 
@@ -164,7 +161,6 @@ reports:
 fpga-test:
         stage: fpga-test
         retry: 2
-        extends: .fpga-test_needs
         extends: .common_conf
         # Overwrite tags to select the right board
         tags: 
@@ -227,7 +223,6 @@ release_job:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created
         script:
             - echo "Running release job"
-        extends: .fpga-test_needs
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
          description: 'CICD release with bitstreams [acme, openpiton] for Alveo U55C and Alveo U280'
