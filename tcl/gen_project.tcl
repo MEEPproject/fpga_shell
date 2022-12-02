@@ -166,12 +166,12 @@ if { [info exists g_bd_list] } {
     putcolors "Adding the EA BDs ..." $CYAN
 
     foreach oneBD $g_bd_list {
-        if { [catch {import_ip $oneBD} ErrorMessage] } {
+        if { [catch {add_files ${oneBD}} ErrorMessage] } {
                 puterrors "BD $oneBD has not been added"
                 puterrors "$ErrorMessage"
                 return 1
-        } else {
-                putcolors "BD $oneIP added" $CYAN
+        } else {                
+                putcolors "BD $oneBD added" $CYAN
         }
     }
 }
@@ -187,13 +187,13 @@ if { [info exists g_patch_list] } {
     putcolors "Applying shell patches ..." $CYAN
 
     foreach patch $g_patch_list {
-	if { [catch {source $patch} ErrorMessage] } {
-	        puterrors "Patch $patch has not been loaded"
-        	puterrors "$ErrorMessage"
-	        return 1
-	} else {
-	        putcolors "Patch $patch applied" $CYAN
-	}
+        if { [catch {source $patch} ErrorMessage] } {
+                puterrors "Patch $patch has not been loaded"
+                puterrors "$ErrorMessage"
+                return 1
+        } else {
+                putcolors "Patch $patch applied" $CYAN
+        }
     }
     #TODO: Catch
     validate_bd_design
