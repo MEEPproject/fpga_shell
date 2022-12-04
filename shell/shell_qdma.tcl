@@ -114,15 +114,43 @@ set PortList [lappend PortList $g_pcie_file]
 	   set_property name $PCIeClkNm [get_bd_ports axi_aclk_0]
 	   set_property name $PCIeRstNm [get_bd_ports axi_aresetn_0]
 	   #TODO: Add register slice option to relax timing
-
    }
 
 	# This variable is used in shell_hbm.tcl
 	set PCIeDMAdone 0
 
-
 set pcie_clk_pin  [get_bd_pins qdma_0/axi_aclk]
 set pcie_rst_pin [get_bd_pins qdma_0/axi_aresetn]
+
+# Create an interconnect for the PCIe AXI Lite interface
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_xbar_pcie_lite
+connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI_LITE] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/S00_AXI]
+connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie_lite/ACLK]
+connect_bd_net [get_bd_pins qdma_0/phy_ready] [get_bd_pins axi_xbar_pcie_lite/ARESETN]
+connect_bd_net $pcie_rst_pin [get_bd_pins axi_xbar_pcie_lite/S00_ARESETN]
+connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie_lite/S00_ACLK]
+set_property -dict [list CONFIG.NUM_MI {1}] [get_bd_cells axi_xbar_pcie_lite]
+connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M00_ACLK] $pcie_clk_pin
+connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M00_ARESETN] $pcie_rst_pin
+# There is at least a BROM connected to the PCIe AXI LIte interface
+set slv_axi_ninstances 1
+
+create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_brom_system
+set_property -dict [list CONFIG.PROTOCOL {AXI4LITE} CONFIG.SINGLE_PORT_BRAM {1} CONFIG.READ_LATENCY {8}] [get_bd_cells axi_brom_system]
+create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 shell_rom
+connect_bd_intf_net [get_bd_intf_pins shell_rom/BRAM_PORTA] [get_bd_intf_pins axi_brom_system/BRAM_PORTA]
+
+
+connect_bd_net [get_bd_pins axi_brom_system/s_axi_aclk]  $pcie_clk_pin
+connect_bd_net [get_bd_pins axi_brom_system/s_axi_aresetn]  $pcie_rst_pin
+
+connect_bd_intf_net [get_bd_intf_pins axi_brom_system/S_AXI] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M00_AXI]
+
+
+
+
+
+
 
 
 save_bd_design

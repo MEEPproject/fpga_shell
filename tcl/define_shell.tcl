@@ -141,7 +141,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 							dict set d_device SyncClk $ClkList
 						}
 					}
-					## If the interface is synchronous to the PCIe CLK, create an special case
+					## If the interface is synchronous to the PCIe/DDR/Ethernet CLK, create an special case
 					if { [lindex $fields 4] == "PCIE_CLK" } {
 						set ClkFreq 250000000
 						set ClkName "PCIE_CLK"
@@ -210,6 +210,9 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					if { "${device}" == "AURORA" } {
                         dict set d_device Mode   [lindex $fields 6]
                         dict set d_device UsrClk [lindex $fields 8]
+					}
+					if { "${device}" == "SLV_AXI" } {						
+						dict set d_device AxiIntf "AxiL"
 					}
 					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}

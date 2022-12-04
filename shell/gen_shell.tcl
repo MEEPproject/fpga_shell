@@ -104,17 +104,21 @@ foreach dicEntry $ShellEnabledIntf {
 		set BROMentry $dicEntry
 		source $g_root_dir/shell/shell_brom.tcl
 	}
-        if {[regexp -inline -all "BRAM" $IntfName] ne "" } {
-                set BRAMentry $dicEntry
-                source $g_root_dir/shell/shell_bram.tcl
-        }	
+	if {[regexp -inline -all "BRAM" $IntfName] ne "" } {
+			set BRAMentry $dicEntry
+			source $g_root_dir/shell/shell_bram.tcl
+	}
+	if {[regexp -inline -all "SLV_AXI" $IntfName] ne "" } {
+		set SLVAXIentry $dicEntry
+		source $g_root_dir/shell/shell_slvaxi.tcl	
+		set_property CONFIG.ASSOCIATED_BUSIF ${g_SLVAXI_ifname} [get_bd_ports /$g_SLVAXI_CLK]
+	}
 	
 }
 
 #GEnerate IF GPIO: Inside the tcl
 
 source $g_root_dir/shell/shell_gpio.tcl
-
 
 ## TODO: Find the right place for this, as lools like the smartConnect
 ## needs to be present for this to get set

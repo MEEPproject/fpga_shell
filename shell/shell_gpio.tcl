@@ -38,11 +38,19 @@ make_bd_pins_external  [get_bd_pins axi_gpio_0/gpio_io_o]
 set_property name $IntfName [get_bd_ports gpio_io_o_0]
 set_property -dict [list CONFIG.C_DOUT_DEFAULT $InitValue] [get_bd_cells axi_gpio_0]
 
-## Connect to QDMA AXI Lite interface. Clock & reset ports are those from QDMA
-connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI_LITE] [get_bd_intf_pins axi_gpio_0/S_AXI]
-connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins axi_gpio_0/s_axi_aclk]
-connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins axi_gpio_0/s_axi_aresetn]
+set_property -dict [list CONFIG.NUM_MI [expr $slv_axi_ninstances + 1]] [get_bd_cells axi_xbar_pcie_lite]	
+
 save_bd_design
+#connect_bd_intf_net [get_bd_intf_pins axi_gpio_0/S_AXI] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_AXI]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M02_AXI] [get_bd_intf_pins axi_gpio_0/S_AXI]
+connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_ACLK] $APBClockPin
+connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_ARESETN] $APBRstPin
+
+connect_bd_net [get_bd_pins axi_gpio_0/s_axi_aclk] $APBClockPin
+connect_bd_net [get_bd_pins axi_gpio_0/s_axi_aresetn] $APBRstPin
+
+# Increase the counter to track the number of slaves added	
+incr slv_axi_ninstances
 
 ## Add timing constraints to the timing constrains file
 ## For the GPIO, we assume all outputs are used as asynchronous to the PCIe clock domain.
