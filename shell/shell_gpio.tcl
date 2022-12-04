@@ -42,7 +42,7 @@ set_property -dict [list CONFIG.NUM_MI [expr $slv_axi_ninstances + 1]] [get_bd_c
 
 save_bd_design
 #connect_bd_intf_net [get_bd_intf_pins axi_gpio_0/S_AXI] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_AXI]
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M02_AXI] [get_bd_intf_pins axi_gpio_0/S_AXI]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_AXI] [get_bd_intf_pins axi_gpio_0/S_AXI]
 connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_ACLK] $APBClockPin
 connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_ARESETN] $APBRstPin
 

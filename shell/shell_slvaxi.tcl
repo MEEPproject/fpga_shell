@@ -44,6 +44,8 @@ connect_bd_intf_net [get_bd_intf_ports $g_SLVAXI_ifname] -boundary_type upper [g
 # Increase the counter to track the number of slaves added	
 incr slv_axi_ninstances
 
+puterrors "NUMBER LITE $slv_axi_ninstances"
+
 save_bd_design
 
 #### SLVAXI memory map	
@@ -56,7 +58,7 @@ putdebugs "SLVAXIaddrWidth $SLVAXIaddrWidth"
 set SLVAXIMemRange 4
 
 #save_bd_design
-assign_bd_address [get_bd_addr_segs {$g_SLVAXI_ifname/S_AXI/Reg }]
+assign_bd_address [get_bd_addr_segs ${g_SLVAXI_ifname}/S_AXI/Reg ]
 set_property range ${SLVAXIMemRange}K [get_bd_addr_segs qdma_0/M_AXI_LITE/SEG_${g_SLVAXI_ifname}_Reg]
 set_property offset ${SLVAXIbaseAddr} [get_bd_addr_segs qdma_0/M_AXI_LITE/SEG_${g_SLVAXI_ifname}_Reg]
 
