@@ -122,6 +122,10 @@ set PortList [lappend PortList $g_pcie_file]
 set pcie_clk_pin  [get_bd_pins qdma_0/axi_aclk]
 set pcie_rst_pin [get_bd_pins qdma_0/axi_aresetn]
 
+################################################################
+# QDMA AXI Lite interface + BROM with system information
+################################################################
+
 # Create an interconnect for the PCIe AXI Lite interface
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_xbar_pcie_lite
 connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI_LITE] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/S00_AXI]
@@ -137,20 +141,29 @@ set slv_axi_ninstances 1
 
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_brom_system
 set_property -dict [list CONFIG.PROTOCOL {AXI4LITE} CONFIG.SINGLE_PORT_BRAM {1} CONFIG.READ_LATENCY {8}] [get_bd_cells axi_brom_system]
-create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 shell_rom
-connect_bd_intf_net [get_bd_intf_pins shell_rom/BRAM_PORTA] [get_bd_intf_pins axi_brom_system/BRAM_PORTA]
 
+### Initialize the ROM IP
+putmeeps "Packaging ROM IP..."
+exec make -C "$g_root_dir/ip/axi_brom" FPGA_BOARD=$g_board_part meep_rom
+putmeeps "... Done."
+update_ip_catalog -rebuild
+# Place the initrom.mem file at $g_root_dir/ip/axi_brom/meep_rom/src
+
+create_bd_cell -type ip -vlnv meep-project.eu:MEEP:native_bram:0.2 meep_rom
+
+connect_bd_net [get_bd_pins axi_brom_system/bram_addr_a] [get_bd_pins meep_rom/addra]
+connect_bd_net [get_bd_pins axi_brom_system/bram_clk_a] [get_bd_pins meep_rom/clka]
+connect_bd_net [get_bd_pins axi_brom_system/bram_wrdata_a] [get_bd_pins meep_rom/dina]
+connect_bd_net [get_bd_pins axi_brom_system/bram_rddata_a] [get_bd_pins meep_rom/douta]
+connect_bd_net [get_bd_pins axi_brom_system/bram_en_a] [get_bd_pins meep_rom/ena]
+connect_bd_net [get_bd_pins axi_brom_system/bram_we_a] [get_bd_pins meep_rom/wea]
 
 connect_bd_net [get_bd_pins axi_brom_system/s_axi_aclk]  $pcie_clk_pin
 connect_bd_net [get_bd_pins axi_brom_system/s_axi_aresetn]  $pcie_rst_pin
 
 connect_bd_intf_net [get_bd_intf_pins axi_brom_system/S_AXI] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M00_AXI]
 
-
-
-
-
-
-
+# Crete hierarchy to beautify this block
+group_bd_cells SHELL_ROM [get_bd_cells meep_rom] [get_bd_cells axi_brom_system]
 
 save_bd_design

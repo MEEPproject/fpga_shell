@@ -44,7 +44,7 @@ connect_bd_intf_net [get_bd_intf_ports $g_SLVAXI_ifname] -boundary_type upper [g
 # Increase the counter to track the number of slaves added	
 incr slv_axi_ninstances
 
-puterrors "NUMBER LITE $slv_axi_ninstances"
+putdebugs "NUMBER LITE $slv_axi_ninstances"
 
 save_bd_design
 
