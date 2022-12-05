@@ -134,7 +134,8 @@ report_route: $(IMPL_DCP)
 ####
 
 rom_file:
-	$(SH_DIR)/create_rom.sh
+	$(SH_DIR)/create_rom.sh $(ROOT_DIR)
+	mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/meep_rom/src/initrom.mem
 
 ####
 
