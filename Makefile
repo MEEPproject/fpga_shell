@@ -133,6 +133,11 @@ report_route: $(IMPL_DCP)
 
 ####
 
+rom_file:
+	$(SH_DIR)/create_rom.sh
+
+####
+
 submodules:	
 	@(git submodule update --init --recursive)
 

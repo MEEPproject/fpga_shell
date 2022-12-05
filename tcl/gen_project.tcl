@@ -208,6 +208,8 @@ update_compile_order -fileset sources_1
 # Set the incremental flow by default
 set_property AUTO_INCREMENTAL_CHECKPOINT 1 [get_runs synth_1]
 set_property write_incremental_synth_checkpoint false [get_runs synth_1]
+set_property STEPS.SYNTH_DESIGN.TCL.PRE [get_files ${$g_root_dir}/tcl/pre_synth.tcl -of [get_fileset utils_1] ] [get_runs synth_1]
+
 
 putmeeps "Writing project tcl ..."
 
