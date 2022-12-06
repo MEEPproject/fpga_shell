@@ -206,7 +206,7 @@ if { [info exists hbm_inst] == 0 } {
 	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_cattrip_or/Res]
 	
 	if { $HBMReady != ""} {
-        	create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 APB_rst_or
+                create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 APB_rst_or
 	    set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {and} CONFIG.LOGO_FILE {data/sym_andgate.png}] [get_bd_cells APB_rst_or]
 	    connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins APB_rst_or/Op1]
 	    connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins APB_rst_or/Op2]
@@ -268,26 +268,19 @@ if { [info exists hbm_inst] == 0 } {
 
 		# Between 16 and 31, SEL_LIST1 instead of SEL_LIST0
 		set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_31_ACLK} CONFIG.USER_SAXI_31 {true}] [get_bd_cells hbm_0]
-		create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_pcie_dma
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_register_slice:2.1 axi_register_slice_31
 
-		set_property -dict [list CONFIG.NUM_SI {1}] [get_bd_cells smartconnect_pcie_dma]
-                #get_property [list CONFIG.NUM_MI] [get_bd_cells smartconnect_pcie_dma]
+                putmeeps "Deploying AXI HBM DMA: $slv_axi_ninstances"
 
-		connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] [get_bd_intf_pins smartconnect_pcie_dma/S00_AXI]
-		connect_bd_net $pcie_clk_pin [get_bd_pins smartconnect_pcie_dma/aclk]
-                connect_bd_net $pcie_rst_pin [get_bd_pins smartconnect_pcie_dma/aresetn]
+                set_property -dict [list CONFIG.NUM_MI [expr $slv_axi_ninstances + 1]] [get_bd_cells axi_xbar_pcie]	
+                connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ACLK] $pcie_clk_pin
+                connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ARESETN] $pcie_rst_pin
 
 		connect_bd_net $pcie_clk_pin [get_bd_pins hbm_0/AXI_31_ACLK]
 		connect_bd_net $pcie_rst_pin [get_bd_pins hbm_0/AXI_31_ARESET_N]
 
-		connect_bd_intf_net [get_bd_intf_pins axi_register_slice_31/M_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
-		connect_bd_net [get_bd_pins axi_register_slice_31/aclk] $pcie_clk_pin
-		connect_bd_net [get_bd_pins axi_register_slice_31/aresetn] $pcie_rst_pin
-		set_property -dict [list CONFIG.USE_AUTOPIPELINING {1}] [get_bd_cells axi_register_slice_31]	
-
-                connect_bd_intf_net [get_bd_intf_pins smartconnect_pcie_dma/M00_AXI] [get_bd_intf_pins axi_register_slice_31/S_AXI]
-
+		connect_bd_intf_net [get_bd_intf_pins axi_xbar_pcie/M0${slv_axi_ninstances}_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
+                
+                incr slv_axi_ninstances
 		set PCIeDMAdone 1
 	}
 

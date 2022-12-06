@@ -1,5 +1,6 @@
-#!\bin\bash
-THIS_DIR=$1
+#!/bin/bash
+
+THIS_DIR=${1-`pwd`}
 
 # This converts the date (from epoc) to hexadecimal value
 printf '%x\r\n' $(date +%s) > $THIS_DIR/misc/initrom.mem
@@ -7,7 +8,7 @@ printf '%x\r\n' $(date +%s) > $THIS_DIR/misc/initrom.mem
 SHA_SHELL=`git rev-parse --short HEAD`
 PAD_SHA="0"$SHA_SHELL
 
-echo "PAD_SHA" >> $THIS_DIR/misc/initrom.mem
+echo "$PAD_SHA" >> $THIS_DIR/misc/initrom.mem
 
 cd $THIS_DIR/accelerator
 
@@ -15,7 +16,7 @@ cd $THIS_DIR/accelerator
 SHA_ACC=`git rev-parse --short HEAD`
 PAD_SHA="0"$SHA_ACC
 
-echo "PAD_SHA" >> $THIS_DIR/misc/initrom.mem
+echo "$PAD_SHA" >> $THIS_DIR/misc/initrom.mem
 
 cd $THIS_DIR
 

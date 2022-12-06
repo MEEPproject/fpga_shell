@@ -30,16 +30,22 @@ set SLVAXIMemRange [expr {2**$SLVAXIaddrWidth/1024}]
 
 putmeeps "Deploying AXI Lite number $slv_axi_ninstances"
 
-set_property -dict [list CONFIG.NUM_MI [expr $slv_axi_ninstances + 1]] [get_bd_cells axi_xbar_pcie_lite]	
-connect_bd_net [get_bd_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_ACLK] [get_bd_pins rst_ea_$g_SLVAXIClkPort/slowest_sync_clk]
-connect_bd_net [get_bd_pins rst_ea_${g_SLVAXIClkPort}/peripheral_aresetn] [get_bd_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_ARESETN] 
+set_property -dict [list CONFIG.NUM_MI [expr $slv_axi_ninstances + 1]] [get_bd_cells axi_xbar_pcie]	
+connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ACLK] [get_bd_pins rst_ea_$g_SLVAXIClkPort/slowest_sync_clk]
+connect_bd_net [get_bd_pins rst_ea_${g_SLVAXIClkPort}/peripheral_aresetn] [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ARESETN] 
 
 create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 $g_SLVAXI_ifname
 set_property CONFIG.PROTOCOL AXI4LITE [get_bd_intf_ports /$g_SLVAXI_ifname]
 set_property CONFIG.ADDR_WIDTH $SLVAXIaddrWidth [get_bd_intf_ports /$g_SLVAXI_ifname]
 set_property CONFIG.FREQ_HZ $g_SLVAXI_freq [get_bd_intf_ports /$g_SLVAXI_ifname]
 
-connect_bd_intf_net [get_bd_intf_ports $g_SLVAXI_ifname] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/M0${slv_axi_ninstances}_AXI]
+## TODO: Not sure what to do with these
+# set_property CONFIG.HAS_BURST 1 [get_bd_intf_ports /$g_SLVAXI_ifname]
+# set_property CONFIG.HAS_CACHE 1 [get_bd_intf_ports /$g_SLVAXI_ifname]
+# set_property CONFIG.HAS_LOCK 1 [get_bd_intf_ports /$g_SLVAXI_ifname]
+# set_property CONFIG.HAS_QOS 1 [get_bd_intf_ports /$g_SLVAXI_ifname]
+
+connect_bd_intf_net [get_bd_intf_ports $g_SLVAXI_ifname] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie/M0${slv_axi_ninstances}_AXI]
 
 # Increase the counter to track the number of slaves added	
 incr slv_axi_ninstances

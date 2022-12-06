@@ -1,4 +1,4 @@
-ROOT_DIR     =  $(PWD)
+ROOT_DIR     ?=  $(PWD)
 TCL_DIR      =  $(ROOT_DIR)/tcl
 SH_DIR	     =  $(ROOT_DIR)/sh
 DEF_FILE     ?= $(ROOT_DIR)/ea_url.txt
@@ -88,7 +88,7 @@ $(BINARIES_DIR):
 	mkdir -p $(BINARIES_DIR)
 	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
-$(PROJECT_FILE): clean_ip $(ACCEL_DIR)
+$(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
 	$(SH_DIR)/accelerator_build.sh $(EA_PARAM) ;\
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
@@ -135,7 +135,7 @@ report_route: $(IMPL_DCP)
 
 rom_file:
 	$(SH_DIR)/create_rom.sh $(ROOT_DIR)
-	mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/meep_rom/src/initrom.mem
+	mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/src/initrom.mem
 
 ####
 
@@ -150,6 +150,7 @@ clean_ip:
 	@(make -C ip/aurora_raw clean)
 	@(make -C ip/10GbEthernet clean)
 	@(make -C ip/uart_16650a clean)
+	@(make -C ip/axi_brom clean)
 
 clean_binaries:
 	rm -rf binaries

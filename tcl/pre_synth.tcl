@@ -14,9 +14,12 @@
 
 # Author: Daniel J.Mazure, BSC-CNS
 # Date: 22.02.2022
-# Description: 
+# Description: A placeholder to add hooks when needed
 
-### Initialize the rom file
-putmeeps "Creating the BROM initialization file..."
-exec make -C "$g_root_dir" rom_file
-putmeeps "... Done."
+# Set the right directory
+set tmp_dir [get_property DIRECTORY [current_project]]
+set tmp_dir "${tmp_dir}/../../.."
+
+set abs_dir [file normalize $tmp_dir]
+
+
