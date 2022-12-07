@@ -45,7 +45,7 @@ set_property -dict [list CONFIG.C_DOUT_DEFAULT $InitValue] [get_bd_cells axi_gpi
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_xbar_pcie_lite
 connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI_LITE] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie_lite/S00_AXI]
 connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie_lite/ACLK]
-connect_bd_net [get_bd_pins qdma_0/phy_ready] [get_bd_pins axi_xbar_pcie_lite/ARESETN]
+connect_bd_net $pcie_xbar_rst_pin [get_bd_pins axi_xbar_pcie_lite/ARESETN]
 connect_bd_net $pcie_rst_pin [get_bd_pins axi_xbar_pcie_lite/S00_ARESETN]
 connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie_lite/S00_ACLK]
 set_property -dict [list CONFIG.NUM_MI {1}] [get_bd_cells axi_xbar_pcie_lite]

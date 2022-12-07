@@ -105,6 +105,13 @@ set PortList [lappend PortList $g_pcie_file]
   connect_bd_net -net util_ds_buf_IBUF_DS_ODIV2 [get_bd_pins qdma_0/sys_clk] [get_bd_pins util_ds_buf/IBUF_DS_ODIV2]
   connect_bd_net -net util_ds_buf_IBUF_OUT [get_bd_pins qdma_0/sys_clk_gt] [get_bd_pins util_ds_buf/IBUF_OUT]
 
+  create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_rst_pcie
+
+  connect_bd_net [get_bd_pins qdma_0/axi_aclk] [get_bd_pins proc_sys_rst_pcie/slowest_sync_clk]
+connect_bd_net [get_bd_pins qdma_0/phy_ready] [get_bd_pins proc_sys_rst_pcie/dcm_locked]
+connect_bd_net [get_bd_pins qdma_0/axi_aresetn] [get_bd_pins proc_sys_rst_pcie/ext_reset_in]
+
+
 
    if { $PCIeDMA != "dma" } {
 
@@ -123,18 +130,21 @@ set PortList [lappend PortList $g_pcie_file]
 	# This variable is used in shell_hbm.tcl
 	set PCIeDMAdone 0
 
-set pcie_clk_pin  [get_bd_pins qdma_0/axi_aclk]
-set pcie_rst_pin [get_bd_pins qdma_0/axi_aresetn]
+set pcie_clk_pin [get_bd_pins qdma_0/axi_aclk]
+set pcie_rst_pin [get_bd_pins proc_sys_rst_pcie/peripheral_aresetn]
+
+set pcie_xbar_rst_pin [get_bd_pins proc_sys_rst_pcie/interconnect_aresetn]
+
 
 ################################################################
-# QDMA AXI Lite interface + BROM with system information
+# QDMA Memory Map interface + BROM with system information
 ################################################################
 
 # Create an interconnect for the PCIe AXI Lite interface
 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_xbar_pcie
 connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie/S00_AXI]
 connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie/ACLK]
-connect_bd_net [get_bd_pins qdma_0/phy_ready] [get_bd_pins axi_xbar_pcie/ARESETN]
+connect_bd_net $pcie_xbar_rst_pin [get_bd_pins axi_xbar_pcie/ARESETN]
 connect_bd_net $pcie_rst_pin [get_bd_pins axi_xbar_pcie/S00_ARESETN]
 connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie/S00_ACLK]
 set_property -dict [list CONFIG.NUM_MI {1}] [get_bd_cells axi_xbar_pcie]
@@ -154,6 +164,9 @@ update_ip_catalog -rebuild
 # Place the initrom.mem file at $g_root_dir/ip/axi_brom/meep_rom/src
 
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:native_bram:0.2 meep_rom
+# 8K is the minimum to not to have issues
+set_property -dict [list CONFIG.BRAM_ADDR_WIDTH {13}] [get_bd_cells meep_rom]
+
 
 connect_bd_net [get_bd_pins axi_brom_system/bram_addr_a] [get_bd_pins meep_rom/addra]
 connect_bd_net [get_bd_pins axi_brom_system/bram_clk_a] [get_bd_pins meep_rom/clka]
