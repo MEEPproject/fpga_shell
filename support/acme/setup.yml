@@ -50,9 +50,11 @@
     after_script:
         - cp $(find . -name "make_project.log") tmp/
 
+# This is OpenPiton dependant, so it is declared here and referenced in the shell yml
 .save_dts:
     after_script:
         - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
+        - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*info.h" -type f -print -quit) tmp/dts/info_${EA}_${FPGA_BOARD}.h
 
 .default_tags:
   tags:
@@ -74,7 +76,7 @@
 # This creates/moves/overwrites the selected bitstream to the specified folder
 # This way, MEEP users can grab from here the latest successfull bitstream
 .deploy-EA:
-  after_script:
+  script:
     - mkdir -p $SHELL_DEPLOY_DIR/latest_bitstream
     - cp $ABSDIR/bitstream/$RELEASE_BITSTREAM $SHELL_DEPLOY_DIR/latest_bitstream/
     - echo "$ABSDIR" > $SHELL_DEPLOY_DIR/latest_bitstream/info.txt

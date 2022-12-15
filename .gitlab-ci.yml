@@ -209,11 +209,12 @@ deploy-EA:
         script:            
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_* tmp/            
+            - mkdir -p tmp/reports; mv reports_* tmp/reports/            
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
+            - !reference [.deploy-EA, script]
         after_script:             
-            - !reference [.deploy-EA, after_script]
+            - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false
 
 # This job needs to put together all the bitstreams. No parallel jobs here.            
