@@ -120,7 +120,7 @@ foreach dicEntry $ShellEnabledIntf {
 
 source $g_root_dir/shell/shell_gpio.tcl
 
-## TODO: Find the right place for this, as lools like the smartConnect
+## TODO: Find the right place for this, as it looks like the smartConnect
 ## needs to be present for this to get set
 #set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
 #set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
@@ -130,7 +130,5 @@ source $g_root_dir/shell/shell_memmap.tcl
 
 update_ip_catalog -rebuild -scan_changes
  
-validate_bd_design
-
 save_bd_design 
 

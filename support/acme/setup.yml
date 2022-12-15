@@ -22,6 +22,8 @@
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
         # TODO: Link with the SDK repo, set triggering policies
         OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
+        RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
+        # Change this is MEEP wants another bitstream as fixed release
 
 .qdma_drivers: &qdma_drivers
         - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
@@ -48,6 +50,10 @@
     after_script:
         - cp $(find . -name "make_project.log") tmp/
 
+.save_dts:
+    after_script:
+        - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
+
 .default_tags:
   tags:
     - MEEP_FPGA
@@ -64,3 +70,11 @@
     - cp $OSBI_DEPLOY_DIR boot/
     - mv boot tmp/            
     - echo -e "Artifacts:"; ls tmp/
+
+# This creates/moves/overwrites the selected bitstream to the specified folder
+# This way, MEEP users can grab from here the latest successfull bitstream
+.deploy-EA:
+  after_script:
+    - mkdir -p $SHELL_DEPLOY_DIR/latest_bitstream
+    - cp $ABSDIR/bitstream/$RELEASE_BITSTREAM $SHELL_DEPLOY_DIR/latest_bitstream/
+    - echo "$ABSDIR" > $SHELL_DEPLOY_DIR/latest_bitstream/info.txt

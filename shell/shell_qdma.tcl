@@ -161,7 +161,7 @@ putmeeps "Packaging ROM IP..."
 exec make -C "$g_root_dir/ip/axi_brom" FPGA_BOARD=$g_board_part meep_rom
 putmeeps "... Done."
 update_ip_catalog -rebuild
-# Place the initrom.mem file at $g_root_dir/ip/axi_brom/meep_rom/src
+# Place the initrom.mem file at $g_root_dir/ip/axi_brom/src
 
 create_bd_cell -type ip -vlnv meep-project.eu:MEEP:native_bram:0.2 meep_rom
 # 8K is the minimum to not to have issues

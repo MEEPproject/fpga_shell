@@ -11,52 +11,7 @@
             - FPGA_BOARD: [u55c,u280]
               EA: [acme, ariane, pronoc, meep_dvino, acme_vpu]
               # These labels need to match what is at accelerator_build.sh
-              # on the EA meep_shell directory
-
-.implementation_needs:              
-  needs:
-    - "synthesis: [u280, acme]"
-    - "synthesis: [u55c, acme]"
-    - "synthesis: [u280, ariane]"
-    - "synthesis: [u55c, ariane]"
-    - "synthesis: [u280, pronoc]"
-    - "synthesis: [u55c, pronoc]"
-
-
-.bitstream_needs: 
-  needs:
-    - "implementation: [u280, acme]"
-    - "implementation: [u55c, acme]"
-    - "implementation: [u280, ariane]"
-    - "implementation: [u55c, ariane]"
-    - "implementation: [u280, pronoc]"
-    - "implementation: [u55c, pronoc]"
-
-.fpga-test_needs:
-  needs:
-    - "bitstream: [u280, acme]"
-    - "bitstream: [u55c, acme]"
-    - "bitstream: [u280, ariane]"
-    - "bitstream: [u55c, ariane]"
-    - "bitstream: [u280, pronoc]"
-    - "bitstream: [u55c, pronoc]"
-
-
-.deploy_needs:
-  needs:
-    - "bitstream: [u280, acme]"
-    - "bitstream: [u55c, acme]"
-    - "fpga-test: [u280, acme]"
-    - "fpga-test: [u55c, acme]"
-    - "bitstream: [u280, ariane]"
-    - "bitstream: [u55c, ariane]"
-    - "fpga-test: [u280, ariane]"
-    - "fpga-test: [u55c, ariane]"
-    - "bitstream: [u280, pronoc]"
-    - "bitstream: [u55c, pronoc]"
-    - "fpga-test: [u280, pronoc]"
-    - "fpga-test: [u55c, pronoc]"
-      
+              # on the EA meep_shell directory    
 
 .default_tags:
   tags:
@@ -72,7 +27,7 @@
   timeout: 8h
   tags: !reference [.default_tags, tags] 
   # Don't block successfull builds in the matrix:
-  # This would benefit from variable dependencies/needs, but that's not supported
+  # This would benefit from variable dependencies/needs, but that's not supported as per today on GitLab
   allow_failure: true  
 
 

@@ -195,10 +195,11 @@ if { [info exists g_patch_list] } {
                 putcolors "Patch $patch applied" $CYAN
         }
     }
-    #TODO: Catch
-    validate_bd_design
     save_bd_design
 }
+
+validate_bd_design
+save_bd_design
 
 # Sanity checks
 update_ip_catalog -rebuild

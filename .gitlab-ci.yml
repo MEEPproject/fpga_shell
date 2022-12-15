@@ -87,6 +87,7 @@ synthesis:
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+            - !reference [.save_dts, after_script]
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
@@ -170,7 +171,7 @@ fpga-test:
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
-            - mkdir -p tmp        
+            - mkdir -p tmp/logs     
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
@@ -178,7 +179,7 @@ fpga-test:
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG $VALID_MSG        
-            - mv $FPGA_LOG tmp/$FPGA_LOG
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:            
             - !reference [.fpga_test, after_script]
         allow_failure: false
@@ -208,9 +209,11 @@ deploy-EA:
         script:            
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_* tmp/
-            - mv dcp tmp/ ; mv bitstream tmp/
+            - mkdir -p tmp/reports; mv reports_* tmp/            
+            - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
+        after_script:             
+            - !reference [.deploy-EA, after_script]
         allow_failure: false
 
 # This job needs to put together all the bitstreams. No parallel jobs here.            
