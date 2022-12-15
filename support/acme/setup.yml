@@ -20,6 +20,7 @@
         QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
         SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
+        CI_RISCV_DIR: /home/tools/openpiton/riscv_install
         # TODO: Link with the SDK repo, set triggering policies
         OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
         RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
@@ -55,6 +56,13 @@
     after_script:
         - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
         - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*info.h" -type f -print -quit) tmp/dts/info_${EA}_${FPGA_BOARD}.h
+
+.export_toolchain:
+    before_script:
+        - export RISCV=$CI_RISCV_DIR
+        - echo "Using pre-existing RISCV toolchain"
+        # Some scripting-based decision should be added to <sometimes> build the toolchain from scratch (i,e, merge to master branch)
+        - echo "RISCV = $RISCV"
 
 .default_tags:
   tags:

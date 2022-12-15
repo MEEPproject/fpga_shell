@@ -71,6 +71,7 @@ synthesis:
         before_script:
             - *clone_ea
             - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
+            - !reference [.export_toolchain, before_script]
         script:
             - make initialize
             - make $FPGA_BOARD
