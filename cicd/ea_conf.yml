@@ -54,3 +54,8 @@
         sh/update_sha.sh ea_url.txt $COMMIT_REF $COMMIT_SHA
       fi   
 
+.git_clean:
+    before_script:
+        - git config --local --unset http.proxy || true
+        - git config --local --unset https.proxy || true      
+

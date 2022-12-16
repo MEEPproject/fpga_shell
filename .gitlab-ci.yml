@@ -23,7 +23,6 @@ workflow:
         - !reference [.default_rules, rules]
         - if: $CI_PIPELINE_SOURCE == "pipeline"
         - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-        - if: $CI_PIPELINE_SOURCE == "web"
         - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
           when: never  
         - if: $CI_COMMIT_TAG != null 
@@ -70,6 +69,7 @@ synthesis:
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
+            - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
             - !reference [.export_toolchain, before_script]
