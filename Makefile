@@ -77,6 +77,10 @@ yaml: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
 	$(SH_DIR)/extract_url.sh
 
+create_shell_structure:
+	# Create a basic file structure in the accelerator folder to get shell compatibility
+	$(SH_DIR)/gen_struct_meep.sh $(ROOT_DIR)
+
 $(ACCEL_DIR):
 	$(SH_DIR)/load_module.sh $(LOAD_EA)
 	@(EA_GIT_URL=$$(grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' ) ;\
