@@ -21,6 +21,7 @@
   rules:
     - !reference [.default_rules, rules]  
     - if: $CI_PIPELINE_SOURCE == "pipeline"  
+    - if: $CI_PIPELINE_SOURCE == "web"
   variables:
     GIT_SUBMODULE_STRATEGY: "none"
   parallel: !reference [.multi_target, parallel]  
