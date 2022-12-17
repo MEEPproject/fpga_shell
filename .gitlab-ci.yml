@@ -243,5 +243,5 @@ release_job:
           links:
             - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit
-           - name: 'Bitstream_${TARGET_MEEP}_U55C'       
+            - name: 'Bitstream_${TARGET_MEEP}_U55C'       
               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit         
