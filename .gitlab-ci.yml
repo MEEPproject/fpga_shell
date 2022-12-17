@@ -22,7 +22,7 @@ workflow:
     rules:
         - !reference [.default_rules, rules]
         - if: $CI_PIPELINE_SOURCE == "pipeline"
-        - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
         - if: $CI_PIPELINE_SOURCE == "web"
         - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
           when: never  
@@ -241,7 +241,7 @@ release_job:
          tag_name: '$CI_COMMIT_TAG'
          assets:
           links:
-            - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit
             - name: 'Bitstream_${TARGET_MEEP}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit         
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit 
+            - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit                    
