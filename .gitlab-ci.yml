@@ -135,7 +135,7 @@ bitstream:
             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
         artifacts:
             when: always
-            expire_in: 3 days
+            expire_in: 7 days
             paths:
                 - bitstream  
             reports:
@@ -226,22 +226,22 @@ release_job:
         tags: !reference [.default_tags, tags]
         when: on_success
         image: registry.gitlab.com/gitlab-org/release-cli:latest
+        variables:
+            TARGET_GOLDEN: ariane
+            TARGET_MEEP: acme_vpu
+            JOB_ID_GOLDEN: ${BS_CI_JOB_ID_ariane_u55c}
+            JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_vpu_u55c}
         rules:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created
         script:
             - echo "Running release job"
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
-         description: 'CICD release with bitstreams [acme, openpiton] for Alveo U55C and Alveo U280'
+         description: 'CICD release with bitstreams [$TARGET_GOLDEN, $TARGET_MEEP] for Alveo U55C'
          tag_name: '$CI_COMMIT_TAG'
          assets:
           links:
-            - name: 'Bitstream_acme_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_acme_u55c.bit
-            - name: 'Bitstream__acme_U280'              
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_acme_u280.bit
-            - name: 'Bitstream_openpiton_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u55c}/artifacts/raw/bitstream/system_openpiton_u55c.bit
-            - name: 'Bitstream__openpiton_U280'              
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${BS_CI_JOB_ID_acme_u280}/artifacts/raw/bitstream/system_openpiton_u280.bit
-          
+            - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit
+           - name: 'Bitstream_${TARGET_MEEP}_U55C'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit         
