@@ -182,12 +182,14 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 						} 
 					}
 					if { "${device}" == "HBM" } {
+						dict set d_device AxiIntf   [lindex $fields 3]	
 						dict set d_device CalibDone [lindex $fields 6]	
 						dict set d_device EnChannel [lindex $fields 7]
 						dict set d_device DevNum ${n}
 					}
   	                if { "${device}" == "DDR4" } {
 						dict set d_device IntfLabel [lindex $fields 2]
+						dict set d_device AxiIntf   [lindex $fields 3]
          	            #dict set d_device ClkName   "ui_clk"
 						dict set d_device ClkName   [lindex $fields 8]
 				        dict set d_device CalibDone [lindex $fields 6]
@@ -200,6 +202,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					}
 					if { "${device}" == "ETHERNET" } {
                         dict set d_device IntfLabel [lindex $fields 2 ]
+						dict set d_device AxiIntf   [lindex $fields 3 ]
                         dict set d_device ClkName   [lindex $fields 5 ]
                         dict set d_device RstName   [lindex $fields 6 ]
                         dict set d_device GbEth     [lindex $fields 7 ]

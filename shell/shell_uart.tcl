@@ -48,7 +48,7 @@ if { $g_UART_MODE eq "xilinx" } {
     set UartCoreName "axi_uart16550_0"
     set UartCoreIP $XilinxUart
 
-} else {
+} elseif { $g_UART_MODE eq "normal" } {
 
     # MEEP UART
 
