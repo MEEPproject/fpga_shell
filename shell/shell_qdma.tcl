@@ -20,6 +20,7 @@ set PCIEifname [dict get $PCIEentry IntfLabel]
 set PCIeDMA    [dict get $PCIEentry Mode]
 set PCIeClkNm  [dict get $PCIEentry ClkName]
 set PCIeRstNm  [dict get $PCIEentry RstName]
+set PCIeJTAG   [dict get $PCIEentry JtagDebEn]
 
 set PortList [lappend PortList $g_pcie_file] 
   
@@ -134,6 +135,24 @@ set pcie_clk_pin [get_bd_pins qdma_0/axi_aclk]
 set pcie_rst_pin [get_bd_pins proc_sys_rst_pcie/peripheral_aresetn]
 
 set pcie_xbar_rst_pin [get_bd_pins proc_sys_rst_pcie/interconnect_aresetn]
+
+################################################################
+# PCIe-JTAG debugger
+################################################################
+ if { $PCIeJTAG == true } {
+
+  set_property -dict [list CONFIG.cfg_ext_if {true}] $qdma_0
+  set debug_bridge [create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 debug_bridge_0]
+  set_property -dict [list CONFIG.C_DEBUG_MODE {6} CONFIG.C_PCIE_EXT_CFG_BASE_ADDR {0xe80}] $debug_bridge
+  connect_bd_net [get_bd_pins debug_bridge_0/clk] $pcie_clk_pin
+  connect_bd_intf_net [get_bd_intf_pins qdma_0/pcie_cfg_ext] [get_bd_intf_pins debug_bridge_0/pcie3_cfg_ext]
+  make_bd_pins_external  [get_bd_pins debug_bridge_0/tap_tms] [get_bd_pins debug_bridge_0/tap_tck] [get_bd_pins debug_bridge_0/tap_tdi] [get_bd_pins debug_bridge_0/tap_tdo]
+  set_property name tap_tdo [get_bd_ports tap_tdo_0]
+  set_property name tap_tms [get_bd_ports tap_tms_0]
+  set_property name tap_tck [get_bd_ports tap_tck_0]
+  set_property name tap_tdi [get_bd_ports tap_tdi_0]
+
+ }
 
 
 ################################################################

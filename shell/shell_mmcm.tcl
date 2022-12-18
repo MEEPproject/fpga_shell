@@ -148,6 +148,13 @@ putdebugs $ConfMMCMString
   set APBClockPin ""
   set APBRstPin ""
 
+  create_bd_port -dir I -type rst fake_reset_pin
+  set fake_rst_pin [get_bd_ports fake_reset_pin] 
+  #delete_bd_objs [get_bd_nets fake_reset_pin_1] [get_bd_ports fake_reset_pin]
+  # Temporal reset pin creted to be later substitued by the HBM calibration output
+
+
+
 # Start from 1, because the MMCM IP uses outputs numbered starting from 1
   set n 1 
 
@@ -165,7 +172,7 @@ putdebugs $ConfMMCMString
 		if { !($ClkName == "APBclk" || $ClkName == "EthInitClk")} {
 
 			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
-			connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
+			connect_bd_net $fake_rst_pin [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
 			### Create the reset list to be used later
 			connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/clk_out${n}]
 			### TODO: connect DCM locked signal

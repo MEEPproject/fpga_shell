@@ -236,6 +236,9 @@ if { [info exists hbm_inst] == 0 } {
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] $APBRstPin
 	connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] $APBRstPin
 
+        delete_bd_objs [get_bd_ports fake_reset_pin]
+        connect_bd_net [get_bd_pins hbm_cattrip_or/Res] [get_bd_pins rst_ea_CLK0/ext_reset_in]
+
 }
 
 ###################################################################
@@ -250,7 +253,8 @@ if { [info exists hbm_inst] == 0 } {
 
 	## Width
         if { $HBMaxi4 == "axi4lite" } {
-                create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_4lite${HBMChNum}
+                set smartConnectLite [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_4lite${HBMChNum}]
+                set_property -dict [list CONFIG.NUM_SI {1}] $smartConnectLite
      		connect_bd_intf_net [get_bd_intf_pins smartconnect_4lite${HBMChNum}/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
                 connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins smartconnect_4lite${HBMChNum}/S00_AXI]
                 connect_bd_net  [get_bd_pins smartconnect_4lite${HBMChNum}/aclk] $HBMClockPin
