@@ -147,10 +147,10 @@ set pcie_xbar_rst_pin [get_bd_pins proc_sys_rst_pcie/interconnect_aresetn]
   connect_bd_net [get_bd_pins debug_bridge_0/clk] $pcie_clk_pin
   connect_bd_intf_net [get_bd_intf_pins qdma_0/pcie_cfg_ext] [get_bd_intf_pins debug_bridge_0/pcie3_cfg_ext]
   make_bd_pins_external  [get_bd_pins debug_bridge_0/tap_tms] [get_bd_pins debug_bridge_0/tap_tck] [get_bd_pins debug_bridge_0/tap_tdi] [get_bd_pins debug_bridge_0/tap_tdo]
-  set_property name tap_tdo [get_bd_ports tap_tdo_0]
-  set_property name tap_tms [get_bd_ports tap_tms_0]
-  set_property name tap_tck [get_bd_ports tap_tck_0]
-  set_property name tap_tdi [get_bd_ports tap_tdi_0]
+  set_property name jtag_tdo [get_bd_ports tap_tdo_0]
+  set_property name jtag_tms [get_bd_ports tap_tms_0]
+  set_property name jtag_tck [get_bd_ports tap_tck_0]
+  set_property name jtag_tdi [get_bd_ports tap_tdi_0]
 
  }
 
