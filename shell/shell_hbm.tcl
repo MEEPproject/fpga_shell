@@ -236,9 +236,6 @@ if { [info exists hbm_inst] == 0 } {
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] $APBRstPin
 	connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] $APBRstPin
 
-        delete_bd_objs [get_bd_ports fake_reset_pin]
-        connect_bd_net [get_bd_pins hbm_cattrip_or/Res] [get_bd_pins rst_ea_CLK0/ext_reset_in]
-
 }
 
 ###################################################################

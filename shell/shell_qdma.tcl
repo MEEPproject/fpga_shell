@@ -160,13 +160,14 @@ set pcie_xbar_rst_pin [get_bd_pins proc_sys_rst_pcie/interconnect_aresetn]
 ################################################################
 
 # Create an interconnect for the PCIe AXI Lite interface
-create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_xbar_pcie
+set axi_xbar_pcie_cell [create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_xbar_pcie]
 connect_bd_intf_net [get_bd_intf_pins qdma_0/M_AXI] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie/S00_AXI]
 connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie/ACLK]
 connect_bd_net $pcie_xbar_rst_pin [get_bd_pins axi_xbar_pcie/ARESETN]
 connect_bd_net $pcie_rst_pin [get_bd_pins axi_xbar_pcie/S00_ARESETN]
 connect_bd_net $pcie_clk_pin [get_bd_pins axi_xbar_pcie/S00_ACLK]
-set_property -dict [list CONFIG.NUM_MI {1}] [get_bd_cells axi_xbar_pcie]
+set_property -dict [list CONFIG.NUM_MI {1}] $axi_xbar_pcie_cell
+set_property -dict [list CONFIG.S00_HAS_REGSLICE {4}] $axi_xbar_pcie_cell
 connect_bd_net [get_bd_pins axi_xbar_pcie/M00_ACLK] $pcie_clk_pin
 connect_bd_net [get_bd_pins axi_xbar_pcie/M00_ARESETN] $pcie_rst_pin
 # There is at least a BROM connected to the PCIe AXI LIte interface
