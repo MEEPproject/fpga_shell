@@ -25,7 +25,7 @@
 # 5) tcl/project_options.tcl
 
 ROOT_DIR=$1
-ACC_DIR=$ROOT_DIR/accelerator/meep_shell/test
+ACC_DIR=$ROOT_DIR/accelerator/meep_shell
 
 mkdir -p $ACC_DIR/tcl
 
@@ -50,5 +50,5 @@ ARST,LOW,ExtArstn
 echo -e "# Use this script to initialize your EA\n" > $ACC_DIR/accelerator_build.sh
 echo -e "# Use this script to initialize your submodules\n" > $ACC_DIR/accelerator_init.sh
 echo -e "# git submodules update --init --recursive\n" >> $ACC_DIR/accelerator_init.sh
-echo -e "# Use this file to store the EA's top module definition \n" > $ACC_DIR/accelerator_mod.sv
+echo -e "\/\/ Use this file to store the EA's top module definition \n" > $ACC_DIR/accelerator_mod.sv
 echo -e "# Use this script to add your files to the g_ea_flist tcl list. It will be read by Shell's tcl/gen_project.tcl script\n" > $ACC_DIR/tcl/project_options.tcl

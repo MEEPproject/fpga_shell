@@ -104,120 +104,113 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 		
 			if { [lindex $fields 0] == "${device}" && [lindex $fields 1] == "yes" } {	
 
-				# Dont push to the user to number his interfaces when there is only one.							
-				# TODO: Parse $fields 3 to secuere that it is in fact a number
-				for {set i 0} {$i < [lindex $fields 3] } {incr i} {
-					if {[lindex $fields 3] == 1} {	
-						set n ""
-					} else {
-						set n $i
-					}
-					set d_device [dict create Name g_${device}${n}]
-					
-					dict set d_device IntfLabel [lindex $fields 2]${n}
-					# Create empty fields to be filled later
-					dict set d_device SyncClk   [lindex $fields 4] Freq ""
-					dict set d_device SyncClk   [lindex $fields 4] Name ""
-					dict set d_device AxiIntf "Axi4"
-					dict set d_device BaseAddr [lindex $fields 5]
-					# set BROMMemRange [expr {2**$BROMaddrWidth/1024}]
-					set IntfLabel [dict get $d_device IntfLabel]
-					set axivalues [ get_axi_properties $EAModFile $IntfLabel ]
+				set d_device [dict create Name g_${device}]
+				
+				dict set d_device IntfLabel [lindex $fields 2]
+				# Create empty fields to be filled later
+				dict set d_device SyncClk   [lindex $fields 4] Freq ""
+				dict set d_device SyncClk   [lindex $fields 4] Name ""
+				dict set d_device AxiIntf "Axi4"
+				dict set d_device BaseAddr [lindex $fields 5]
+				# set BROMMemRange [expr {2**$BROMaddrWidth/1024}]
+				set IntfLabel [dict get $d_device IntfLabel]
+				set axivalues [ get_axi_properties $EAModFile $IntfLabel ]
 
-					dict set d_device "AxiAddrWidth" [lindex $axivalues 0]
-					dict set d_device "AxiDataWidth" [lindex $axivalues 1]
-					dict set d_device "AxiIdWidth"   [lindex $axivalues 2]
-					dict set d_device "AxiUserWidth" [lindex $axivalues 3]
+				dict set d_device "AxiAddrWidth" [lindex $axivalues 0]
+				dict set d_device "AxiDataWidth" [lindex $axivalues 1]
+				dict set d_device "AxiIdWidth"   [lindex $axivalues 2]
+				dict set d_device "AxiUserWidth" [lindex $axivalues 3]
 
-					## If the Interface has an associated clock, add it to the dict
-					foreach vclocks $ClockList {	
-						set ClkNum  [dict get $vclocks ClkNum]
-						if { $ClkNum == [lindex $fields 4] } {
-							set ClkValue [dict get $vclocks ClkNum]
-							set ClkFreq  [dict get $vclocks ClkFreq]
-							set ClkName  [dict get $vclocks ClkName]
-							set ClkList [list Label $ClkValue Freq $ClkFreq Name $ClkName]
-							putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
-							dict set d_device SyncClk $ClkList
-						}
-					}
-					## If the interface is synchronous to the PCIe/DDR/Ethernet CLK, create an special case
-					if { [lindex $fields 4] == "PCIE_CLK" } {
-						set ClkFreq 250000000
-						set ClkName "PCIE_CLK"
-						set ClkList [list Freq $ClkFreq Name $ClkName]
+				## If the Interface has an associated clock, add it to the dict
+				foreach vclocks $ClockList {	
+					set ClkNum  [dict get $vclocks ClkNum]
+					if { $ClkNum == [lindex $fields 4] } {
+						set ClkValue [dict get $vclocks ClkNum]
+						set ClkFreq  [dict get $vclocks ClkFreq]
+						set ClkName  [dict get $vclocks ClkName]
+						set ClkList [list Label $ClkValue Freq $ClkFreq Name $ClkName]
 						putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
 						dict set d_device SyncClk $ClkList
-
 					}
-					if { [lindex $fields 4] == "DDR_CLK" } {
-						set ClkFreq 300000000
-                        set ClkName "DDR_CLK"
-                        set ClkList [list Freq $ClkFreq Name $ClkName]
-                        putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
-                        dict set d_device SyncClk $ClkList					
-					}
-					if { [lindex $fields 4] == "ETH_CLK" } {
-                        set ClkFreq 1611328125
-                        set ClkName "ETH_CLK"
-                        set ClkList [list Freq $ClkFreq Name $ClkName]
-                        putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
-                        dict set d_device SyncClk $ClkList
-                        }
-					
-					### Device-dependant settings
-					if { "${device}" == "PCIE" } {
-						dict set d_device IntfLabel  [lindex $fields 2]
-						dict set d_device ClkName    [lindex $fields 5]
-						dict set d_device RstName    [lindex $fields 6]
-						dict set d_device Mode       [lindex $fields 7]
-						dict set d_device SliceRegEn [lindex $fields 8]
-					}	
-					if { "${device}" == "UART" } {
-						dict set d_device Mode [lindex $fields 6]	
-						dict set d_device IRQ  [lindex $fields 7]	
-						dict set d_device AxiIntf "AxiL"
-						if { [lindex $fields 5] != "normal" } {
-							dict set d_device AxiIntf "no"						
-						} 
-					}
-					if { "${device}" == "HBM" } {
-						dict set d_device CalibDone [lindex $fields 6]	
-						dict set d_device EnChannel [lindex $fields 7]
-						dict set d_device DevNum ${n}
-					}
-  	                if { "${device}" == "DDR4" } {
-						dict set d_device IntfLabel [lindex $fields 2]
-         	            #dict set d_device ClkName   "ui_clk"
-						dict set d_device ClkName   [lindex $fields 8]
-				        dict set d_device CalibDone [lindex $fields 6]
-                        dict set d_device EnChannel [lindex $fields 7]
-                        dict set d_device DevNum ${n}
-                    }
-
-					if { "${device}" == "BROM" } {
-						dict set d_device InitFile [lindex $fields 6]	
-					}
-					if { "${device}" == "ETHERNET" } {
-                        dict set d_device IntfLabel [lindex $fields 2 ]
-                        dict set d_device ClkName   [lindex $fields 5 ]
-                        dict set d_device RstName   [lindex $fields 6 ]
-                        dict set d_device GbEth     [lindex $fields 7 ]
-                        dict set d_device IRQ       [lindex $fields 8 ]
-                        dict set d_device qsfpPort  [lindex $fields 9 ]
-                        dict set d_device dmaMem    [lindex $fields 10]
-					}
-					if { "${device}" == "AURORA" } {
-                        dict set d_device Mode   [lindex $fields 6]
-                        dict set d_device UsrClk [lindex $fields 8]
-					}
-					if { "${device}" == "SLV_AXI" } {						
-						dict set d_device AxiIntf "AxiL"
-					}
-					set EnabledIntf [lappend EnabledIntf "$d_device"]					
 				}
+				## If the interface is synchronous to the PCIe/DDR/Ethernet CLK, create an special case
+				if { [lindex $fields 4] == "PCIE_CLK" } {
+					set ClkFreq 250000000
+					set ClkName "PCIE_CLK"
+					set ClkList [list Freq $ClkFreq Name $ClkName]
+					putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+					dict set d_device SyncClk $ClkList
+
+				}
+				if { [lindex $fields 4] == "DDR_CLK" } {
+					set ClkFreq 300000000
+					set ClkName "DDR_CLK"
+					set ClkList [list Freq $ClkFreq Name $ClkName]
+					putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+					dict set d_device SyncClk $ClkList					
+				}
+				if { [lindex $fields 4] == "ETH_CLK" } {
+					set ClkFreq 1611328125
+					set ClkName "ETH_CLK"
+					set ClkList [list Freq $ClkFreq Name $ClkName]
+					putmeeps "$device Clk: ${ClkFreq}Hz ${ClkName}"
+					dict set d_device SyncClk $ClkList
+					}
+				
+				### Device-dependant settings
+				if { "${device}" == "PCIE" } {
+					dict set d_device IntfLabel  [lindex $fields 2]
+					dict set d_device ClkName    [lindex $fields 5]
+					dict set d_device RstName    [lindex $fields 6]
+					dict set d_device Mode       [lindex $fields 7]
+					dict set d_device SliceRegEn [lindex $fields 8]
+					dict set d_device JtagDebEn  [lindex $fields 9]
+				}	
+				if { "${device}" == "UART" } {
+					dict set d_device Mode [lindex $fields 6]	
+					dict set d_device IRQ  [lindex $fields 7]	
+					dict set d_device AxiIntf "AxiL"
+					if { [lindex $fields 5] != "normal" } {
+						dict set d_device AxiIntf "no"						
+					} 
+				}
+				if { "${device}" == "HBM" } {
+					dict set d_device AxiIntf   [lindex $fields 3]	
+					dict set d_device CalibDone [lindex $fields 6]	
+					dict set d_device EnChannel [lindex $fields 7]
+				}
+				if { "${device}" == "DDR4" } {
+					dict set d_device IntfLabel [lindex $fields 2]
+					dict set d_device AxiIntf   [lindex $fields 3]
+					#dict set d_device ClkName   "ui_clk"
+					dict set d_device ClkName   [lindex $fields 8]
+					dict set d_device CalibDone [lindex $fields 6]
+					dict set d_device EnChannel [lindex $fields 7]
+				}
+
+				if { "${device}" == "BROM" } {
+					dict set d_device InitFile [lindex $fields 6]	
+				}
+				if { "${device}" == "ETHERNET" } {
+					dict set d_device IntfLabel [lindex $fields 2 ]
+					dict set d_device AxiIntf   [lindex $fields 3 ]
+					dict set d_device ClkName   [lindex $fields 5 ]
+					dict set d_device RstName   [lindex $fields 6 ]
+					dict set d_device GbEth     [lindex $fields 7 ]
+					dict set d_device IRQ       [lindex $fields 8 ]
+					dict set d_device qsfpPort  [lindex $fields 9 ]
+					dict set d_device dmaMem    [lindex $fields 10]
+				}
+				if { "${device}" == "AURORA" } {
+					dict set d_device Mode   [lindex $fields 6]
+					dict set d_device UsrClk [lindex $fields 8]
+				}
+				if { "${device}" == "SLV_AXI" } {						
+					dict set d_device AxiIntf "AxiL"
+				}
+				set EnabledIntf [lappend EnabledIntf "$d_device"]					
 			}
-		}	
+		}			
 	}
 	puts $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"
 	#putmeeps $fd_ShellEnv "set ShellEnabledIntf \[list [join [list $EnabledIntf]]\]"
