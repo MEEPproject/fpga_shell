@@ -27,7 +27,8 @@ set HBMFreq   [dict get $HBMentry SyncClk Freq]
 set HBMname   [dict get $HBMentry SyncClk Name]
 set HBMintf   [dict get $HBMentry IntfLabel]
 set HBMReady  [dict get $HBMentry CalibDone]
-set HBMChNum  [dict get $HBMentry EnChannel]
+set HBMChNum  [dict get $HBMentry EnChannel] 
+set HBMaxi4   [dict get $HBMentry AxiIntf]
 
 set HBMaddrWidth [dict get $HBMentry AxiAddrWidth]
 set HBMdataWidth [dict get $HBMentry AxiDataWidth]
@@ -62,6 +63,21 @@ if { $APBRstPin == "" } {
 putmeeps "Creating HBM instance..."
 ### TODO: Support different user widths per AXI channel
 ### TODO: Region, prot and others can be extracted as the other widths
+
+if { $HBMaxi4 == "axi4lite" } {
+        set axi_protocol "AXI4LITE"
+        set has_burst 0
+        set max_burst 1
+        set has_cache 0
+        set narrow_burst 0
+} else {
+        set axi_protocol "AXI4"
+        set has_burst 1        
+        set max_burst 256
+        set has_cache 1
+        set narrow_burst 1
+}
+
 set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
@@ -71,25 +87,25 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.DATA_WIDTH $HBMdataWidth \
    CONFIG.FREQ_HZ $HBMFreq \
    CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST {1} \
-   CONFIG.HAS_CACHE {1} \
-   CONFIG.HAS_LOCK {1} \
-   CONFIG.HAS_PROT {1} \
-   CONFIG.HAS_QOS {1} \
-   CONFIG.HAS_REGION {1} \
+   CONFIG.HAS_BURST $has_burst \
+   CONFIG.HAS_CACHE $has_cache \
+   CONFIG.HAS_LOCK {0} \
+   CONFIG.HAS_PROT {0} \
+   CONFIG.HAS_QOS {0} \
+   CONFIG.HAS_REGION {0} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
    CONFIG.ID_WIDTH $HBMidWidth \
-   CONFIG.MAX_BURST_LENGTH {256} \
+   CONFIG.MAX_BURST_LENGTH $max_burst \
    CONFIG.NUM_READ_OUTSTANDING {1} \
    CONFIG.NUM_READ_THREADS {1} \
    CONFIG.NUM_WRITE_OUTSTANDING {1} \
    CONFIG.NUM_WRITE_THREADS {1} \
-   CONFIG.PROTOCOL {AXI4} \
+   CONFIG.PROTOCOL $axi_protocol \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
    CONFIG.RUSER_WIDTH $HBMuserWidth \
-   CONFIG.SUPPORTS_NARROW_BURST {1} \
+   CONFIG.SUPPORTS_NARROW_BURST $narrow_burst \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
@@ -206,12 +222,12 @@ if { [info exists hbm_inst] == 0 } {
 	connect_bd_net [get_bd_ports hbm_cattrip] [get_bd_pins hbm_cattrip_or/Res]
 	
 	if { $HBMReady != ""} {
-                create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 APB_rst_or
+            create_bd_cell -type ip -vlnv xilinx.com:ip:util_vector_logic:2.0 APB_rst_or
 	    set_property -dict [list CONFIG.C_SIZE {1} CONFIG.C_OPERATION {and} CONFIG.LOGO_FILE {data/sym_andgate.png}] [get_bd_cells APB_rst_or]
 	    connect_bd_net [get_bd_pins hbm_0/apb_complete_0] [get_bd_pins APB_rst_or/Op1]
 	    connect_bd_net [get_bd_pins hbm_0/apb_complete_1] [get_bd_pins APB_rst_or/Op2]
-        make_bd_pins_external  [get_bd_pins APB_rst_or/Res]
-        set_property name $HBMReady [get_bd_ports Res_0]
+            make_bd_pins_external  [get_bd_pins APB_rst_or/Res]
+            set_property name $HBMReady [get_bd_ports Res_0]
 	}
 
 	connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_$HBMClkNm/dcm_locked]
@@ -233,7 +249,15 @@ if { [info exists hbm_inst] == 0 } {
 	set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 AXI_${HBMChNum}_ACLK CONFIG.USER_SAXI_${HBMChNum} {true}] [get_bd_cells hbm_0]
 
 	## Width
-	if { $HBMdataWidth != 256 } {
+        if { $HBMaxi4 == "axi4lite" } {
+                set smartConnectLite [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_4lite${HBMChNum}]
+                set_property -dict [list CONFIG.NUM_SI {1}] $smartConnectLite
+     		connect_bd_intf_net [get_bd_intf_pins smartconnect_4lite${HBMChNum}/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins smartconnect_4lite${HBMChNum}/S00_AXI]
+                connect_bd_net  [get_bd_pins smartconnect_4lite${HBMChNum}/aclk] $HBMClockPin
+                connect_bd_net  [get_bd_pins smartconnect_4lite${HBMChNum}/aresetn] $HBMRstPin
+
+	} elseif { $HBMdataWidth != 256 } {
                 create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_${HBMChNum}
                 connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/S_AXI]
                 connect_bd_net [get_bd_pins axi_protocol_convert_${HBMChNum}/aclk] $HBMClockPin

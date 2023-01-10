@@ -276,6 +276,9 @@ proc get_axi_properties { g_wire_file axi_ifname } {
 	
 	putmeeps "Inside properties: $axi_ifname"
 
+	set someVar ""
+	#gets stdin someVar
+
 	while {[gets $fd_wire line] >= 0} { 
 
 		#TODO: Don't parse commented lines
