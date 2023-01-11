@@ -162,29 +162,39 @@ reports:
 
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
+#Use this job to check the ssh connection
 fpga-test:
         stage: fpga-test
         retry: 2
         extends: .common_conf
         # Overwrite tags to select the right board
         tags: 
-            - $FPGA_BOARD        
+            - u55c        
         before_script:
             - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
-            - mkdir -p tmp/logs     
+            - mkdir -p tmp/logs 
+            ## SSH
+            - command -v ssh-agent > /dev/null || (apk add --update openssh)
+            - eval $(ssh-agent -s)
+            - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
         script:
             # The EA script should provide the right script and the right binary
-            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh driverup
             - source sh/fpga_test.sh $FPGA_LOG
+            - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
+            - chmod 644 ~/.ssh/known_hosts
+            - ssh root@10.0.2.15 "hostname" 
             - echo "Checking FPGA log ..."
             - sh/check_log.sh $FPGA_LOG $VALID_MSG        
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:            
             - !reference [.fpga_test, after_script]
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh driverup
         allow_failure: false
         artifacts:
             when: always
