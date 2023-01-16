@@ -17,7 +17,7 @@
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - FPGA_u55c
 
 .common_conf:
   rules:
