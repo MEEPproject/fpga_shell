@@ -72,7 +72,8 @@
 
 .fpga_test:
   before_script:
-    - *qdma_drivers    
+    #- *qdma_drivers    
+    - echo "run fpga verification"
   script:
           #- source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
     - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR

@@ -172,7 +172,7 @@ fpga-test:
             - FPGA_u55c        
         before_script:
             - ls; ls dcp; tree 
-            - !reference [.fpga_test, before_script]
+            # - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
             - mkdir -p tmp/logs 
