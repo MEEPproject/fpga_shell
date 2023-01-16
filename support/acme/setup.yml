@@ -68,7 +68,7 @@
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - FPGA_u55c
 
 .fpga_test:
   before_script:
