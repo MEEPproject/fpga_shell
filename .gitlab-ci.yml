@@ -169,7 +169,7 @@ fpga-test:
         extends: .common_conf
         # Overwrite tags to select the right board
         tags: 
-            - u55c        
+            - FPGA_BOARD        
         before_script:
             - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
