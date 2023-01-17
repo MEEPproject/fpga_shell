@@ -184,7 +184,7 @@ fpga-test:
             # The EA script should provide the right script and the right binary
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh driverup
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh $FPGA_LOG
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
             - chmod 644 ~/.ssh/known_hosts
@@ -194,7 +194,7 @@ fpga-test:
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:            
             - !reference [.fpga_test, after_script]
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh driverdown
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
         allow_failure: false
         artifacts:
             when: always
