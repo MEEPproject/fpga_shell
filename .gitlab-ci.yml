@@ -186,7 +186,10 @@ fpga-test:
             - !reference [.fpga_test, script]
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh $FPGA_LOG
-            - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
+            # - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
+            # - chmod 644 ~/.ssh/known_hosts
+            - echo "~/.ssh/known_hosts"
+            - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts
             - chmod 644 ~/.ssh/known_hosts
             - ssh root@10.0.2.15 "hostname" 
             - echo "Checking FPGA log ..."
