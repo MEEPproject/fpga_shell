@@ -22,9 +22,9 @@
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
         CI_RISCV_DIR: /home/tools/openpiton/riscv_install
         # TODO: Link with the SDK repo, set triggering policies
-        OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230111/osbi_alveo.bin
+        OSBI_DEPLOY_DIR: /home/fcano/git_repo/test_cicd/binaries/osbi_ssh_key.bin
         RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
-        LOAD_ONIC_SCRIPT: /home/fcano/git_repo/fpga-tools/fpga
+        LOAD_ONIC_SCRIPT: /home/fcano/git_repo/test_cicd/sh
         BOOT_ONIC_SCRIPT: /home/fcano/git_repo/test_cicd/sh/boot_acme.sh
         # Change this is MEEP wants another bitstream as fixed release
 
@@ -77,6 +77,7 @@
   script:
           #- source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
     - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
+    - echo $PATH
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/

@@ -182,7 +182,7 @@ fpga-test:
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
         script:
             # The EA script should provide the right script and the right binary
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh qdma $BITSTREAM
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic.sh driverup
             - source sh/fpga_test.sh $FPGA_LOG
