@@ -194,7 +194,7 @@ fpga-test:
             - echo $PWD
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
             - echo "ssh-keyscan used it"
-            -echo $PWD
+            - echo $PWD
             - chmod 644 ~/.ssh/known_hosts
             - echo "ssh/known_hosts"
             - ping -c 2 10.0.2.15
