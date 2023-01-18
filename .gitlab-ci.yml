@@ -183,7 +183,7 @@ fpga-test:
             - mkdir -p ~/.ssh
             - chmod 700 ~/.ssh
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma bitstream/system_u55c.bit
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
 
         script:
             - source $BOOT_ONIC_SCRIPT/boot_acme.sh $OSBI_DEPLOY_DIR
