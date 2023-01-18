@@ -192,6 +192,7 @@ fpga-test:
             - source sh/fpga_test.sh riscv.log
             # - ssh-keyscan 10.0.2.15 
             - echo $PWD
+            - ssh-keyscan -v 10.0.2.15
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
             - echo "ssh-keyscan used it"
             - echo $PWD
