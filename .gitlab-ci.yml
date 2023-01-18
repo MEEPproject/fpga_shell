@@ -176,7 +176,7 @@ fpga-test:
         tags: 
             - FPGA_u55c        
         before_script:
-            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit 
+            - export BITSTREAM=bitstream/system_acme_u55c.bit 
             - command -v ssh-agent > /dev/null || (apk add --update openssh)
             - eval $(ssh-agent -s)
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
