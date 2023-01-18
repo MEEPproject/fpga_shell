@@ -186,7 +186,7 @@ fpga-test:
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
 
         script:
-            - source $BOOT_ONIC_SCRIPT/boot_acme.sh $OSBI_DEPLOY_DIR
+            - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
             - ssh-keyscan 10.0.2.15 
