@@ -191,7 +191,7 @@ fpga-test:
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
             # - ssh-keyscan 10.0.2.15 
-            -echo $PWD
+            - echo $PWD
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
             - echo "ssh-keyscan used it"
             -echo $PWD
