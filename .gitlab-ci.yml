@@ -18,6 +18,12 @@ include:
   - local: support/acme/setup.yml
 
 
+variables:
+    LOAD_ONIC_SCRIPT: /home/fcano/git_repo/test_cicd/sh
+    BOOT_ONIC_SCRIPT: /home/fcano/git_repo/test_cicd/sh/boot_acme.sh
+    OSBI_DEPLOY_DIR: /home/fcano/git_repo/test_cicd/binaries/osbi_ssh_key.bin
+    VALID_MSG_SSH: "buildroot"
+
 workflow:
     rules:
         - !reference [.default_rules, rules]
@@ -163,47 +169,39 @@ reports:
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
 #Use this job to check the ssh connection
+# 
 fpga-test:
         stage: fpga-test
-        retry: 2
-        extends: .common_conf
-        # Overwrite tags to select the right board
+        retry: 2        
         tags: 
             - FPGA_u55c        
         before_script:
-            - ls; ls dcp; tree 
-            # - !reference [.fpga_test, before_script]
-            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
-            - mkdir -p tmp/logs 
-            ## SSH
+            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit 
             - command -v ssh-agent > /dev/null || (apk add --update openssh)
             - eval $(ssh-agent -s)
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-              ##
-            ## Create the SSH directory and give it the right permissions
-            ##
             - mkdir -p ~/.ssh
             - chmod 700 ~/.ssh
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma bitstream/system_u55c.bit
 
         script:
-            # The EA script should provide the right script and the right binary
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
-            - !reference [.fpga_test, script]
+            - source $BOOT_ONIC_SCRIPT/boot_acme.sh $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
-            - source sh/fpga_test.sh $FPGA_LOG
+            - source sh/fpga_test.sh riscv.log
+            - ssh-keyscan 10.0.2.15 
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
             - chmod 644 ~/.ssh/known_hosts
-            # - echo "~/.ssh/known_hosts"
-            # - echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts
-            - chmod 644 ~/.ssh/known_hosts
-            - ssh root@10.0.2.15 "hostname" 
-            - echo "Checking FPGA log ..."
-            - sh/check_log.sh $FPGA_LOG $VALID_MSG        
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ssh root@10.0.2.15 "hostname" > test.log   
+            - sh/check_log.sh test.log  $VALID_MSG_SSH
+            
         after_script:            
-            - !reference [.fpga_test, after_script]
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
+            - mkdir -p boot     
+            - cp test.log boot/       
+            - cp $OSBI_DEPLOY_DIR boot/
+            - mv boot tmp/            
+            - echo -e "Artifacts:"; ls tmp/
+            - sh/load-bitstream-onic-test.sh driverdown
         allow_failure: false
         artifacts:
             when: always
