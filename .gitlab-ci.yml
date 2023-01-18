@@ -182,6 +182,7 @@ fpga-test:
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
             - mkdir -p ~/.ssh
             - chmod 700 ~/.ssh
+            - echo $PWD
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
 
@@ -190,8 +191,10 @@ fpga-test:
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
             # - ssh-keyscan 10.0.2.15 
+            -echo $PWD
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
             - echo "ssh-keyscan used it"
+            -echo $PWD
             - chmod 644 ~/.ssh/known_hosts
             - echo "ssh/known_hosts"
             - ping -c 2 10.0.2.15
