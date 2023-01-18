@@ -189,10 +189,13 @@ fpga-test:
             - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
-            - ssh-keyscan 10.0.2.15 
+            # - ssh-keyscan 10.0.2.15 
             - ssh-keyscan 10.0.2.15 >> ~/.ssh/known_hosts
+            - echo "ssh-keyscan used it"
             - chmod 644 ~/.ssh/known_hosts
-            - ssh root@10.0.2.15 "hostname" > test.log   
+            - echo "ssh/known_hosts"
+            - ping -c 2 10.0.2.15
+            - ssh root@10.0.2.15 "hostname"   
             - sh/check_log.sh test.log  $VALID_MSG_SSH
             
         after_script:            
