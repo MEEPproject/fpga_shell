@@ -185,18 +185,23 @@ fpga-test:
             - chmod 700 ~/.ssh
             - echo $PWD
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
         script:
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
             - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
             - ssh-keyscan -v 10.0.2.15 >> ~/.ssh/known_hosts
-            - echo "ssh-keyscan used it"
             - chmod 644 ~/.ssh/known_hosts
             - echo "ssh/known_hosts"
             - ssh root@10.0.2.15 "hostname"  > test.log 
             - sh/check_log.sh test.log  $VALID_MSG_SSH            
-        after_script:            
+        after_script: 
+            - > 
+                if [ $CI_JOB_STATUS == 'success' ]; then
+                    echo 'This will only run on success'
+                else
+                    echo 'This will only run when job failed or is cancelled'
+                fi           
             - mkdir -p boot     
             - cp test.log boot/       
             - cp $OSBI_DEPLOY_DIR boot/
