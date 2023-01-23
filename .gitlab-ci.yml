@@ -177,7 +177,7 @@ fpga-test:
         tags: 
             - FPGA_u55c        
         before_script:
-            - - export BITSTREAM=bitstream/system_acme_u55c.bit 
+            - export BITSTREAM=bitstream/system_acme_u55c.bit 
             - command -v ssh-agent > /dev/null || (apk add --update openssh)
             - eval $(ssh-agent -s)
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
@@ -186,7 +186,6 @@ fpga-test:
             - echo $PWD
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
-
         script:
             - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
@@ -196,8 +195,7 @@ fpga-test:
             - chmod 644 ~/.ssh/known_hosts
             - echo "ssh/known_hosts"
             - ssh root@10.0.2.15 "hostname"  > test.log 
-            - sh/check_log.sh test.log  $VALID_MSG_SSH
-            
+            - sh/check_log.sh test.log  $VALID_MSG_SSH            
         after_script:            
             - mkdir -p boot     
             - cp test.log boot/       
