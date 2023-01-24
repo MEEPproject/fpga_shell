@@ -186,7 +186,7 @@ fpga-test:
             - echo $PWD
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
         script:
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM_DIR
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
             - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
