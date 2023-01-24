@@ -13,9 +13,9 @@
 # Include the supported EA configuration files. This could be done in other 
 # included file for clarity
 
-include:
-  - local: cicd/ea_conf.yml
-  - local: support/acme/setup.yml
+# include:
+#   - local: cicd/ea_conf.yml
+#   - local: support/acme/setup.yml
 
 
 variables:
@@ -25,147 +25,147 @@ variables:
     BITSTREAM_DIR: /home/fcano/fpga-tools/bitstream/system_u55c_mem.bit
     VALID_MSG_SSH: "buildroot"
 
-workflow:
-    rules:
-        - !reference [.default_rules, rules]
-        - if: $CI_PIPELINE_SOURCE == "pipeline"
-        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
-        - if: $CI_PIPELINE_SOURCE == "web"
-        - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-          when: never  
-        - if: $CI_COMMIT_TAG != null 
-        - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
-          when: never # Pushing to main doesn't create pipelines unless there is a tag
+# workflow:
+#     rules:
+#         - !reference [.default_rules, rules]
+#         - if: $CI_PIPELINE_SOURCE == "pipeline"
+#         - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
+#         - if: $CI_PIPELINE_SOURCE == "web"
+#         - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+#           when: never  
+#         - if: $CI_COMMIT_TAG != null 
+#         - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+#           when: never # Pushing to main doesn't create pipelines unless there is a tag
     
 
-variables: !reference [.setup, variables]
+# variables: !reference [.setup, variables]
 
 
-stages:
-    - synthesis
-    - implementation
-    - bitstream
-    - fpga-test
-    - deploy
+# stages:
+#     - synthesis
+#     - implementation
+#     - bitstream
+#     - fpga-test
+#     - deploy
 
-.clone_ea: &clone_ea 
-    # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one.
-    # The load_module script loads the txt file in the support folder.
-    # The hidden job substitute the SHA in case this is a triggered pipeline 
-    # The extract_url script inserts the token into the repo URL.
-    - echo "Inserting the Gitlab token in the EA's URL"
-    - sh/load_module.sh $EMULATED_ACCELERATOR
-    - echo "$COMMIT_SHA"; echo "Actual URL:"; cat ea_url.txt
-    - echo "CommitREF is $COMMIT_REF"; echo "The commit SHA is $COMMIT_SHA"
-    - !reference [.update_sha, script]
-    - echo "After update_sha:"; cat ea_url.txt
-    - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
-    - echo "After update_sha:"; cat ea_url.txt
+# .clone_ea: &clone_ea 
+#     # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one.
+#     # The load_module script loads the txt file in the support folder.
+#     # The hidden job substitute the SHA in case this is a triggered pipeline 
+#     # The extract_url script inserts the token into the repo URL.
+#     - echo "Inserting the Gitlab token in the EA's URL"
+#     - sh/load_module.sh $EMULATED_ACCELERATOR
+#     - echo "$COMMIT_SHA"; echo "Actual URL:"; cat ea_url.txt
+#     - echo "CommitREF is $COMMIT_REF"; echo "The commit SHA is $COMMIT_SHA"
+#     - !reference [.update_sha, script]
+#     - echo "After update_sha:"; cat ea_url.txt
+#     - sh/extract_url.sh ea_url.txt $CI_BUILD_TOKEN
+#     - echo "After update_sha:"; cat ea_url.txt
 
-# EMULATED_ACCELERATOR might be an export variable instead of a GitLab one.
-# Then, before script can setup this bash variable depending on the value 
-# of the EA matrix/parallel value. This way we can clone other EAs 
+# # EMULATED_ACCELERATOR might be an export variable instead of a GitLab one.
+# # Then, before script can setup this bash variable depending on the value 
+# # of the EA matrix/parallel value. This way we can clone other EAs 
 
 
-synthesis:
-        stage: synthesis
-        extends: .common_conf
-        interruptible: true
-        retry: 1
-        variables:
-            GIT_STRATEGY: clone            
-            GIT_SUBMODULE_STRATEGY: "recursive"
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-        before_script:
-            - !reference [.git_clean, before_script]
-            - *clone_ea
-            - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
-            - !reference [.export_toolchain, before_script]
-        script:
-            - make initialize
-            - make $FPGA_BOARD
-            - make project EA_PARAM=$EA
-            - make synthesis
-            - !reference [.check_synth, script]
-        after_script:
-            - mkdir -p tmp/project
-            - !reference [.synth_default, after_script]
-            - cp ea_url.txt tmp/EA_info.txt
-            - cp shell_build.log tmp/project/
-            - cp -r src/system_top.sv tmp/project/
-            - cp -r tcl/shell_env.tcl tmp/project/
-            - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
-            - !reference [.save_dts, after_script]
-        allow_failure: false # If any sinthesys fails, all fails 
-        artifacts:
-          when: always
-          paths:
-            - tmp
-            - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+# synthesis:
+#         stage: synthesis
+#         extends: .common_conf
+#         interruptible: true
+#         retry: 1
+#         variables:
+#             GIT_STRATEGY: clone            
+#             GIT_SUBMODULE_STRATEGY: "recursive"
+#             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+#         before_script:
+#             - !reference [.git_clean, before_script]
+#             - *clone_ea
+#             - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
+#             - !reference [.export_toolchain, before_script]
+#         script:
+#             - make initialize
+#             - make $FPGA_BOARD
+#             - make project EA_PARAM=$EA
+#             - make synthesis
+#             - !reference [.check_synth, script]
+#         after_script:
+#             - mkdir -p tmp/project
+#             - !reference [.synth_default, after_script]
+#             - cp ea_url.txt tmp/EA_info.txt
+#             - cp shell_build.log tmp/project/
+#             - cp -r src/system_top.sv tmp/project/
+#             - cp -r tcl/shell_env.tcl tmp/project/
+#             - cp gen_system.tcl tmp/project/
+#             - echo -e "Artifacts:"; ls tmp; ls dcp
+#             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+#             - !reference [.save_dts, after_script]
+#         allow_failure: false # If any sinthesys fails, all fails 
+#         artifacts:
+#           when: always
+#           paths:
+#             - tmp
+#             - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
             
-implementation:
-        stage: implementation
-        extends: .common_conf         
-        # As this is a matrix, rename the corresponding dcp for make to recognize it 
-        before_script:           
-            - ls; ls dcp; tree 
-            - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
-        script:
-            - make ci_implementation DCP_ON=false
-            - !reference [.check_impl, script]
-        after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
-            - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_${EA}_${FPGA_BOARD}
-        artifacts:
-            when: always
-            expire_in: 1 day
-            paths:
-                - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
-                - reports_${EA}_${FPGA_BOARD}
+# implementation:
+#         stage: implementation
+#         extends: .common_conf         
+#         # As this is a matrix, rename the corresponding dcp for make to recognize it 
+#         before_script:           
+#             - ls; ls dcp; tree 
+#             - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
+#         script:
+#             - make ci_implementation DCP_ON=false
+#             - !reference [.check_impl, script]
+#         after_script:
+#             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
+#             - echo -e "Artifacts:"; ls dcp; ls reports
+#             - mv reports reports_${EA}_${FPGA_BOARD}
+#         artifacts:
+#             when: always
+#             expire_in: 1 day
+#             paths:
+#                 - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
+#                 - reports_${EA}_${FPGA_BOARD}
 
-bitstream:
-        stage: bitstream
-        extends: .common_conf        
-        before_script:
-            - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
-        script:
-            - make ci_bitstream
-        after_script:
-            - make clean_implementation
-            - mv bitstream/system.bit bitstream/system_${EA}_${FPGA_BOARD}.bit
-            - echo -e "Artifacts:"; ls bitstream
-            # Store the Job ID to identify later the path to the bitstream artifact
-            - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
-        artifacts:
-            when: always
-            expire_in: 7 days
-            paths:
-                - bitstream  
-            reports:
-             dotenv: gen_bitstream.env      
+# bitstream:
+#         stage: bitstream
+#         extends: .common_conf        
+#         before_script:
+#             - ls; ls dcp; tree 
+#             - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+#         script:
+#             - make ci_bitstream
+#         after_script:
+#             - make clean_implementation
+#             - mv bitstream/system.bit bitstream/system_${EA}_${FPGA_BOARD}.bit
+#             - echo -e "Artifacts:"; ls bitstream
+#             # Store the Job ID to identify later the path to the bitstream artifact
+#             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
+#         artifacts:
+#             when: always
+#             expire_in: 7 days
+#             paths:
+#                 - bitstream  
+#             reports:
+#              dotenv: gen_bitstream.env      
 
-reports:
-        stage: bitstream
-        extends: .common_conf
-        before_script:
-            - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
-        script:
-            - echo "Generate implementation reports..."
-            - make ci_report_route
-            - make validate  
-        after_script:
-            - ls reports            
-            - mv reports reports_${EA}_${FPGA_BOARD}
-            - ls; tree            
-        artifacts:
-            when: always
-            paths:
-                - reports_${EA}_${FPGA_BOARD}
+# reports:
+#         stage: bitstream
+#         extends: .common_conf
+#         before_script:
+#             - ls; ls dcp; tree 
+#             - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+#         script:
+#             - echo "Generate implementation reports..."
+#             - make ci_report_route
+#             - make validate  
+#         after_script:
+#             - ls reports            
+#             - mv reports reports_${EA}_${FPGA_BOARD}
+#             - ls; tree            
+#         artifacts:
+#             when: always
+#             paths:
+#                 - reports_${EA}_${FPGA_BOARD}
 
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
@@ -177,7 +177,7 @@ fpga-test:
         tags: 
             - FPGA_u55c        
         before_script:
-            - export BITSTREAM=bitstream/system_acme_u55c.bit 
+            # - export BITSTREAM=bitstream/system_acme_u55c.bit 
             - command -v ssh-agent > /dev/null || (apk add --update openssh)
             - eval $(ssh-agent -s)
             - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
@@ -186,7 +186,7 @@ fpga-test:
             - echo $PWD
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverdown
         script:
-            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM
+            - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh qdma $BITSTREAM_DIR
             - source $BOOT_ONIC_SCRIPT $OSBI_DEPLOY_DIR
             - $LOAD_ONIC_SCRIPT/load-bitstream-onic-test.sh driverup
             - source sh/fpga_test.sh riscv.log
@@ -202,7 +202,8 @@ fpga-test:
                 else
                     echo 'This will only run when job failed or is cancelled'
                 fi           
-            - mkdir -p boot     
+            - mkdir -p boot 
+            - cp ~/.ssh/known_hosts  boot/   
             - cp test.log boot/       
             - cp $OSBI_DEPLOY_DIR boot/
             - mv boot tmp/            
@@ -213,57 +214,57 @@ fpga-test:
             paths:
             - tmp
 
-deploy-EA:
-        stage: deploy
-        # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
-        when: on_success
-        rules:
-            - !reference [.default_rules, rules]  
-            - if: $CI_PIPELINE_SOURCE == "pipeline" 
-        variables:
-            GIT_SUBMODULE_STRATEGY: "none"
-            GIT_STRATEGY: "none"
-        timeout: 8h
-        tags: !reference [.default_tags, tags] 
-        before_script:
-            - ls; ls dcp; tree  
-            - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}
-            - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
-            - mkdir -p $ABSDIR            
-        script:            
-            - date >> $ABSDIR/date.txt
-            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_* tmp/reports/            
-            - mv dcp tmp/ ; mv bitstream tmp/            
-            - cp -r tmp/* $ABSDIR
-            - !reference [.deploy-EA, script]
-        after_script:             
-            - echo "Remember - Exported variables are not propagated to after_script"
-        allow_failure: false
+# deploy-EA:
+#         stage: deploy
+#         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
+#         when: on_success
+#         rules:
+#             - !reference [.default_rules, rules]  
+#             - if: $CI_PIPELINE_SOURCE == "pipeline" 
+#         variables:
+#             GIT_SUBMODULE_STRATEGY: "none"
+#             GIT_STRATEGY: "none"
+#         timeout: 8h
+#         tags: !reference [.default_tags, tags] 
+#         before_script:
+#             - ls; ls dcp; tree  
+#             - export TODAY=$(date +"%y%m%d")            
+#             - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}
+#             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
+#             - mkdir -p $ABSDIR            
+#         script:            
+#             - date >> $ABSDIR/date.txt
+#             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
+#             - mkdir -p tmp/reports; mv reports_* tmp/reports/            
+#             - mv dcp tmp/ ; mv bitstream tmp/            
+#             - cp -r tmp/* $ABSDIR
+#             - !reference [.deploy-EA, script]
+#         after_script:             
+#             - echo "Remember - Exported variables are not propagated to after_script"
+#         allow_failure: false
 
-# This job needs to put together all the bitstreams. No parallel jobs here.            
-release_job:
-        stage: deploy
-        tags: !reference [.default_tags, tags]
-        when: on_success
-        image: registry.gitlab.com/gitlab-org/release-cli:latest
-        variables:
-            TARGET_GOLDEN: ariane
-            TARGET_MEEP: acme_vpu
-            JOB_ID_GOLDEN: ${BS_CI_JOB_ID_ariane_u55c}
-            JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_vpu_u55c}
-        rules:
-            - if: $CI_COMMIT_TAG # Run this job when a tag is created
-        script:
-            - echo "Running release job"
-        release:
-         name: 'MEEP Release $CI_COMMIT_TAG'
-         description: 'CICD release with bitstreams [$TARGET_GOLDEN, $TARGET_MEEP] for Alveo U55C'
-         tag_name: '$CI_COMMIT_TAG'
-         assets:
-          links:
-            - name: 'Bitstream_${TARGET_MEEP}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit 
-            - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit                    
+# # This job needs to put together all the bitstreams. No parallel jobs here.            
+# release_job:
+#         stage: deploy
+#         tags: !reference [.default_tags, tags]
+#         when: on_success
+#         image: registry.gitlab.com/gitlab-org/release-cli:latest
+#         variables:
+#             TARGET_GOLDEN: ariane
+#             TARGET_MEEP: acme_vpu
+#             JOB_ID_GOLDEN: ${BS_CI_JOB_ID_ariane_u55c}
+#             JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_vpu_u55c}
+#         rules:
+#             - if: $CI_COMMIT_TAG # Run this job when a tag is created
+#         script:
+#             - echo "Running release job"
+#         release:
+#          name: 'MEEP Release $CI_COMMIT_TAG'
+#          description: 'CICD release with bitstreams [$TARGET_GOLDEN, $TARGET_MEEP] for Alveo U55C'
+#          tag_name: '$CI_COMMIT_TAG'
+#          assets:
+#           links:
+#             - name: 'Bitstream_${TARGET_MEEP}_U55C'       
+#               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit 
+#             - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
+#               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit                    
