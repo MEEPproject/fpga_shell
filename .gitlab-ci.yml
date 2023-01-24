@@ -45,7 +45,7 @@ stages:
     - synthesis
     - implementation
     - bitstream
-     - fpga-test
+    - fpga-test
     - deploy
 
 .clone_ea: &clone_ea 
