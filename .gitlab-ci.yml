@@ -172,7 +172,7 @@ reports:
 # 
 fpga-test:
         stage: fpga-test
-        retry: 3        
+        retry: 2        
         tags: 
             - FPGA_u55c        
         before_script:
