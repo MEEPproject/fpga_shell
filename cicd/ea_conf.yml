@@ -17,7 +17,7 @@
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - docker
 
 .common_conf:
   rules:

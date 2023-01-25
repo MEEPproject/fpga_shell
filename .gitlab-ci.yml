@@ -174,7 +174,7 @@ fpga-test:
         stage: fpga-test
         retry: 2        
         tags: 
-            - FPGA_u55c        
+            - docker        
         before_script:
             - export BITSTREAM=bitstream/system_acme_u55c.bit 
             - command -v ssh-agent > /dev/null || (apk add --update openssh)
