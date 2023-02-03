@@ -22,7 +22,7 @@
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
         CI_RISCV_DIR: /home/tools/openpiton/riscv_install
         # TODO: Link with the SDK repo, set triggering policies
-        OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
+        OSBI_DEPLOY_DIR: /home/tools/load-ariane/firmware/osbi_buildroot.bin
         RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
         # Change this is MEEP wants another bitstream as fixed release
 
