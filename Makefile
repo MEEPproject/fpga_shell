@@ -36,6 +36,9 @@ U280_BOARD   = "u280"
 U55C_BOARD   = "u55c"
 #SHELL := /bin/bash
 
+# applying extra Xilinx licenses in case they are needed
+export XILINXD_LICENSE_FILE := $(XILINXD_LICENSE_FILE):/opt/flexlm/license/Xilinx.lic
+
 .PHONY: clean clean_project clean_accelerator clean_synthesis clean_implementation clean_ci_cd
 
 #.DEFAULT_GOAL := initialize
