@@ -9,7 +9,9 @@
     parallel:
         matrix:
             - FPGA_BOARD: [u55c,u280]
-              EA: [acme, ariane, pronoc, meep_dvino, acme_vpu]
+              EA: [acme_ea-4a, acme_ea-1h16v, acme_ea-4h2v]
+              PROTON_OP: pronoc
+
               # These labels need to match what is at accelerator_build.sh
               # on the EA meep_shell directory    
 

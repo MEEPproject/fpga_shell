@@ -77,7 +77,7 @@ synthesis:
         script:
             - make initialize
             - make $FPGA_BOARD
-            - make project EA_PARAM=$EA
+            - make project EA_PARAM=$EA EA_PARAM+=$PROTON_OP
             - make synthesis
             - !reference [.check_synth, script]
         after_script:
