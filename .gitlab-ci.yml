@@ -128,8 +128,9 @@ bitstream:
         script:
             - make ci_bitstream
         after_script:
+            - DATE=$(date +"%y%m%d")
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/system_${EA}_${FPGA_BOARD}.bit
+            - mv bitstream/system.bit bitstream/$DATE_${EA}_${FPGA_BOARD}.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
