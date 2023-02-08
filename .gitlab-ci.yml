@@ -70,15 +70,15 @@ synthesis_production:
         variables:
             GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
-            - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
+            - echo "Actual element in the matrix is $EA + u55c
             - !reference [.export_toolchain, before_script]
         script:
             - make initialize
-            - make $FPGA_BOARD
+            - make u55c
             - make project EA_PARAM=$EA EA_PARAM+=$PROTON_OP
             - make synthesis
             - !reference [.check_synth, script]
@@ -91,7 +91,7 @@ synthesis_production:
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_u55c.dcp
             - !reference [.save_dts, after_script]
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
@@ -149,14 +149,14 @@ implementation_production:
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script:           
             - ls; ls dcp; tree 
-            - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
+            - mv dcp/synthesis_${EA}_u55c.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_u55c.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_${EA}_${FPGA_BOARD}
+            - mv reports reports_${EA}_u55c
         artifacts:
             when: always
             expire_in: 1 day
@@ -193,7 +193,7 @@ bitstream_production:
           - implementation_production
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_u55c.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
@@ -202,7 +202,7 @@ bitstream_production:
             - mv bitstream/system.bit bitstream/$DATE_${EA}_production.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
-            - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
+            - echo BS_CI_JOB_ID_${EA}_u55c=$CI_JOB_ID >> gen_bitstream.env
         artifacts:
             when: always
             expire_in: 7 days
@@ -243,19 +243,19 @@ reports_production:
           - implementation_production
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_u55c.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
         after_script:
             - ls reports            
-            - mv reports reports_${EA}_${FPGA_BOARD}
+            - mv reports reports_${EA}_u55c
             - ls; tree            
         artifacts:
             when: always
             paths:
-                - reports_${EA}_${FPGA_BOARD}
+                - reports_${EA}_u55c
 
 reports_test:
         stage: bitstream
@@ -288,12 +288,12 @@ fpga-test-prodcution:
           - bitstream_production
         # Overwrite tags to select the right board
         tags: 
-            - $FPGA_BOARD        
+            - u55c        
         before_script:
             - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
-            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
+            - export FPGA_LOG=fpga_test_${EA}_u55c.log
+            - export BITSTREAM=bitstream/system_${EA}_u55c.bit    
             - mkdir -p tmp/logs     
         script:
             # The EA script should provide the right script and the right binary
