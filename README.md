@@ -2,6 +2,8 @@
 <div align="center">
     <img src="Images/addressmap.png" width="200px" alt="<MEEP logo>"/> 
 
+
+<br/>
 <h1 align="center">MEEP Shell 
 
 <br/>
