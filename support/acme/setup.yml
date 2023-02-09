@@ -59,8 +59,8 @@
 
 .export_toolchain:
     before_script:
-        - export RISCV=$CI_RISCV_DIR
-        - echo "Using pre-existing RISCV toolchain"
+        - echo "Using pre-existing RISCV toolchain" 
+        - export RISCV=$CI_RISCV_DIR        
         # Some scripting-based decision should be added to <sometimes> build the toolchain from scratch (i,e, merge to master branch)
         - echo "RISCV = $RISCV"
 
