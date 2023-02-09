@@ -85,7 +85,7 @@ In order to change the default target board:
 ```Bash
 make  <targetBoard>            # Where <targetBoard> = u55c, u280, vcu128
 ```
-<br/>Others:
+Others:
 ```Bash
 make SmartPlace        # Exahustive search of the best placement strategy (~20hours)
 ```
@@ -95,7 +95,7 @@ make reports_synth     # Create synthesis reports: Utilization, timing paths
 ```Bash
 make reports_impl      # Create implementation reports: Utilization, timing paths
 ```
-<br/>Push with GitLab variables:
+Push with GitLab variables:
 ```Bash
 git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 ```
