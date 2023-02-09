@@ -43,7 +43,7 @@ In order to define the interfaces that ought to be active in the Shell, edit <sp
 ```Bash
 INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
 ```
-Where *diasmbiguation* is <span style="color:green">yes</span> in order to add the component to the Shell, <span style="color:red">no</span> for it to be absent.<br/>
+Where *diasmbiguation* is <span style="color:green">**_yes_**</span> in order to add the component to the Shell, <span style="color:red">**_no_**</span> for it to be absent.<br/>
 
 ----
 
