@@ -114,14 +114,6 @@ are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it
 will be explained later.
 
-## 👷 Partners
-**Barcelona Supercomputing Center** - Centro Nacional de Supercomputación (BSC-CNS) :globe_with_meridians:
-[Website](https://www.bsc.es "Welcome")
-<br/>**University of Zagreb**, Faculty of Electrical Engineering and Computing
-:globe_with_meridians: [Website](https://www.fer.unizg.hr/en "Welcome")
-<br/>**TÜBITAK BILGEM** Informatics and Information Security Research Center :globe_with_meridians: [Website](https://bilgem.tubitak.gov.tr/en "Welcome")
-
-
 
 ## :woman: Authors 
 - Alex Kropotov: alex.kropotov@bsc.es
@@ -132,11 +124,20 @@ will be explained later.
 - Francelly Cano Ladino: francelly.canoladino@bsc.es
 
 
+## 👷 Partners
+**Barcelona Supercomputing Center** - Centro Nacional de Supercomputación (BSC-CNS) :globe_with_meridians:
+[Website](https://www.bsc.es "Welcome")
+<br/>**University of Zagreb**, Faculty of Electrical Engineering and Computing
+:globe_with_meridians: [Website](https://www.fer.unizg.hr/en "Welcome")
+<br/>**TÜBITAK BILGEM** Informatics and Information Security Research Center :globe_with_meridians: [Website](https://bilgem.tubitak.gov.tr/en "Welcome")
+
+
 ## :globe_with_meridians: Wiki
 
 For more detailed instructions on how to use this software, visit [project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki").
 
-
+<br/>
+<br/>
 <div align="center">
 <h2 align="center">🤝 Support</h2>
 <p align="center">The MEEP project has received funding from the European High-Performance Computing Joint Undertaking (JU) under grant agreement No 946002. The JU receives support from the European Union’s Horizon 2020 research and innovation programme in Spain, Croatia, Turkey.</p></div>
