@@ -30,9 +30,9 @@
         - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
         - "export PATH=$QDMA_APPS:$PATH"
 
-.default_rules:
-  rules:
-   if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
+# .default_rules:
+#   rules:
+#    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
 .sdk_default:
     before_script:

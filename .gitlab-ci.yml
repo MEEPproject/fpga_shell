@@ -20,7 +20,6 @@ include:
 
 workflow:
     rules:
-        - !reference [.default_rules, rules]
         - if: $CI_PIPELINE_SOURCE == "pipeline"
         - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
         - if: $CI_PIPELINE_SOURCE == "web"
@@ -29,6 +28,8 @@ workflow:
         - if: $CI_COMMIT_TAG != null 
         - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
           when: never # Pushing to main doesn't create pipelines unless there is a tag
+        - !reference [.default_rules, rules]
+        - !reference [.production_rules, rules]
     
 
 variables: !reference [.setup, variables]
@@ -143,7 +144,9 @@ synthesis_test:
             
 implementation_production:
         stage: implementation
-        extends: .common_conf 
+        extends: .common_conf
+        rules: 
+            - !reference [.production_rules,rules] 
         dependencies:
           - synthesis_production
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
@@ -165,7 +168,9 @@ implementation_production:
                 - reports_${EA}_${FPGA_BOARD}
 implementation_test:
         stage: implementation
-        extends: .common_conf 
+        extends: .common_conf
+        rules:
+            - !reference [.test_rules,rules] 
         dependencies:
           - synthesis_test
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
@@ -189,6 +194,8 @@ implementation_test:
 bitstream_production:
         stage: bitstream
         extends: .common_conf
+        rules: 
+            - !reference [.production_rules,rules]
         dependencies:
           - implementation_production
         before_script:
@@ -213,7 +220,9 @@ bitstream_production:
 
 bitstream_test:
         stage: bitstream
-        extends: .common_conf 
+        extends: .common_conf
+        rules:
+            - !reference [.test_rules,rules] 
         dependencies:
           - implementation_test
         before_script:
@@ -239,6 +248,8 @@ bitstream_test:
 reports_production:
         stage: bitstream
         extends: .common_conf
+        rules: 
+            - !reference [.production_rules,rules]
         dependencies:
           - implementation_production
         before_script:
@@ -260,6 +271,8 @@ reports_production:
 reports_test:
         stage: bitstream
         extends: .common_conf
+        rules:
+            - !reference [.test_rules,rules]
         dependencies:
           - implementation_test
         before_script:
@@ -284,6 +297,8 @@ fpga-test-prodcution:
         stage: fpga-test
         retry: 2
         extends: .common_conf
+        rules: 
+            - !reference [.production_rules,rules]
         dependencies:
           - bitstream_production
         # Overwrite tags to select the right board
@@ -314,6 +329,8 @@ fpga-test-test:
         stage: fpga-test
         retry: 2
         extends: .common_conf
+        rules:
+            - !reference [.test_rules,rules]
         dependencies:
           - bitstream_test
         # Overwrite tags to select the right board
@@ -345,8 +362,8 @@ deploy-EA-production:
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
-        rules:
-            - !reference [.default_rules, rules]  
+        rules: 
+            - !reference [.production_rules,rules]  
             - if: $CI_PIPELINE_SOURCE == "pipeline" 
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
@@ -356,7 +373,7 @@ deploy-EA-production:
         before_script:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}
+            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR            
         script:            
@@ -377,7 +394,7 @@ deploy-EA-test:
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
         rules:
-            - !reference [.default_rules, rules]  
+            - !reference [.test_rules,rules]
             - if: $CI_PIPELINE_SOURCE == "pipeline" 
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
@@ -387,7 +404,7 @@ deploy-EA-test:
         before_script:
             - ls; ls dcp; tree  
             - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}
+            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_test
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR            
         script:            
