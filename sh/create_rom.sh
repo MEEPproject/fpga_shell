@@ -36,7 +36,7 @@ cd $PARENT_DIR
 #stores [4 bytes]/[word] every row
 #In ASCII, every letter occupies a [byte], so either I reduce the names, or padd them with an extra char
 
-sed -n 1p $SHELL_DEF_FILE | cut -d= -f2 | xxd -p -c 4 > $FILE_GENERATED
+sed -n 1p $SHELL_DEF_FILE | cut -d= -f2 | xxd -p -c 4 >> $FILE_GENERATED
 
 for i in {2..10}
 do
