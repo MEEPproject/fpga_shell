@@ -7,7 +7,7 @@
 <p align="center"><repo-desc></p>
 <br/>
 
-<h1 align="center">&#128026 MEEP Shell 
+<h1 align="center">MEEP Shell 
 
 <br/>
 <br/>
