@@ -1,6 +1,6 @@
 
 <div align="center">
-    <img src="Images/addressmap.png" width="200px" alt="<MEEP logo>"/> 
+    <img src="Images/meep-logo-symbol.png" width="200px" alt="<MEEP logo>"/> 
 
 
 <br/>
