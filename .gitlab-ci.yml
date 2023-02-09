@@ -76,6 +76,7 @@ synthesis_production:
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + u55c
+            - echo "[DEBUG] no riscv"
 
         script:
             - echo "[DEBUG] synthesis"
