@@ -1,16 +1,13 @@
 
-<p align="center">
-  <a href="https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/tree/blanca_ROM/sh" title="<FPGA_Shell>">
-    <img src="Images/addressmap.png" width="200px" alt="<MEEP logo>"/>
-  </a>
-</p>
-<p align="center"><repo-desc></p>
-<br/>
+<div align="center">
+    <img src="Images/addressmap.png" width="200px" alt="<MEEP logo>"/> 
 
 <h1 align="center">MEEP Shell 
 
 <br/>
 <br/>
+</div>
+
 
 
 
@@ -86,7 +83,7 @@ In order to change the default target board:
 ```Bash
 make  <targetBoard>            # Where <targetBoard> = u55c, u280, vcu128
 ```
-Others:
+<br/>Others:
 ```Bash
 make SmartPlace        # Exahustive search of the best placement strategy (~20hours)
 ```
