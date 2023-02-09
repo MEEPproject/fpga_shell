@@ -76,7 +76,7 @@ synthesis_production:
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + u55c
-            - !reference [.export_toolchain, before_script]
+            #- !reference [.export_toolchain, before_script]
         script:
             - make initialize
             - make u55c
