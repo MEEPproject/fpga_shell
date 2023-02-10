@@ -103,7 +103,7 @@ make bitstream         # Generates the bitstream. Creates the synthesis.dcp and/
 In order to change the default target board:
 
 ```Bash
-make  <targetBoard>            # Where <targetBoard> = u55c, u280, vcu128
+make  <targetBoard>            # Where <targetBoard> = u55c, u280
 ```
 Others:
 ```Bash
@@ -133,6 +133,16 @@ incrementaly, adding more pieces as they are needed. The only exception to this
 are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it
 will be explained later.
+
+## :floppy_disk: ROM information
+The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
+- Date of the project generation
+- SHA of the Shell
+- SHA of the Accelerator
+- IDs of the active interfaces
+
+The active interfaces are defined in [accelerator_def](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "accelerator_def.csv") and parsed in 
+[define_shell.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/sh/define_shell.sh "define_shell.sh "), where all the aforementioned information gets written in a new file initrom.mem (gets rewritten if it already exists), stored in _misc_ directory inside the parent directory _fpga_shell_. When issuing _make project_, the [Makefile](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/Makefile "Makefile")  moves the information stored in _initrom.mem_ into the ip.
 
 
 ## :woman: Authors 
