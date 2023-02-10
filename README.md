@@ -4,12 +4,15 @@
 
 
 <br/>
-<h1 align="center">MEEP Shell 
-
+<h1 align="center">MEEP FPGA Shell 
 <br/>
 <br/>
 </div>
+<div align="center">
 
+[![pipeline status](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/badges/develop/ssh_connection/pipeline.svg)](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/commits/develop/ssh_connection)
+
+</div>
 
 
 
@@ -17,11 +20,20 @@
 ## 🚀 Features
 The shell is meant to be a static perimeter architecture that guarantees that the inside accelerator package can be interchangeable for any other package when meeting a defined I/O interface between the shell and the accelerator package.
 
+### 🎭 EA packages
 The list of supported EA packages so far is as follows:
-- dvino
-- sargantana
 - acme (openpiton framework)
+- ariane (openpiton framework)
+- dvino
+- ea_demo
+- epac
+- eprocessor
+- pronoc
+- sargantana
 
+Every EA has a folder  fpga_shell/support with a ea_url.txt file. This file contains the Git URL and the commit SHA. If it is necessary to change the commit SHA to point a specific commit this is the place to modify it.
+
+### 📡 Interfaces
 The  FPGA Shell implements the following interfaces:
 
 - PCIe: Establishes communication between FPGA and the host server.
@@ -29,8 +41,13 @@ The  FPGA Shell implements the following interfaces:
 - Ethernet: 100Gb Ethernet.
 - Aurora: P2P interface.
 - DDR4: External Memory.
-- Boot ROM: Stores and reads information on the configuration of the Shell when booting the project
+- Info ROM: Stores and reads information on the configuration of the Shell when booting the project
 - UART
+
+### :books: Boards
+The supported boards are as follows:
+- Alveo U55C
+- Alveo U280
 
 ## :electric_plug: Prerequisites
 - The MEEP Shell needs to be used with Vivado 2021.2. 
@@ -64,6 +81,9 @@ make binaries          # It generates the binaries
 ```Bash
 make project           # Creates the Vivado project. Generates the FPGA shell around the EA 
 ```
+if you are working with acme, there are different "flavours" that can be generated. <br/>For example
+_make project EA_PARAM=acme_
+<br/>It will generate a OpePiton project with Lagarto as a core. There are other combinations available.
 ```Bash
 make synthesis         # Synthesizes the project
 ```
@@ -104,8 +124,8 @@ make project EA_PARAMS=pronoc
 ```
 
 ## 📂 Directory Structure
-The MEEP FPGA Shell is built around the sh, shell and tcl folders. The sh folder
-handle some automatic tasks during the whole flow, working closely with Makefiles. The tcl folder joints most of the Vivado calls, procedures and automated scripts. The shell folder is where all the different IPs that can be part of the Shell (depending on the selected configuration) are stored.
+The MEEP FPGA Shell is built around the sh, shell and tcl folders. <br/>IThe sh folder
+handle some automatic tasks during the whole flow, working closely with Makefiles.<br/>I The tcl folder joints most of the Vivado calls, procedures and automated scripts.<br/>I The shell folder is where all the different IPs that can be part of the Shell (depending on the selected configuration) are stored.<br/>I
 IPs are treated individually, in such a way there is no friction between different
 set ups, meaning that any combination of IPs can be set with no dependency
 or incompatibility between them. Which such approach, the Shell can be built
