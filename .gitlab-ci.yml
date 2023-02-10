@@ -34,7 +34,6 @@ workflow:
 
 variables: !reference [.setup, variables]
 
-
 stages:
     - synthesis
     - implementation
