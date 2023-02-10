@@ -9,6 +9,7 @@
         EMULATED_ACCELERATOR: acme 
         GIT_STRATEGY: clone
         GIT_SUBMODULE_STRATEGY: recursive
+        DATE: $(date +"%y%m%d")
         CUSTOM_MSG: 1x1_VAS_noVPU
         LINUX_IMAGE: osbi.bin
         SDK_DIR: accelerator/sdk

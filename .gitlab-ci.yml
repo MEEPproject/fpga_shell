@@ -205,7 +205,7 @@ bitstream_production:
         script:
             - make ci_bitstream
         after_script:
-            - DATE=$(date +"%y%m%d")
+            - exportDATE=$(date +"%y%m%d")
             - make clean_implementation
             - mv bitstream/system.bit bitstream/$DATE_${EA}_production.bit
             - echo -e "Artifacts:"; ls bitstream
@@ -232,9 +232,8 @@ bitstream_test:
         script:
             - make ci_bitstream
         after_script:
-            - DATE=$(date +"%y%m%d")
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/$DATE_${EA}_test_${FPGA_BOARD}.bit
+            - mv bitstream/system.bit bitstream/${DATE}_${EA}_test_${FPGA_BOARD}.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
@@ -306,10 +305,9 @@ fpga-test-prodcution:
         tags: 
             - u55c        
         before_script:
-            - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_u55c.log
-            - export BITSTREAM=bitstream/system_${EA}_u55c.bit    
+            - export BITSTREAM=bitstream/${DATE}_${EA}_u55c.bit    
             - mkdir -p tmp/logs     
         script:
             # The EA script should provide the right script and the right binary
@@ -341,7 +339,7 @@ fpga-test-test:
             - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
+            - export BITSTREAM=bitstream/${DATE}_${EA}_${FPGA_BOARD}.bit    
             - mkdir -p tmp/logs     
         script:
             # The EA script should provide the right script and the right binary
