@@ -67,6 +67,9 @@ synthesis_production:
             - !reference [.production_rules,rules]
         interruptible: true
         retry: 1
+        only:
+            variables:
+              - $ENV_WORK == "PRODUCTION"
         variables:
             GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
@@ -109,6 +112,9 @@ synthesis_test:
             - !reference [.test_rules,rules]
         interruptible: true
         retry: 1
+        only:
+            variables:
+              - $ENV_WORK == "TEST"
         variables:
             GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
