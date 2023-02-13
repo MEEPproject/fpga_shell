@@ -210,9 +210,9 @@ bitstream_production:
         script:
             - make ci_bitstream
         after_script:
-            - exportDATE=$(date +"%y%m%d")
+            - export DATE=$(date +"%y%m%d")
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/$DATE_${EA}_production.bit
+            - mv bitstream/system.bit bitstream/${DATE}_${EA}_production.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_u55c=$CI_JOB_ID >> gen_bitstream.env
