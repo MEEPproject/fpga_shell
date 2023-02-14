@@ -9,6 +9,7 @@ binaries
 dcp
 reports
 system.bit
+meep_shell
 gen_system.tcl
 *.swp
 *.log

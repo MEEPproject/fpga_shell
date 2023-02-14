@@ -21,10 +21,9 @@
 
 .production_rules:
   rules:
-    - if: $ENV_WORK == "PRODUCTION"    
+    - if: $ENV_WORK == "PRODUCTION" && $CI_PIPELINE_SOURCE == "pipeline"   
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production" #Can be trigger for a mer_request to the The target branch "production"
-    - if: $CI_PIPELINE_SOURCE == "schedule" #A schedule pipeline: production monthly
-    - if: $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_PIPELINE_SOURCE == "schedule" #A schedule pipeline: production monthly    
     - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
       when: never  
     - if: $CI_COMMIT_TAG != null 
@@ -33,8 +32,9 @@
 
 .test_rules:
   rules:
-    - if: $ENV_WORK == "TEST"    
+    - if: $ENV_WORK == "TEST" && $CI_PIPELINE_SOURCE == "pipeline" 
     - if: ($CI_COMMIT_MESSAGE =~ /#TestCICD/)
+    - if: 
 
 .common_conf:
   # rules:
