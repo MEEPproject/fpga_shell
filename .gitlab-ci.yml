@@ -364,8 +364,7 @@ deploy-EA-production:
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
         rules: 
-            - !reference [.production_rules,rules]  
-            - if: $CI_PIPELINE_SOURCE == "pipeline" 
+            - !reference [.production_rules,rules]
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
             GIT_STRATEGY: "none"
@@ -395,8 +394,7 @@ deploy-EA-test:
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
         rules:
-            - !reference [.test_rules,rules]
-            - if: $CI_PIPELINE_SOURCE == "pipeline" 
+            - !reference [.test_rules,rules]            
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
             GIT_STRATEGY: "none"
