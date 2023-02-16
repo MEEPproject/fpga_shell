@@ -20,7 +20,7 @@
 
 
 cd accelerator
-
-bash -x meep_shell/accelerator_build.sh $1 $2
+# execute accelerator_build using no debug mode
+meep_shell/accelerator_build.sh $1 $2
 
 cd ..

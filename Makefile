@@ -139,8 +139,13 @@ report_route: $(IMPL_DCP)
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
 #Help menu accelerator_build.sh
+syntax_ea: 
+	@$(SH_DIR)/accelerator_build.sh -s
+####
+
+#Help menu accelerator_build.sh
 help_ea: 
-	@$(SH_DIR)/accelerator_build.sh -h;
+	@$(SH_DIR)/accelerator_build.sh -h
 ####
 
 rom_file:
