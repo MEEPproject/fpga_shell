@@ -38,3 +38,39 @@ are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it 
 will be explained later. 
 
+# Bitstreams Naming convention
+
+In order to have a standar method to the bitstream name releases, and the procedure to generate those. There are mandatory rules to use:
+
+# ACME_EA
+
+All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
+
+* First letter: to designate the core (A: *Ariane*; H: *Lagarto Hun*)
+* Second letter: to identify the accelerator (x: *no accelerator*; V: *VPU*; G: *VPU+SA-HEVC+SA-NN*)
+* Thrid letter: to identify the Memory Tile (x: *no MT*, M: *Memory Tile*)
+
+To complete this information, we will add an extra value to each fields:
+
+* **acme_ea_aHbVcM**; where:  
+  - "a" means the number of cores in the system
+  - "b" means the number of vector lanes
+  - "c" means the number of MT
+## Environments to work
+
+We have define two differents environments to generate different bitstream depending of the "environmnet". There are production and Test environmnet.
+## Production
+
+The production environment will be a monthly release. We will work with:
+
+1. Production bitstreams (all ProNoC): 
+    1. ACME_EA 4Axx (available --> *golden reference)
+    2. ACME_EA 1H16G1M (not available yet) [pending from MT & SAs]
+    3. ACME_EA 4H2V4M (not available yet) (L1.Ar) [pending from MT]
+    4. ACME_EA 4H2V2M (not available yet) (L1.Ar) [pending from MT]
+    5. Meanwhile 2, 3 & 4 are in place we will include a transition one: 
+        1. ACME_EA 1H16Vx (L1.Ar) (available)
+        2. ACME_EA 4H2Vx (L1.Ar) (available)
+
+
+## Test 
