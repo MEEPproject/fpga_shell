@@ -67,17 +67,19 @@ All use **ProNoC** routers
 
 | Bitstream names     | Description           | Status           | 
 | :-----------------  |:----------------------| :----------------|
-| **acme_ea_4a**      | *golden reference*     | available        |
-| **acme_ea_1h16g1m** | |not available yet. Pending from MT & SAs  |
-| **acme_ea_4h2v4m**  |        |not available yet . Pending from MT|
-| **acme_ea_4h2v2m**  |(L1.Ariane) |not available yet [pending from MT]|
+|acme_ea_4a      | *golden reference*     | available        |
+| acme_ea_1h16g1m | |not available yet. Pending from MT & SAs  |
+| acme_ea_4h2v4m  |        |not available yet . Pending from MT|
+| acme_ea_4h2v2m  |(L1.Ariane) |not available yet [pending from MT]|
 |Meanwhile 2, 3 & 4 are in place we will include a transition one |
-| **acme_ea_1h16v**   |(L1.Ariane)                | available       |
-| **acme_ea_4h2v**    |(L1.Ariane)                | available       |
+| acme_ea_1h16v   |(L1.Ariane)                | available       |
+| acme_ea_4h2v    |(L1.Ariane)                | available       |
 
 :card_box: The FPGA card used here is the **u55c**
 
 There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule :clock1:.
+
+The bitstreams generated will be released in  https://release.meep-project.eu/nexus/#browse/search
 
 ## Test :fingers_crossed:
 
