@@ -72,7 +72,7 @@ synthesis_production:
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         before_script:
-            - PROTON_OP: "meep  eth  ncmem hbm pronoc" 
+            - PROTON_OP= "meep  eth  ncmem hbm pronoc" 
             - echo "${PROTON_OP}"
             - !reference [.git_clean, before_script]
             - *clone_ea
