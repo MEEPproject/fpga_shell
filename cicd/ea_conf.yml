@@ -18,8 +18,6 @@
     - MEEP_FPGA
 
 .production_rules:
-  variables:
-    PROTON_OP: "meep  eth  ncmem hbm pronoc" 
   rules:
     - if: $ENV_WORK == "PRODUCTION" && $CI_PIPELINE_SOURCE == "pipeline"   
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production" #Can be trigger for a mer_request to the The target branch "production"
