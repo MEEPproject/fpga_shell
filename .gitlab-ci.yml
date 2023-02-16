@@ -199,6 +199,7 @@ bitstream_production:
         dependencies:
           - implementation_production
         before_script:
+            - DATE=$(date +"%Y%m%d")
             - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_u55c.dcp dcp/implementation.dcp            
         script:
@@ -206,7 +207,7 @@ bitstream_production:
         after_script:
             - export DATE=$(date +"%y%m%d")
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/${EA}_production.bit
+            - mv bitstream/system.bit bitstream/${DATE}_${EA}_production.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_u55c=$CI_JOB_ID >> gen_bitstream.env
@@ -226,13 +227,14 @@ bitstream_test:
         dependencies:
           - implementation_test
         before_script:
+            - DATE=$(date +"%Y%m%d")
             - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/${EA}_test_${FPGA_BOARD}.bit
+            - mv bitstream/system.bit bitstream/${DATE}_${EA}_test_${FPGA_BOARD}.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
@@ -305,9 +307,10 @@ fpga-test-prodcution:
             - u55c        
         before_script:
             - !reference [.fpga_test, before_script]
+            - DATE=$(date +"%Y%m%d") 
             - export FPGA_LOG=fpga_test_${EA}_u55c.log
             - export BITSTREAM=bitstream/${DATE}_${EA}_u55c.bit    
-            - mkdir -p tmp/logs     
+            - mkdir -p tmp/logs                
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
@@ -334,9 +337,9 @@ fpga-test-test:
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
-        before_script:
-            - ls; ls dcp; tree 
+        before_script:            
             - !reference [.fpga_test, before_script]
+            - DATE=$(date +"%Y%m%d")
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${DATE}_${EA}_${FPGA_BOARD}.bit    
             - mkdir -p tmp/logs     
