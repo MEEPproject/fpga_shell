@@ -63,14 +63,19 @@ We have define two differents environments to generate different bitstream depen
 
 The production environment will be a monthly release. We will work with:
 
-1. Production bitstreams (all ProNoC): 
-    1. ACME_EA 4Axx (available --> *golden reference)
-    2. ACME_EA 1H16G1M (not available yet) [pending from MT & SAs]
-    3. ACME_EA 4H2V4M (not available yet) (L1.Ar) [pending from MT]
-    4. ACME_EA 4H2V2M (not available yet) (L1.Ar) [pending from MT]
-    5. Meanwhile 2, 3 & 4 are in place we will include a transition one: 
-        1. ACME_EA 1H16Vx (L1.Ar) (available)
-        2. ACME_EA 4H2Vx (L1.Ar) (available)
+| Production bitstreams      | Description           | Status           | 
+| -------------  |:---------------------:| :---------------------:|
+|    all ProNoC                                                      |
+| acme_ea_4A  |  golden reference | available  |
+|acme_ea_1H16G1M |pending from MT & SAs|not available yet|
+|ACME_EA 4H2V4M |pending from MT|not available yet|
+|ACME_EA 4H2V2M|(L1.Ar) [pending from MT]|not available yet|
+|    Meanwhile 2, 3 & 4 are in place we will include a transition one                                              |
+|ACME_EA 1H16Vx|(L1.Ar)|available|
+|ACME_EA 4H2Vx|(L1.Ar)|available|
+
+
+
 
 
 ## Test 

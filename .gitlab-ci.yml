@@ -82,7 +82,7 @@ synthesis_production:
             - echo "[DEBUG] synthesis"
             - make initialize
             - make u55c
-            - make project EA_PARAM=$EA EA_PARAM+=${PROTON_OP}
+            - make project EA_PARAM=$EA EA_PARAM+="${PROTON_OP}"
             - make synthesis
             - !reference [.check_synth, script]
         after_script:

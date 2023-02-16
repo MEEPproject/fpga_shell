@@ -21,6 +21,6 @@
 
 cd accelerator
 # execute accelerator_build using no debug mode
-meep_shell/accelerator_build.sh $1 $2
+meep_shell/accelerator_build.sh $1 $2 $3 $4 $5 $6 $7 $8
 
 cd ..
