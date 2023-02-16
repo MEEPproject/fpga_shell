@@ -59,25 +59,32 @@ To complete this information, we will add an extra value to each fields:
 ## Environments to work
 
 We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
-## Production
+## Production 	:rocket:
 
 The production environment will be a monthly release. We will work with:
 
+All use **ProNoC** routers
+
 | Bitstream names     | Description           | Status           | 
 | :-----------------  |:----------------------| :----------------|
-| <h3 align="center"> all ProNoC  </h3>                          |
 | **acme_ea_4a**      | *golden reference*     | available        |
 | **acme_ea_1h16g1m** | |not available yet. Pending from MT & SAs  |
 | **acme_ea_4h2v4m**  |        |not available yet . Pending from MT|
 | **acme_ea_4h2v2m**  |(L1.Ariane) |not available yet [pending from MT]|
-| <h3 align="center">  Meanwhile 2, 3 & 4 are in place we will include a transition one </h3>|
+|Meanwhile 2, 3 & 4 are in place we will include a transition one |
 | **acme_ea_1h16v**   |(L1.Ariane)                | available       |
 | **acme_ea_4h2v**    |(L1.Ariane)                | available       |
 
+:card_box: The FPGA card used here is the **u55c**
 
+There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule :clock1:.
 
-## Test 
+## Test :fingers_crossed:
 
-The same ones than before with OP routers. This will help to ensure nothing is broken on the way.
+The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
 Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers.
+
+:card_box: Here we uses the **u280** and **u55c** fpga cards.
+
+If we want to use this environment, we need to use in our *commit message* **#TestCICD**
