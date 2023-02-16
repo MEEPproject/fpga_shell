@@ -52,30 +52,32 @@ All the bistreams will use the **ACME_EA** with three letters to better identify
 
 To complete this information, we will add an extra value to each fields:
 
-* **acme_ea_aHbVcM**; where:  
+* **acme_ea_ahbvcm**; where:  
   - "a" means the number of cores in the system
   - "b" means the number of vector lanes
   - "c" means the number of MT
 ## Environments to work
 
-We have define two differents environments to generate different bitstream depending of the "environmnet". There are production and Test environmnet.
+We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
 ## Production
 
 The production environment will be a monthly release. We will work with:
 
-| Production bitstreams      | Description           | Status           | 
-| -------------  |:---------------------:| :---------------------:|
-|    all ProNoC                                                      |
-| acme_ea_4A  |  golden reference | available  |
-|acme_ea_1H16G1M |pending from MT & SAs|not available yet|
-|ACME_EA 4H2V4M |pending from MT|not available yet|
-|ACME_EA 4H2V2M|(L1.Ar) [pending from MT]|not available yet|
-|    Meanwhile 2, 3 & 4 are in place we will include a transition one                                              |
-|ACME_EA 1H16Vx|(L1.Ar)|available|
-|ACME_EA 4H2Vx|(L1.Ar)|available|
-
-
+| Bitstream names     | Description           | Status           | 
+| :-----------------  |:----------------------| :----------------|
+| <h3 align="center"> all ProNoC  </h3>                          |
+| **acme_ea_4a**      | *golden reference*     | available        |
+| **acme_ea_1h16g1m** | |not available yet. Pending from MT & SAs  |
+| **acme_ea_4h2v4m**  |        |not available yet . Pending from MT|
+| **acme_ea_4h2v2m**  |(L1.Ariane) |not available yet [pending from MT]|
+| <h3 align="center">  Meanwhile 2, 3 & 4 are in place we will include a transition one </h3>|
+| **acme_ea_1h16v**   |(L1.Ariane)                | available       |
+| **acme_ea_4h2v**    |(L1.Ariane)                | available       |
 
 
 
 ## Test 
+
+The same ones than before with OP routers. This will help to ensure nothing is broken on the way.
+
+Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers.
