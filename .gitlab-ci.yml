@@ -370,21 +370,24 @@ deploy-EA-production:
             GIT_STRATEGY: "none"
         timeout: 8h
         tags: !reference [.default_tags, tags] 
-        before_script:
-            - ls; ls dcp; tree  
-            - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_production
+        parallel: !reference [.multi_target_production, parallel]  
+        before_script:             
+            - export DATE=$(date +"%y%m%d")            
+            - export EADIRNAME=${DATE}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
+            - echo "Shell deploy"
             - mkdir -p $ABSDIR            
-        script:            
+        script:  
+            - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - mkdir -p tmp/reports; mv reports_* tmp/reports/            
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
-            - !reference [.deploy-EA, script]
+            # Store production's bitstreams
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_${EA}_u55c.bit ${MEEP_RAW_REPOSITORY}/bitstreams/${EA}/${DATE}_${EA}_u55c.bit
         after_script:             
-            - echo "Remember - Exported variables are not propagated to after_script"
+            - echo "Remember - Exported variables are not propagated to after_script"            
         allow_failure: false
         environment:
             name: production
