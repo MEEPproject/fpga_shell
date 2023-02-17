@@ -391,6 +391,7 @@ deploy-EA-production:
         allow_failure: false
         environment:
             name: production
+            url: ${MEEP_RAW_REPOSITORY}
 
 deploy-EA-test:
         stage: deploy
