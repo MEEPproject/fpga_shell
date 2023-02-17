@@ -33,10 +33,10 @@ EA_GIT_SHA=$2
 if [ "$#" -ne 2 ]; then
     echo "[MEEP] Error: Illegal number of parameters, terminating"
 	echo "[MEEP] INFO: Usage: generate.sh <accelerator_repo>"
-	return -1
+	exit 1
 fi
-
-bash -x $SH_DIR/gitsubmodules.sh $EA_GIT_URL $EA_GIT_SHA
+#Removed debug execution
+$SH_DIR/gitsubmodules.sh $EA_GIT_URL $EA_GIT_SHA
 #Generic call to accelerator conf script. It should be meep_shell/accelerator_init.sh
 cd $ACC_DIR
 
@@ -54,6 +54,6 @@ else
  echo "[MEEP] INFO: SymLink won't be created"
 fi
 
-bash -x $ACC_DIR/meep_shell/accelerator_init.sh $ACC_DIR
+$ACC_DIR/meep_shell/accelerator_init.sh $ACC_DIR
 cd $ROOT_DIR
 #Make a make inside DVINO
