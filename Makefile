@@ -96,7 +96,7 @@ $(BINARIES_DIR):
 	@cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
-	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM) ;\
+	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM) 	
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
