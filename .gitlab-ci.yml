@@ -62,7 +62,7 @@ stages:
 
 synthesis_production:
         stage: synthesis
-        extends: .common_conf
+        extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
         interruptible: true
@@ -105,7 +105,7 @@ synthesis_production:
 
 synthesis_test:
         stage: synthesis
-        extends: .common_conf
+        extends: .common_conf_test
         rules:
             - !reference [.test_rules, rules]
         interruptible: true
@@ -145,7 +145,7 @@ synthesis_test:
             
 implementation_production:
         stage: implementation
-        extends: .common_conf
+        extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules] 
         dependencies:
@@ -169,7 +169,7 @@ implementation_production:
                 - reports_${EA}_${FPGA_BOARD}
 implementation_test:
         stage: implementation
-        extends: .common_conf
+        extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules] 
         dependencies:
@@ -194,7 +194,7 @@ implementation_test:
 
 bitstream_production:
         stage: bitstream
-        extends: .common_conf
+        extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
         dependencies:
@@ -221,7 +221,7 @@ bitstream_production:
 
 bitstream_test:
         stage: bitstream
-        extends: .common_conf
+        extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules] 
         dependencies:
@@ -248,7 +248,7 @@ bitstream_test:
 
 reports_production:
         stage: bitstream
-        extends: .common_conf
+        extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
         dependencies:
@@ -271,7 +271,7 @@ reports_production:
 
 reports_test:
         stage: bitstream
-        extends: .common_conf
+        extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules]
         dependencies:
@@ -297,7 +297,7 @@ reports_test:
 fpga-test-prodcution:
         stage: fpga-test
         retry: 2
-        extends: .common_conf
+        extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
         dependencies:
@@ -329,7 +329,7 @@ fpga-test-prodcution:
 fpga-test-test:
         stage: fpga-test
         retry: 2
-        extends: .common_conf
+        extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules]
         dependencies:
