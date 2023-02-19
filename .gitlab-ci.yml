@@ -308,8 +308,8 @@ fpga-test-prodcution:
         before_script:
             - !reference [.fpga_test, before_script]
             - DATE=$(date +"%Y%m%d") 
-            - export FPGA_LOG=fpga_test_${EA}_u55c.log
-            - export BITSTREAM=bitstream/${DATE}_${EA}_u55c.bit    
+            - export FPGA_LOG=fpga_test_${EA}_production.log
+            - export BITSTREAM=bitstream/${DATE}_${EA}_production.bit    
             - mkdir -p tmp/logs                
         script:
             # The EA script should provide the right script and the right binary
@@ -341,7 +341,7 @@ fpga-test-test:
             - !reference [.fpga_test, before_script]
             - DATE=$(date +"%Y%m%d")
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/${DATE}_${EA}_${FPGA_BOARD}.bit    
+            - export BITSTREAM=bitstream/${DATE}_${EA}_${FPGA_BOARD}_test.bit    
             - mkdir -p tmp/logs     
         script:
             # The EA script should provide the right script and the right binary
