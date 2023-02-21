@@ -369,8 +369,7 @@ deploy-EA-production:
             GIT_SUBMODULE_STRATEGY: "none"
             GIT_STRATEGY: "none"
         timeout: 8h
-        tags: !reference [.default_tags, tags] 
-        parallel: !reference [.multi_target_production, parallel]  
+        tags: !reference [.default_tags, tags]          
         before_script:             
             - export DATE=$(date +"%Y%m%d")            
             - export EADIRNAME=${DATE}_${CI_PIPELINE_ID}_production
@@ -384,8 +383,10 @@ deploy-EA-production:
             - mkdir -p tmp/reports; mv reports_* tmp/reports/            
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
-            # Store production's bitstreams
-            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_${EA}_u55c.bit ${MEEP_RAW_REPOSITORY}/bitstreams/${EA}/${DATE}_${EA}_u55c.bit
+            # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_acme_ea_1h16v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h16v/${DATE}_acme_ea_1h16v_production.bit
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_acme_ea_4a_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${DATE}_acme_ea_4a_production.bit
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_acme_ea_4h2v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${DATE}_acme_ea_4h2v_production.bit
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"            
         allow_failure: false
@@ -430,13 +431,14 @@ release_job:
         when: on_success
         image: registry.gitlab.com/gitlab-org/release-cli:latest
         variables:
-            TARGET_GOLDEN: ariane
-            TARGET_MEEP: acme_vpu
-            JOB_ID_GOLDEN: ${BS_CI_JOB_ID_ariane_u55c}
-            JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_vpu_u55c}
+            TARGET_GOLDEN: acme_ea_4a
+            TARGET_MEEP: acme_ea_4hv2
+            JOB_ID_GOLDEN: ${BS_CI_JOB_ID_acme_ea_4a_production}
+            JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_ea_4hv2_production}
         rules:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created
         script:
+            - DATE=$(date +"%Y%m%d") 
             - echo "Running release job"
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
@@ -444,7 +446,7 @@ release_job:
          tag_name: '$CI_COMMIT_TAG'
          assets:
           links:
-            - name: 'Bitstream_${TARGET_MEEP}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit 
-            - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit                    
+            - name: 'Bitstream_${TARGET_MEEP}_production'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/${DATE}_acme_ea_4hv2_production.bit 
+            - name: 'Bitstream_${TARGET_GOLDEN}_production'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/${DATE}_acme_ea_4a_production.bit                   
