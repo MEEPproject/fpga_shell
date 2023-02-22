@@ -35,8 +35,8 @@ Every EA has a folder  `fpga_shell/support` with a ea_url.txt file. This file co
 
 To change the default target. Do :
 
-    `make u55c`
-    `make u280`. 
+    make u55c
+    make u280. 
 
 ## 3. Vivado project
 
@@ -47,28 +47,34 @@ if you are working with **acme**, there are different "flavours" that can be gen
 
 To check which flavours we have, you need to do:
 
-    `make help_ea`
+    make help_ea
 
 if you want to know the nomenclature:
 
-    `make syntax_ea`
+    make syntax_ea
 
-When you know the name you can use it like this. The names description you have :
+When you know the name you can use it like this. The names description you have in section 6 :
 
-    `make project EA_PARAM=acme_ea_4a`
+For example:
+
+    make project EA_PARAM=acme_ea_4a
+
+if you want to add flags:
+
+    make project EA_PARAM+="acme_ea_4a meep pronoc hbm"
 
 It will generate a OpePiton project with Lagarto as a core. There are other conbinations available. 
 
 
 
-## Push with GitLab variables:
+## 4.  Push with GitLab variables:
 
     git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 
     make project EA_PARAMS=pronoc
 
 
-## Developers guide:
+## 5.  Developers guide:
 
 The MEEP FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
 
@@ -82,11 +88,11 @@ IPs are treated individually, in such a way there is no friction between differe
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it will be explained later. 
 
 
-# Bitstreams Naming convention
+## 6. Bitstreams Naming convention
 
 In order to have a standar method to the bitstream name releases, and the procedure to generate those. There are mandatory rules to use:
 
-# ACME_EA
+### 6.1. ACME_EA
 
 All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
 
@@ -100,7 +106,7 @@ To complete this information, we will add an extra value to each fields:
   - "a" means the number of cores in the system
   - "b" means the number of vector lanes
   - "c" means the number of MT
-## Environments to work
+### 6.2. Environments to work
 
 We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
 ## Production 	:rocket:
@@ -125,11 +131,11 @@ There are two ways to execute the pipeline using this environment. By Merge requ
 
 The bitstreams generated will be released in  https://release.meep-project.eu/nexus/#browse/search/raw
 
-## Test :fingers_crossed:
+### 6.3. Test :fingers_crossed:
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
-Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers.
+Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers. (Pending)
 
 :card_box: Here we uses the **u280** and **u55c** fpga cards.
 
