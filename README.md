@@ -109,7 +109,7 @@ To complete this information, we will add an extra value to each fields:
 ### 6.2. Environments to work
 
 We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
-## Production 	:rocket:
+## 6.3. Production 	:rocket:
 
 The production environment will be a monthly release. We will work with:
 
@@ -131,7 +131,7 @@ There are two ways to execute the pipeline using this environment. By Merge requ
 
 The bitstreams generated will be released in  https://release.meep-project.eu/nexus/#browse/search/raw
 
-### 6.3. Test :fingers_crossed:
+### 6.4. Test :fingers_crossed:
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
