@@ -36,7 +36,7 @@ Every EA has a folder  `fpga_shell/support` with a ea_url.txt file. This file co
 To change the default target. Do :
 
     make u55c
-    make u280. 
+    make u280
 
 ## 3. Vivado project
 
@@ -127,7 +127,7 @@ All use **ProNoC** routers
 
 :card_box: The FPGA card used here is the **u55c**
 
-There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule :clock1:.
+There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule  (monthly, the 1th):clock1:.
 
 The bitstreams generated will be released in  https://release.meep-project.eu/nexus/#browse/search/raw
 
