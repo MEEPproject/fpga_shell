@@ -9,7 +9,7 @@
     parallel:
         matrix:
             - FPGA_BOARD: [u55c,u280]
-              EA: [acme_ea_4a, acme_ea_1h16v, acme_ea_4h2v]              
+              EA: [acme_ea_1h16v]              
               # These labels need to match what is at accelerator_build.sh
               # on the EA meep_shell directory    
 
