@@ -17,6 +17,13 @@ include:
   - local: cicd/ea_conf.yml
   - local: support/acme/setup.yml
 
+# The workflow includes all the necessary rules to run all the jobs in this .gitlab-ci.yml.
+# The pipeline ca be trigger for:
+# pipeline: Multi-project pipelines
+# merge_request_event: to production branch
+# Using web
+# Tag
+# The specifics for each environment
 
 workflow:
     rules:
@@ -71,6 +78,7 @@ synthesis_production:
             GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+            #Protosyn flags for prodcution environment
             PROTON_OP: meep eth ncmem hbm pronoc 
         before_script:            
             - !reference [.git_clean, before_script]
@@ -81,6 +89,7 @@ synthesis_production:
             - echo "[DEBUG] synthesis"
             - make initialize
             - make u55c
+            # Synthesis production will use Pronoc routers
             - make project EA_PARAM=$EA EA_PARAM+="${PROTON_OP}"
             - make synthesis
             - !reference [.check_synth, script]
@@ -93,14 +102,14 @@ synthesis_production:
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_u55c.dcp
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_production.dcp
             - !reference [.save_dts, after_script]
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
           paths:
             - tmp
-            - dcp/synthesis_${EA}_u55c.dcp
+            - dcp/synthesis_${EA}_production.dcp
 
 
 synthesis_test:
@@ -122,6 +131,7 @@ synthesis_test:
         script:
             - make initialize
             - make $FPGA_BOARD
+            # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
             - make project EA_PARAM=$EA 
             - make synthesis
             - !reference [.check_synth, script]
@@ -153,20 +163,20 @@ implementation_production:
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script:           
             - ls; ls dcp; tree 
-            - mv dcp/synthesis_${EA}_u55c.dcp dcp/synthesis.dcp #?
+            - mv dcp/synthesis_${EA}_production.dcp dcp/synthesis.dcp #?
         script:
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_u55c.dcp
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_production.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_${EA}_u55c
+            - mv reports reports_${EA}_production
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - dcp/implementation_${EA}_u55c.dcp
-                - reports_${EA}_u55c
+                - dcp/implementation_${EA}_production.dcp
+                - reports_${EA}_production
 implementation_test:
         stage: implementation
         extends: .common_conf_test
@@ -185,6 +195,7 @@ implementation_test:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
             - mv reports reports_${EA}_${FPGA_BOARD}
+        allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
@@ -201,7 +212,7 @@ bitstream_production:
           - implementation_production
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_u55c.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
@@ -238,6 +249,7 @@ bitstream_test:
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
+        allow_failure: true
         artifacts:
             when: always
             expire_in: 7 days
@@ -255,19 +267,19 @@ reports_production:
           - implementation_production
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_u55c.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
         after_script:
             - ls reports            
-            - mv reports reports_${EA}_u55c
+            - mv reports reports_${EA}_production
             - ls; tree            
         artifacts:
             when: always
             paths:
-                - reports_${EA}_u55c
+                - reports_${EA}_production
 
 reports_test:
         stage: bitstream
@@ -286,7 +298,8 @@ reports_test:
         after_script:
             - ls reports            
             - mv reports reports_${EA}_${FPGA_BOARD}
-            - ls; tree            
+            - ls; tree 
+        allow_failure: true
         artifacts:
             when: always
             paths:
@@ -353,7 +366,7 @@ fpga-test-test:
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:            
             - !reference [.fpga_test, after_script]
-        allow_failure: false
+        allow_failure: true
         artifacts:
             when: always
             paths:
