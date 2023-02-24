@@ -3,11 +3,11 @@
 #Si lo hago con rust puedo meter el binario en el path y exe al hacer make project
 #No sé si estos hex son demasiado largos
 
-THIS_DIR=$(pwd)
-PARENT_DIR="$(dirname "$THIS_DIR")" #Returns to parent directory fpga_shell
+THIS_DIR=$(pwd) # ~/git_repo/fpga_shell
+PARENT_DIR="$(dirname "$THIS_DIR")" #Returns to parent directory fpga_shell (git_repo)
 
-SHELL_DEF_FILE=$PARENT_DIR/accelerator/piton/design/chipset/meep_shell/accelerator_def.csv
-FILE_GENERATED=$PARENT_DIR/misc/initrom.mem #primera prueba con txt
+SHELL_DEF_FILE=$THIS_DIR/accelerator/piton/design/chipset/meep_shell/accelerator_def.csv
+FILE_GENERATED=$THIS_DIR/misc/initrom.mem #primera prueba con txt
 
 # This converts the date (from epoc) to hexadecimal value
 printf '%x\r\n' $(date +%s) > $FILE_GENERATED
@@ -17,7 +17,7 @@ PAD_SHA="0"$SHA_SHELL
 
 echo "$PAD_SHA" >> $FILE_GENERATED
 
-cd $PARENT_DIR/accelerator
+cd $THIS_DIR/accelerator
 
 # Do the same for the ACC SHA
 SHA_ACC=`git rev-parse --short HEAD`

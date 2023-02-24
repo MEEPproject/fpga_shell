@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ADDR=$1
+ADDR=$1 #First address where the infoROM is placed according to Vivado's address editor : 0x4000000000
 PCIE_SLOT=`lspci -m -d 10ee:| cut -d " " -f 1 | cut -d ":" -f 1`
 #We are filtering the output of lscpi (list of PCIe in the system) with the vendor ID (Xilinx PCIe) 10ee, and the flag -d
 #this number will differ depending on the server, so it ought not be hardcoded. 
@@ -8,13 +8,12 @@ PCIE_SLOT=`lspci -m -d 10ee:| cut -d " " -f 1 | cut -d ":" -f 1`
 
 QDMA_PCI="qdma${PCIE_SLOT}000"
 
-echo $QDMA_PCI
-
 dma-ctl $QDMA_PCI reg write bar 2 0x0 0x3 >> null
 
 sleep 0.1
 
-dma-from-device -d /dev/qdma09000-MM-1 -s 4 -a $ADDR -f readback >> null
+#We are transfering 4 bytes at a time (defined with option -s)
+dma-from-device -d /dev/$QDMA_PCI-MM-1 -s 4 -a $ADDR -f readback >> null
 
 truncate -s %4 readback
 objcopy -I binary -O binary --reverse-bytes=4 readback
