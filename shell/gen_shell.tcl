@@ -124,6 +124,11 @@ source $g_root_dir/shell/shell_gpio.tcl
 ## needs to be present for this to get set
 #set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
 #set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
+if { [info exists hbm_inst] && $PCIeDMA eq "dma"} {
+  set PCIeHBMSwitch [expr $PCIeHBMCh/16]
+  putmeeps "Setting PCIe clock to drive HBM cross-switch $PCIeHBMSwitch through channel $PCIeHBMCh"
+  set_property -dict [list CONFIG.USER_CLK_SEL_LIST${PCIeHBMSwitch} AXI_${PCIeHBMCh}_ACLK] [get_bd_cells hbm_0]
+}
 
 ### TODO: Catch
 source $g_root_dir/shell/shell_memmap.tcl

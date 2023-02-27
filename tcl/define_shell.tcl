@@ -165,6 +165,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device Mode       [lindex $fields 7]
 					dict set d_device SliceRegEn [lindex $fields 8]
 					dict set d_device JtagDebEn  [lindex $fields 9]
+					dict set d_device HBMChan    [lindex $fields 10]
 				}	
 				if { "${device}" == "UART" } {
 					dict set d_device Mode [lindex $fields 6]	
