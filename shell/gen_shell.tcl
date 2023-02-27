@@ -129,6 +129,11 @@ if { [info exists hbm_inst] && $PCIeDMA eq "dma"} {
   putmeeps "Setting PCIe clock to drive HBM cross-switch $PCIeHBMSwitch through channel $PCIeHBMCh"
   set_property -dict [list CONFIG.USER_CLK_SEL_LIST${PCIeHBMSwitch} AXI_${PCIeHBMCh}_ACLK] [get_bd_cells hbm_0]
 }
+if { [info exists hbm_inst] && $ETHdmaMem eq "hbm"} {
+  set EthHBMSwitch [expr $EthHBMCh/16]
+  putmeeps "Setting Eth clock to drive HBM cross-switch $EthHBMSwitch through channel $EthHBMCh"
+  set_property -dict [list CONFIG.USER_CLK_SEL_LIST${EthHBMSwitch} AXI_${EthHBMCh}_ACLK] [get_bd_cells hbm_0]
+}
 
 ### TODO: Catch
 source $g_root_dir/shell/shell_memmap.tcl

@@ -201,6 +201,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device IRQ       [lindex $fields 8 ]
 					dict set d_device qsfpPort  [lindex $fields 9 ]
 					dict set d_device dmaMem    [lindex $fields 10]
+					dict set d_device HBMChan   [lindex $fields 11]
 				}
 				if { "${device}" == "AURORA" } {
 					dict set d_device Mode   [lindex $fields 6]
