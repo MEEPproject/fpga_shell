@@ -204,6 +204,8 @@ implementation_test:
                 - reports_${EA}_${FPGA_BOARD}
 
 bitstream_production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: bitstream
         extends: .common_conf_production
         rules: 
@@ -216,9 +218,10 @@ bitstream_production:
         script:
             - make ci_bitstream
         after_script:
-            - DATE=$(date +"%Y%m%d")
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/${DATE}_${EA}_production.bit
+            - mv bitstream/system.bit bitstream/${date_format}_${EA}_production.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_u55c=$CI_JOB_ID >> gen_bitstream.env
@@ -231,6 +234,8 @@ bitstream_production:
              dotenv: gen_bitstream.env      
 
 bitstream_test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: bitstream
         extends: .common_conf_test
         rules:
@@ -243,9 +248,10 @@ bitstream_test:
         script:
             - make ci_bitstream
         after_script:
-            - DATE=$(date +"%Y%m%d")
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/${DATE}_${EA}_${FPGA_BOARD}_test.bit
+            - mv bitstream/system.bit bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
             - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
@@ -308,6 +314,8 @@ reports_test:
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test-prodcution:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: fpga-test
         retry: 2
         extends: .common_conf_production
@@ -320,9 +328,10 @@ fpga-test-prodcution:
             - u55c        
         before_script:
             - !reference [.fpga_test, before_script]
-            - DATE=$(date +"%Y%m%d") 
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_${EA}_production.log
-            - export BITSTREAM=bitstream/${DATE}_${EA}_production.bit    
+            - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
             - mkdir -p tmp/logs                
         script:
             # The EA script should provide the right script and the right binary
@@ -340,6 +349,8 @@ fpga-test-prodcution:
             paths:
             - tmp
 fpga-test-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: fpga-test
         retry: 2
         extends: .common_conf_test
@@ -352,9 +363,10 @@ fpga-test-test:
             - $FPGA_BOARD        
         before_script:            
             - !reference [.fpga_test, before_script]
-            - DATE=$(date +"%Y%m%d")
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/${DATE}_${EA}_${FPGA_BOARD}_test.bit    
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
             - mkdir -p tmp/logs     
         script:
             # The EA script should provide the right script and the right binary
@@ -373,6 +385,8 @@ fpga-test-test:
             - tmp
 
 deploy-EA-production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
@@ -384,8 +398,9 @@ deploy-EA-production:
         timeout: 8h
         tags: !reference [.default_tags, tags]          
         before_script:             
-            - export DATE=$(date +"%Y%m%d")            
-            - export EADIRNAME=${DATE}_${CI_PIPELINE_ID}_production
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"            
+            - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - echo "Shell deploy"
             - mkdir -p $ABSDIR            
@@ -397,9 +412,9 @@ deploy-EA-production:
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
             # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
-            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_acme_ea_1h16v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h16v/${DATE}_acme_ea_1h16v_production.bit
-            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_acme_ea_4a_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${DATE}_acme_ea_4a_production.bit
-            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${DATE}_acme_ea_4h2v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${DATE}_acme_ea_4h2v_production.bit
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h16v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h16v/${date_format}_acme_ea_1h16v_production.bit
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
+            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_production.bit
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"            
         allow_failure: false
@@ -408,6 +423,8 @@ deploy-EA-production:
             url: ${MEEP_RAW_REPOSITORY}
 
 deploy-EA-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
@@ -420,8 +437,9 @@ deploy-EA-test:
         tags: !reference [.default_tags, tags] 
         before_script:
             - ls; ls dcp; tree  
-            - export TODAY=$(date +"%Y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}_test
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_test
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - mkdir -p $ABSDIR            
         script:            
@@ -430,7 +448,6 @@ deploy-EA-test:
             - mkdir -p tmp/reports; mv reports_* tmp/reports/            
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
-            - !reference [.deploy-EA, script]
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false
@@ -439,6 +456,8 @@ deploy-EA-test:
 
 # This job needs to put together all the bitstreams. No parallel jobs here.            
 release_job:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: deploy
         tags: !reference [.default_tags, tags]
         when: on_success
@@ -451,7 +470,8 @@ release_job:
         rules:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created
         script:
-            - DATE=$(date +"%Y%m%d") 
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")" 
             - echo "Running release job"
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
@@ -460,6 +480,6 @@ release_job:
          assets:
           links:
             - name: 'Bitstream_${TARGET_MEEP}_production'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/${DATE}_acme_ea_4hv2_production.bit 
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/${date_format}_acme_ea_4hv2_production.bit 
             - name: 'Bitstream_${TARGET_GOLDEN}_production'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/${DATE}_acme_ea_4a_production.bit                   
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/${date_format}_acme_ea_4a_production.bit                   
