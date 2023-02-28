@@ -433,7 +433,7 @@ deploy-EA-test:
             - !reference [.deploy-EA, script]
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"
-        allow_failure: false
+        allow_failure: true
         environment:
             name: test
 
