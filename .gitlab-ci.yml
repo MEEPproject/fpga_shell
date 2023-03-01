@@ -385,8 +385,6 @@ fpga-test-test:
             - tmp
 
 deploy-EA-production:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
@@ -395,16 +393,17 @@ deploy-EA-production:
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
             GIT_STRATEGY: "none"
+            DESIRED_FORMAT: "%Y%m%d"
         timeout: 8h
         tags: !reference [.default_tags, tags]          
         before_script:             
             # The UTC datetime when the pipeline was created
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"            
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
-            - echo "Shell deploy"
+            - echo "FPGA Shell deploys here ${ABSDIR}"
             - mkdir -p $ABSDIR            
-        script:  
+        script: 
             - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
@@ -423,8 +422,6 @@ deploy-EA-production:
             url: ${MEEP_RAW_REPOSITORY}
 
 deploy-EA-test:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
@@ -433,6 +430,7 @@ deploy-EA-test:
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
             GIT_STRATEGY: "none"
+            DESIRED_FORMAT: "%Y%m%d"
         timeout: 8h
         tags: !reference [.default_tags, tags] 
         before_script:
@@ -441,8 +439,9 @@ deploy-EA-test:
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_test
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
+            - echo "FPGA Shell deploys here ${ABSDIR}"
             - mkdir -p $ABSDIR            
-        script:            
+        script:             
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - mkdir -p tmp/reports; mv reports_* tmp/reports/            
