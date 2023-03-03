@@ -411,7 +411,6 @@ deploy-EA-production:
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
             # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
-            - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h16v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h16v/${date_format}_acme_ea_1h16v_production.bit
             - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
             - curl -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_production.bit
         after_script:             
