@@ -19,8 +19,7 @@
 
 set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
-set ETHClkName [dict get $ETHentry ClkName]
-set ETHRstName [dict get $ETHentry RstName]
+set ETHClkIf   [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 set ETHdmaMem  [dict get $ETHentry dmaMem]
@@ -35,7 +34,7 @@ set ETHirq [dict get $ETHentry IRQ]
 
 putdebugs "ETHClkNm     $ETHClkNm    "
 putdebugs "ETHFreq      $ETHFreq     "
-putdebugs "ETHClkName   $ETHClkName  "
+putdebugs "ETHClkIf     $ETHClkIf    "
 putdebugs "ETHintf      $ETHintf     "
 putdebugs "ETHqsfp      $ETHqsfp     "
 putdebugs "ETHdmaMem    $ETHdmaMem   "
@@ -117,12 +116,6 @@ connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins ${
 make_bd_pins_external  [get_bd_pins ${EthHierName}/intc]
 set_property name $ETHirq [get_bd_ports intc_0]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins ${EthHierName}/s_axi]
-
-create_bd_port -dir O -type clk $ETHClkName
-connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins /${EthHierName}/s_axi_clk]
-
-create_bd_port -dir O -type rst $ETHRstName
-connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins /${EthHierName}/s_axi_resetn]
 
 save_bd_design
 

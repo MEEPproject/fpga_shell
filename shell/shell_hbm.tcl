@@ -223,8 +223,6 @@ if { [info exists hbm_inst] == 0 } {
             set_property name $HBMReady [get_bd_ports Res_0]
 	}
 
-	connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_$HBMClkNm/dcm_locked]
-
 	#foreach Number of APB interfaces, one per stack
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] $APBRstPin
 	connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] $APBRstPin
