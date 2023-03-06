@@ -17,10 +17,16 @@ include:
   - local: cicd/ea_conf.yml
   - local: support/acme/setup.yml
 
+# The workflow includes all the necessary rules to run all the jobs in this .gitlab-ci.yml.
+# The pipeline ca be trigger for:
+# pipeline: Multi-project pipelines
+# merge_request_event: to production branch
+# Using web
+# Tag
+# The specifics for each environment
 
 workflow:
     rules:
-        - !reference [.default_rules, rules]
         - if: $CI_PIPELINE_SOURCE == "pipeline"
         - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
         - if: $CI_PIPELINE_SOURCE == "web"
@@ -29,10 +35,11 @@ workflow:
         - if: $CI_COMMIT_TAG != null 
         - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
           when: never # Pushing to main doesn't create pipelines unless there is a tag
+        - !reference [.test_rules, rules]
+        - !reference [.production_rules, rules]
     
 
 variables: !reference [.setup, variables]
-
 
 stages:
     - synthesis
@@ -60,9 +67,56 @@ stages:
 # of the EA matrix/parallel value. This way we can clone other EAs 
 
 
-synthesis:
+synthesis_production:
         stage: synthesis
-        extends: .common_conf
+        extends: .common_conf_production
+        rules: 
+            - !reference [.production_rules,rules]
+        interruptible: true
+        retry: 1
+        variables:
+            GIT_STRATEGY: clone            
+            GIT_SUBMODULE_STRATEGY: "recursive"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+            #Protosyn flags for prodcution environment
+            PROTON_OP: meep eth ncmem hbm pronoc 
+        before_script:            
+            - !reference [.git_clean, before_script]
+            - *clone_ea
+            - echo "Actual element in the matrix is $EA + u55c"
+            - !reference [.export_toolchain, before_script]
+        script:
+            - echo "[DEBUG] synthesis"
+            - make initialize
+            - make u55c
+            # Synthesis production will use Pronoc routers
+            - make project EA_PARAM=$EA EA_PARAM+="${PROTON_OP}"
+            - make synthesis
+            - !reference [.check_synth, script]
+        after_script:
+            - mkdir -p tmp/project
+            - !reference [.synth_default, after_script]
+            - cp ea_url.txt tmp/EA_info.txt
+            - cp shell_build.log tmp/project/
+            - cp -r src/system_top.sv tmp/project/
+            - cp -r tcl/shell_env.tcl tmp/project/
+            - cp gen_system.tcl tmp/project/
+            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_production.dcp
+            - !reference [.save_dts, after_script]
+        allow_failure: false # If any sinthesys fails, all fails 
+        artifacts:
+          when: always
+          paths:
+            - tmp
+            - dcp/synthesis_${EA}_production.dcp
+
+
+synthesis_test:
+        stage: synthesis
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules, rules]
         interruptible: true
         retry: 1
         variables:
@@ -77,7 +131,8 @@ synthesis:
         script:
             - make initialize
             - make $FPGA_BOARD
-            - make project EA_PARAM=$EA
+            # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
+            - make project EA_PARAM=$EA 
             - make synthesis
             - !reference [.check_synth, script]
         after_script:
@@ -98,9 +153,37 @@ synthesis:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
             
-implementation:
+implementation_production:
         stage: implementation
-        extends: .common_conf         
+        extends: .common_conf_production
+        rules: 
+            - !reference [.production_rules,rules] 
+        dependencies:
+          - synthesis_production
+        # As this is a matrix, rename the corresponding dcp for make to recognize it 
+        before_script:           
+            - ls; ls dcp; tree 
+            - mv dcp/synthesis_${EA}_production.dcp dcp/synthesis.dcp #?
+        script:
+            - make ci_implementation DCP_ON=false
+            - !reference [.check_impl, script]
+        after_script:
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_production.dcp
+            - echo -e "Artifacts:"; ls dcp; ls reports
+            - mv reports reports_${EA}_production
+        artifacts:
+            when: always
+            expire_in: 1 day
+            paths:
+                - dcp/implementation_${EA}_production.dcp
+                - reports_${EA}_production
+implementation_test:
+        stage: implementation
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules] 
+        dependencies:
+          - synthesis_test
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script:           
             - ls; ls dcp; tree 
@@ -112,6 +195,7 @@ implementation:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
             - mv reports reports_${EA}_${FPGA_BOARD}
+        allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
@@ -119,20 +203,28 @@ implementation:
                 - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
                 - reports_${EA}_${FPGA_BOARD}
 
-bitstream:
+bitstream_production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: bitstream
-        extends: .common_conf        
+        extends: .common_conf_production
+        rules: 
+            - !reference [.production_rules,rules]
+        dependencies:
+          - implementation_production
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - make clean_implementation
-            - mv bitstream/system.bit bitstream/system_${EA}_${FPGA_BOARD}.bit
+            - mv bitstream/system.bit bitstream/${date_format}_${EA}_production.bit
             - echo -e "Artifacts:"; ls bitstream
             # Store the Job ID to identify later the path to the bitstream artifact
-            - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
+            - echo BS_CI_JOB_ID_${EA}_u55c=$CI_JOB_ID >> gen_bitstream.env
         artifacts:
             when: always
             expire_in: 7 days
@@ -141,9 +233,67 @@ bitstream:
             reports:
              dotenv: gen_bitstream.env      
 
-reports:
+bitstream_test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: bitstream
-        extends: .common_conf
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules] 
+        dependencies:
+          - implementation_test
+        before_script:            
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+        script:
+            - make ci_bitstream
+        after_script:
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - make clean_implementation
+            - mv bitstream/system.bit bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
+            - echo -e "Artifacts:"; ls bitstream
+            # Store the Job ID to identify later the path to the bitstream artifact
+            - echo BS_CI_JOB_ID_${EA}_${FPGA_BOARD}=$CI_JOB_ID >> gen_bitstream.env
+        allow_failure: true
+        artifacts:
+            when: always
+            expire_in: 7 days
+            paths:
+                - bitstream  
+            reports:
+             dotenv: gen_bitstream.env
+
+reports_production:
+        stage: bitstream
+        extends: .common_conf_production
+        rules: 
+            - !reference [.production_rules,rules]
+        dependencies:
+          - implementation_production
+        before_script:
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
+        script:
+            - echo "Generate implementation reports..."
+            - make ci_report_route
+            - make validate  
+        after_script:
+            - ls reports            
+            - mv reports reports_${EA}_production
+            - ls; tree            
+        artifacts:
+            when: always
+            paths:
+                - reports_${EA}_production
+
+reports_test:
+        stage: bitstream
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules]
+        dependencies:
+          - implementation_test
         before_script:
             - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
@@ -154,7 +304,8 @@ reports:
         after_script:
             - ls reports            
             - mv reports reports_${EA}_${FPGA_BOARD}
-            - ls; tree            
+            - ls; tree 
+        allow_failure: true
         artifacts:
             when: always
             paths:
@@ -162,19 +313,26 @@ reports:
 
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
-fpga-test:
+fpga-test-prodcution:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: fpga-test
         retry: 2
-        extends: .common_conf
+        extends: .common_conf_production
+        rules: 
+            - !reference [.production_rules,rules]
+        dependencies:
+          - bitstream_production
         # Overwrite tags to select the right board
         tags: 
-            - $FPGA_BOARD        
+            - u55c        
         before_script:
-            - ls; ls dcp; tree 
             - !reference [.fpga_test, before_script]
-            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/system_${EA}_${FPGA_BOARD}.bit    
-            - mkdir -p tmp/logs     
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_production.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
+            - mkdir -p tmp/logs                
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
@@ -190,50 +348,128 @@ fpga-test:
             when: always
             paths:
             - tmp
+fpga-test-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+        stage: fpga-test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules]
+        dependencies:
+          - bitstream_test
+        # Overwrite tags to select the right board
+        tags: 
+            - $FPGA_BOARD        
+        before_script:            
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
+            - mkdir -p tmp/logs     
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - !reference [.fpga_test, script]
+            - source sh/fpga_test.sh $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG        
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:            
+            - !reference [.fpga_test, after_script]
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
 
-deploy-EA:
+deploy-EA-production:
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
-        rules:
-            - !reference [.default_rules, rules]  
-            - if: $CI_PIPELINE_SOURCE == "pipeline" 
+        rules: 
+            - !reference [.production_rules,rules]
         variables:
             GIT_SUBMODULE_STRATEGY: "none"
             GIT_STRATEGY: "none"
+            DESIRED_FORMAT: "%Y%m%d"
         timeout: 8h
-        tags: !reference [.default_tags, tags] 
-        before_script:
-            - ls; ls dcp; tree  
-            - export TODAY=$(date +"%y%m%d")            
-            - export EADIRNAME=${TODAY}_${CI_PIPELINE_ID}
+        tags: !reference [.default_tags, tags]          
+        before_script:             
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
+            - echo "FPGA Shell deploys here ${ABSDIR}"
             - mkdir -p $ABSDIR            
-        script:            
+        script: 
+            - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - mkdir -p tmp/reports; mv reports_* tmp/reports/            
             - mv dcp tmp/ ; mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
-            - !reference [.deploy-EA, script]
+            # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
+            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
+            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_production.bit
+        after_script:             
+            - echo "Remember - Exported variables are not propagated to after_script"            
+        allow_failure: false
+        environment:
+            name: production
+            url: ${MEEP_RAW_REPOSITORY}
+
+deploy-EA-test:
+        stage: deploy
+        # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
+        when: on_success
+        rules:
+            - !reference [.test_rules,rules]            
+        variables:
+            GIT_SUBMODULE_STRATEGY: "none"
+            GIT_STRATEGY: "none"
+            DESIRED_FORMAT: "%Y%m%d"
+        timeout: 8h
+        tags: !reference [.default_tags, tags] 
+        before_script:
+            - ls; ls dcp; tree  
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_test
+            - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
+            - echo "FPGA Shell deploys here ${ABSDIR}"
+            - mkdir -p $ABSDIR            
+        script:             
+            - date >> $ABSDIR/date.txt
+            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
+            - mkdir -p tmp/reports; mv reports_* tmp/reports/            
+            - mv dcp tmp/ ; mv bitstream tmp/            
+            - cp -r tmp/* $ABSDIR
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false
+        environment:
+            name: test
 
 # This job needs to put together all the bitstreams. No parallel jobs here.            
 release_job:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
         stage: deploy
         tags: !reference [.default_tags, tags]
         when: on_success
         image: registry.gitlab.com/gitlab-org/release-cli:latest
         variables:
-            TARGET_GOLDEN: ariane
-            TARGET_MEEP: acme_vpu
-            JOB_ID_GOLDEN: ${BS_CI_JOB_ID_ariane_u55c}
-            JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_vpu_u55c}
+            TARGET_GOLDEN: acme_ea_4a
+            TARGET_MEEP: acme_ea_4hv2
+            JOB_ID_GOLDEN: ${BS_CI_JOB_ID_acme_ea_4a_production}
+            JOB_ID_MEEP: ${BS_CI_JOB_ID_acme_ea_4hv2_production}
         rules:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created
         script:
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")" 
             - echo "Running release job"
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
@@ -241,7 +477,7 @@ release_job:
          tag_name: '$CI_COMMIT_TAG'
          assets:
           links:
-            - name: 'Bitstream_${TARGET_MEEP}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/system_${TARGET_MEEP}_u55c.bit 
-            - name: 'Bitstream_${TARGET_GOLDEN}_U55C'       
-              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/system_${TARGET_GOLDEN}_u55c.bit                    
+            - name: 'Bitstream_${TARGET_MEEP}_production'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/${date_format}_acme_ea_4hv2_production.bit 
+            - name: 'Bitstream_${TARGET_GOLDEN}_production'       
+              url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/${date_format}_acme_ea_4a_production.bit                   

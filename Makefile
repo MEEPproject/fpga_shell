@@ -48,14 +48,14 @@ u200: clean
 	$(SH_DIR)/extract_part.sh $(U200_BOARD)
 
 u280: clean
-	$(SH_DIR)/extract_part.sh $(U280_BOARD) 
+	@$(SH_DIR)/extract_part.sh $(U280_BOARD) 
 
 u55c: clean
 	@($(SH_DIR)/extract_part.sh $(U55C_BOARD)) 
 	@(echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.2")
 
 vcu128:	
-	$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
+	@$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
 
 
 initialize: submodules clean clean_accelerator $(ACCEL_DIR) 
@@ -78,11 +78,11 @@ update_sha: $(ACCEL_DIR)
 
 yaml: $(YAML_FILE)
 	# Edit the YAML file to update the URLs
-	$(SH_DIR)/extract_url.sh
+	@$(SH_DIR)/extract_url.sh
 
 create_shell_structure:
 	# Create a basic file structure in the accelerator folder to get shell compatibility
-	$(SH_DIR)/gen_struct_meep.sh $(ROOT_DIR)
+	@$(SH_DIR)/gen_struct_meep.sh $(ROOT_DIR)
 
 $(ACCEL_DIR):
 	$(SH_DIR)/load_module.sh $(LOAD_EA)
@@ -91,58 +91,66 @@ $(ACCEL_DIR):
 
 
 $(BINARIES_DIR):
-	$(SH_DIR)/accelerator_bin.sh
-	mkdir -p $(BINARIES_DIR)
-	cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
+	@$(SH_DIR)/accelerator_bin.sh
+	@mkdir -p $(BINARIES_DIR)
+	@cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
-	$(SH_DIR)/accelerator_build.sh $(EA_PARAM) ;\
+	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM) 	
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
 	
 $(BIT_FILE): $(IMPL_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
 	
 #### Special calls for the CI/CD, where the change on the artifact timestamp disables the use of the "requirements"
 
 ci_implementation: 
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
 	
 ci_bitstream: 
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
 
 ci_report_route:
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 	
 
 #### Special script to adquire the best placement strategy #####
 
 SmartPlace: $(SYNTH_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
 	
 validate: $(REPORT_DIR)
-	$(SH_DIR)/check_timing.sh
+	@$(SH_DIR)/check_timing.sh
 
 report_synth: $(SYNTH_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
 
 report_place: $(PLACE_DCP)
 	echo "Make sure you have run the implementation process with the DCP_ON option"
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_place.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_place.tcl -tclargs $(ROOT_DIR)
 
 report_route: $(IMPL_DCP)
-	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
+	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
+#Help menu accelerator_build.sh
+syntax_ea: 
+	@$(SH_DIR)/accelerator_build.sh -s
+####
+
+#Help menu accelerator_build.sh
+help_ea: 
+	@$(SH_DIR)/accelerator_build.sh -h
 ####
 
 rom_file:
-	$(SH_DIR)/create_rom.sh $(ROOT_DIR)
-	mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/src/initrom.mem
+	@$(SH_DIR)/create_rom.sh $(ROOT_DIR)
+	@mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/src/initrom.mem
 
 ####
 
@@ -150,7 +158,7 @@ submodules:
 	@(git submodule update --init --recursive)
 
 clean: clean_ip clean_project
-	rm -rf dcp reports src 	
+	@rm -rf dcp reports src 	
 
 clean_ip: 
 	@(make -C ip/100GbEthernet clean)
@@ -160,23 +168,23 @@ clean_ip:
 	@(make -C ip/axi_brom clean)
 
 clean_binaries:
-	rm -rf binaries
+	@rm -rf binaries
 	
 clean_project: clean_ip 
-	rm -rf project
+	@rm -rf project
 	
 clean_accelerator:
-	rm -rf accelerator
+	@rm -rf accelerator
 
 clean_synthesis: clean_implementation	
-	rm -rf dcp/synthesis.dcp
+	@rm -rf dcp/synthesis.dcp
 
 clean_implementation:
-	rm -rf dcp/implementation.dcp reports
+	@rm -rf dcp/implementation.dcp reports
 
 clean_bitstream:
-	rm -rf bitstream
+	@rm -rf bitstream
 
 clean_all: clean clean_binaries clean_bitstream
-	rm -rf accelerator
+	@rm -rf accelerator
 
