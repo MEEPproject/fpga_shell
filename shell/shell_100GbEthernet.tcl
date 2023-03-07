@@ -19,11 +19,11 @@
 
 set ETHClkNm   [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
-set ETHClkName [dict get $ETHentry ClkName]
-set ETHRstName [dict get $ETHentry RstName]
+set ETHClkIf   [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 set ETHdmaMem  [dict get $ETHentry dmaMem]
+set EthHBMCh   [dict get $ETHentry HBMChan]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -34,7 +34,7 @@ set ETHirq [dict get $ETHentry IRQ]
 
 putdebugs "ETHClkNm     $ETHClkNm    "
 putdebugs "ETHFreq      $ETHFreq     "
-putdebugs "ETHClkName   $ETHClkName  "
+putdebugs "ETHClkIf     $ETHClkIf    "
 putdebugs "ETHintf      $ETHintf     "
 putdebugs "ETHqsfp      $ETHqsfp     "
 putdebugs "ETHdmaMem    $ETHdmaMem   "
@@ -117,12 +117,6 @@ make_bd_pins_external  [get_bd_pins ${EthHierName}/intc]
 set_property name $ETHirq [get_bd_ports intc_0]
 connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins ${EthHierName}/s_axi]
 
-create_bd_port -dir O -type clk $ETHClkName
-connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins /${EthHierName}/s_axi_clk]
-
-create_bd_port -dir O -type rst $ETHRstName
-connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins /${EthHierName}/s_axi_resetn]
-
 save_bd_design
 
 
@@ -148,21 +142,25 @@ putdebugs "Mem Range ETH: $ETHMemRange"
 
 # Open an HBM Channels so the Ethernet DMA gets to the main memory
 if { ${ETHdmaMem} eq "hbm" } {
-set_property -dict [list CONFIG.USER_SAXI_28 {TRUE}] [get_bd_cells hbm_0]
-set_property -dict [list CONFIG.USER_SAXI_29 {TRUE}] [get_bd_cells hbm_0]
-set_property -dict [list CONFIG.USER_SAXI_30 {TRUE}] [get_bd_cells hbm_0]
+  set TxHBMCh [expr $EthHBMCh+0]
+  set RxHBMCh [expr $EthHBMCh+1]
+  set SgHBMCh [expr $EthHBMCh+2]
 
-connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_28${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_rx]
-connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_29${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_tx]
-connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_sg]
+  set_property -dict [list CONFIG.USER_SAXI_${TxHBMCh} {TRUE}] [get_bd_cells hbm_0]
+  set_property -dict [list CONFIG.USER_SAXI_${RxHBMCh} {TRUE}] [get_bd_cells hbm_0]
+  set_property -dict [list CONFIG.USER_SAXI_${SgHBMCh} {TRUE}] [get_bd_cells hbm_0]
 
-connect_bd_net [get_bd_pins hbm_0/AXI_28_ACLK] [get_bd_pins ${EthHierName}/rx_clk]
-connect_bd_net [get_bd_pins hbm_0/AXI_29_ACLK] [get_bd_pins ${EthHierName}/tx_clk]
-connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins ${EthHierName}/s_axi_clk]
+  connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${TxHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_tx]
+  connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${RxHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_rx]
+  connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${SgHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_sg]
 
-connect_bd_net [get_bd_pins hbm_0/AXI_28_ARESET_N] [get_bd_pins ${EthHierName}/rx_rstn]
-connect_bd_net [get_bd_pins hbm_0/AXI_29_ARESET_N] [get_bd_pins ${EthHierName}/tx_rstn]
-connect_bd_net [get_bd_pins hbm_0/AXI_30_ARESET_N] [get_bd_pins ${EthHierName}/s_axi_resetn]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${TxHBMCh}_ACLK] [get_bd_pins ${EthHierName}/tx_clk]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${RxHBMCh}_ACLK] [get_bd_pins ${EthHierName}/rx_clk]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${SgHBMCh}_ACLK] [get_bd_pins ${EthHierName}/s_axi_clk]
+
+  connect_bd_net [get_bd_pins hbm_0/AXI_${TxHBMCh}_ARESET_N] [get_bd_pins ${EthHierName}/tx_rstn]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${RxHBMCh}_ARESET_N] [get_bd_pins ${EthHierName}/rx_rstn]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${SgHBMCh}_ARESET_N] [get_bd_pins ${EthHierName}/s_axi_resetn]
 }
 
 save_bd_design
