@@ -75,7 +75,7 @@ echo "$outputfile"
 
 sed -i '/picocom v3.1/,/Terminal ready/d; /----------------------------------------/,/Custom Bootloader for MEEP/d; /Terminating... /,/Thanks for using picocom/d' $inputfile
 }
-
+#menu
 if [ $1 == setup ]; then
    setup
 elif [ $1 == test_loop ]; then
