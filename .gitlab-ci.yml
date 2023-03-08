@@ -45,7 +45,7 @@ stages:
     - synthesis
     - implementation
     - bitstream
-    - fpga-test
+    - test
     - deploy
 
 .clone_ea: &clone_ea 
@@ -311,12 +311,98 @@ reports_test:
             paths:
                 - reports_${EA}_${FPGA_BOARD}
 
+###
+### Tests Benchmarks
+###
+test-benchmarks-production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.production_rules,rules]
+        dependencies:
+          - bitstream_production
+        tags: 
+            - $FPGA_BOARD        
+        before_script:            
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created            
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_production.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
+            - mkdir -p tmp/logs                
+            #build binaries
+            - source sh/riscv_test_run.sh setup
+            - make test_riscv
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - cd $(pwd)/accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmark
+            - source sh/riscv_test_run.sh test_loop            
+            - source sh/fpga_test.sh $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - source sh/riscv_test_run.sh clean_log $FPGA_LOG
+        after_script:            
+            - mkdir -p benchmarks_results
+            - cp $FPGA_LOG benchmarks_results/
+            - cp $OSBI_DEPLOY_DIR boot/
+            - mv benchmarks_results tmp/
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+test-benchmarks-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules]
+        dependencies:
+          - bitstream_test
+        # Overwrite tags to select the right board
+        tags: 
+            - $FPGA_BOARD        
+        before_script:            
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
+            - mkdir -p tmp/logs
+            #build binaries
+            - source sh/riscv_test_run.sh setup
+            - make test_riscv
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - cd $(pwd)/accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmark
+            - source sh/riscv_test_run.sh test_loop            
+            - source sh/fpga_test.sh $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - source sh/riscv_test_run.sh clean_log $FPGA_LOG
+        after_script:            
+            - mkdir -p benchmarks_results
+            - cp $FPGA_LOG benchmarks_results/
+            - cp $OSBI_DEPLOY_DIR boot/
+            - mv benchmarks_results tmp/            
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test-prodcution:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
-        stage: fpga-test
+        stage: test
         retry: 2
         extends: .common_conf_production
         rules: 
@@ -351,7 +437,7 @@ fpga-test-prodcution:
 fpga-test-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
-        stage: fpga-test
+        stage: test
         retry: 2
         extends: .common_conf_test
         rules:
@@ -383,6 +469,7 @@ fpga-test-test:
             when: always
             paths:
             - tmp
+
 
 deploy-EA-production:
         stage: deploy

@@ -148,6 +148,10 @@ help_ea:
 	@$(SH_DIR)/accelerator_build.sh -h
 ####
 
+# Compile benchmarks for FPGA
+test_riscv:
+	${MAKE} -C $(ACCEL_DIR)/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks fpga
+
 rom_file:
 	@$(SH_DIR)/create_rom.sh $(ROOT_DIR)
 	@mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/src/initrom.mem
