@@ -133,7 +133,7 @@ synthesis_test:
         script:
             - make initialize
             - make $FPGA_BOARD
-            - !reference [.acme_benchmarks, script]
+            - !reference [.riscv_benchmarks, script]
             # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
             - make project EA_PARAM=$EA 
             - make synthesis
@@ -149,7 +149,7 @@ synthesis_test:
             - echo -e "Artifacts:"; ls tmp; ls dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
             - !reference [.save_dts, after_script]
-            - !reference [.acme_benchmarks, after_script]
+            - !reference [.riscv_benchmarks, after_script]
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
