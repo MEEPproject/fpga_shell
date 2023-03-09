@@ -149,7 +149,7 @@ help_ea:
 ####
 
 # Compile benchmarks for FPGA
-test_riscv:
+test_riscv_acme:
 	${MAKE} -C $(ACCEL_DIR)/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks fpga
 
 rom_file:
