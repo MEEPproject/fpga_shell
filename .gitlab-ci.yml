@@ -167,8 +167,7 @@ implementation_production:
         variables:
             GIT_STRATEGY: fetch         
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
-        before_script:           
-            - ls; ls dcp; tree 
+        before_script:     
             - mv dcp/synthesis_${EA}_production.dcp dcp/synthesis.dcp #?
         script:
             - make ci_implementation DCP_ON=false
@@ -183,6 +182,7 @@ implementation_production:
             paths:
                 - dcp/implementation_${EA}_production.dcp
                 - reports_${EA}_production
+
 implementation_test:
         stage: implementation
         extends: .common_conf_test
@@ -195,7 +195,6 @@ implementation_test:
           - synthesis_test
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script:           
-            - ls; ls dcp; tree 
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
@@ -224,7 +223,6 @@ bitstream_production:
         dependencies:
           - implementation_production
         before_script:
-            - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
@@ -256,7 +254,6 @@ bitstream_test:
         dependencies:
           - implementation_test
         before_script:            
-            - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
@@ -288,7 +285,6 @@ reports_production:
         dependencies:
           - implementation_production
         before_script:
-            - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
@@ -296,8 +292,7 @@ reports_production:
             - make validate  
         after_script:
             - ls reports            
-            - mv reports reports_${EA}_production
-            - ls; tree            
+            - mv reports reports_${EA}_production        
         artifacts:
             when: always
             paths:
@@ -348,7 +343,8 @@ test-benchmarks-production:
           - bitstream_production
         tags: 
             - $FPGA_BOARD        
-        before_script:            
+        before_script: 
+            - ls; tree            
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created            
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
@@ -357,8 +353,10 @@ test-benchmarks-production:
             - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
+            - ls; tree 
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - cd tmp/bin; echo "$pwd"
+            - cd tmp/bin
+            - echo "$pwd"
             - source sh/riscv_test_run.sh test_loop
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
@@ -390,7 +388,8 @@ test-benchmarks-test:
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
-        before_script:            
+        before_script:  
+            - ls; tree           
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
@@ -398,9 +397,11 @@ test-benchmarks-test:
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
             - mkdir -p tmp/logs
         script:
+            - ls; tree 
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - cd tmp/bin
+            - echo "$pwd"
             - source sh/riscv_test_run.sh test_loop            
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
