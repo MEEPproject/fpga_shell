@@ -296,7 +296,7 @@ reports_production:
             - ls; tree 
             - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
-            -  ls; tree 
+            - ls; tree 
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
