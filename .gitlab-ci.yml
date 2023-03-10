@@ -164,7 +164,9 @@ implementation_production:
             - !reference [.production_rules,rules] 
         dependencies:
           - synthesis_production
-        # As this is a matrix, rename the corresponding dcp for make to recognize it 
+        variables:
+            GIT_STRATEGY: fetch         
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         before_script:           
             - ls; ls dcp; tree 
             - mv dcp/synthesis_${EA}_production.dcp dcp/synthesis.dcp #?
@@ -184,6 +186,9 @@ implementation_production:
 implementation_test:
         stage: implementation
         extends: .common_conf_test
+        variables:
+            GIT_STRATEGY: fetch            
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.test_rules,rules] 
         dependencies:
@@ -210,6 +215,8 @@ implementation_test:
 bitstream_production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch         
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: bitstream
         extends: .common_conf_production
         rules: 
@@ -240,6 +247,8 @@ bitstream_production:
 bitstream_test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: bitstream
         extends: .common_conf_test
         rules:
@@ -271,6 +280,9 @@ bitstream_test:
 reports_production:
         stage: bitstream
         extends: .common_conf_production
+        variables: 
+            GIT_STRATEGY: fetch         
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         rules: 
             - !reference [.production_rules,rules]
         dependencies:
@@ -294,6 +306,9 @@ reports_production:
 reports_test:
         stage: bitstream
         extends: .common_conf_test
+        variables:
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.test_rules,rules]
         dependencies:
@@ -321,6 +336,8 @@ reports_test:
 test-benchmarks-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch         
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
         extends: .common_conf_test
@@ -341,7 +358,7 @@ test-benchmarks-production:
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - cd tmp/bin
+            - cd tmp/bin; echo "$pwd"
             - source sh/riscv_test_run.sh test_loop
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
@@ -360,6 +377,8 @@ test-benchmarks-production:
 test-benchmarks-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_test
@@ -402,6 +421,8 @@ test-benchmarks-test:
 fpga-test-prodcution:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch         
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
         extends: .common_conf_production
@@ -437,6 +458,8 @@ fpga-test-prodcution:
 fpga-test-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_test
