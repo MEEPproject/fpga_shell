@@ -288,8 +288,8 @@ if { [info exists hbm_inst] == 0 } {
                 connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ARESETN] $pcie_rst_pin
 
                 if { $PCIeHBMCh == "" } {
-                  # Setting highest HBM channel by default
                   set PCIeHBMCh 31
+                  putmeeps "PCIe DMA channel for HBM is not listed, setting it by default to the highest one: $PCIeHBMCh"
                 }
 
                 set_property -dict [list CONFIG.USER_SAXI_${PCIeHBMCh} {TRUE}] [get_bd_cells hbm_0]

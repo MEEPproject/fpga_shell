@@ -206,6 +206,13 @@ set_property range $ETHMemRange [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
 
+if { $g_board_part == "u280" && [expr $EthHBMCh/16] != [expr $PCIeHBMCh/16] } {
+  putmeeps "Resolving not completely investegated HBM issue for board $g_board_part:"
+  putmeeps "probably $ETHrate Eth DMA is single channel ($EthHBMCh) connected to HBM stack [expr $EthHBMCh/16] switch,"
+  set EthHBMCh [formatHBMch [expr $PCIeHBMCh + 1]]
+  putmeeps "so moving it to channel $EthHBMCh, next to PCIe channel $PCIeHBMCh, please change it accordingly if it doesn't fit."
+}
+
 set_property -dict [list CONFIG.USER_SAXI_${EthHBMCh} {TRUE}] [get_bd_cells hbm_0]
 
 connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_user_clock] [get_bd_pins hbm_0/AXI_${EthHBMCh}_ACLK] 
