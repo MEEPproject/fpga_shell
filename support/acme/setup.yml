@@ -36,7 +36,7 @@
 .riscv_benchmarks:
   script:
     # build benchmarks
-    - source sh/riscv_test_run.sh setup
+    - source sh/run_baremetal.sh setup
     - make test_riscv_acme
   after_script:
     - mkdir -p tmp/bin
