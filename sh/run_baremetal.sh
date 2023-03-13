@@ -39,8 +39,6 @@ BOOT_FILE=/home/tools/fpga-tools/boot_riscv
 
 function run_loop_test() {
 
-test_riscv=(histogram mt-histogram int-median int-multiply qsort rsort int-spmv int-vvadd int-matrix_mult fibonacci towers int-bubblesort fd-median fd-multiply fd-spmv fd-vvadd fd-matrix_mult fd-bubblesort dhrystone mm)
-
 
 
 echo -e "${G}**********************************************${NC}"
@@ -49,9 +47,13 @@ echo -e "${G}**********************************************${NC}"
 
 start_time=$(date +%s.%N)   # get start time in seconds.nanoseconds
 
+
+# Read the list of items into an array (test_list)
+readarray -t test_riscv < $1
+
 for i in "${test_riscv[@]}"
 do
-   source $BOOT_FILE/boot_acme.sh $i.bin
+   source $BOOT_FILE/boot_acme.sh $i
    #echo "$i"
    sleep 20
 done
@@ -64,6 +66,8 @@ echo "Elapsed time: $elapsed_time seconds"
 echo "Loop complete!" # the boot benchmarks has finished
 
 cd "$(pwd)"
+
+echo "$(pwd)"
 }
 
 function clean_log() {
@@ -79,7 +83,7 @@ sed -i '/picocom v3.1/,/Terminal ready/d; /-------------------------------------
 if [ $1 == setup ]; then
    setup
 elif [ $1 == test_loop ]; then
-   run_loop_test
+   run_loop_test $2
 elif [ $1 == clean_log ]; then
    clean_log $2 $3
 fi

@@ -363,13 +363,13 @@ test-benchmarks-production:
             - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
-            - ls; tree 
+            - ls; echo $PWD
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - cd tmp/bin; ls
-            - source run_baremetal.sh test_loop
+            - cd tmp/bin; source run_baremetal.sh test_loop test_list.txt
+            - echo $PWD
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - source tmp/bin/run_baremetal.sh clean_log $FPGA_LOG
+            - source run_baremetal.sh clean_log $FPGA_LOG
         after_script:            
             - mkdir -p benchmarks_results
             - cp $FPGA_LOG benchmarks_results/
@@ -398,7 +398,7 @@ test-benchmarks-test:
         tags: 
             - $FPGA_BOARD        
         before_script:  
-            - ls; tree           
+            - ls
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
@@ -406,14 +406,13 @@ test-benchmarks-test:
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
             - mkdir -p tmp/logs
         script:
-            - ls; tree 
+            - ls; echo $PWD
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - cd tmp/bin; ls            
-            - source run_baremetal.sh test_loop            
+            - source run_baremetal.sh test_loop tmp/bin/test_list.txt           
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - source tmp/bin/run_baremetal.sh clean_log $FPGA_LOG
+            - source run_baremetal.sh clean_log $FPGA_LOG
         after_script:            
             - mkdir -p benchmarks_results
             - cp $FPGA_LOG benchmarks_results/

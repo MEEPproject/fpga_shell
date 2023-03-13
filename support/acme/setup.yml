@@ -41,7 +41,7 @@
   after_script:
     - mkdir -p tmp/bin
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin
-    - cp -r sh/run_baremetal.sh tmp/bin
+    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.txt tmp/bin
   artifacts:
     when: always
     paths:
