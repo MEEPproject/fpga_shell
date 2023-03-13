@@ -368,8 +368,8 @@ test-benchmarks-production:
             - cd tmp/bin; source run_baremetal.sh test_loop test_list.txt
             - echo $PWD
             - source sh/fpga_test.sh $FPGA_LOG
-            - echo "Checking FPGA log ..."
-            - source run_baremetal.sh clean_log $FPGA_LOG
+            - echo "Checking FPGA log ..." 
+            - source run_baremetal.sh clean_log $FPGA_LOG; cat $FPGA_LOG
         after_script:            
             - mkdir -p benchmarks_results
             - cp $FPGA_LOG benchmarks_results/
