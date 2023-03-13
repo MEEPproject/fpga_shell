@@ -110,13 +110,6 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.WUSER_WIDTH $HBMuserWidth \
    ] $hbm_axi4
    
-## TODO: Make dependant of selected HBM channels number
-if { $PCIeDMA != "yes" } {
-	set PCIeHBM "false"
-} else {
-	set PCIeHBM "true"
-
-}
 
 # Create HBM instance if doesn't exsists already
 if { [info exists hbm_inst] == 0 } {
@@ -192,7 +185,7 @@ if { [info exists hbm_inst] == 0 } {
    CONFIG.USER_SAXI_28 {false} \
    CONFIG.USER_SAXI_29 {false} \
    CONFIG.USER_SAXI_30 {false} \
-   CONFIG.USER_SAXI_31 $PCIeHBM \
+   CONFIG.USER_SAXI_31 {false} \
    CONFIG.USER_SWITCH_ENABLE_01 {TRUE} \
  ] $hbm_inst
 	
@@ -230,8 +223,6 @@ if { [info exists hbm_inst] == 0 } {
             set_property name $HBMReady [get_bd_ports Res_0]
 	}
 
-	connect_bd_net [get_bd_pins clk_wiz_1/locked] [get_bd_pins rst_ea_$HBMClkNm/dcm_locked]
-
 	#foreach Number of APB interfaces, one per stack
 	connect_bd_net [get_bd_pins hbm_0/APB_0_PRESET_N] $APBRstPin
 	connect_bd_net [get_bd_pins hbm_0/APB_1_PRESET_N] $APBRstPin
@@ -246,7 +237,7 @@ if { [info exists hbm_inst] == 0 } {
 # TODO: HBM AXI Labels must be variables generated during the shell definition
 # TODO: All the blocks than shape the HBM pipe need to be labeled depending on the channel numbering
 # NEED TO ENABLE THE RIGHT HBM CHANNEL!!
-	set_property -dict [list CONFIG.USER_CLK_SEL_LIST0 AXI_${HBMChNum}_ACLK CONFIG.USER_SAXI_${HBMChNum} {true}] [get_bd_cells hbm_0]
+        set_property -dict [list CONFIG.USER_SAXI_${HBMChNum} {TRUE}] [get_bd_cells hbm_0]
 
 	## Width
         if { $HBMaxi4 == "axi4lite" } {
@@ -290,22 +281,25 @@ if { [info exists hbm_inst] == 0 } {
 	save_bd_design
 	if { $PCIeDMA eq "dma" && $PCIeDMAdone == 0} {
 
-		# Between 16 and 31, SEL_LIST1 instead of SEL_LIST0
-		set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_31_ACLK} CONFIG.USER_SAXI_31 {true}] [get_bd_cells hbm_0]
-
                 putmeeps "Deploying AXI HBM DMA: $slv_axi_ninstances"
 
                 set_property -dict [list CONFIG.NUM_MI [expr $slv_axi_ninstances + 1]] [get_bd_cells axi_xbar_pcie]	
-                connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ACLK] $pcie_clk_pin
+                connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ACLK]    $pcie_clk_pin
                 connect_bd_net [get_bd_pins axi_xbar_pcie/M0${slv_axi_ninstances}_ARESETN] $pcie_rst_pin
 
-		connect_bd_net $pcie_clk_pin [get_bd_pins hbm_0/AXI_31_ACLK]
-		connect_bd_net $pcie_rst_pin [get_bd_pins hbm_0/AXI_31_ARESET_N]
+                if { $PCIeHBMCh == "" } {
+                  set PCIeHBMCh 31
+                  putmeeps "PCIe DMA channel for HBM is not listed, setting it by default to the highest one: $PCIeHBMCh"
+                }
 
-		connect_bd_intf_net [get_bd_intf_pins axi_xbar_pcie/M0${slv_axi_ninstances}_AXI] [get_bd_intf_pins hbm_0/SAXI_31${HBM_AXI_LABEL}]
-                
+                set_property -dict [list CONFIG.USER_SAXI_${PCIeHBMCh} {TRUE}] [get_bd_cells hbm_0]
+
+                connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${PCIeHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins axi_xbar_pcie/M0${slv_axi_ninstances}_AXI]
+                connect_bd_net      [get_bd_pins      hbm_0/AXI_${PCIeHBMCh}_ACLK]     $pcie_clk_pin
+                connect_bd_net      [get_bd_pins      hbm_0/AXI_${PCIeHBMCh}_ARESET_N] $pcie_rst_pin
+
                 incr slv_axi_ninstances
-		set PCIeDMAdone 1
+                set PCIeDMAdone 1
 	}
 
 #Connect Clocks	

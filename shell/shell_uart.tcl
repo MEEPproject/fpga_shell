@@ -45,19 +45,19 @@ if { $UARTaddrWidth == "0" } {
 
 if { $g_UART_MODE eq "xilinx" } {
 
-    set UartCoreName "axi_uart16550_0"
+    set UartCoreName "Xilinx_axi_uart_0"
     set UartCoreIP $XilinxUart
 
 } elseif { $g_UART_MODE eq "normal" } {
 
     # MEEP UART
 
-    set UartCoreName "MEEP_uart16650_0"
+    set UartCoreName "MEEP_uart_0"
     set UartCoreIP $MEEPUart
 
     ### Initialize the IPs
     putmeeps "Packaging UART IP..."
-    exec make -C "$g_root_dir/ip/uart_16650a" FPGA_BOARD=$g_board_part AXI_AWIDTH=$UARTaddrWidth
+    exec make -C "$g_root_dir/ip/pulp_uart" FPGA_BOARD=$g_board_part AXI_AWIDTH=$UARTaddrWidth
     putmeeps "... Done."
     update_ip_catalog -rebuild
 

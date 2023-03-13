@@ -168,7 +168,7 @@ clean_ip:
 	@(make -C ip/100GbEthernet clean)
 	@(make -C ip/aurora_raw clean)
 	@(make -C ip/10GbEthernet clean)
-	@(make -C ip/uart_16650a clean)
+	@(make -C ip/pulp_uart clean)
 	@(make -C ip/axi_brom clean)
 
 clean_binaries:
