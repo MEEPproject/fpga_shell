@@ -366,7 +366,7 @@ test-benchmarks-production:
             - ls; tree 
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - cd tmp/bin; ls
-            - source tmp/bin/run_baremetal.sh test_loop
+            - source run_baremetal.sh test_loop
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
             - source tmp/bin/run_baremetal.sh clean_log $FPGA_LOG
@@ -410,7 +410,7 @@ test-benchmarks-test:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - cd tmp/bin; ls            
-            - source tmp/bin/run_baremetal.sh test_loop            
+            - source run_baremetal.sh test_loop            
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
             - source tmp/bin/run_baremetal.sh clean_log $FPGA_LOG
