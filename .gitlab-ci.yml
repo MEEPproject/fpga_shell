@@ -81,13 +81,11 @@ synthesis_production:
             #Protosyn flags for prodcution environment
             PROTON_OP: meep eth ncmem hbm pronoc 
         before_script:  
-            - ls; tree           
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + u55c"
             - !reference [.export_toolchain, before_script]
         script:
-            - ls; tree 
             - echo "[DEBUG] synthesis"
             - make initialize
             - make u55c
@@ -128,13 +126,11 @@ synthesis_test:
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
-            - ls; tree 
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
             - !reference [.export_toolchain, before_script]
         script:
-            - ls; tree 
             - make initialize
             - make $FPGA_BOARD
             - !reference [.riscv_benchmarks, script]
@@ -198,11 +194,9 @@ implementation_test:
         dependencies:
           - synthesis_test
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
-        before_script:         
-            - ls; tree   
+        before_script: 
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
         script:
-            - ls; tree 
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
@@ -259,11 +253,9 @@ bitstream_test:
             - !reference [.test_rules,rules] 
         dependencies:
           - implementation_test
-        before_script:  
-            - ls; tree           
+        before_script: 
             - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
         script:
-            - ls; tree 
             - make ci_bitstream
         after_script:
             # The UTC datetime when the pipeline was created
@@ -293,10 +285,8 @@ reports_production:
         dependencies:
           - implementation_production
         before_script:
-            - ls; tree 
             - mv dcp/implementation_${EA}_production.dcp dcp/implementation.dcp            
         script:
-            - ls; tree 
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
@@ -354,7 +344,6 @@ test-benchmarks-production:
         tags: 
             - $FPGA_BOARD        
         before_script: 
-            - ls; tree            
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created            
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
@@ -363,7 +352,6 @@ test-benchmarks-production:
             - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
-            - ls; echo $PWD
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - source sh/run_baremetal.sh test_loop tmp/bin/test_list.txt
             - echo $PWD
@@ -397,8 +385,7 @@ test-benchmarks-test:
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
-        before_script:  
-            - ls
+        before_script: 
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
@@ -406,7 +393,6 @@ test-benchmarks-test:
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
             - mkdir -p tmp/logs
         script:
-            - ls; echo $PWD
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - source sh/run_baremetal.sh test_loop tmp/bin/test_list.txt           
