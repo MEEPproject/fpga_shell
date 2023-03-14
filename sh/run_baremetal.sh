@@ -79,11 +79,20 @@ echo "$outputfile"
 
 sed -i '/picocom v3.1/,/Terminal ready/d; /----------------------------------------/,/Custom Bootloader for MEEP/d; /Terminating... /,/Thanks for using picocom/d' $inputfile
 }
+
+function set_file() {
+
+#set the risht path to execute the baremetal test
+   sed -i -e 's#^#./tmp/bin/#'  $1
+
+}
 #menu
 if [ $1 == setup ]; then
    setup
 elif [ $1 == test_loop ]; then
    run_loop_test $2
+elif [ $1 == set_file ]; then
+   set_file $2
 elif [ $1 == clean_log ]; then
    clean_log $2 $3
 fi
