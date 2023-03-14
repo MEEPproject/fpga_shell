@@ -76,8 +76,8 @@ if { $g_UART_MODE eq "simple"} {
 
 } else {
 
-        set UARTbaseAddr [dict get $UARTentry BaseAddr]
-        set UARTMemRange [expr {2**$UARTaddrWidth/1024}]
+        # set UARTbaseAddr [dict get $UARTentry BaseAddr]
+        # set UARTMemRange [expr {2**$UARTaddrWidth/1024}]
 
 	putmeeps "Deploying $UartCoreName"
 
@@ -88,11 +88,12 @@ if { $g_UART_MODE eq "simple"} {
 	connect_bd_net [get_bd_pins $UartCoreName/s_axi_aclk] [get_bd_pins rst_ea_$g_UARTClkPort/slowest_sync_clk]
 	connect_bd_net [get_bd_pins rst_ea_${g_UARTClkPort}/peripheral_aresetn] [get_bd_pins $UartCoreName/s_axi_aresetn]
 
+    # Now all AXI properties are inhereted from the IP
 	make_bd_intf_pins_external  [get_bd_intf_pins $UartCoreName/S_AXI]
 	set_property name $g_UART_ifname [get_bd_intf_ports S_AXI_0]
-	set_property CONFIG.ADDR_WIDTH $UARTaddrWidth [get_bd_intf_ports /$g_UART_ifname]
-	set_property -dict [list CONFIG.G_ADDR_WIDTH $UARTaddrWidth] [get_bd_cells $UartCoreName]	
-	set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /$g_UART_ifname]
+	# set_property CONFIG.ADDR_WIDTH $UARTaddrWidth [get_bd_intf_ports /$g_UART_ifname]
+	# set_property -dict [list CONFIG.G_ADDR_WIDTH $UARTaddrWidth] [get_bd_cells $UartCoreName]	
+	# set_property CONFIG.FREQ_HZ $g_CLK0_freq [get_bd_intf_ports /$g_UART_ifname]
 
 	#Deal with no IRQ scenario
 	if { $g_UART_irq != "none" } {
@@ -100,7 +101,7 @@ if { $g_UART_MODE eq "simple"} {
 		set_property name $g_UART_irq [get_bd_ports ip2intc_irpt_0]
 	}	
 
-	set_property CONFIG.ASSOCIATED_BUSIF ${g_UART_ifname} [get_bd_ports /$g_UART_CLK]
+	set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_bd_ports /$g_UART_CLK]]$g_UART_ifname: [get_bd_ports /$g_UART_CLK]
 	
 	### UART memory map	
 	
