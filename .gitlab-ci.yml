@@ -347,7 +347,7 @@ test-benchmarks-production:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created            
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_production.log
+            - export FPGA_LOG=fpga_test_baremetal_${EA}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
             - mkdir -p tmp/logs
         script:
@@ -358,11 +358,8 @@ test-benchmarks-production:
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..." 
             - cat $FPGA_LOG
-        after_script:            
-            - mkdir -p benchmarks_results
-            - cp $FPGA_LOG benchmarks_results/
-            - cp $OSBI_DEPLOY_DIR boot/
-            - mv benchmarks_results tmp/
+        after_script:             
+            - cp $FPGA_LOG tmp/bin/
         allow_failure: true
         artifacts:
             when: always
@@ -389,20 +386,18 @@ test-benchmarks-test:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
+            - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
             - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt           
+            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt $FPGA_LOG
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
         after_script:            
-            - mkdir -p benchmarks_results
-            - cp -r $FPGA_LOG benchmarks_results/
-            - mv benchmarks_results tmp/bin/
+            - cp -r $FPGA_LOG tmp/bin/            
             - cat sh/run_baremetal.sh
         allow_failure: true
         artifacts:
