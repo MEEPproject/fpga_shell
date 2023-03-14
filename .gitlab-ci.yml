@@ -353,11 +353,11 @@ test-benchmarks-production:
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop tmp/bin/test_list.txt
+            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt $FPGA_LOG
             - echo $PWD
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..." 
-            - source sh/run_baremetal.sh clean_log $FPGA_LOG; cat $FPGA_LOG
+            - cat $FPGA_LOG
         after_script:            
             - mkdir -p benchmarks_results
             - cp $FPGA_LOG benchmarks_results/
@@ -395,15 +395,14 @@ test-benchmarks-test:
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop tmp/bin/test_list.txt           
+            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt           
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - source sh/run_baremetal.sh clean_log $FPGA_LOG; cat $FPGA_LOG
+            - cat $FPGA_LOG
         after_script:            
             - mkdir -p benchmarks_results
-            - cp $FPGA_LOG benchmarks_results/
-            - cp $OSBI_DEPLOY_DIR boot/
-            - mv benchmarks_results tmp/
+            - cp -r $FPGA_LOG benchmarks_results/
+            - mv benchmarks_results tmp/bin/
             - cat sh/run_baremetal.sh
         allow_failure: true
         artifacts:
