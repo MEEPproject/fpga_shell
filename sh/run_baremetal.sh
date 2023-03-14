@@ -108,7 +108,7 @@ do
    source $BOOT_FILE/boot_acme.sh $k
    echo "$k"
    tail $OUTPUT_FILE
-   sleep 20
+   sleep 33
    
 done
 
