@@ -96,17 +96,17 @@ readarray -t test_riscv < $TEST_LIST
 #we open pico to print output results
 #n this script, the & character at the end of the picocom command runs it in the background, so the script can continue executing while picocom is running.
 
-stty -F /dev/ttyUSB2 115200 inlcr -echo
+stty -F /dev/ttyUSB2 115200 raw -echo
 cat < /dev/ttyUSB2 > $OUTPUT_FILE &
 #nohup sh -c "cat /dev/ttyUSB2 > $OUTPUT_FILE" &
 
 start_time=$(date +%s.%N)   # get start time in seconds.nanoseconds
 
-for i in "${test_riscv[@]}"
+for k in "${test_riscv[@]}"
 do
    #echo "$i"
-   source $BOOT_FILE/boot_acme.sh $i
-   echo -e " The result of  ${Y}$i ${NC} test was printed "
+   source $BOOT_FILE/boot_acme.sh $k
+   echo "$k"
    tail $OUTPUT_FILE
    sleep 20
    
