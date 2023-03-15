@@ -166,7 +166,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				
 				
 			} else {
-				set ret [puterrors "Not considered branch?...--> $line"]
+				set ret [putwarnings "Not considered branch?...--> $line"]
 				puts $fd_wire $line
 				#set teclado [read stdin 1]
 				#TODO: Use tcl "error" built-in procedure
