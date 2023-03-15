@@ -349,15 +349,17 @@ test-benchmarks-production:
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_baremetal_${EA}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
-            - mkdir -p tmp/logs
+            - mkdir -p tmp/test_logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt $FPGA_LOG            
+            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt $FPGA_LOG
             - echo "Checking FPGA log ..." 
+            - source sh/run_baremetal.sh clean_log $FPGA_LOG
             - cat $FPGA_LOG
-        after_script:             
-            - cp $FPGA_LOG tmp/bin/
+            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
+        after_script:
+            - echo "The baremetal tests have been tested"
         allow_failure: true
         artifacts:
             when: always
@@ -386,16 +388,17 @@ test-benchmarks-test:
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
-            - mkdir -p tmp/logs
+            - mkdir -p tmp/test_logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt $FPGA_LOG            
+            - source sh/run_baremetal.sh test_loop_log tmp/bin/test_list.txt $FPGA_LOG
             - echo "Checking FPGA log ..."
+            - source sh/run_baremetal.sh clean_log $FPGA_LOG
             - cat $FPGA_LOG
-        after_script:            
-            - cp -r $FPGA_LOG tmp/bin/            
-            - cat sh/run_baremetal.sh
+            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
+        after_script:
+            - echo "The baremetal tests have been tested"
         allow_failure: true
         artifacts:
             when: always
