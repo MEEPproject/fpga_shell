@@ -86,7 +86,7 @@ close $fd_mod
 set fd_mod  [open $g_mod_file   "r"]
 set fd_inst [open $g_inst_file  "w"]
 
-add_instance $fd_mod $fd_inst
+# add_instance $fd_mod $fd_inst
 
 close $fd_mod
 close $fd_inst
@@ -130,12 +130,13 @@ puts  $fd_mod    "   ); \r\n "
 fcopy $fd_wire   $fd_mod
 puts  $fd_mod    "\r\n meep_shell meep_shell_inst"
 puts  $fd_mod    "   \("
+puts  $fd_mod    " .* // implicit connection of all signals at once"
 
 # Put together the Shell-top connections and the EA-shell connections
 fcopy $fd_inst    $fd_mod
 #fcopy $fd_map   $fd_mod
 fcopy $fd_shell   $fd_mod
-puts  $fd_mod    "    .hbm_cattrip             \(hbm_cattrip\)"
+# puts  $fd_mod    "    .hbm_cattrip             \(hbm_cattrip\)"
 puts  $fd_mod 	 "\);\r\n"
 close $fd_wire
 close $fd_shell
