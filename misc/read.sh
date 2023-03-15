@@ -3,17 +3,18 @@
 ADDR=$1 #First address where the infoROM is placed according to Vivado's address editor : 0x4000000000
 PCIE_SLOT=`lspci -m -d 10ee:| cut -d " " -f 1 | cut -d ":" -f 1`
 #We are filtering the output of lscpi (list of PCIe in the system) with the vendor ID (Xilinx PCIe) 10ee, and the flag -d
-#this number will differ depending on the server, so it ought not be hardcoded. 
+#this number will differ depending on the server, so it can't be hardcoded. 
 #result of this will be a 2 digit number z.B. 08
 
-QDMA_PCI="qdma${PCIE_SLOT}000"
+QDMA_PCI="qdma${PCIE_SLOT}000" #Constructs the PCI device identifier
 
-dma-ctl $QDMA_PCI reg write bar 2 0x0 0x3 >> null
+#Writes a value to the second BAR (base address register) of the QDMA PCI device identified by QDMA_PCI. Idk why it is this concrete value, but it seems that it is needed to properly configure the QDMA device for the subsequent DMA read operation.
+dma-ctl $QDMA_PCI reg write bar 2 0x0 0x3 >> /dev/null 
 
 sleep 0.1
 
-#We are transfering 4 bytes at a time (defined with option -s)
-dma-from-device -d /dev/$QDMA_PCI-MM-1 -s 4 -a $ADDR -f readback >> null
+#Reads data from the QDMA device into a file called "readback"
+dma-from-device -d /dev/$QDMA_PCI-MM-1 -s 4 -a $ADDR -f readback >> /dev/null
 
 truncate -s %4 readback
 objcopy -I binary -O binary --reverse-bytes=4 readback

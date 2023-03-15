@@ -1,4 +1,3 @@
-EMULATED_ACCELERATOR_NAME: eprocessor
-EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/eprocessor/eprocessor-rtl/fpga-sdv.git
-EMULATED_ACCELERATOR_SHA: fb7a67cbcc776512c93039c692b673a4a3150d6e
-
+EMULATED_ACCELERATOR_NAME: acme
+EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/meep_openpiton.git
+EMULATED_ACCELERATOR_SHA: 1f576428252d4e4ef801a5b7b58efb8170c4b126

@@ -9,6 +9,7 @@
         EMULATED_ACCELERATOR: acme 
         GIT_STRATEGY: clone
         GIT_SUBMODULE_STRATEGY: recursive
+        DATE: $(date +"%y%m%d")
         CUSTOM_MSG: 1x1_VAS_noVPU
         LINUX_IMAGE: osbi.bin
         SDK_DIR: accelerator/sdk
@@ -22,17 +23,19 @@
         BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
         CI_RISCV_DIR: /home/tools/openpiton/riscv_install
         # TODO: Link with the SDK repo, set triggering policies
-        OSBI_DEPLOY_DIR: /home/dmazure/workspace/4Xavi/osbi_alveo.bin
+        OSBI_DEPLOY_DIR: /home/tools/load-ariane/firmware/osbi_buildroot.bin
         RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
+        #Link of Nexus cloud where the bitstreams ofr production will be store.
+        MEEP_RAW_REPOSITORY: " https://release.meep-project.eu/nexus/repository/acme-images/"
         # Change this is MEEP wants another bitstream as fixed release
 
 .qdma_drivers: &qdma_drivers
         - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
         - "export PATH=$QDMA_APPS:$PATH"
 
-.default_rules:
-  rules:
-   if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
+# .default_rules:
+#   rules:
+#    if: ($CI_COMMIT_BRANCH =~ /^support/ || $CI_COMMIT_MESSAGE =~ /^#TestCICD/)
 
 .sdk_default:
     before_script:
@@ -59,8 +62,8 @@
 
 .export_toolchain:
     before_script:
-        - export RISCV=$CI_RISCV_DIR
-        - echo "Using pre-existing RISCV toolchain"
+        - echo "Using pre-existing RISCV toolchain" 
+        - export RISCV=$CI_RISCV_DIR        
         # Some scripting-based decision should be added to <sometimes> build the toolchain from scratch (i,e, merge to master branch)
         - echo "RISCV = $RISCV"
 

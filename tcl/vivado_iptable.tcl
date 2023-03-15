@@ -32,10 +32,12 @@ switch $g_board_part {
 	u280 {
 		set HBM_AXI_LABEL ""
 		set HBMDensity "8GB"
+		set HBMaddrWidth "33"
 	}
 	u55c {
 		set HBM_AXI_LABEL "_8HI"
 		set HBMDensity "16GB"
+		set HBMaddrWidth "34"
 	}
 }
 

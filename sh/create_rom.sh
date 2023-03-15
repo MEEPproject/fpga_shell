@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#Si lo hago con rust puedo meter el binario en el path y exe al hacer make project
-#No sé si estos hex son demasiado largos
+#This executes without errors from the context of the Makefile, which is the one calling this script.
+#It won't work when called from the scripts' context.
 
 THIS_DIR=$(pwd) # ~/git_repo/fpga_shell
 PARENT_DIR="$(dirname "$THIS_DIR")" #Returns to parent directory fpga_shell (git_repo)

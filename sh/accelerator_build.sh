@@ -16,11 +16,26 @@
 # Author: Daniel J.Mazure, BSC-CNS
 # Date: 22.02.2022
 # Description: 
+# Updated by Fran. Check if original accelerator_build return a fail or succed exit status
 
-
+BR='\033[1;31m'     #Bold Red 
+NC='\033[0;0;0m'    #NO COLOR
 
 cd accelerator
 
-bash -x meep_shell/accelerator_build.sh $1
+# execute accelerator_build using no debug mode
+meep_shell/accelerator_build.sh $1 $2 $3 $4 $5 $6 $7 $8 
+
+#check the exit status of accelerator_build.sh
+if [ "$?" -eq 1 ]; then
+    
+    echo -e  ${BR}"accelerator_build.sh has failed during the execution: make project" ${NC}
+    exit 1
+else
+    
+    echo "accelerator_build.sh has succeded"
+    exit 0
+fi
+
 
 cd ..

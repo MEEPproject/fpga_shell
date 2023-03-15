@@ -402,10 +402,10 @@ proc AddClk2MMCM { ClockList ConfMMCMString NewClk} {
 
     ### +2 because the list is at this point one element short and because
     ### The Clock wizard numeration differs and doesn't have a 0
-    set numClk [llength $ClockList]
-    set d_clock [dict create Name CLK${numClk}]
+    set numClk [string trimleft [dict get [lindex $ClockList end] ClkNum] CLK]
+    set d_clock [dict create Name CLK$[llength $ClockList]]
         
-	dict set d_clock ClkNum  CLK${numClk}
+    dict set d_clock ClkNum  CLK[incr numClk]
     dict set d_clock ClkFreq $ClkFreqNew
     dict set d_clock ClkName $ClkNameNew
 	dict set d_clock ClkRst ""
