@@ -80,42 +80,37 @@ set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
 
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
-# TODO: Check what needs to be harcoded. DMA solutions doesn't give much flexibility
-# Now all AXI properties are inhereted from the IP
-make_bd_intf_pins_external [get_bd_intf_pins $EthHierName/eth_dma_axi_lite]
-set_property name $ETHintf [get_bd_intf_ports eth_dma_axi_lite_0]
-
-#   set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
-#   set_property -dict [ list \
-#    CONFIG.ADDR_WIDTH $ETHaddrWidth \
-#    CONFIG.ARUSER_WIDTH {0} \
-#    CONFIG.AWUSER_WIDTH {0} \
-#    CONFIG.BUSER_WIDTH {0} \
-#    CONFIG.DATA_WIDTH $ETHdataWidth \
-#    CONFIG.HAS_BRESP {1} \
-#    CONFIG.HAS_BURST {0} \
-#    CONFIG.HAS_CACHE {0} \
-#    CONFIG.HAS_LOCK {0} \
-#    CONFIG.HAS_PROT {0} \
-#    CONFIG.HAS_QOS {0} \
-#    CONFIG.HAS_REGION {0} \
-#    CONFIG.HAS_RRESP {1} \
-#    CONFIG.HAS_WSTRB {1} \
-#    CONFIG.ID_WIDTH $ETHidWidth \
-#    CONFIG.MAX_BURST_LENGTH {1} \
-#    CONFIG.NUM_READ_OUTSTANDING {1} \
-#    CONFIG.NUM_READ_THREADS {1} \
-#    CONFIG.NUM_WRITE_OUTSTANDING {1} \
-#    CONFIG.NUM_WRITE_THREADS {1} \
-#    CONFIG.PROTOCOL {AXI4LITE} \
-#    CONFIG.READ_WRITE_MODE {READ_WRITE} \
-#    CONFIG.RUSER_BITS_PER_BYTE {0} \
-#    CONFIG.RUSER_WIDTH {0} \
-#    CONFIG.SUPPORTS_NARROW_BURST {0} \
-#    CONFIG.WUSER_BITS_PER_BYTE {0} \
-#    CONFIG.WUSER_WIDTH {0} \
-#    ] $eth_axi
-
+# Creating AXI port actually for axi_dma instance, so taking AXI properties from its S_AXI_LITE port
+  set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
+  set_property -dict [ list \
+   CONFIG.ADDR_WIDTH {12} \
+   CONFIG.ARUSER_WIDTH {0} \
+   CONFIG.AWUSER_WIDTH {0} \
+   CONFIG.BUSER_WIDTH {0} \
+   CONFIG.DATA_WIDTH {64} \
+   CONFIG.HAS_BRESP {1} \
+   CONFIG.HAS_BURST {1} \
+   CONFIG.HAS_CACHE {0} \
+   CONFIG.HAS_LOCK {0} \
+   CONFIG.HAS_PROT {0} \
+   CONFIG.HAS_QOS {0} \
+   CONFIG.HAS_REGION {0} \
+   CONFIG.HAS_RRESP {1} \
+   CONFIG.HAS_WSTRB {1} \
+   CONFIG.ID_WIDTH {0} \
+   CONFIG.MAX_BURST_LENGTH {1} \
+   CONFIG.NUM_READ_OUTSTANDING {256} \
+   CONFIG.NUM_READ_THREADS {16} \
+   CONFIG.NUM_WRITE_OUTSTANDING {256} \
+   CONFIG.NUM_WRITE_THREADS {16} \
+   CONFIG.PROTOCOL {AXI4LITE} \
+   CONFIG.READ_WRITE_MODE {READ_WRITE} \
+   CONFIG.RUSER_BITS_PER_BYTE {0} \
+   CONFIG.RUSER_WIDTH {0} \
+   CONFIG.SUPPORTS_NARROW_BURST {0} \
+   CONFIG.WUSER_BITS_PER_BYTE {0} \
+   CONFIG.WUSER_WIDTH {0} \
+   ] $eth_axi
 
 
 #create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_n
@@ -173,7 +168,7 @@ set RstPinIP   [get_bd_pins ${EthHierName}/$ipRst]
 create_bd_port -dir O -from 1 -to 0 -type intr $ETHirq
 connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins ${EthHierName}/eth_dma_irq]
 
-# connect_bd_intf_net [get_bd_intf_ports ${ETHintf}] -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_axi_lite]
+connect_bd_intf_net [get_bd_intf_ports ${ETHintf}] -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_axi_lite]
 
 # Connect the defined ethernet CLK & RST to the DMA AXI IP, and also forward them to the EA
 connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_clk]   [get_bd_pins rst_ea_$ETHClkLab/slowest_sync_clk]
