@@ -96,7 +96,8 @@ $(BINARIES_DIR):
 	@cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
-	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM) 	
+	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM)
+	${MAKE} -C $(ACCEL_DIR) acc_framework
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
@@ -145,12 +146,15 @@ syntax_ea:
 
 #Help menu accelerator_build.sh
 help_ea: 
-	@$(SH_DIR)/accelerator_build.sh -h
+	${MAKE} -C $(ACCEL_DIR) help_ea
 ####
 
 # Compile benchmarks for FPGA
-test_riscv_acme:
-	${MAKE} -C $(ACCEL_DIR)/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks fpga
+test_riscv_fpga:
+	${MAKE} -C $(ACCEL_DIR) test_riscv_fpga
+
+test_riscv_clean:
+	${MAKE} -C $(ACCEL_DIR) test_riscv_clean
 
 rom_file:
 	@$(SH_DIR)/create_rom.sh $(ROOT_DIR)
