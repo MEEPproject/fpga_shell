@@ -88,10 +88,10 @@ synthesis_production:
         script:
             - echo "[DEBUG] synthesis"
             - make initialize
-            - make u55c
-            - !reference [.riscv_benchmarks, script]
+            - make u55c            
             # Synthesis production will use Pronoc routers
             - make project EA_PARAM=$EA EA_PARAM+="${PROTON_OP}"
+            - !reference [.riscv_benchmarks, script]
             - make synthesis
             - !reference [.check_synth, script]
         after_script:
@@ -132,10 +132,10 @@ synthesis_test:
             - !reference [.export_toolchain, before_script]
         script:
             - make initialize
-            - make $FPGA_BOARD
-            - !reference [.riscv_benchmarks, script]
+            - make $FPGA_BOARD            
             # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
-            - make project EA_PARAM=$EA 
+            - make project EA_PARAM=$EA
+            - !reference [.riscv_benchmarks, script]
             - make synthesis
             - !reference [.check_synth, script]
         after_script:
