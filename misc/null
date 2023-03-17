@@ -20,3 +20,9 @@ qdma08000, 08:00.00, bar#2, reg 0x0, read back 0x1.
 size=4 Average BW = 62.971301 KB/sec
 qdma08000, 08:00.00, bar#2, reg 0x0, read back 0x1.
 size=4 Average BW = 108.137336 KB/sec
+qdma08000, 08:00.00, bar#2, reg 0x0, read back 0x1.
+size=4 Average BW = 68.940555 KB/sec
+qdma08000, 08:00.00, bar#2, reg 0x0, read back 0x1.
+size=4 Average BW = 105.783727 KB/sec
+qdma08000, 08:00.00, bar#2, reg 0x0, read back 0x1.
+size=4 Average BW = 62.215172 KB/sec

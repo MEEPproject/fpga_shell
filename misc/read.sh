@@ -19,9 +19,9 @@ dma-from-device -d /dev/$QDMA_PCI-MM-1 -s 4 -a $ADDR -f readback >> /dev/null
 truncate -s %4 readback
 objcopy -I binary -O binary --reverse-bytes=4 readback
 
-cat readback | xxd  -c 4 | awk '{print $2 $3}' > olakase
+cat readback | xxd  -c 4 | awk '{print $2 $3}' > content
 
-cat olakase
+#cat content
 
 #fpgadate=$(echo $((16#`cat olakase`)))
 
@@ -30,5 +30,5 @@ cat olakase
 #date --date @${fpgadate}
 
 
-rm olakase
+#rm content
 rm readback
