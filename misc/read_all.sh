@@ -1,4 +1,4 @@
-ii#!/bin/bash
+#!/bin/bash
 
 ADDR=0x400000000
 shell_components=("PCIE" "DDR4" "HBMM" "AURO" "UART" "ETHE" "BROM" "BRAM")
