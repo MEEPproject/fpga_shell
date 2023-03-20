@@ -51,9 +51,9 @@ do
     if [[ "$elem" == "$(cat content | xxd -r -p | tr '\0' '_')" ]]
     then
 	word_new=${map_components[$(cat content | xxd -r -p )]}
-	offset=$(( 39 + $(( ${#word_new} - 4 )) ))
+	offset=$(( 41 + $(( ${#word_new} - 4 )) ))
 	offset2=$(( 29 - $(( ${#word_new} - 4 )) ))
-	printf " ║ %${offset}s %${offset2}s\n" "$word_new" "║"
+	printf " ║ %${offset}s %${offset2}s\n" "║  $word_new" "║"
         read_next
     fi
 done
