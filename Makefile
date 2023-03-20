@@ -149,7 +149,7 @@ help_ea:
 ####
 
 rom_file:
-	@$(SH_DIR)/create_rom.sh $(ROOT_DIR)
+	@$(SH_DIR)/create_inforom.sh $(ROOT_DIR)
 	@mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/src/initrom.mem
 
 ####
