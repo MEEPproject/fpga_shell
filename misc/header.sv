@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Author: Daniel J.Mazure, BSC-CNS
+// Authors: Daniel J.Mazure, Alex Kropotov BSC-CNS
 // Date: N/A
 // Description: This file has been automatically generated. It creates
 // 		the top level ports and instantiates the FPGA-Shell and
