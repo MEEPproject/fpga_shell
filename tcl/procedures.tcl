@@ -114,7 +114,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 			} elseif { [ regexp {^\s*$} $line ] } {
 				#putmeeps "INFO: empty line\r\n"	
 				puts $fd_wire $line
-			} elseif { [ regexp {[(|)]\s*;*\s*$} $line ] } {
+			} elseif { [ regexp {[(|)]\s*;\s*$} $line ] } {
 				#putmeeps "Module opening/closing"
 			} elseif { [ regexp {endmodule} $line ] } {
 				#putmeeps "endmodule"	
