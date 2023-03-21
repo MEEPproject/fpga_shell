@@ -106,20 +106,12 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 			}
 		} else {
 		
-		# Look for comments at the begining of the line
-			if { [regexp -inline -all {^\s*//} $line] ne ""} {
-				#putmeeps "INFO: comment line\r\n"	
-				puts $fd_wire $line
-		# Detect empty lines
-			} elseif { [ regexp {^\s*$} $line ] } {
-				#putmeeps "INFO: empty line\r\n"	
-				puts $fd_wire $line
+            if { [regexp {^\s*/\*|\*/\s*$} $line] } {
+                putmeeps "Removing pure multi-line comment: $line"	
 			} elseif { [ regexp {[(|)]\s*;\s*$} $line ] } {
-				#putmeeps "Module opening/closing"
+                putmeeps "Removing module opening/closing: $line"
 			} elseif { [ regexp {endmodule} $line ] } {
-				#putmeeps "endmodule"	
-				# putwarnings	"AXI user signals are not supported and will not be connected"
-				#putdebugs "[ regexp axi_.*user $line ]"
+                putmeeps "Removing endmodule: $line"
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
@@ -166,7 +158,7 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				
 				
 			} else {
-				set ret [putwarnings "Not considered branch?...--> $line"]
+                set ret [putmeeps "Passing string: $line"]
 				puts $fd_wire $line
 				#set teclado [read stdin 1]
 				#TODO: Use tcl "error" built-in procedure
