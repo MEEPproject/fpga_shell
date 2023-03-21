@@ -39,7 +39,7 @@
     - source sh/run_baremetal.sh setup
     - make test_riscv_fpga
   after_script:
-    - mkdir -p tmp/bin
+    - mkdir -p tmp/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.txt tmp/bin_$EA
     - source sh/run_baremetal.sh set_file tmp/bin_$EA/test_list.txt
