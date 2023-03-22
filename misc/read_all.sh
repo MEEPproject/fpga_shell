@@ -16,48 +16,110 @@ do
    map_components["${shell_components[$i]}"]="${fullname_comp[$i]}"
 done	
 
+function usage(){
+	echo USAGE:
+	echo Valid commands:
+	echo get date
+	echo get sha shell
+	echo get sha EA
+	echo get EA
+	echo get shell components
+	echo read all
 
-cat title.txt
-
-printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
-printf " ║ %-30s  ║ %5s %5s \n" "DATE OF BITSTREAM GENERATION:" " $(./show_date.sh $(./read.sh $ADDR))" "║"
-printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
-
-
-read_next
-printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
-printf " ║ %-30s  ║ %5s %26s \n" "SHA OF THE SHELL:" " $( cat content | sed 's/^0*//')" "║"
-printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
-
-
-read_next
-printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
-printf " ║ %-30s  ║ %5s %25s \n" "SHA OF THE ACCELERATOR:" " $(cat content | sed 's/^0*//')" "║"
-printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
+}
 
 
-read_next
-printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
-printf " ║ %-30s  ║ %5s %29s \n" "EMULATED ACCELERATOR:" " $(cat content | xxd -r -p)" "║"
-printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
+function get_date(){	
+	printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
+	printf " ║ %-30s  ║ %5s %5s \n" "DATE OF BITSTREAM GENERATION:" " $(./show_date.sh $(./read.sh 0x400000000))" "║"
+	printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
+}
 
+function get_sha_shell(){
+	./read.sh 0x400000004
+	printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
+	printf " ║ %-30s  ║ %5s %26s \n" "SHA OF THE SHELL:" " $( cat content | sed 's/^0*//')" "║"
+	printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
+}
 
-printf " ╔═══════════════════════════════════════════════════════════════════╗\n"
-printf " ║ INCLUDES SHELL COMPONENTS: %42s \n" " ║"
-read_next
-for elem in "${shell_components[@]}"
-do
-    # Bash treats null bytes as string terminators, so I substitute them with '_' to avoid warning messages (this happens when it reads an empty position within the ROM)
-    if [[ "$elem" == "$(cat content | xxd -r -p | tr '\0' '_')" ]]
-    then
-	word_new=${map_components[$(cat content | xxd -r -p )]}
-	offset=$(( 41 + $(( ${#word_new} - 4 )) ))
-	offset2=$(( 29 - $(( ${#word_new} - 4 )) ))
-	printf " ║ %${offset}s %${offset2}s\n" "║  $word_new" "║"
-        read_next
-    fi
+function get_sha_EA(){
+	./read.sh 0x400000008
+	printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
+	printf " ║ %-30s  ║ %5s %25s \n" "SHA OF THE ACCELERATOR:" " $(cat content | sed 's/^0*//')" "║"
+	printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
+}
+
+function get_EA(){
+	./read.sh 0x40000000C
+	printf " ╔═════════════════════════════════╦═════════════════════════════════╗\n"
+	printf " ║ %-30s  ║ %5s %29s \n" "EMULATED ACCELERATOR:" " $(cat content | xxd -r -p)" "║"
+	printf " ╚═════════════════════════════════╩═════════════════════════════════╝\n"
+}
+
+function get_shell_components(){
+	ADDR=0x40000000C
+	printf " ╔═══════════════════════════════════════════════════════════════════╗\n"
+	printf " ║ INCLUDES SHELL COMPONENTS: %42s \n" " ║"
+	read_next
+	for elem in "${shell_components[@]}"
+	do
+	    # Bash treats null bytes as string terminators, so I substitute them with '_' to avoid warning messages (this happens when it reads an empty position within the ROM)
+	    if [[ "$elem" == "$(cat content | xxd -r -p | tr '\0' '_')" ]]
+	    then
+		word_new=${map_components[$(cat content | xxd -r -p )]}
+		offset=$(( 41 + $(( ${#word_new} - 4 )) ))
+		offset2=$(( 29 - $(( ${#word_new} - 4 )) ))
+		printf " ║ %${offset}s %${offset2}s\n" "║  $word_new" "║"
+        	read_next
+	    fi
+	done
+	printf " ║                                                                   ║\n"
+	printf " ╚═══════════════════════════════════════════════════════════════════╝\n"
+}
+
+function read_all(){
+	cat title.txt
+	get_date
+	get_sha_shell
+	get_she_EA
+	get_EA
+	get_shell_components
+}
+
+usage
+while true
+do 
+   read command
+   case "$command" in 
+	   "get date")
+	   	get_date
+     		;;		
+	   "get sha shell")
+		get_sha_shell
+		;;
+	   "get sha EA")
+		get_sha_EA
+		;;
+	   "get EA")
+	        get_EA
+		;;
+	   "get shell components")
+		get_shell_components
+		;;	
+	   "read all")
+		read_all
+		;;
+	   "exit")
+	       break
+	       ;;
+	   *)
+	       echo "Invalid command"
+	       ;;
+   esac
 done
-printf " ║                                                                   ║\n"
-printf " ╚═══════════════════════════════════════════════════════════════════╝\n"
-
+   
 rm content
+
+
+
+
