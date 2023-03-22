@@ -81,7 +81,7 @@ sed -i '/picocom v3.1/,/Terminal ready/d; /-------------------------------------
 }
 
 function set_file() {
-info="./tmp/bin_$2"
+info="./tmp/bin_$2/"
 echo "$info"
 
 #set the right path to execute the baremetal test
