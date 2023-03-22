@@ -81,9 +81,11 @@ sed -i '/picocom v3.1/,/Terminal ready/d; /-------------------------------------
 }
 
 function set_file() {
+info="./tmp/bin_$2"
+echo "$info"
 
-#set the risht path to execute the baremetal test
-   sed -i -e 's#^#./tmp/bin/#'  $1
+#set the right path to execute the baremetal test
+  sed -i -e "s#^#${info}#"  $1
 
 }
 
@@ -152,7 +154,7 @@ if [ $1 == setup ]; then
 elif [ $1 == test_loop ]; then
    run_loop_test $2
 elif [ $1 == set_file ]; then
-   set_file $2
+   set_file $2 $3
 elif [ $1 == test_loop_log ]; then
    test_loop_log $2 $3
 elif [ $1 == pico_close ]; then

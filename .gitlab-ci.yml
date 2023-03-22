@@ -355,7 +355,6 @@ test-benchmarks-production:
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.txt $FPGA_LOG
             - echo "Checking FPGA log ..." 
-            - source sh/run_baremetal.sh clean_log $FPGA_LOG
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
@@ -394,7 +393,6 @@ test-benchmarks-test:
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.txt $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - source sh/run_baremetal.sh clean_log $FPGA_LOG
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
