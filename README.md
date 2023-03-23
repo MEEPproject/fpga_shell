@@ -1,4 +1,3 @@
-
 <div align="center">
     <img src="Images/meep-logo-symbol.png" width="200px" alt="<MEEP logo>"/> 
 
@@ -260,7 +259,7 @@ are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it
 will be explained later.
 
-## :floppy_disk: ROM information
+## :floppy_disk: infoROM information
 The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
 - Date of the project generation
 - SHA of the Shell
@@ -269,6 +268,17 @@ The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
 
 The active interfaces are defined in [accelerator_def](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "accelerator_def.csv") and parsed in 
 [define_shell.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/sh/define_shell.sh "define_shell.sh "), where all the aforementioned information gets written in a new file initrom.mem (gets rewritten if it already exists), stored in _misc_ directory inside the parent directory _fpga_shell_. When issuing _make project_, the [Makefile](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/Makefile "Makefile")  moves the information stored in _initrom.mem_ into the ip.
+
+In order to read from the infoROM, execute [read_all.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/misc/read_all.sh).
+The possible commands are the following:
+- get date
+- get sha shell
+- get sha EA
+- get EA
+- get shell components
+- read all
+
+
 
 [Futher information](https://wiki.meep-project.eu/index.php/MEEP_InfoROM)
 
