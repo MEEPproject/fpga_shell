@@ -59,13 +59,11 @@ if { $APBRstPin == "" } {
 
 
 putmeeps "Creating HBM instance..."
-### TODO: Support different user widths per AXI channel
-### TODO: Region, prot and others can be extracted as the other widths
 
 set HBMaxiProt   [string replace $HBMaxi   [string first "-" $HBMaxi] end]
 set HBMdataWidth [string replace $HBMaxi 0 [string first "-" $HBMaxi]    ]
 
-set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
+set hbm_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
    CONFIG.ARUSER_WIDTH {0} \
@@ -94,7 +92,7 @@ set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_
    CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
-   ] $hbm_axi4
+   ] $hbm_axi
 
 
 # Create HBM instance if doesn't exsists already
