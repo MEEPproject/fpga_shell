@@ -28,7 +28,7 @@ set HBMname   [dict get $HBMentry SyncClk Name]
 set HBMintf   [dict get $HBMentry IntfLabel]
 set HBMReady  [dict get $HBMentry CalibDone]
 set HBMChNum  [dict get $HBMentry EnChannel] 
-set HBMaxi4   [dict get $HBMentry AxiIntf]
+set HBMaxi    [dict get $HBMentry AxiIntf]
 
 set HBMidWidth   [dict get $HBMentry AxiIdWidth]
 set HBMuserWidth [dict get $HBMentry AxiUserWidth]
@@ -59,48 +59,41 @@ if { $APBRstPin == "" } {
 
 
 putmeeps "Creating HBM instance..."
-### TODO: Support different user widths per AXI channel
-### TODO: Region, prot and others can be extracted as the other widths
 
-set HBMaxiPr [string replace $HBMaxi4 [string first "-" $HBMaxi4] end]
-if { $HBMaxiPr == "AXI4LITE" } {
-        set has_burst 0
-        set max_burst 1
-        set has_cache 0
-        set narrow_burst 0
-} else {
-        set has_burst 1        
-        set max_burst 256
-        set has_cache 1
-        set narrow_burst 1
-}
-set HBMdataWidth [string replace $HBMaxi4 0 [string first "-" $HBMaxi4]]
+set HBMaxiProt   [string replace $HBMaxi   [string first "-" $HBMaxi] end]
+set HBMdataWidth [string replace $HBMaxi 0 [string first "-" $HBMaxi]    ]
 
-set hbm_axi4 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
+set hbm_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
+   CONFIG.ARUSER_WIDTH {0} \
+   CONFIG.AWUSER_WIDTH {0} \
+   CONFIG.BUSER_WIDTH {0} \
    CONFIG.DATA_WIDTH $HBMdataWidth \
    CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST $has_burst \
-   CONFIG.HAS_CACHE $has_cache \
+   CONFIG.HAS_BURST {1} \
+   CONFIG.HAS_CACHE {0} \
    CONFIG.HAS_LOCK {0} \
    CONFIG.HAS_PROT {0} \
    CONFIG.HAS_QOS {0} \
    CONFIG.HAS_REGION {0} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
-   CONFIG.MAX_BURST_LENGTH $max_burst \
-   CONFIG.NUM_READ_OUTSTANDING {1} \
-   CONFIG.NUM_READ_THREADS {1} \
-   CONFIG.NUM_WRITE_OUTSTANDING {1} \
-   CONFIG.NUM_WRITE_THREADS {1} \
-   CONFIG.PROTOCOL $HBMaxiPr \
+   CONFIG.ID_WIDTH {6} \
+   CONFIG.MAX_BURST_LENGTH {16} \
+   CONFIG.NUM_READ_OUTSTANDING {256} \
+   CONFIG.NUM_READ_THREADS {16} \
+   CONFIG.NUM_WRITE_OUTSTANDING {256} \
+   CONFIG.NUM_WRITE_THREADS {16} \
+   CONFIG.PROTOCOL $HBMaxiProt \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
-   CONFIG.SUPPORTS_NARROW_BURST $narrow_burst \
+   CONFIG.RUSER_WIDTH {0} \
+   CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
-   ] $hbm_axi4
-   
+   CONFIG.WUSER_WIDTH {0} \
+   ] $hbm_axi
+
 
 # Create HBM instance if doesn't exsists already
 if { [info exists hbm_inst] == 0 } {
@@ -231,7 +224,7 @@ if { [info exists hbm_inst] == 0 } {
         set_property -dict [list CONFIG.USER_SAXI_${HBMChNum} {TRUE}] [get_bd_cells hbm_0]
 
 	## Width
-        if { $HBMaxiPr == "AXI4LITE" } {
+        if { $HBMaxiProt == "AXI4LITE" } {
                 set smartConnectLite [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_4lite${HBMChNum}]
                 set_property -dict [list CONFIG.NUM_SI {1}] $smartConnectLite
      		connect_bd_intf_net [get_bd_intf_pins smartconnect_4lite${HBMChNum}/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
@@ -252,19 +245,16 @@ if { [info exists hbm_inst] == 0 } {
 		connect_bd_net $HBMRstPin [get_bd_pins axi_protocol_convert_${HBMChNum}/aresetn]
 		connect_bd_net $HBMRstPin [get_bd_pins axi_dwidth_converter_${HBMChNum}/s_axi_aresetn] 
 
+	} elseif { $HBMaxiProt == "AXI3" } {
+                # direct connection to HBM if assigned protocol is AXI3
+		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
 	} else {
+                # using RAMA IP in between if assigned protocol is AXI4
 		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
 		connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
 		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
 	        connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
 		connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
-		# RAMA explicitly forbids this signals
-		set_property CONFIG.HAS_CACHE  0 [get_bd_intf_ports $HBMintf]
-                set_property CONFIG.HAS_LOCK   0 [get_bd_intf_ports $HBMintf]
-                set_property CONFIG.HAS_QOS    0 [get_bd_intf_ports $HBMintf]
-                set_property CONFIG.HAS_REGION 0 [get_bd_intf_ports $HBMintf]
-                set_property CONFIG.HAS_PROT   0 [get_bd_intf_ports $HBMintf]		
-
 	}
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it

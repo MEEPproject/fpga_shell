@@ -188,6 +188,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 				}
 				if { "${device}" == "ETHERNET" } {
 					dict set d_device IntfLabel [lindex $fields 2 ]
+					dict set d_device AxiIntf   [lindex $fields 3 ]	
 					dict set d_device GbEth     [lindex $fields 5 ]
 					dict set d_device IRQ       [lindex $fields 6 ]
 					dict set d_device qsfpPort  [lindex $fields 7 ]
