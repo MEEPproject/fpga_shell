@@ -80,7 +80,7 @@ set hbm_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_r
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
    CONFIG.ID_WIDTH {6} \
-   CONFIG.MAX_BURST_LENGTH {16} \
+   CONFIG.MAX_BURST_LENGTH {256} \
    CONFIG.NUM_READ_OUTSTANDING {256} \
    CONFIG.NUM_READ_THREADS {16} \
    CONFIG.NUM_WRITE_OUTSTANDING {256} \
