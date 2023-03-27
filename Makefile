@@ -98,7 +98,6 @@ $(BINARIES_DIR):
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
 	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM)
-	${MAKE} -C $(ACCEL_DIR) acc_framework
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
