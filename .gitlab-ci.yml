@@ -328,81 +328,6 @@ reports_test:
 ###
 ### Tests jobs
 ###
-test-benchmarks-production:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch         
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
-        stage: test
-        retry: 2
-        extends: .common_conf_test
-        rules:
-            - !reference [.production_rules,rules]
-        dependencies:
-          - synthesis_production
-          - bitstream_production
-        tags: 
-            - $FPGA_BOARD        
-        before_script: 
-            - !reference [.fpga_test, before_script]
-            # The UTC datetime when the pipeline was created            
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_baremetal_${EA}_production.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
-            - mkdir -p tmp/test_logs
-        script:
-            # The EA script should provide the right script and the right binary
-            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.txt $FPGA_LOG
-            - echo "Checking FPGA log ..." 
-            - cat $FPGA_LOG
-            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
-        after_script:
-            - echo "The baremetal tests have been tested"
-        allow_failure: true
-        artifacts:
-            when: always
-            paths:
-            - tmp
-
-test-benchmarks-test:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-        stage: test
-        retry: 2
-        extends: .common_conf_test
-        rules:
-            - !reference [.test_rules,rules]
-        dependencies:
-          - synthesis_test
-          - bitstream_test
-        # Overwrite tags to select the right board
-        tags: 
-            - $FPGA_BOARD        
-        before_script: 
-            - !reference [.fpga_test, before_script]
-            # The UTC datetime when the pipeline was created
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
-            - mkdir -p tmp/test_logs
-        script:
-            # The EA script should provide the right script and the right binary
-            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.txt $FPGA_LOG
-            - echo "Checking FPGA log ..."
-            - cat $FPGA_LOG
-            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
-        after_script:
-            - echo "The baremetal tests have been tested"
-        allow_failure: true
-        artifacts:
-            when: always
-            paths:
-            - tmp
-
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
 fpga-test-prodcution:
@@ -479,6 +404,82 @@ fpga-test-test:
             when: always
             paths:
             - tmp
+
+test-benchmarks-production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch         
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.production_rules,rules]
+        dependencies:
+          - synthesis_production
+          - bitstream_production
+        tags: 
+            - $FPGA_BOARD        
+        before_script: 
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created            
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_baremetal_${EA}_production.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_production.bit    
+            - mkdir -p tmp/test_logs
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.txt $FPGA_LOG
+            - echo "Checking FPGA log ..." 
+            - cat $FPGA_LOG
+            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
+        after_script:
+            - echo "The baremetal tests have been tested"
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+test-benchmarks-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules]
+        dependencies:
+          - synthesis_test
+          - bitstream_test
+        # Overwrite tags to select the right board
+        tags: 
+            - $FPGA_BOARD        
+        before_script: 
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
+            - mkdir -p tmp/test_logs
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.txt $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - cat $FPGA_LOG
+            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
+        after_script:
+            - echo "The baremetal tests have been tested"
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
 
 
 deploy-EA-production:
