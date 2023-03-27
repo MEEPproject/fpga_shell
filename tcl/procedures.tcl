@@ -101,23 +101,17 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 					set moduleName [lindex $moduleName  1]
 					set moduleParsed 1
 					puts $fd_inst "$moduleName ${moduleName}_inst \( "
+                    puts $fd_inst " .* // implicit connection of all signals at once"
 				}
 			}
 		} else {
 		
-		# Look for comments at the begining of the line
-			if { [regexp -inline -all {^\s*//} $line] ne ""} {
-				#putmeeps "INFO: comment line\r\n"	
-		# Detect empty lines
-			} elseif { [ regexp {^\s*$} $line ] } {
-				#putmeeps "INFO: empty line\r\n"	
-			} elseif { [ regexp {[(|)]\s*;*\s*$} $line ] } {
-				#putmeeps "Module opening/closing"
+            if { [regexp {^\s*/\*|\*/\s*$} $line] } {
+                putmeeps "Removing pure multi-line comment: $line"	
+			} elseif { [ regexp {[(|)]\s*;\s*$} $line ] } {
+                putmeeps "Removing module opening/closing: $line"
 			} elseif { [ regexp {endmodule} $line ] } {
-				#putmeeps "endmodule"	
-			} elseif { [ regexp axi_.*user $line ] } {
-				putwarnings	"AXI user signals are not supported and will not be connected"
-				#putdebugs "[ regexp -inline axi_.*user $line ]"
+                putmeeps "Removing endmodule: $line"
 			} elseif { [regexp -inline -all {\yinput\y|\youtput\y} $line ]  ne ""} {
 			
 				if { [regexp -inline -all {\ywire\y} $line ]  ne ""} {
@@ -141,11 +135,11 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				# by tcl to not to interpted returning brackets.
 				
 				set MyVector [regexp -all -inline {\[.+\]} $line]
-				set MyVector [string map {" " ""} $MyVector]
+				# set MyVector [string map {" " ""} $MyVector]
 				set MyVector [join $MyVector]
 				
 				set MySignal [regexp -inline -all {\s{1}[a-z|A-Z|0-9|-|_]+\s*,*$} $line]
-				set MySignal [string map {" " ""} $MySignal]
+				# set MySignal [string map {" " ""} $MySignal]
 				# Need to remove the comma, as there is no lookbehind regex in tcl
 				set MySignal [string map {"," ""} $MySignal]
 				set MySignal [join $MySignal]
@@ -153,18 +147,19 @@ proc parse_module {fd_mod fd_inst fd_wire fd_shell} {
 				set MyWire "wire $MyVector\ $MySignal    ;"
 				set MyPortConnection "$comma     .$MySignal     \($MySignal\)    "
 										
-				puts $fd_inst $MyPortConnection
+				# puts $fd_inst $MyPortConnection
 				puts $fd_wire $MyWire
 				
 				## Store only port connections to be appended to the shell instance
-				puts $fd_shell  "       .$MySignal     \($MySignal\)     , " 
+				# puts $fd_shell  "       .$MySignal     \($MySignal\)     , " 
 				
 				# # The first connection need to be comma-less. Place it thereafter				
 				set comma ","
 				
 				
 			} else {
-				set ret [puterrors "Not considered branch?...--> $line"]
+                set ret [putmeeps "Passing string: $line"]
+				puts $fd_wire $line
 				#set teclado [read stdin 1]
 				#TODO: Use tcl "error" built-in procedure
 

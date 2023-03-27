@@ -110,7 +110,6 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 				# Create empty fields to be filled later
 				dict set d_device SyncClk   [lindex $fields 4] Freq ""
 				dict set d_device SyncClk   [lindex $fields 4] Name ""
-				dict set d_device AxiIntf "Axi4"
 				dict set d_device BaseAddr [lindex $fields 5]
 				# set BROMMemRange [expr {2**$BROMaddrWidth/1024}]
 				set IntfLabel [dict get $d_device IntfLabel]
@@ -170,10 +169,6 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 				if { "${device}" == "UART" } {
 					dict set d_device Mode [lindex $fields 6]	
 					dict set d_device IRQ  [lindex $fields 7]	
-					dict set d_device AxiIntf "AxiL"
-					if { [lindex $fields 5] != "normal" } {
-						dict set d_device AxiIntf "no"						
-					} 
 				}
 				if { "${device}" == "HBM" } {
 					dict set d_device AxiIntf   [lindex $fields 3]	
@@ -182,7 +177,6 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 				}
 				if { "${device}" == "DDR4" } {
 					dict set d_device IntfLabel [lindex $fields 2]
-					dict set d_device AxiIntf   [lindex $fields 3]
 					#dict set d_device ClkName   "ui_clk"
 					dict set d_device ClkName   [lindex $fields 8]
 					dict set d_device CalibDone [lindex $fields 6]
@@ -194,7 +188,7 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 				}
 				if { "${device}" == "ETHERNET" } {
 					dict set d_device IntfLabel [lindex $fields 2 ]
-					dict set d_device AxiIntf   [lindex $fields 3 ]
+					dict set d_device AxiIntf   [lindex $fields 3 ]	
 					dict set d_device GbEth     [lindex $fields 5 ]
 					dict set d_device IRQ       [lindex $fields 6 ]
 					dict set d_device qsfpPort  [lindex $fields 7 ]
@@ -206,7 +200,6 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device UsrClk [lindex $fields 8]
 				}
 				if { "${device}" == "SLV_AXI" } {						
-					dict set d_device AxiIntf "AxiL"
 				}
 				set EnabledIntf [lappend EnabledIntf "$d_device"]					
 			}

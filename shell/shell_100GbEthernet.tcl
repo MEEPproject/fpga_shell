@@ -24,6 +24,7 @@ set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 set ETHdmaMem  [dict get $ETHentry dmaMem]
 set EthHBMCh   [dict get $ETHentry HBMChan]
+set Ethaxi     [dict get $ETHentry AxiIntf]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -46,7 +47,7 @@ putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp $ETHdmaMem $ETHFreq
+exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp $ETHdmaMem $ETHFreq $Ethaxi
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
@@ -58,37 +59,40 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_100Gb_Ethernet:$g_ip_ver
 
 # ## This might be hardcoded to the IP AXI bus width parameters until 
 # ## we can back-propagate them to the Ethernet IP. 512,64,6
+# Now all AXI properties are inhereted from the IP
+make_bd_intf_pins_external [get_bd_intf_pins $EthHierName/s_axi]
+set_property name $ETHintf [get_bd_intf_ports s_axi_0]
 
-  set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
-  set_property -dict [ list \
-   CONFIG.ADDR_WIDTH $ETHaddrWidth \
-   CONFIG.ARUSER_WIDTH {0} \
-   CONFIG.AWUSER_WIDTH {0} \
-   CONFIG.BUSER_WIDTH {0} \
-   CONFIG.DATA_WIDTH $ETHdataWidth \
-   CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST {1} \
-   CONFIG.HAS_CACHE {1} \
-   CONFIG.HAS_LOCK {1} \
-   CONFIG.HAS_PROT {1} \
-   CONFIG.HAS_QOS {1} \
-   CONFIG.HAS_REGION {1} \
-   CONFIG.HAS_RRESP {1} \
-   CONFIG.HAS_WSTRB {1} \
-   CONFIG.ID_WIDTH $ETHidWidth \
-   CONFIG.MAX_BURST_LENGTH {1} \
-   CONFIG.NUM_READ_OUTSTANDING {256} \
-   CONFIG.NUM_READ_THREADS {16} \
-   CONFIG.NUM_WRITE_OUTSTANDING {256} \
-   CONFIG.NUM_WRITE_THREADS {16} \
-   CONFIG.PROTOCOL {AXI4LITE} \
-   CONFIG.READ_WRITE_MODE {READ_WRITE} \
-   CONFIG.RUSER_BITS_PER_BYTE {0} \
-   CONFIG.RUSER_WIDTH {0} \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
-   CONFIG.WUSER_BITS_PER_BYTE {0} \
-   CONFIG.WUSER_WIDTH {0} \
-   ] $eth_axi
+  # set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
+  # set_property -dict [ list \
+  #  CONFIG.ADDR_WIDTH $ETHaddrWidth \
+  #  CONFIG.ARUSER_WIDTH {0} \
+  #  CONFIG.AWUSER_WIDTH {0} \
+  #  CONFIG.BUSER_WIDTH {0} \
+  #  CONFIG.DATA_WIDTH $ETHdataWidth \
+  #  CONFIG.HAS_BRESP {1} \
+  #  CONFIG.HAS_BURST {1} \
+  #  CONFIG.HAS_CACHE {1} \
+  #  CONFIG.HAS_LOCK {1} \
+  #  CONFIG.HAS_PROT {1} \
+  #  CONFIG.HAS_QOS {1} \
+  #  CONFIG.HAS_REGION {1} \
+  #  CONFIG.HAS_RRESP {1} \
+  #  CONFIG.HAS_WSTRB {1} \
+  #  CONFIG.ID_WIDTH $ETHidWidth \
+  #  CONFIG.MAX_BURST_LENGTH {1} \
+  #  CONFIG.NUM_READ_OUTSTANDING {256} \
+  #  CONFIG.NUM_READ_THREADS {16} \
+  #  CONFIG.NUM_WRITE_OUTSTANDING {256} \
+  #  CONFIG.NUM_WRITE_THREADS {16} \
+  #  CONFIG.PROTOCOL {AXI4LITE} \
+  #  CONFIG.READ_WRITE_MODE {READ_WRITE} \
+  #  CONFIG.RUSER_BITS_PER_BYTE {0} \
+  #  CONFIG.RUSER_WIDTH {0} \
+  #  CONFIG.SUPPORTS_NARROW_BURST {0} \
+  #  CONFIG.WUSER_BITS_PER_BYTE {0} \
+  #  CONFIG.WUSER_WIDTH {0} \
+  #  ] $eth_axi
 
 
 create_bd_port -dir I -from 3 -to 0 -type data qsfp_4x_grx_n
@@ -115,7 +119,8 @@ connect_bd_net [get_bd_pins rst_ea_$ETHClkNm/peripheral_aresetn] [get_bd_pins ${
 # Make External avoids passing the signal width to this point. The bus is created automatically
 make_bd_pins_external  [get_bd_pins ${EthHierName}/intc]
 set_property name $ETHirq [get_bd_ports intc_0]
-connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins ${EthHierName}/s_axi]
+# connect_bd_intf_net [get_bd_intf_ports $ETHintf] [get_bd_intf_pins ${EthHierName}/s_axi]
+set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_bd_ports /$ETHClkIf]]$ETHintf: [get_bd_ports /$ETHClkIf]
 
 save_bd_design
 
@@ -130,10 +135,10 @@ set ETHbaseAddr [dict get $ETHentry BaseAddr]
 
 ## Ethernet address space is 512K as the highest address. 
 ## TODO: Maybe it should be hardcoded
-set ETHMemRange [expr {2**$ETHaddrWidth/1024}]
+# set ETHMemRange [expr {2**$ETHaddrWidth/1024}]
 
 putdebugs "Base Addr ETH: $ETHbaseAddr"
-putdebugs "Mem Range ETH: $ETHMemRange"
+# putdebugs "Mem Range ETH: $ETHMemRange"
 
 # assign_bd_address                  [get_bd_addr_segs {${EthHierName}/s_axi/reg0 }]
 # set_property offset $ETHbaseAddr   [get_bd_addr_segs {${EthHierName}/s_axi/reg0 }]
