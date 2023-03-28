@@ -129,7 +129,7 @@ To change the default target. Do :
 
 ## 3. Vivado project
 
-In order to creaet a Vivado project, and generate the **FPGA Shell** around the EA.
+In order to create a Vivado project, and generate the **FPGA Shell** around the EA.
 
 if you are working with **acme**, there are different "flavours" that can be generated.
 
@@ -269,15 +269,46 @@ The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
 The active interfaces are defined in [accelerator_def](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "accelerator_def.csv") and parsed in 
 [define_shell.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/sh/define_shell.sh "define_shell.sh "), where all the aforementioned information gets written in a new file initrom.mem (gets rewritten if it already exists), stored in _misc_ directory inside the parent directory _fpga_shell_. When issuing _make project_, the [Makefile](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/Makefile "Makefile")  moves the information stored in _initrom.mem_ into the ip.
 
-In order to read from the infoROM, execute [read_all.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/misc/read_all.sh).
-The possible commands are the following:
-- get date
-- get sha shell
-- get sha EA
-- get EA
-- get shell components
-- read all
+In order to read from the infoROM, execute [read_all.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/misc/read_all.sh):
 
+### 		:book: Read infoROM 
+```Bash
+source read_inforom.sh
+```
+Once executed, the possible commands are the following:
+
+<div align="center">
+    <img src="Images/usage.png" width="500px" alt="<InfoROM output>"/> 
+
+Output of *source read_inforom.sh* 
+</div>
+
+#### :microscope: Read by element
+```Bash
+get date
+```
+```Bash
+get sha shell
+```
+```Bash
+get sha EA
+```
+```Bash
+get EA
+```
+```Bash
+get shell components
+```
+#### :telescope: Read all at once
+```Bash
+read all
+```
+
+<div align="center">
+    <img src="Images/inforom_example.png" width="500px" alt="<InfoROM output>"/> 
+
+Output of *read all* command
+</div>
 
 
 [Futher information](https://wiki.meep-project.eu/index.php/MEEP_InfoROM)
