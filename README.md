@@ -275,7 +275,6 @@ In order to read from the infoROM, execute [read_all.sh](https://gitlab.bsc.es/m
 ```Bash
 source read_inforom.sh
 ```
-Once executed, the possible commands are the following:
 
 <div align="center">
     <img src="Images/usage.png" width="500px" alt="<InfoROM output>"/> 
