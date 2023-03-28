@@ -16,16 +16,18 @@ do
    map_components["${shell_components[$i]}"]="${fullname_comp[$i]}"
 done	
 
-function usage(){
-	echo USAGE:
-	echo Valid commands:
-	echo get date
-	echo get sha shell
-	echo get sha EA
-	echo get EA
-	echo get shell components
-	echo read all
 
+function usage() {
+    echo ""
+    echo " Valid commands:"
+    echo ""
+    echo "    get date			Retrieves the current date"
+    echo "    get sha shell		Retrieves the sha of the shell"
+    echo "    get sha EA			Retrieves the sha of the emulated accelerator"
+    echo "    get EA			Retrieves the name of the emulated accelerator"
+    echo "    get shell components	Retrieves the list of active components in the shell"
+    echo "    read all			Retrieves all the information stored in the infoROM"
+    echo ""
 }
 
 
@@ -81,7 +83,7 @@ function read_all(){
 	cat title.txt
 	get_date
 	get_sha_shell
-	get_she_EA
+	get_sha_EA
 	get_EA
 	get_shell_components
 }
