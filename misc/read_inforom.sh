@@ -21,7 +21,7 @@ function usage() {
     echo ""
     echo " Valid commands:"
     echo ""
-    echo "    get date			Retrieves the current date"
+    echo "    get date			Retrieves the date of the bitstream generation"
     echo "    get sha shell		Retrieves the sha of the shell"
     echo "    get sha EA			Retrieves the sha of the emulated accelerator"
     echo "    get EA			Retrieves the name of the emulated accelerator"
