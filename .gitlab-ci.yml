@@ -330,7 +330,7 @@ reports_test:
 ###
 
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
-fpga-test-prodcution:
+fpga-test-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch         
@@ -412,7 +412,7 @@ test-benchmarks-production:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
-        extends: .common_conf_test
+        extends: .common_conf_production
         rules:
             - !reference [.production_rules,rules]
         dependencies:
@@ -436,7 +436,7 @@ test-benchmarks-production:
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
             - echo "The baremetal tests have been tested"
-        allow_failure: true
+        allow_failure: false
         artifacts:
             when: always
             paths:
