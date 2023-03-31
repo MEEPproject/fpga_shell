@@ -25,24 +25,19 @@ set g_UART_CLK	  [dict get $UARTentry SyncClk Name]
 set g_CLK0_freq   [dict get $UARTentry SyncClk Freq]
 set g_UARTClkPort [dict get $UARTentry SyncClk Label]
 
-set UARTaddrWidth [dict get $UARTentry AxiAddrWidth]
+# set UARTaddrWidth [dict get $UARTentry AxiAddrWidth]
 
 # Default to non-empty value for the special case where
 # the UART is going to be used via PATCH. In this case,
 # there is no associated axi bus values comming from the EA.
 
-if { $UARTaddrWidth == "0" } {
-    set UARTaddrWidth "13"	
-}
+# if { $UARTaddrWidth == "0" } {
+#     set UARTaddrWidth "13"	
+# }
 
 #putdebugs "UART? $g_UART_CLK"
 
-# Definded under tcl/vivado_ip_tables.tcl
-#set MEEPUart "meep-project.eu:MEEP:MEEP_PULP_UART:1.0"
-#set XilinxUart "xilinx.com:ip:axi_uart16550:2.0"
-
-
-
+# UART IPs are definded in tcl/vivado_ip_tables.tcl
 if { $g_UART_MODE eq "xilinx" } {
 
     set UartCoreName "Xilinx_axi_uart_0"
@@ -57,7 +52,7 @@ if { $g_UART_MODE eq "xilinx" } {
 
     ### Initialize the IPs
     putmeeps "Packaging UART IP..."
-    exec make -C "$g_root_dir/ip/pulp_uart" FPGA_BOARD=$g_board_part AXI_AWIDTH=$UARTaddrWidth
+    exec make -C "$g_root_dir/ip/pulp_uart" FPGA_BOARD=$g_board_part
     putmeeps "... Done."
     update_ip_catalog -rebuild
 
@@ -106,16 +101,16 @@ if { $g_UART_MODE eq "simple"} {
 	### UART memory map	
 	
 	set UARTbaseAddr [dict get $UARTentry BaseAddr]
-	set UARTMemRange [expr {2**$UARTaddrWidth/1024}]
+	# set UARTMemRange [expr {2**$UARTaddrWidth/1024}]
 	
 	putdebugs "UARTBaseAddr $UARTbaseAddr"
-	putdebugs "UARTMemRange $UARTMemRange"
-	putdebugs "UARTaddrWidth $UARTaddrWidth"
+	# putdebugs "UARTMemRange $UARTMemRange"
+	# putdebugs "UARTaddrWidth $UARTaddrWidth"
 
 	save_bd_design
 
 	assign_bd_address [get_bd_addr_segs {$UartCoreName/S_AXI/Reg }]
-	set_property range ${UARTMemRange}K [get_bd_addr_segs ${g_UART_ifname}/SEG_${UartCoreName}_Reg]
+	# set_property range ${UARTMemRange}K [get_bd_addr_segs ${g_UART_ifname}/SEG_${UartCoreName}_Reg]
 	set_property offset $UARTbaseAddr   [get_bd_addr_segs ${g_UART_ifname}/SEG_${UartCoreName}_Reg]
 
 }
