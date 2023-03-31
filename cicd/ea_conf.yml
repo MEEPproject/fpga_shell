@@ -8,8 +8,8 @@
 .multi_target_test:
   parallel:
     matrix:
-      - FPGA_BOARD: [u55c]
-        EA: [acme_ea_4h2v, acme_ea_1h]
+      - FPGA_BOARD: [u55c,u280]
+        EA: [acme_ea_4h2v, acme_ea_1h, acme_ea_1h16v]
         # These labels need to match what is at accelerator_build.sh
         # on the EA meep_shell directory
 
