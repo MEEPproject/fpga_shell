@@ -41,6 +41,6 @@ switch $g_board_part {
 	}
 }
 
-set MEEPUart "meep-project.eu:MEEP:uart_16650a:1.0"
+set MEEPUart "meep-project.eu:MEEP:pulp_uart:1.0"
 set XilinxUart "xilinx.com:ip:axi_uart16550:2.0"
 
