@@ -88,7 +88,7 @@ synthesis_production:
         script:
             - echo "[DEBUG] synthesis"
             - make initialize
-            - make u55c            
+            - make $FPGA_BOARD            
             # Synthesis production will use Pronoc routers
             - make project EA_PARAM=$EA EA_PARAM+="${PROTON_OP}"
             - !reference [.riscv_benchmarks, script]
@@ -344,7 +344,7 @@ fpga-test-production:
           - bitstream_production
         # Overwrite tags to select the right board
         tags: 
-            - u55c        
+            - $FPGA_BOARD         
         before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
@@ -424,7 +424,7 @@ test-benchmarks-production:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created            
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_baremetal_${EA}_production.log
+            - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit    
             - mkdir -p tmp/test_logs
         script:
