@@ -292,11 +292,11 @@ reports_production:
             - make validate  
         after_script:
             - ls reports            
-            - mv reports reports_${EA}_${FPGA_BOARD}        
+            - mv reports reports_${EA}_${FPGA_BOARD}_production       
         artifacts:
             when: always
             paths:
-                - reports_${EA}_${FPGA_BOARD}
+                - reports_${EA}_${FPGA_BOARD}_production
 
 reports_test:
         stage: bitstream
@@ -317,13 +317,13 @@ reports_test:
             - make validate  
         after_script:
             - ls reports            
-            - mv reports reports_${EA}_${FPGA_BOARD}
+            - mv reports reports_${EA}_${FPGA_BOARD}_test
             - ls; tree 
         allow_failure: true
         artifacts:
             when: always
             paths:
-                - reports_${EA}_${FPGA_BOARD}
+                - reports_${EA}_${FPGA_BOARD}_test
 
 ###
 ### Tests jobs
