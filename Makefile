@@ -9,6 +9,7 @@ EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2
 EA_GIT_SHA   = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
 EA_DIR       =  $(ROOT_DIR)/accelerator
 EA_PARAM     ?= 
+OPTIONS      =
 # EA_PARAM is related to the EA, to it can be parametrized from the Shell
 # For MEEP/ACME, the options are: lagarto, ariane, pronoc, meep_dvino @10/11/2022
 DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
@@ -96,7 +97,7 @@ $(BINARIES_DIR):
 	@cp -r accelerator/meep_shell/binaries/* $(BINARIES_DIR)
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
-	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM) 	
+	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM)
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
 	
 $(SYNTH_DCP):
@@ -140,13 +141,20 @@ report_route: $(IMPL_DCP)
 
 #Help menu accelerator_build.sh
 syntax_ea: 
-	@$(SH_DIR)/accelerator_build.sh -s
-####
+	${MAKE} -C $(ACCEL_DIR) syntax_ea
+#### 
 
 #Help menu accelerator_build.sh
 help_ea: 
-	@$(SH_DIR)/accelerator_build.sh -h
+	${MAKE} -C $(ACCEL_DIR) help_ea
 ####
+
+# Compile benchmarks for FPGA
+test_riscv_fpga:
+	${MAKE} -C $(ACCEL_DIR) test_riscv_fpga
+
+test_riscv_clean:
+	${MAKE} -C $(ACCEL_DIR) test_riscv_clean
 
 rom_file:
 	@$(SH_DIR)/create_inforom.sh $(ROOT_DIR)
