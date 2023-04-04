@@ -417,8 +417,7 @@ test-benchmarks-production:
             - !reference [.production_rules,rules]
         dependencies:
           - synthesis_production
-          - bitstream_production
-        needs: ["fpga-test-production"]
+          - bitstream_production        
         tags: 
             - $FPGA_BOARD        
         before_script: 
@@ -455,8 +454,7 @@ test-benchmarks-test:
             - !reference [.test_rules,rules]
         dependencies:
           - synthesis_test
-          - bitstream_test
-        needs: ["fpga-test-test"]
+          - bitstream_test        
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
