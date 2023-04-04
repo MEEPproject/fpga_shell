@@ -24,6 +24,7 @@ set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 set ETHdmaMem  [dict get $ETHentry dmaMem]
 set EthHBMCh   [dict get $ETHentry HBMChan]
+set Ethaxi     [dict get $ETHentry AxiIntf]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -46,7 +47,7 @@ putdebugs "ETHirq       $ETHirq"
 
 ### Initialize the IPs
 putmeeps "Packaging ETH IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp $ETHdmaMem $ETHFreq
+exec vivado -mode batch -nolog -nojournal -notrace -source $g_root_dir/ip/100GbEthernet/tcl/gen_project.tcl -tclargs $g_board_part $ETHqsfp $ETHdmaMem $ETHFreq $Ethaxi
 putmeeps "... Done."
 update_ip_catalog -rebuild
 

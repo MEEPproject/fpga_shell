@@ -22,6 +22,7 @@ set ETHClkIf   [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
 set EthHBMCh   [dict get $ETHentry HBMChan]
+set EthAxi     [dict get $ETHentry AxiIntf]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -78,16 +79,15 @@ set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
 
 [Add2ConstrFileList $TimingConstrFile $ConstrList]
 
-# ## This might be hardcoded to the IP AXI bus width parameters until 
-# ## we can back-propagate them to the Ethernet IP. 512,64,6
-# Creating AXI port actually for axi_dma instance, so taking AXI properties from its S_AXI_LITE port
+  set EthAxiProt  [string replace $EthAxi   [string first "-" $EthAxi] end]
+  set EthAxiWidth [string replace $EthAxi 0 [string first "-" $EthAxi]    ]
   set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH {12} \
    CONFIG.ARUSER_WIDTH {0} \
    CONFIG.AWUSER_WIDTH {0} \
    CONFIG.BUSER_WIDTH {0} \
-   CONFIG.DATA_WIDTH {64} \
+   CONFIG.DATA_WIDTH $EthAxiWidth \
    CONFIG.HAS_BRESP {1} \
    CONFIG.HAS_BURST {1} \
    CONFIG.HAS_CACHE {0} \
@@ -98,16 +98,16 @@ set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
    CONFIG.ID_WIDTH {0} \
-   CONFIG.MAX_BURST_LENGTH {1} \
+   CONFIG.MAX_BURST_LENGTH {256} \
    CONFIG.NUM_READ_OUTSTANDING {256} \
    CONFIG.NUM_READ_THREADS {16} \
    CONFIG.NUM_WRITE_OUTSTANDING {256} \
    CONFIG.NUM_WRITE_THREADS {16} \
-   CONFIG.PROTOCOL {AXI4LITE} \
+   CONFIG.PROTOCOL $EthAxiProt \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
    CONFIG.RUSER_WIDTH {0} \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
+   CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
    ] $eth_axi
