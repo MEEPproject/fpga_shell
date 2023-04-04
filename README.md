@@ -86,6 +86,11 @@ make initialize        # Should be used with flag LOAD_EA=<selectedEA>
 ```
 Where *selectedEA* can be any of the supported EA packages: dvino, sargantana, acme, openpiton.
 
+
+```Bash
+make <board>        # In order to choose the FPGA board, where <board>=u55c / u280. 
+```
+
 <span style="color:green"> *(Including Openpiton here does not make much sense in my opinion  since it is not an EA, maybe it is the framework for Ariane here?)*. </span>
 <br/>
 
