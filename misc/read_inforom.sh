@@ -110,6 +110,7 @@ do
 		;;	
 	   "read all")
 		read_all
+		break
 		;;
 	   "exit")
 	       break
