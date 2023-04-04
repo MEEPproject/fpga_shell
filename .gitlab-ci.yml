@@ -103,7 +103,7 @@ synthesis_production:
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
         allow_failure: false # If any sinthesys fails, all fails 
@@ -111,7 +111,7 @@ synthesis_production:
           when: always
           paths:
             - tmp
-            - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+            - dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
 
 
 synthesis_test:
@@ -147,7 +147,7 @@ synthesis_test:
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
             - echo -e "Artifacts:"; ls tmp; ls dcp
-            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
         allow_failure: false # If any sinthesys fails, all fails 
@@ -155,7 +155,7 @@ synthesis_test:
           when: always
           paths:
             - tmp
-            - dcp/synthesis_${EA}_${FPGA_BOARD}.dcp
+            - dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
             
 implementation_production:
         stage: implementation
@@ -168,20 +168,20 @@ implementation_production:
             GIT_STRATEGY: fetch         
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:     
-            - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp #?
+            - mv dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp dcp/synthesis.dcp #?
         script:
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_${EA}_${FPGA_BOARD}
+            - mv reports reports_${EA}_${FPGA_BOARD}_production
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
-                - reports_${EA}_${FPGA_BOARD}
+                - dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
+                - reports_${EA}_${FPGA_BOARD}_production
 
 implementation_test:
         stage: implementation
@@ -195,21 +195,21 @@ implementation_test:
           - synthesis_test
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script: 
-            - mv dcp/synthesis_${EA}_${FPGA_BOARD}.dcp dcp/synthesis.dcp
+            - mv dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}.dcp
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_${EA}_${FPGA_BOARD}
+            - mv reports reports_${EA}_${FPGA_BOARD}_test
         allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - dcp/implementation_${EA}_${FPGA_BOARD}.dcp
-                - reports_${EA}_${FPGA_BOARD}
+                - dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
+                - reports_${EA}_${FPGA_BOARD}_test
 
 bitstream_production:
         variables:
@@ -223,7 +223,7 @@ bitstream_production:
         dependencies:
           - implementation_production
         before_script:
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
@@ -254,7 +254,7 @@ bitstream_test:
         dependencies:
           - implementation_test
         before_script: 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp            
         script:
             - make ci_bitstream
         after_script:
@@ -285,7 +285,7 @@ reports_production:
         dependencies:
           - implementation_production
         before_script:
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
@@ -310,7 +310,7 @@ reports_test:
           - implementation_test
         before_script:
             - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp            
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
@@ -418,6 +418,7 @@ test-benchmarks-production:
         dependencies:
           - synthesis_production
           - bitstream_production
+        needs: ["fpga-test-production"]
         tags: 
             - $FPGA_BOARD        
         before_script: 
@@ -455,6 +456,7 @@ test-benchmarks-test:
         dependencies:
           - synthesis_test
           - bitstream_test
+        needs: ["fpga-test-test"]
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
