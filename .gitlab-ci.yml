@@ -163,6 +163,8 @@ synthesis_quick_test:
             - !reference [.quick_test_rules, rules]
         interruptible: true
         retry: 1
+        tags:
+            - MEEP_FPGA
         variables:
             GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
@@ -260,7 +262,9 @@ implementation_quick_test:
             GIT_STRATEGY: fetch            
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         rules:
-            - !reference [.quick_test_rules,rules] 
+            - !reference [.quick_test_rules,rules]
+        tags:
+            - MEEP_FPGA
         dependencies:
           - synthesis_quick_test
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
@@ -351,7 +355,9 @@ bitstream_quick_test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: bitstream
         rules:
-            - !reference [.quick_test_rules,rules] 
+            - !reference [.quick_test_rules,rules]
+        tags:
+            - MEEP_FPGA
         dependencies:
           - implementation_quick_test
         before_script: 
@@ -433,6 +439,8 @@ reports_quick_test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         rules:
             - !reference [.quick_test_rules,rules]
+        tags:
+            - MEEP_FPGA
         dependencies:
           - implementation_quick_test
         before_script:
@@ -542,6 +550,8 @@ fpga-quick-test:
         retry: 2
         rules:
             - !reference [.quick_test_rules,rules]
+        tags:
+            - MEEP_FPGA
         dependencies:
           - bitstream_quick_test
         # Overwrite tags to select the right board
@@ -656,6 +666,8 @@ test-benchmarks-quick_test:
         extends: .common_conf_test
         rules:
             - !reference [.quick_test_rules,rules]
+        tags:
+            - MEEP_FPGA
         dependencies:
           - synthesis_quick_test
           - bitstream_quick_test        
