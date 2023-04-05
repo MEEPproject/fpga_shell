@@ -550,8 +550,6 @@ fpga-quick-test:
         retry: 2
         rules:
             - !reference [.quick_test_rules,rules]
-        tags:
-            - MEEP_FPGA
         dependencies:
           - bitstream_quick_test
         # Overwrite tags to select the right board
@@ -663,11 +661,8 @@ test-benchmarks-quick_test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
-        extends: .common_conf_test
         rules:
             - !reference [.quick_test_rules,rules]
-        tags:
-            - MEEP_FPGA
         dependencies:
           - synthesis_quick_test
           - bitstream_quick_test        
