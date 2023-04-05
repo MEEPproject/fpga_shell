@@ -37,7 +37,7 @@ workflow:
           when: never # Pushing to main doesn't create pipelines unless there is a tag
         - !reference [.test_rules, rules]
         - !reference [.production_rules, rules]
-    
+        - !reference [.quick_test_rules, rules]                        
 
 variables: !reference [.setup, variables]
 
@@ -157,6 +157,49 @@ synthesis_test:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
             
+synthesis_quick_test:
+        stage: synthesis       
+        rules:
+            - !reference [.quick_test_rules, rules]
+        interruptible: true
+        retry: 1
+        variables:
+            GIT_STRATEGY: clone            
+            GIT_SUBMODULE_STRATEGY: "recursive"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        before_script:
+            - !reference [.git_clean, before_script]
+            - *clone_ea
+            - echo "Actual element in the matrix is $EA + u55c"
+            - !reference [.export_toolchain, before_script]
+        script:
+            - make initialize
+            - make u55c            
+            # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
+            - make project EA_PARAM=$EA
+            - !reference [.riscv_benchmarks, script]
+            - make synthesis
+            - !reference [.check_synth, script]
+        after_script:
+            - mkdir -p tmp/project
+            - !reference [.synth_default, after_script]
+            - cp ea_url.txt tmp/EA_info.txt
+            - cp shell_build.log tmp/project/
+            - cp -r src/system_top.sv tmp/project/
+            - cp -r tcl/shell_env.tcl tmp/project/
+            - cp gen_system.tcl tmp/project/
+            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - mv dcp/synthesis.dcp dcp/synthesis_${EA}_u55c_qtest.dcp
+            - !reference [.save_dts, after_script]
+            - !reference [.riscv_benchmarks, after_script]
+        allow_failure: false # If any sinthesys fails, all fails 
+        artifacts:
+          when: always
+          expire_in: 1 day
+          paths:
+            - tmp
+            - dcp/synthesis_${EA}_u55c_qtest.dcp
+
 implementation_production:
         stage: implementation
         extends: .common_conf_production
@@ -210,6 +253,33 @@ implementation_test:
             paths:
                 - dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
                 - reports_${EA}_${FPGA_BOARD}_test
+
+implementation_quick_test:
+        stage: implementation
+        variables:
+            GIT_STRATEGY: fetch            
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        rules:
+            - !reference [.quick_test_rules,rules] 
+        dependencies:
+          - synthesis_quick_test
+        # As this is a matrix, rename the corresponding dcp for make to recognize it 
+        before_script: 
+            - mv dcp/synthesis_${EA}_u55c_qtest.dcp dcp/synthesis.dcp
+        script:
+            - make ci_implementation DCP_ON=false
+            - !reference [.check_impl, script]
+        after_script:
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_u55c_qtest.dcp
+            - echo -e "Artifacts:"; ls dcp; ls reports
+            - mv reports reports_${EA}_u55c_qtest
+        allow_failure: true
+        artifacts:
+            when: always
+            expire_in: 1 day
+            paths:
+                - dcp/implementation_${EA}_u55c_qtest.dcp
+                - reports_${EA}_u55c_qtest
 
 bitstream_production:
         variables:
@@ -274,6 +344,37 @@ bitstream_test:
             reports:
              dotenv: gen_bitstream.env
 
+bitstream_quick_test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        stage: bitstream
+        rules:
+            - !reference [.quick_test_rules,rules] 
+        dependencies:
+          - implementation_quick_test
+        before_script: 
+            - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp            
+        script:
+            - make ci_bitstream
+        after_script:
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - make clean_implementation
+            - mv bitstream/system.bit bitstream/${date_format}_${EA}_u55c_qtest.bit
+            - echo -e "Artifacts:"; ls bitstream
+            # Store the Job ID to identify later the path to the bitstream artifact
+            - echo BS_CI_JOB_ID_${EA}_u55c=$CI_JOB_ID >> gen_bitstream.env
+        allow_failure: true
+        artifacts:
+            when: always
+            expire_in: 3 days
+            paths:
+                - bitstream  
+            reports:
+             dotenv: gen_bitstream.env
+
 reports_production:
         stage: bitstream
         extends: .common_conf_production
@@ -324,6 +425,33 @@ reports_test:
             when: always
             paths:
                 - reports_${EA}_${FPGA_BOARD}_test
+
+reports_quick_test:
+        stage: bitstream
+        variables:
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        rules:
+            - !reference [.quick_test_rules,rules]
+        dependencies:
+          - implementation_quick_test
+        before_script:
+            - ls; ls dcp; tree 
+            - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp            
+        script:
+            - echo "Generate implementation reports..."
+            - make ci_report_route
+            - make validate  
+        after_script:
+            - ls reports            
+            - mv reports reports_${EA}_u55c_qtest
+            - ls; tree 
+        allow_failure: true
+        artifacts:
+            when: always
+            expire_in: 3 days
+            paths:
+                - reports_${EA}_u55c_qtest
 
 ###
 ### Tests jobs
@@ -405,6 +533,44 @@ fpga-test-test:
             paths:
             - tmp
 
+fpga-quick-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        stage: test
+        retry: 2
+        rules:
+            - !reference [.quick_test_rules,rules]
+        dependencies:
+          - bitstream_quick_test
+        # Overwrite tags to select the right board
+        tags: 
+            - u55c       
+        before_script:            
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_u55c.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit    
+            - mkdir -p tmp/logs     
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - !reference [.fpga_test, script]
+            - source sh/fpga_test.sh $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG        
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:            
+            - !reference [.fpga_test, after_script]
+        allow_failure: true
+        artifacts:
+            when: always
+            expire_in: 3 days
+            paths:
+            - tmp
+
 test-benchmarks-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
@@ -480,7 +646,44 @@ test-benchmarks-test:
             paths:
             - tmp
 
-
+test-benchmarks-quick_test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.quick_test_rules,rules]
+        dependencies:
+          - synthesis_quick_test
+          - bitstream_quick_test        
+        # Overwrite tags to select the right board
+        tags: 
+            - u55c       
+        before_script: 
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_baremetal_${EA}_u55c_qtest.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit    
+            - mkdir -p tmp/test_logs
+        script:
+            # The EA script should provide the right script and the right binary
+            - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
+            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.list $FPGA_LOG
+            - echo "Checking FPGA log ..."
+            - cat $FPGA_LOG
+            - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
+        after_script:
+            - echo "The baremetal tests have been tested"
+        allow_failure: true
+        artifacts:
+            when: always
+            expire_in: 3 days
+            paths:
+            - tmp
 
 deploy-EA-production:
         stage: deploy
