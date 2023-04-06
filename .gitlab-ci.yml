@@ -668,7 +668,8 @@ test-benchmarks-quick_test:
           - bitstream_quick_test        
         # Overwrite tags to select the right board
         tags: 
-            - u55c       
+            - u55c   
+        timeout: 8h    
         before_script: 
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
