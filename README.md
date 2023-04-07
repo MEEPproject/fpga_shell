@@ -306,7 +306,7 @@ get shell components
 ```Bash
 read all
 ```
-
+This will automatically kill the process.
 <div align="center">
     <img src="Images/inforom_example.png" width="500px" alt="<InfoROM output>"/> 
 
