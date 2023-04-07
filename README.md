@@ -64,12 +64,11 @@ The supported boards are as follows:
 - Alveo U280
 
 ## :electric_plug: Prerequisites
-- The MEEP Shell needs to be used with Vivado 2021.2. 
-- The board files for U280/U55C don't need to be installed.
+- The MEEP Shell is compatible with both Vivado 2021.2. and 2021.1 versions
 - It only works on Linux. There is no plan to add Windows support in the middle term.
 
 ## 🛠️ Usage
-In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">*accelerator_def.csv*</span> <span style="color:grey"> (./git repo/fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv)</span> in the following format:
+In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">*accelerator_def.csv*</span> <span style="color:grey"> (./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv)</span> in the following format:
 <br/>
 ```Bash
 INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
@@ -82,7 +81,7 @@ After cloning the repository, in order to create a project:
 <br/>Include the EA package by using the correct initialization flag:
 
 ```Bash
-make initialize        # Should be used with flag LOAD_EA=<selectedEA>
+make initialize LOAD_EA=acme  # Should be used with flag LOAD_EA=<selectedEA>
 ```
 Where *selectedEA* can be any of the supported EA packages: dvino, sargantana, acme, openpiton.
 
@@ -94,9 +93,6 @@ make <board>        # In order to choose the FPGA board, where <board>=u55c / u2
 <span style="color:green"> *(Including Openpiton here does not make much sense in my opinion  since it is not an EA, maybe it is the framework for Ariane here?)*. </span>
 <br/>
 
-```Bash
-make binaries          # It generates the binaries 
-```
 ```Bash
 make project           # Creates the Vivado project. Generates the FPGA shell around the EA 
 ```
@@ -121,16 +117,6 @@ For example:
     make initialize LOAD_EA=sargantana
 
 Every EA has a folder `fpga_shell/support` with a ea_url.txt file. This file contains the Git URL and the commit SHA. If it is necessary to change the commit SHA to point a specific commit this is the place to modify it.
-
-## 2. Supported Boards
-
-- Alveo U55C
-- Alveo U280
-
-To change the default target. Do :
-
-    make u55c
-    make u280
 
 ## 3. Vivado project
 
