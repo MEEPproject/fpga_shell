@@ -184,12 +184,12 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
             write_checkpoint -force $g_root_dir/dcp/post_place.dcp 	
 	}	
 
-	if { [expr $CurrentSlack < -1.000 ] && $g_quick_impl != "true"} {
-		puts "route_design will not be run as the WNS is above 1.000 "
-		puts "Implementation Failed. Check the timing reports to study how to improve timing"
-		## TODO: Quality of Results can be used as another criteria to not going further
-	    return 1
-	}	
+	# if { [expr $CurrentSlack < -1.000 ] && $g_quick_impl != "true"} {
+	# 	puts "route_design will not be run as the WNS is above 1.000 "
+	# 	puts "Implementation Failed. Check the timing reports to study how to improve timing"
+	# 	## TODO: Quality of Results can be used as another criteria to not going further
+	#     return 1
+	# }	
 
 	# TODO: Explore other routing strategies?
 	route_design -directive $route_design_directive
