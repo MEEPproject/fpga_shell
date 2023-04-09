@@ -200,12 +200,33 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 
 	## TODO: Directives can be added here to go the extra mile. E.g, the WNS is below -0.1 after 
 	## default routing
-    set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
-
+    # set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 	# if { [expr $CurrentSlack < 0.000] && [expr $CurrentSlack > -0.200] } {
-            puts "Running post-route phys_opt_design iteration with directive $post_route_directive"
-            phys_opt_design -directive $post_route_directive
+    #         puts "Running post-route phys_opt_design iteration with directive $post_route_directive"
+    #         phys_opt_design -directive $post_route_directive
     # }
+
+    set i 0
+    set nloops [llength $PhysOptDirectives]
+    set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+    set PrevSlack $CurrentSlack
+    for {set i 0} {$i < $nloops} {incr i} {		
+      set CurrentDirective [lindex $PhysOptDirectives $i]
+      puts "Running post-route phys_opt_design iteration $i/$nloops with directive $CurrentDirective"
+      phys_opt_design -directive $CurrentDirective
+      # Get the Slack after the optimization
+      set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
+      puts "\r\n-------------------------"
+      puts "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack\r\nPrevious WNS: $PrevSlack"
+      puts "Directive $CurrentDirective improved WNS by [expr abs($PrevSlack - $CurrentSlack)]ns"
+      set PrevSlack $CurrentSlack
+      puts "-------------------------\r\n"
+      if {$g_quick_impl == "true" } {
+      # Don't run the optimization loop when quick flag is enabled. Break the foreach loop
+      break;
+      }
+    }
+
     write_checkpoint -force $g_root_dir/dcp/implementation.dcp
     set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 
@@ -261,9 +282,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 # Optionaly add a place directive as an argument.
 
 set directivesFile $g_root_dir/shell/directives.tcl
-# set g_place_directive "ExtraNetDelay_low"
+# set g_place_directive "Explore"
+set g_place_directive "ExtraNetDelay_low"
 # set g_route_directive "NoTimingRelaxation"
-set g_place_directive "Explore"
 set g_route_directive "AggressiveExplore"
 
 # SmartPlace.tcl script creates a directives file when called.
