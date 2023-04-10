@@ -1,18 +1,18 @@
 [submodule "ip/axi_brom"]
 	path = ip/axi_brom
-	url = ../axi_brom.git
+	url = https://github.com/MEEPproject/shell_rom.git
 [submodule "ip/100GbEthernet"]
 	path = ip/100GbEthernet
-	url = ../ethernet_test.git
+	url = https://github.com/MEEPproject/shell_10GbE.git
 [submodule "ip/aurora_dma"]
 	path = ip/aurora_dma
-	url = ../aurora_user_interface.git
+	url = https://github.com/MEEPproject/shell_aurora.git
 [submodule "ip/aurora_raw"]
 	path = ip/aurora_raw
-	url = ../aurora_raw.git
+	url = https://github.com/MEEPproject/shell_aurora.git
 [submodule "ip/10GbEthernet"]
 	path = ip/10GbEthernet
-	url = ../10gb_ethernet.git
+	url = https://github.com/MEEPproject/shell_10GbE.git
 [submodule "ip/uart_16650a"]
 	path = ip/uart_16650a
-	url = ../ariane_uart.git
+	url = https://github.com/MEEPproject/shell_uart.git
