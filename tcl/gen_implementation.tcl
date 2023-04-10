@@ -282,8 +282,8 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 # Optionaly add a place directive as an argument.
 
 set directivesFile $g_root_dir/shell/directives.tcl
-# set g_place_directive "ExtraNetDelay_low"
-set g_place_directive "Explore"
+# set g_place_directive "Explore"
+set g_place_directive "ExtraNetDelay_low"
 # set g_route_directive "NoTimingRelaxation"
 set g_route_directive "AggressiveExplore"
 
