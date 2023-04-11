@@ -221,7 +221,7 @@ implementation_production:
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mv reports reports_${EA}_${FPGA_BOARD}_production
+            - mv reports reports_${EA}_${FPGA_BOARD}_production/implementation
         artifacts:
             when: always
             expire_in: 1 day
@@ -402,7 +402,7 @@ reports_production:
             - make validate  
         after_script:
             - ls reports            
-            - mv reports reports_${EA}_${FPGA_BOARD}_production       
+            - mv reports reports_${EA}_${FPGA_BOARD}_production/reports
         artifacts:
             when: always
             paths:
