@@ -397,8 +397,7 @@ reports_production:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules: 
             - !reference [.production_rules,rules]
-        dependencies:
-          - implementation_production
+        needs: [implementation_production]
         before_script:
             - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp            
         script:
@@ -488,8 +487,7 @@ fpga-test-production:
         extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
-        dependencies:
-          - bitstream_production
+        needs: [bitstream_production]
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD         
