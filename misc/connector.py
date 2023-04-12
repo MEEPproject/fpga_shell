@@ -34,63 +34,89 @@ with open('utilization_hier.rpt', 'r') as file:
             m.group()
             m=str(m.group())
             m = " ".join(m.split())
-            m = ''.join(m)
-            print(m)       
+            resources = ''.join(m)
+            
+            print(resources)       
             # Reset counter
             numline = 0
         if numline == 2:
             data = line.rstrip()
             data = " ".join(data.split())
-            #data = str(data)
             data = ''.join(data)
             print(data)
 
-mydata = data.split('|')
+resources = resources.split('|')
+values = data.split('|')
 
-for item in mydata:
-    print(item)
+for amount in values:
+    print(amount)
+
+for field in resources:
+    field = field.replace(" ","")    
+    print(field)
 
 
 #Dropping EMPLOYEE table if already exists.
 cursor.execute("DROP TABLE IF EXISTS FPGA_RESOURCES")
 
-sql ='''CREATE TABLE FPGA_RESOURCES(
+sql_table ='''CREATE TABLE FPGA_RESOURCES(
    BITSTREAM_ID CHAR(20) NOT NULL,
    NAME CHAR(20) NOT NULL,
-   DATE CHAR(20) NOT NULL,
-   LUT INT,
-   FF INT,
-   DSP INT,
-   BRAM INT,
-   POWER FLOAT
-)'''
+   DATE CHAR(20) NOT NULL'''
 
-cursor.execute(sql)
+ins_values = ""
 
-#sql = """INSERT INTO FPGA_RESOURCES(
-#    BITSTREAM_ID, NAME, DATE)
-#    VALUES ('olakase', 'ariane', '04.12.23')"""
+for field in resources:
+    field = field.replace(" ","")
+    if field:
+        sql_table  += ",\n   {} CHAR(20)".format(field)
+        ins_values += ", {}".format(field)
 
-insert_data = (
-    "INSERT INTO FPGA_RESOURCES(BITSTREAM_ID, NAME, DATE)"
-    "VALUES (%s, %s, %s)"
-)
-data = ('olakase', 'ariane', '04.12.23')
+sql_table  += "\n   )"
+ins_values += ")"
+
+print("SQL_TABLE:\r\n")
+print(sql_table)
+
+cursor.execute(sql_table)
+
+print("INSERT!!\r\n")
+ins_values = '''INSERT INTO FPGA_RESOURCES( BITSTREAM_ID, NAME, DATE''' + ins_values
+print(ins_values)
+
+sha1 = "'olakase'"
+BitName = "'ConPronoc'"
+date = "'12.04.23'"
+
+res_values = "\rVALUES (" + sha1 + ", " + BitName + ", " + date + ", "
+
+for one_value in values:  
+     if one_value:
+        one_value = one_value.replace(" ","")    
+        if one_value.isdigit():
+            res_values += " {},".format(one_value)
+        else:
+            res_values += " '{}',".format(one_value)
+
+if res_values.endswith(","):
+    res_values = res_values[:-1]
+
+res_values = res_values + ")"
+
+print(res_values)
 
 
- #Preparing SQL query to INSERT a record into the database.
-#insert_stmt = (
-#   "INSERT INTO EMPLOYEE(FIRST_NAME, LAST_NAME, AGE, SEX, INCOME)"
-#   "VALUES (%s, %s, %s, %s, %s)"
-#)
-#data = ('Ramya', 'Ramapriya', 25, 'F', 5000)
+insert_data = ins_values + res_values
+
+print("")
+print(insert_data)
 
 try:
     # Executing the SQL command
     # No dynamic data:
-    # cursor.execute(insert_data)
+    cursor.execute(insert_data)
     # Dynamic data:
-    cursor.execute(insert_data, data)
+    #cursor.execute(insert_data, data)
 
     # Commit changes in the database
     conn.commit()
