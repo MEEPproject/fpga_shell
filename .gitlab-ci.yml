@@ -602,9 +602,7 @@ test-benchmarks-production:
         extends: .common_conf_production
         rules:
             - !reference [.production_rules,rules]
-        dependencies:
-          - synthesis_production
-          - bitstream_production        
+        needs: [synthesis_production,bitstream_production]
         tags: 
             - $FPGA_BOARD        
         before_script: 
