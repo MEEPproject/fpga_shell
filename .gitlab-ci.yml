@@ -223,9 +223,9 @@ implementation_production:
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mkdir -p tmp/implementation/implementation_reports_${EA}_${FPGA_BOARD}_production
-            - cp reports tmp/implementation/implementation_reports_${EA}_${FPGA_BOARD}_production
-            - mv reports reports_${EA}_${FPGA_BOARD}_production
+            - mkdir -p tmp/implementation
+            - mv reports implementation/reports_${EA}_${FPGA_BOARD}_production
+            - cp implementation/reports_${EA}_${FPGA_BOARD}_production tmp/implementation
             - ls tmp
         artifacts:
             when: always
@@ -407,9 +407,9 @@ reports_production:
             - make validate  
         after_script:
             - ls reports
-            - mkdir -p tmp/reports/reports_${EA}_${FPGA_BOARD}_production
-            - cp reports tmp//reports/reports_${EA}_${FPGA_BOARD}_production
-            - mv reports reports_${EA}_${FPGA_BOARD}_production/reports
+            - mkdir -p tmp/reports
+            - mv reports reports/reports_${EA}_${FPGA_BOARD}_production
+            - cp reports/reports_${EA}_${FPGA_BOARD}_production/reports tmp/reports
             - ls tmp
         artifacts:
             when: always
