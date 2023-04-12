@@ -121,7 +121,7 @@ To complete this information, we will add an extra value to each fields:
 
 ### 7.2. Environments to work
 
-We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
+We have define two differents environments to generate different bitstream depending of the "environment". There are **Production**, **Test** , and **Quick Test** environments.
 
 ## 7.3. Production :rocket:
 
@@ -138,9 +138,10 @@ All use **ProNoC** routers
 | Meanwhile 2, 3 & 4 are in place we will include a transition one |
 | acme_ea_1h16v                                                    | (L1.Ariane)                  | available                                    |
 | acme_ea_4h2v                                                     | (L1.Ariane)                  | available                                    |
+| acme_ea_16h                                                      | (L1.Ariane)                  | available                                    |
 | acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
 
-:card_box: The FPGA card used here is the **u55c**
+:card_box: The FPGA card used here are the **u55c** and **u280**
 
 There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule (monthly, the 1th):clock1:.
 
@@ -155,3 +156,13 @@ Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP r
 :card_box: Here we uses the **u280** and **u55c** fpga cards.
 
 If we want to use this environment, we need to use in our _commit message_ **#TestCICD**
+
+### 7.3. Quick Test :fingers_crossed:
+
+The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .I
+
+:card_box: Here we uses the **u55c** fpga card.
+
+If we want to use this environment, we need to use the gitlab web page -> **Run Pipeline**
+
+There you can add the **EA** variable the right bitstream configuration do you want to use.
