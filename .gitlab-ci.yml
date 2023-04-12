@@ -224,7 +224,7 @@ implementation_production:
             - echo -e "Artifacts:"; ls dcp; ls reports
             - mkdir -p tmp/implementation
             - mv reports reports_${EA}_${FPGA_BOARD}_production
-            - cp reports_${EA}_${FPGA_BOARD}_production tmp/implementation
+            - cp -r reports_${EA}_${FPGA_BOARD}_production tmp/implementation
             - ls tmp
         artifacts:
             when: always
@@ -402,7 +402,7 @@ reports_production:
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_production
-            - cp reports_${EA}_${FPGA_BOARD}_production/reports tmp/reports
+            - cp -r reports_${EA}_${FPGA_BOARD}_production/reports tmp/reports
             - ls tmp
         artifacts:
             when: always
