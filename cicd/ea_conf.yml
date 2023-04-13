@@ -5,19 +5,21 @@
 # default, all artifacts are downloaded. Dependencies is an optimization.
 # Same applies for needs. It is not mandatory.
 
+    
+
 .multi_target_test:
   parallel:
     matrix:
       - FPGA_BOARD: [u55c,u280]
-        EA: [acme_ea_4a, acme_ea_4h2v, acme_ea_1h16v]
+        EA: [acme_ea_4h2v, acme_ea_1h, acme_ea_1h16v]
         # These labels need to match what is at accelerator_build.sh
         # on the EA meep_shell directory
 
 .multi_target_production:
   parallel:
     matrix:
-      - FPGA_BOARD: [u55c]
-        EA: [acme_ea_4a, acme_ea_4h2v, acme_ea_1h]
+      - FPGA_BOARD: [u55c,u280]
+        EA: [acme_ea_4a, acme_ea_4h2v, acme_ea_1h,acme_ea_16h]
 
 .default_tags:
   tags:
@@ -38,6 +40,12 @@
   rules:
     - if: $ENV_WORK == "TEST" && $CI_PIPELINE_SOURCE == "pipeline"
     - if: ($CI_COMMIT_MESSAGE =~ /#TestCICD/)
+
+.quick_test_rules:
+  rules:
+    - if: $ENV_WORK == "QUICKTEST" && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: ($CI_COMMIT_MESSAGE =~ /#TestHun/)
 
 .common_conf_production:
   # rules:
@@ -68,6 +76,8 @@
   # Don't block successfull builds in the matrix:
   # This would benefit from variable dependencies/needs, but that's not supported as per today on GitLab
   allow_failure: true
+
+
 
 .check_synth:
   script:

@@ -144,13 +144,29 @@ if you want to add flags:
 
 It will generate a OpePiton project with Lagarto as a core. There are other conbinations available.
 
-## 4. Push with GitLab variables:
+## 4. Typical usage in CLI
+
+Change default board if needed:
+
+    make u280
+
+Update file `ea_url.txt` in `support` folder for your accelerator with required commit. Then clone accelerator repo:
+
+    make initialize LOAD_EA=acme
+
+Make changes in clonned `accelerator` folder or/and any git actions if needed. Run full implementation with additional parameters if needed:
+
+    make all LOAD_EA=acme EA_PARAM=acme_ea_4a
+
+For more details please refer to https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_MEEP_Shell_use
+
+## 5. Push with GitLab variables:
 
     git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 
     make project EA_PARAMS=pronoc
 
-## 5. Developers guide:
+## 6. Developers guide:
 
 The MEEP FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
 
@@ -163,11 +179,11 @@ The **shell** folder is where all the different IPs that can be part of the Shel
 IPs are treated individually, in such a way there is no friction between different set ups, meaning that any combination of IPs can be set with no dependency or incompatibility between them. Which such approach, the Shell can be built incrementaly, adding more pieces as they are needed. The only exception to this are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it will be explained later.
 
-## 6. Bitstreams Naming convention
+## 7. Bitstreams Naming convention
 
 In order to have a standar method to the bitstream name releases, and the procedure to generate those. There are mandatory rules to use:
 
-### 6.1. ACME_EA
+### 7.1. ACME_EA
 
 All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
 
@@ -182,11 +198,11 @@ To complete this information, we will add an extra value to each fields:
   - "b" means the number of vector lanes
   - "c" means the number of MT
 
-### 6.2. Environments to work
+### 7.2. Environments to work
 
 We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
 
-## 6.3. Production :rocket:
+## 7.3. Production :rocket:
 
 The production environment will be a monthly release. We will work with:
 
@@ -209,7 +225,7 @@ There are two ways to execute the pipeline using this environment. By Merge requ
 
 The bitstreams generated will be released in https://release.meep-project.eu/nexus/#browse/search/raw
 
-### 6.4. Test :fingers_crossed:
+### 7.4. Test :fingers_crossed:
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
