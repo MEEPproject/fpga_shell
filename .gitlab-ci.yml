@@ -111,6 +111,7 @@ synthesis_production:
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
+          expire_in: 3 day
           paths:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
@@ -148,13 +149,16 @@ synthesis_test:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
+            - cp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
+            - echo -e "Artifacts:"; ls tmp; ls dcp; tree
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
+          expire_in: 3 day
           paths:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
@@ -193,10 +197,12 @@ synthesis_quick_test:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_u55c_qtest.dcp
+            - cp dcp/synthesis_${EA}_u55c_qtest.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
+            - echo -e "Artifacts:"; ls tmp; ls dcp
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
@@ -230,6 +236,7 @@ implementation_production:
             when: always
             expire_in: 1 day
             paths:
+                - tmp
                 - dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
                 - reports_${EA}_${FPGA_BOARD}_production
 
@@ -249,14 +256,17 @@ implementation_test:
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
-            - echo -e "Artifacts:"; ls dcp; ls reports
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp            
+            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_${FPGA_BOARD}_test
+            - cp -r reports_${EA}_${FPGA_BOARD}_test tmp/implementation
+            - echo -e "Artifacts:"; ls dcp; ls reports; tree
         allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
             paths:
+                - tmp
                 - dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
                 - reports_${EA}_${FPGA_BOARD}_test
 
@@ -279,13 +289,16 @@ implementation_quick_test:
             - !reference [.check_impl, script]
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_u55c_qtest.dcp
-            - echo -e "Artifacts:"; ls dcp; ls reports
+            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_u55c_qtest
+            - cp -r reports_${EA}_u55c_qtest tmp/implementation
+            - echo -e "Artifacts:"; ls dcp; ls reports
         allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
             paths:
+                - tmp
                 - dcp/implementation_${EA}_u55c_qtest.dcp
                 - reports_${EA}_u55c_qtest
 
@@ -407,6 +420,7 @@ reports_production:
         artifacts:
             when: always
             paths:
+                - tmp
                 - reports_${EA}_${FPGA_BOARD}_production
 
 reports_test:
@@ -426,13 +440,16 @@ reports_test:
             - make ci_report_route
             - make validate  
         after_script:
-            - ls reports            
+            - ls reports
+            - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_test
-            - ls; tree 
+            - cp -r reports_${EA}_${FPGA_BOARD}_test tmp/reports
+            - ls tmp; tree 
         allow_failure: true
         artifacts:
             when: always
             paths:
+                - tmp
                 - reports_${EA}_${FPGA_BOARD}_test
 
 reports_quick_test:
@@ -454,14 +471,17 @@ reports_quick_test:
             - make ci_report_route
             - make validate  
         after_script:
-            - ls reports            
+            - ls reports
+            - mkdir -p tmp/reports
             - mv reports reports_${EA}_u55c_qtest
-            - ls; tree 
+            - cp -r reports_${EA}_u55c_qtest  tmp/reports
+            - ls tmp; tree 
         allow_failure: true
         artifacts:
             when: always
             expire_in: 3 days
             paths:
+                - tmp
                 - reports_${EA}_u55c_qtest
 
 ###
@@ -505,6 +525,7 @@ fpga-test-production:
             when: always
             paths:
             - tmp
+
 fpga-test-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
@@ -711,8 +732,8 @@ deploy-EA-production:
             - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - ls tmp
-            - mv dcp tmp/ ; mv bitstream tmp/            
+            - ls tmp; tree
+            - mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
             # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
@@ -746,9 +767,8 @@ deploy-EA-test:
             - mkdir -p $ABSDIR            
         script:             
             - date >> $ABSDIR/date.txt
-            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_* tmp/reports/            
-            - mv dcp tmp/ ; mv bitstream tmp/            
+            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt            
+            - mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"
