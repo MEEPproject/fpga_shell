@@ -6,7 +6,7 @@ VOLUME /etc/phpmyadmin/config.user.inc.php
 # Set environment variables for database connection
 ENV PMA_HOST=db
 ENV PMA_USER=root
-ENV PMA_PASSWORD=my-secret-pw
+ENV PMA_PASSWORD=123
 
 # Expose port 80 for HTTP traffic
 EXPOSE 80

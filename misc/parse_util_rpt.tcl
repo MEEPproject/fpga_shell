@@ -1,14 +1,12 @@
 # Parse report, return a simple list
 
-source [pwd]/tcl/environment.tcl
-source $g_root_dir/tcl/impl_utils.tcl
 
 if { $::argc > 0 } {
- set g_file_path $::argv
- puts "File path is $g_file_path"
+    set g_file_path $::argv
+    puts "File path is $g_file_path"
 } else {
- puts "Bad usage: this script needs an argument"
- exit -1
+    puts "Bad usage: this script needs an argument"
+    exit -1
 }
 
 proc ParseReport { FilePath } {
@@ -59,7 +57,7 @@ proc ParseReport { FilePath } {
 
 if {[file exists $g_file_path]} {
     set ParsedUtilizaion [ParseReport $g_file_path]
-    set tmp_file $g_root_dir/misc/ParsedUtil.csv
+    set tmp_file ${g_file_path}.csv
     set fd_tmp  [open $tmp_file  "w"]
     puts $fd_tmp [lindex $ParsedUtilizaion 0]
     puts $fd_tmp [lindex $ParsedUtilizaion 1]
