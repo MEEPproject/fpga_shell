@@ -716,13 +716,15 @@ deploy-EA-production:
         rules: 
             - !reference [.production_rules,rules]
         variables:
-            GIT_SUBMODULE_STRATEGY: "none"
-            GIT_STRATEGY: "none"
+            GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+            GIT_CLEAN_FLAGS: -ffdx
         timeout: 8h
         tags: !reference [.default_tags, tags]          
         before_script:             
             # The UTC datetime when the pipeline was created
+            - ls tmp; tree
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
@@ -752,9 +754,10 @@ deploy-EA-test:
         rules:
             - !reference [.test_rules,rules]            
         variables:
-            GIT_SUBMODULE_STRATEGY: "none"
-            GIT_STRATEGY: "none"
+            GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+            GIT_CLEAN_FLAGS: -ffdx
         timeout: 8h
         tags: !reference [.default_tags, tags] 
         before_script:
