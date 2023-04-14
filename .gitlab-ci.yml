@@ -719,7 +719,6 @@ deploy-EA-production:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-            GIT_CLEAN_FLAGS: -ffdx
         timeout: 8h
         tags: !reference [.default_tags, tags]          
         before_script:             
@@ -757,7 +756,6 @@ deploy-EA-test:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-            GIT_CLEAN_FLAGS: -ffdx
         timeout: 8h
         tags: !reference [.default_tags, tags] 
         before_script:
