@@ -55,6 +55,3 @@ proc reportRoute { g_root_dir } {
 
 
 }
-
-reportRoute $g_root_dir
-
