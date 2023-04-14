@@ -2,12 +2,14 @@
 
 Run, from this directory:
 
-# Build the container
-docker build -t mysql-server . #Note the dot, which is the path to the Dockerfile
+# docker volume create mysql-volume
+
+# Build the container, runs the Dockerfile
+docker build -t mysql-image . #Note the dot, which is the path to the Dockerfile
 
 # Run the container
-docker run -d --name=mysql-server mysql/mysql-server:latest
-# Get the generated root password:
+docker run --name=mysql-server -p3306:3306 -v mysql-volume:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123 -d mysql-image
+# Get the generated root password, when not provided:
 docker logs mysql-server
 
 # Log into the container interactively:
@@ -33,7 +35,7 @@ CREATE TABLE RESOURCES (BITSTREAM_ID CHAR(20));
 CREATE USER 'grafanaReader'@'localhost' IDENTIFIED BY '123'; 
 CREATE USER 'grafanaReader'@'%' IDENTIFIED BY '123'; 
 
-GRANT SELECT ON MEEP_FPGA.RESOURCES TO 'grafanaReader';
+GRANT SELECT ON MEEP_FPGA.* TO 'grafanaReader';
 GRANT CREATE USER ON *.* TO  'grafanaReader'@'%';
 
 FLUSH PRIVILEGES;
