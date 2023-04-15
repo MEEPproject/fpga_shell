@@ -101,14 +101,17 @@ synthesis_production:
             - cp shell_build.log tmp/project/
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
-            - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - cp gen_system.tcl tmp/project/            
+            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
+            - cp dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
+            - echo -e "Artifacts:"; ls tmp; ls dcp
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
+          expire_in: 3 day
           paths:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
@@ -146,13 +149,16 @@ synthesis_test:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
+            - cp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
+            - echo -e "Artifacts:"; ls tmp; ls dcp; tree
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
+          expire_in: 3 day
           paths:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
@@ -191,10 +197,12 @@ synthesis_quick_test:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - echo -e "Artifacts:"; ls tmp; ls dcp
+            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_u55c_qtest.dcp
+            - cp dcp/synthesis_${EA}_u55c_qtest.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
+            - echo -e "Artifacts:"; ls tmp; ls dcp
         allow_failure: false # If any sinthesys fails, all fails 
         artifacts:
           when: always
@@ -208,8 +216,7 @@ implementation_production:
         extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules] 
-        dependencies:
-          - synthesis_production
+        needs: [synthesis_production]
         variables:
             GIT_STRATEGY: fetch         
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
@@ -221,11 +228,15 @@ implementation_production:
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
+            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_${FPGA_BOARD}_production
+            - cp -r reports_${EA}_${FPGA_BOARD}_production tmp/implementation
+            - ls tmp
         artifacts:
             when: always
             expire_in: 1 day
             paths:
+                - tmp
                 - dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
                 - reports_${EA}_${FPGA_BOARD}_production
 
@@ -237,8 +248,7 @@ implementation_test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.test_rules,rules] 
-        dependencies:
-          - synthesis_test
+        needs: [synthesis_test]
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script: 
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp dcp/synthesis.dcp
@@ -246,14 +256,17 @@ implementation_test:
             - make ci_implementation DCP_ON=false
             - !reference [.check_impl, script]
         after_script:
-            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
-            - echo -e "Artifacts:"; ls dcp; ls reports
+            - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp            
+            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_${FPGA_BOARD}_test
+            - cp -r reports_${EA}_${FPGA_BOARD}_test tmp/implementation
+            - echo -e "Artifacts:"; ls dcp; ls reports; tree
         allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
             paths:
+                - tmp
                 - dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
                 - reports_${EA}_${FPGA_BOARD}_test
 
@@ -267,8 +280,7 @@ implementation_quick_test:
         tags:
             - MEEP_FPGA
         timeout: 8h 
-        dependencies:
-          - synthesis_quick_test
+        needs: [synthesis_quick_test]
         # As this is a matrix, rename the corresponding dcp for make to recognize it 
         before_script: 
             - mv dcp/synthesis_${EA}_u55c_qtest.dcp dcp/synthesis.dcp
@@ -277,13 +289,16 @@ implementation_quick_test:
             - !reference [.check_impl, script]
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_u55c_qtest.dcp
-            - echo -e "Artifacts:"; ls dcp; ls reports
+            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_u55c_qtest
+            - cp -r reports_${EA}_u55c_qtest tmp/implementation
+            - echo -e "Artifacts:"; ls dcp; ls reports
         allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
             paths:
+                - tmp
                 - dcp/implementation_${EA}_u55c_qtest.dcp
                 - reports_${EA}_u55c_qtest
 
@@ -296,8 +311,7 @@ bitstream_production:
         extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
-        dependencies:
-          - implementation_production
+        needs: [implementation_production]
         before_script:
             - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp            
         script:
@@ -327,8 +341,7 @@ bitstream_test:
         extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules] 
-        dependencies:
-          - implementation_test
+        needs: [implementation_test]
         before_script: 
             - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp            
         script:
@@ -361,10 +374,9 @@ bitstream_quick_test:
         tags:
             - MEEP_FPGA
         timeout: 8h 
-        dependencies:
-          - implementation_quick_test
+        needs: [implementation_quick_test]
         before_script: 
-            - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp
         script:
             - make ci_bitstream
         after_script:
@@ -392,20 +404,23 @@ reports_production:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules: 
             - !reference [.production_rules,rules]
-        dependencies:
-          - implementation_production
+        needs: [implementation_production]
         before_script:
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
             - make validate  
         after_script:
-            - ls reports            
-            - mv reports reports_${EA}_${FPGA_BOARD}_production       
+            - ls reports
+            - mkdir -p tmp/reports
+            - mv reports reports_${EA}_${FPGA_BOARD}_production
+            - cp -r reports_${EA}_${FPGA_BOARD}_production/reports tmp/reports
+            - ls tmp
         artifacts:
             when: always
             paths:
+                - tmp
                 - reports_${EA}_${FPGA_BOARD}_production
 
 reports_test:
@@ -416,8 +431,7 @@ reports_test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.test_rules,rules]
-        dependencies:
-          - implementation_test
+        needs: [implementation_test]
         before_script:
             - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp            
@@ -426,13 +440,16 @@ reports_test:
             - make ci_report_route
             - make validate  
         after_script:
-            - ls reports            
+            - ls reports
+            - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_test
-            - ls; tree 
+            - cp -r reports_${EA}_${FPGA_BOARD}_test tmp/reports
+            - ls tmp; tree 
         allow_failure: true
         artifacts:
             when: always
             paths:
+                - tmp
                 - reports_${EA}_${FPGA_BOARD}_test
 
 reports_quick_test:
@@ -445,8 +462,7 @@ reports_quick_test:
         tags:
             - MEEP_FPGA
         timeout: 8h 
-        dependencies:
-          - implementation_quick_test
+        needs: [implementation_quick_test]
         before_script:
             - ls; ls dcp; tree 
             - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp            
@@ -455,14 +471,17 @@ reports_quick_test:
             - make ci_report_route
             - make validate  
         after_script:
-            - ls reports            
+            - ls reports
+            - mkdir -p tmp/reports
             - mv reports reports_${EA}_u55c_qtest
-            - ls; tree 
+            - cp -r reports_${EA}_u55c_qtest  tmp/reports
+            - ls tmp; tree 
         allow_failure: true
         artifacts:
             when: always
             expire_in: 3 days
             paths:
+                - tmp
                 - reports_${EA}_u55c_qtest
 
 ###
@@ -480,8 +499,7 @@ fpga-test-production:
         extends: .common_conf_production
         rules: 
             - !reference [.production_rules,rules]
-        dependencies:
-          - bitstream_production
+        needs: [bitstream_production]
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD         
@@ -507,6 +525,7 @@ fpga-test-production:
             when: always
             paths:
             - tmp
+
 fpga-test-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
@@ -517,8 +536,7 @@ fpga-test-test:
         extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules]
-        dependencies:
-          - bitstream_test
+        needs: [bitstream_test]
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
@@ -554,8 +572,7 @@ fpga-quick-test:
         retry: 2
         rules:
             - !reference [.quick_test_rules,rules]
-        dependencies:
-          - bitstream_quick_test
+        needs: [bitstream_quick_test]
         # Overwrite tags to select the right board
         tags: 
             - u55c  
@@ -594,9 +611,7 @@ test-benchmarks-production:
         extends: .common_conf_production
         rules:
             - !reference [.production_rules,rules]
-        dependencies:
-          - synthesis_production
-          - bitstream_production        
+        needs: [synthesis_production,bitstream_production]
         tags: 
             - $FPGA_BOARD        
         before_script: 
@@ -631,9 +646,7 @@ test-benchmarks-test:
         extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules]
-        dependencies:
-          - synthesis_test
-          - bitstream_test        
+        needs: [synthesis_test,bitstream_test]
         # Overwrite tags to select the right board
         tags: 
             - $FPGA_BOARD        
@@ -668,9 +681,7 @@ test-benchmarks-quick_test:
         retry: 2
         rules:
             - !reference [.quick_test_rules,rules]
-        dependencies:
-          - synthesis_quick_test
-          - bitstream_quick_test        
+        needs: [synthesis_quick_test,bitstream_quick_test]
         # Overwrite tags to select the right board
         tags: 
             - u55c   
@@ -705,13 +716,14 @@ deploy-EA-production:
         rules: 
             - !reference [.production_rules,rules]
         variables:
-            GIT_SUBMODULE_STRATEGY: "none"
-            GIT_STRATEGY: "none"
+            GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         timeout: 8h
         tags: !reference [.default_tags, tags]          
         before_script:             
             # The UTC datetime when the pipeline was created
+            - ls tmp; tree
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
@@ -721,8 +733,8 @@ deploy-EA-production:
             - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_* tmp/reports/            
-            - mv dcp tmp/ ; mv bitstream tmp/            
+            - ls tmp; tree
+            - mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
             # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
@@ -741,9 +753,9 @@ deploy-EA-test:
         rules:
             - !reference [.test_rules,rules]            
         variables:
-            GIT_SUBMODULE_STRATEGY: "none"
-            GIT_STRATEGY: "none"
+            GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         timeout: 8h
         tags: !reference [.default_tags, tags] 
         before_script:
@@ -756,9 +768,8 @@ deploy-EA-test:
             - mkdir -p $ABSDIR            
         script:             
             - date >> $ABSDIR/date.txt
-            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mkdir -p tmp/reports; mv reports_* tmp/reports/            
-            - mv dcp tmp/ ; mv bitstream tmp/            
+            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt            
+            - mv bitstream tmp/            
             - cp -r tmp/* $ABSDIR
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"

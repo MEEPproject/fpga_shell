@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/badges/production/pipeline.svg)](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/commits/production)
+
 # FPGA Shell
 
 Go to the MEEP wiki @ https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program for **_instructions about how to use this SW._**
@@ -100,11 +102,35 @@ The **shell** folder is where all the different IPs that can be part of the Shel
 IPs are treated individually, in such a way there is no friction between different set ups, meaning that any combination of IPs can be set with no dependency or incompatibility between them. Which such approach, the Shell can be built incrementaly, adding more pieces as they are needed. The only exception to this are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it will be explained later.
 
-## 7. Bitstreams Naming convention
+## 7. Test Bitstream
+
+**MEEP SERVERS tools**
+
+You can find the bistream in the folder **bitstream**
+
+Before to load the bistream, you need to setup PATH for drivers:
+
+    PATH=/home/tools/drivers/'hostname'/dma_ip_drivers/QDMA/linux-kernel/bin/:$PATH
+
+you can add it in you local .bashrc.
+
+Then you can use the following command to load the bistream
+
+    /home/tools/fpga-tools/fpga/load-bitstream.sh qdma <your_bistream.bit>
+
+> Be careful with the FPGA board you have used to generate the bistream, and the board you are using to load the bistream. It needs to be the same type.
+
+You can have open in parallel other terminal to use picocom
+
+    picocom: picocom -b 115200 /dev/ttyUSB2
+
+Finally, if you want to boota binary. Yo can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
+
+## 8. Bitstreams Naming convention
 
 In order to have a standar method to the bitstream name releases, and the procedure to generate those. There are mandatory rules to use:
 
-### 7.1. ACME_EA
+### 8.1. ACME_EA
 
 All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
 
@@ -119,11 +145,11 @@ To complete this information, we will add an extra value to each fields:
   - "b" means the number of vector lanes
   - "c" means the number of MT
 
-### 7.2. Environments to work
+### 8.2. Environments to work
 
-We have define two differents environments to generate different bitstream depending of the "environment". There are **Production** and **Test** environment.
+We have define two differents environments to generate different bitstream depending of the "environment". There are **Production**, **Test** , and **Quick Test** environments.
 
-## 7.3. Production :rocket:
+## 8.3. Production :rocket:
 
 The production environment will be a monthly release. We will work with:
 
@@ -138,15 +164,16 @@ All use **ProNoC** routers
 | Meanwhile 2, 3 & 4 are in place we will include a transition one |
 | acme_ea_1h16v                                                    | (L1.Ariane)                  | available                                    |
 | acme_ea_4h2v                                                     | (L1.Ariane)                  | available                                    |
+| acme_ea_16h                                                      | (L1.Ariane)                  | available                                    |
 | acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
 
-:card_box: The FPGA card used here is the **u55c**
+:card_box: The FPGA card used here are the **u55c** and **u280**
 
 There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule (monthly, the 1th):clock1:.
 
 The bitstreams generated will be released in https://release.meep-project.eu/nexus/#browse/search/raw
 
-### 7.4. Test :fingers_crossed:
+### 8.4. Test :fingers_crossed:
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
@@ -155,3 +182,13 @@ Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP r
 :card_box: Here we uses the **u280** and **u55c** fpga cards.
 
 If we want to use this environment, we need to use in our _commit message_ **#TestCICD**
+
+### 8.3. Quick Test :fingers_crossed:
+
+The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .I
+
+:card_box: Here we uses the **u55c** fpga card.
+
+If we want to use this environment, we need to use the gitlab web page -> **Run Pipeline**
+
+There you can add the **EA** variable the right bitstream configuration do you want to use.
