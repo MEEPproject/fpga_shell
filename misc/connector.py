@@ -44,6 +44,11 @@ def connect2db(bitstreamid_sha, name, date, filename):
         print(resources)
         print(numbers)
 
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='RESOURCES';")
+    # Fetch the results of the query
+    result = cursor.fetchone()
+
+
     # Creates the table creatin template
     sql_table ='''CREATE TABLE RESOURCES(
        BITSTREAM_ID CHAR(20) NOT NULL,
@@ -65,8 +70,10 @@ def connect2db(bitstreamid_sha, name, date, filename):
     print(sql_table)
 
     # cursor.execute("DROP TABLE IF EXISTS RESOURCES")
-
-    cursor.execute(sql_table)
+    if result:
+        print("Table already exists")
+    else:
+        cursor.execute(sql_table)
 
     ins_values = '''INSERT INTO RESOURCES( BITSTREAM_ID, NAME, DATE''' + ins_values
 
