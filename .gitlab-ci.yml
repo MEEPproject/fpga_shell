@@ -102,9 +102,7 @@ synthesis_production:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/            
-            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
-            - cp dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
             - echo -e "Artifacts:"; ls tmp; ls dcp
@@ -149,9 +147,7 @@ synthesis_test:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
-            - cp dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
             - echo -e "Artifacts:"; ls tmp; ls dcp; tree
@@ -176,10 +172,11 @@ synthesis_quick_test:
             GIT_STRATEGY: clone            
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+            FPGA: u55c
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
-            - echo "Actual element in the matrix is $EA + u55c"
+            - echo "Actual element in the matrix is $EA + $FPGA"
             - !reference [.export_toolchain, before_script]
         script:
             - make initialize
@@ -197,9 +194,7 @@ synthesis_quick_test:
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
             - cp gen_system.tcl tmp/project/
-            - mkdir -p tmp/dcp
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_u55c_qtest.dcp
-            - cp dcp/synthesis_${EA}_u55c_qtest.dcp tmp/dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
             - echo -e "Artifacts:"; ls tmp; ls dcp
@@ -228,16 +223,11 @@ implementation_production:
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
-            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_${FPGA_BOARD}_production
-            - cp -r reports_${EA}_${FPGA_BOARD}_production tmp/implementation
-            - cp dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp tmp/dcp
-            - ls tmp
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - tmp
                 - dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
                 - reports_${EA}_${FPGA_BOARD}_production
 
@@ -258,17 +248,13 @@ implementation_test:
             - !reference [.check_impl, script]
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
-            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_${FPGA_BOARD}_test
-            - cp -r reports_${EA}_${FPGA_BOARD}_test tmp/implementation
-            - cp dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp tmp/dcp
             - echo -e "Artifacts:"; ls dcp; ls reports; tree
         allow_failure: true
         artifacts:
             when: always
             expire_in: 1 day
             paths:
-                - tmp
                 - dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
                 - reports_${EA}_${FPGA_BOARD}_test
 
@@ -291,10 +277,7 @@ implementation_quick_test:
             - !reference [.check_impl, script]
         after_script:
             - mv dcp/implementation.dcp dcp/implementation_${EA}_u55c_qtest.dcp
-            - mkdir -p tmp/implementation
             - mv reports reports_${EA}_u55c_qtest
-            - cp -r reports_${EA}_u55c_qtest tmp/implementation
-            - cp dcp/implementation_${EA}_u55c_qtest.dcp tmp/dcp
             - echo -e "Artifacts:"; ls dcp; ls reports
         allow_failure: true
         artifacts:
@@ -418,12 +401,9 @@ reports_production:
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_production
-            - cp -r reports_${EA}_${FPGA_BOARD}_production tmp/reports
-            - ls tmp
         artifacts:
             when: always
             paths:
-                - tmp
                 - reports_${EA}_${FPGA_BOARD}_production
 
 reports_test:
@@ -446,13 +426,10 @@ reports_test:
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_test
-            - cp -r reports_${EA}_${FPGA_BOARD}_test tmp/reports
-            - ls tmp; tree 
         allow_failure: true
         artifacts:
             when: always
             paths:
-                - tmp
                 - reports_${EA}_${FPGA_BOARD}_test
 
 reports_quick_test:
@@ -477,8 +454,6 @@ reports_quick_test:
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_u55c_qtest
-            - cp -r reports_${EA}_u55c_qtest  tmp/reports
-            - ls tmp; tree 
         allow_failure: true
         artifacts:
             when: always
@@ -731,14 +706,17 @@ deploy-EA-production:
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_production
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - echo "FPGA Shell deploys here ${ABSDIR}"
-            - mkdir -p $ABSDIR            
+            - mkdir -p $ABSDIR
         script: 
             - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - ls tmp; tree
-            - mv bitstream tmp/            
+            - mv bitstream tmp/
+            - mkdir -p tmp/reports; mv reports_* tmp/reports/ 
+            - mv dcp tmp/ 
             - cp -r tmp/* $ABSDIR
+            - ls $ABSDIR 
             # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_production.bit
@@ -757,8 +735,7 @@ deploy-EA-test:
             - !reference [.test_rules,rules]            
         variables:
             GIT_STRATEGY: fetch
-            DESIRED_FORMAT: "%Y%m%d"
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+            DESIRED_FORMAT: "%Y%m%d"            
         timeout: 8h
         tags: !reference [.default_tags, tags] 
         before_script:
@@ -768,19 +745,23 @@ deploy-EA-test:
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_test
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - echo "FPGA Shell deploys here ${ABSDIR}"
-            - mkdir -p $ABSDIR            
-        script:             
+            - mkdir -p $ABSDIR
+            - ls 
+        script:
             - date >> $ABSDIR/date.txt
-            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt            
+            - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - mv bitstream tmp/            
+            - mkdir -p tmp/reports; mv reports_* tmp/reports/ 
+            - mv dcp tmp/ 
             - cp -r tmp/* $ABSDIR
+            - ls $ABSDIR 
         after_script:             
             - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false
         environment:
             name: test
 
-# This job needs to put together all the bitstreams. No parallel jobs here.            
+# This job needs to put together all the bitstreams. No parallel jobs here
 release_job:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
