@@ -135,9 +135,11 @@ report_place: $(PLACE_DCP)
 report_route: $(IMPL_DCP)
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
-parse_util_report: report_route
+parse_util_report: $(ROOT_DIR)/reports/post_route/utilization_hier.rpt
 	$(VIVADO_XLNX) $(VIVADO_OPT) $(ROOT_DIR)/misc/parse_util_report.tcl -tclargs \
-	$(ROOT_DIR)/reports/post_route/utilization_hier.rpt
+	$<
+
+
 
 
 ####

@@ -22,7 +22,7 @@ def connect2db(bitstreamid_sha, name, date, filename):
     print("Connection established to: ",data)
 
     #Dropping RESOURCES table if already exists.
-    cursor.execute("DROP TABLE IF EXISTS RESOURCES")
+    # cursor.execute("DROP TABLE IF EXISTS RESOURCES")
 
     with open(filename, 'r') as file:
 
@@ -63,6 +63,8 @@ def connect2db(bitstreamid_sha, name, date, filename):
 
     print("SQL_TABLE:\r\n")
     print(sql_table)
+
+    # cursor.execute("DROP TABLE IF EXISTS RESOURCES")
 
     cursor.execute(sql_table)
 

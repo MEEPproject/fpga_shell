@@ -81,6 +81,10 @@
     - mv boot tmp/            
     - echo -e "Artifacts:"; ls tmp/
 
+.reports:
+  after_script:
+    - make parse_util_report
+
 # This creates/moves/overwrites the selected bitstream to the specified folder
 # This way, MEEP users can grab from here the latest successfull bitstream
 .deploy-EA:
@@ -88,3 +92,7 @@
     - mkdir -p $SHELL_DEPLOY_DIR/latest_bitstream
     - cp $ABSDIR/bitstream/$RELEASE_BITSTREAM $SHELL_DEPLOY_DIR/latest_bitstream/
     - echo "$ABSDIR" > $SHELL_DEPLOY_DIR/latest_bitstream/info.txt
+    # push to database
+
+.push-to-database:
+  - sh/push2db.sh $ABSDIR/bitstream $ABSDIR/reports/post_route/utilization_hier.rpt.csv

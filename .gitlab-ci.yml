@@ -150,8 +150,9 @@ reports:
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
-            - make validate  
+            - make validate
         after_script:
+            - !reference [.reports, after_script]
             - ls reports            
             - mv reports reports_${EA}_${FPGA_BOARD}
             - ls; tree            
