@@ -124,7 +124,7 @@ You can have open in parallel other terminal to use picocom
 
     picocom: picocom -b 115200 /dev/ttyUSB2
 
-Finally, if you want to boota binary. Yo can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
+Finally, if you want to boot a binary. You can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
 
 ## 8. Bitstreams Naming convention
 
