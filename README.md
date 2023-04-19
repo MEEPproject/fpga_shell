@@ -35,7 +35,7 @@
 - [:earth_africa: Environments](chap7)
   - [:wrench: Production](chap7.1)
   - [:four_leaf_clover: Test](chap7.2)
-  - [:dart:Quick Test](chap7.3)
+  - [:dart: Quick Test](chap7.3)
 - [:floppy_disk: infoROM information](chap8)
   - [:book: Read infoROM](chap8.1)
     - [:microscope: Read by element](chap8.1.1)
