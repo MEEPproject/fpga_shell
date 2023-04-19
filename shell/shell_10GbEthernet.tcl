@@ -18,10 +18,11 @@
 
 set ETHClkLab  [dict get $ETHentry SyncClk Label]
 set ETHFreq    [dict get $ETHentry SyncClk Freq]
-set ETHClkName [dict get $ETHentry ClkName]
-set ETHRstName [dict get $ETHentry RstName]
+set ETHClkIf   [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
+set EthHBMCh   [dict get $ETHentry HBMChan]
+set EthAxi     [dict get $ETHentry AxiIntf]
 
 set ETHaddrWidth [dict get $ETHentry AxiAddrWidth]
 set ETHdataWidth [dict get $ETHentry AxiDataWidth]
@@ -32,7 +33,7 @@ set ETHirq [dict get $ETHentry IRQ]
 
 putdebugs "ETHClkLab    $ETHClkLab   "
 putdebugs "ETHFreq      $ETHFreq     "
-putdebugs "ETHClkName   $ETHClkName  "
+putdebugs "ETHClkIf     $ETHClkIf    "
 putdebugs "ETHintf      $ETHintf     "
 putdebugs "ETHaddrWidth $ETHaddrWidth"
 putdebugs "ETHdataWidth $ETHdataWidth"
@@ -78,19 +79,17 @@ set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
 
 [Add2ConstrFileList $TimingConstrFile $ConstrList]
 
-# ## This might be hardcoded to the IP AXI bus width parameters until 
-# ## we can back-propagate them to the Ethernet IP. 512,64,6
-# TODO: Check what needs to be harcoded. DMA solutions doesn't give much flexibility
-
+  set EthAxiProt  [string replace $EthAxi   [string first "-" $EthAxi] end]
+  set EthAxiWidth [string replace $EthAxi 0 [string first "-" $EthAxi]    ]
   set eth_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $ETHintf]
   set_property -dict [ list \
-   CONFIG.ADDR_WIDTH $ETHaddrWidth \
+   CONFIG.ADDR_WIDTH {12} \
    CONFIG.ARUSER_WIDTH {0} \
    CONFIG.AWUSER_WIDTH {0} \
    CONFIG.BUSER_WIDTH {0} \
-   CONFIG.DATA_WIDTH $ETHdataWidth \
+   CONFIG.DATA_WIDTH $EthAxiWidth \
    CONFIG.HAS_BRESP {1} \
-   CONFIG.HAS_BURST {0} \
+   CONFIG.HAS_BURST {1} \
    CONFIG.HAS_CACHE {0} \
    CONFIG.HAS_LOCK {0} \
    CONFIG.HAS_PROT {0} \
@@ -98,21 +97,20 @@ set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
    CONFIG.HAS_REGION {0} \
    CONFIG.HAS_RRESP {1} \
    CONFIG.HAS_WSTRB {1} \
-   CONFIG.ID_WIDTH $ETHidWidth \
-   CONFIG.MAX_BURST_LENGTH {1} \
-   CONFIG.NUM_READ_OUTSTANDING {1} \
-   CONFIG.NUM_READ_THREADS {1} \
-   CONFIG.NUM_WRITE_OUTSTANDING {1} \
-   CONFIG.NUM_WRITE_THREADS {1} \
-   CONFIG.PROTOCOL {AXI4LITE} \
+   CONFIG.ID_WIDTH {0} \
+   CONFIG.MAX_BURST_LENGTH {256} \
+   CONFIG.NUM_READ_OUTSTANDING {256} \
+   CONFIG.NUM_READ_THREADS {16} \
+   CONFIG.NUM_WRITE_OUTSTANDING {256} \
+   CONFIG.NUM_WRITE_THREADS {16} \
+   CONFIG.PROTOCOL $EthAxiProt \
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    CONFIG.RUSER_BITS_PER_BYTE {0} \
    CONFIG.RUSER_WIDTH {0} \
-   CONFIG.SUPPORTS_NARROW_BURST {0} \
+   CONFIG.SUPPORTS_NARROW_BURST {1} \
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
    ] $eth_axi
-
 
 
 #create_bd_port -dir I -from 0 -to 0 -type data qsfp_1x_grx_n
@@ -172,21 +170,14 @@ connect_bd_net [get_bd_ports $ETHirq] [get_bd_pins ${EthHierName}/eth_dma_irq]
 
 connect_bd_intf_net [get_bd_intf_ports ${ETHintf}] -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_axi_lite]
 
-
-create_bd_port -dir O -type clk $ETHClkName
-#connect_bd_net [get_bd_ports ${ETHClkName}] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
-
-create_bd_port -dir O -type rst $ETHRstName
-#connect_bd_net [get_bd_ports ${ETHRstName}] [get_bd_pins ${EthHierName}/eth_gt_rstn]
-
 # Connect the defined ethernet CLK & RST to the DMA AXI IP, and also forward them to the EA
-connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_clk]   [get_bd_pins rst_ea_$ETHClkLab/slowest_sync_clk] [get_bd_ports ${ETHClkName}]
-connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_arstn] [get_bd_pins rst_ea_$ETHClkLab/peripheral_aresetn] [get_bd_ports ${ETHRstName}]
+connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_clk]   [get_bd_pins rst_ea_$ETHClkLab/slowest_sync_clk]
+connect_bd_net [get_bd_pins ${EthHierName}/eth_dma_arstn] [get_bd_pins rst_ea_$ETHClkLab/peripheral_aresetn]
 
 # TODO: This reset maybe need to be ORed with the External User reset
 connect_bd_net [get_bd_ports resetn] [get_bd_pins ${EthHierName}/eth_ext_rstn]
 
-
+set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_bd_ports /$ETHClkIf]]$ETHintf: [get_bd_ports /$ETHClkIf]
 
 save_bd_design
 ## Create the Shell interface to the RTL
@@ -201,24 +192,30 @@ set ETHbaseAddr [dict get $ETHentry BaseAddr]
 ## Ethernet address space is 512K as the highest address. 
 ## TODO: Maybe it should be hardcoded
 
-set ETHMemRange [expr {2**$ETHaddrWidth/1024}]
+# set ETHMemRange [expr {2**$ETHaddrWidth/1024}]
 
 putdebugs "Base Addr ETH: $ETHbaseAddr"
-putdebugs "Mem Range ETH: $ETHMemRange"
+# putdebugs "Mem Range ETH: $ETHMemRange"
 
-assign_bd_address [get_bd_addr_segs ${EthHierName}/axi_dma_0/S_AXI_LITE/Reg ]
-set_property offset $ETHbaseAddr [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
-set_property range $ETHMemRange [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
+# assign_bd_address [get_bd_addr_segs ${EthHierName}/axi_dma_0/S_AXI_LITE/Reg ]
+# set_property offset $ETHbaseAddr [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
+# set_property range $ETHMemRange [get_bd_addr_segs ${ETHintf}/SEG_axi_dma_0_Reg]
 
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
 
-set_property -dict [list CONFIG.USER_CLK_SEL_LIST1 {AXI_30_ACLK} CONFIG.USER_SAXI_30 {true}] [get_bd_cells hbm_0]
+if { $g_board_part == "u280" && [expr $EthHBMCh/16] != [expr $PCIeHBMCh/16] } {
+  putmeeps "Resolving not completely investegated HBM issue for board $g_board_part:"
+  putmeeps "probably $ETHrate Eth DMA is single channel ($EthHBMCh) connected to HBM stack [expr $EthHBMCh/16] switch,"
+  set EthHBMCh [formatHBMch [expr $PCIeHBMCh + 1]]
+  putmeeps "so moving it to channel $EthHBMCh, next to PCIe channel $PCIeHBMCh, please change it accordingly if it doesn't fit."
+}
 
+set_property -dict [list CONFIG.USER_SAXI_${EthHBMCh} {TRUE}] [get_bd_cells hbm_0]
 
-connect_bd_net [get_bd_pins hbm_0/AXI_30_ACLK] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
-connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_rstn] [get_bd_pins hbm_0/AXI_30_ARESET_N]
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_m_axi] [get_bd_intf_pins hbm_0/SAXI_30${HBM_AXI_LABEL}]
+connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_user_clock] [get_bd_pins hbm_0/AXI_${EthHBMCh}_ACLK] 
+connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_rstn]       [get_bd_pins hbm_0/AXI_${EthHBMCh}_ARESET_N]
+connect_bd_intf_net -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_m_axi] [get_bd_intf_pins hbm_0/SAXI_${EthHBMCh}${HBM_AXI_LABEL}]
 
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]

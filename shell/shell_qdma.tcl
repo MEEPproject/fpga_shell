@@ -21,6 +21,7 @@ set PCIeDMA    [dict get $PCIEentry Mode]
 set PCIeClkNm  [dict get $PCIEentry ClkName]
 set PCIeRstNm  [dict get $PCIEentry RstName]
 set PCIeJTAG   [dict get $PCIEentry JtagDebEn]
+set PCIeHBMCh  [dict get $PCIEentry HBMChan]
 
 set PortList [lappend PortList $g_pcie_file] 
   

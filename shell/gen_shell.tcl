@@ -65,13 +65,13 @@ foreach dicEntry $ShellEnabledIntf {
 		set DDR4entry $dicEntry
 		source $g_root_dir/shell/shell_ddr4.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/ddr4_${g_board_part}.xdc"
-                set_property CONFIG.ASSOCIATED_BUSIF $DDR4intf [get_bd_ports /$DDR4ClkNm]
+        set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_bd_ports /$DDR4ClkNm]]$DDR4intf: [get_bd_ports /$DDR4ClkNm]
+
 	} 
 	
 	if {[regexp -inline -all "HBM" $IntfName] ne "" } {
 		set HBMentry $dicEntry
 		source $g_root_dir/shell/shell_hbm.tcl		
-		set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
 	}
 
 	if {[regexp -inline -all "UART" $IntfName] ne "" } {
@@ -91,8 +91,6 @@ foreach dicEntry $ShellEnabledIntf {
 	        } else {
 		source $g_root_dir/shell/shell_eth2pci.tcl
 		}	
-		set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
-		# TODO: Check if ETHClkName is the right label. HBM uses "$HBMName"
 
 	}
 	if {[regexp -inline -all "AURORA" $IntfName] ne "" } {
@@ -111,7 +109,7 @@ foreach dicEntry $ShellEnabledIntf {
 	if {[regexp -inline -all "SLV_AXI" $IntfName] ne "" } {
 		set SLVAXIentry $dicEntry
 		source $g_root_dir/shell/shell_slvaxi.tcl	
-		set_property CONFIG.ASSOCIATED_BUSIF ${g_SLVAXI_ifname} [get_bd_ports /$g_SLVAXI_CLK]
+		set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_bd_ports /$g_SLVAXI_CLK]]$g_SLVAXI_ifname: [get_bd_ports /$g_SLVAXI_CLK]
 	}
 	
 }
@@ -120,10 +118,16 @@ foreach dicEntry $ShellEnabledIntf {
 
 source $g_root_dir/shell/shell_gpio.tcl
 
-## TODO: Find the right place for this, as it looks like the smartConnect
-## needs to be present for this to get set
-#set_property CONFIG.ASSOCIATED_BUSIF $HBMintf [get_bd_ports /$HBMname]
-#set_property CONFIG.ASSOCIATED_BUSIF $ETHintf [get_bd_ports /$ETHClkName]
+if { [info exists hbm_inst] && $PCIeDMA eq "dma"} {
+  set PCIeHBMSwitch [expr $PCIeHBMCh/16]
+  putmeeps "Setting PCIe clock to drive HBM cross-switch $PCIeHBMSwitch through channel $PCIeHBMCh"
+  set_property -dict [list CONFIG.USER_CLK_SEL_LIST${PCIeHBMSwitch} AXI_${PCIeHBMCh}_ACLK] [get_bd_cells hbm_0]
+}
+if { [info exists hbm_inst] && [info exists ETHdmaMem] && $ETHdmaMem eq "hbm"} {
+  set EthHBMSwitch [expr $EthHBMCh/16]
+  putmeeps "Setting Eth clock to drive HBM cross-switch $EthHBMSwitch through channel $EthHBMCh"
+  set_property -dict [list CONFIG.USER_CLK_SEL_LIST${EthHBMSwitch} AXI_${EthHBMCh}_ACLK] [get_bd_cells hbm_0]
+}
 
 ### TODO: Catch
 source $g_root_dir/shell/shell_memmap.tcl
