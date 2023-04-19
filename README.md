@@ -9,6 +9,8 @@
 </div>
 <div align="center">
 
+
+
 [![pipeline status](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/badges/develop/ssh_connection/pipeline.svg)](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/commits/develop/ssh_connection)
 </div>
 
@@ -26,12 +28,14 @@
   - [:scroll: Acme project features](chap4.2)
   - [:paperclip: Push with GitLab variables](chap4.3)
   - [:inbox_tray: Other available commands](chap4.4)
+  - [:mag: Test bitstream](chap4.5)
 - [:open_file_folder: Directory Structure](chap5)
 - [:pencil2: Bitstreams Naming convention](chap6)
   - [:closed_book: ACME_EA](chap6.1)
 - [:earth_africa: Environments](chap7)
   - [:wrench: Production](chap7.1)
   - [:four_leaf_clover: Test](chap7.2)
+  - [:dart:Quick Test](chap7.3)
 - [:floppy_disk: infoROM information](chap8)
   - [:book: Read infoROM](chap8.1)
     - [:microscope: Read by element](chap8.1.1)
@@ -39,6 +43,7 @@
 - [:woman: Authors](chap9)
 - [👷 Partners](chap10)
 - [:globe_with_meridians: Wiki](chap11)
+
 
 
 ## 1- :art: Features `{chap2}`
@@ -183,6 +188,28 @@ make reports_synth     # Create synthesis reports: Utilization, timing paths
 make reports_impl      # Create implementation reports: Utilization, timing paths
 ```
 
+### 3.5-		:mag: Test bitstream `{chap4.5}`
+**MEEP SERVERS tools**
+
+You can find the bistream in the folder **bitstream**
+
+Before to load the bistream, you need to setup PATH for drivers:
+
+    PATH=/home/tools/drivers/'hostname'/dma_ip_drivers/QDMA/linux-kernel/bin/:$PATH
+
+you can add it in you local .bashrc.
+
+Then you can use the following command to load the bistream
+
+    /home/tools/fpga-tools/fpga/load-bitstream.sh qdma <your_bistream.bit>
+
+> Be careful with the FPGA board you have used to generate the bistream, and the board you are using to load the bistream. It needs to be the same type.
+
+You can have open in parallel other terminal to use picocom
+
+    picocom: picocom -b 115200 /dev/ttyUSB2
+
+Finally, if you want to boot a binary. You can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
 
 ## 4-	:open_file_folder: Directory Structure `{chap5}`
 The MEEP FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
@@ -246,6 +273,21 @@ The bitstreams generated will be released in [here](https://release.meep-project
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
+Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers. (Pending)
+
+:card_box: Here we uses the **u280** and **u55c** fpga cards.
+
+If we want to use this environment, we need to use in our _commit message_ **#TestCICD**
+
+### 6.3- :dart: Quick Test `{chap7.3}`
+
+The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .I
+
+:card_box: Here we uses the **u55c** fpga card.
+
+If we want to use this environment, we need to use the gitlab web page -> **Run Pipeline**
+
+There you can add the **EA** variable the right bitstream configuration do you want to use.
 
 
 ## 7- :floppy_disk: infoROM information `{chap8}`
