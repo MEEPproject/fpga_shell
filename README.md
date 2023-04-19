@@ -25,7 +25,7 @@
     - [:snail: Dissected guide](chap4.1.2)
   - [:scroll: Acme project features](chap4.2)
   - [:paperclip: Push with GitLab variables](chap4.3)
-  - [Other available commands](chap4.4)
+  - [:inbox_tray: Other available commands](chap4.4)
 - [:open_file_folder: Directory Structure](chap5)
 - [:pencil2: Bitstreams Naming convention](chap6)
   - [:closed_book: ACME_EA](chap6.1)
