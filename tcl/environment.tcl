@@ -19,7 +19,7 @@
 
 #script_version 1 
 set g_vivado_version [version -short]
-set g_board_part u280
+set g_board_part u55c
 set g_fpga_part xc${g_board_part}-fsvh2892-2L-e
 set g_project_name system      
 set g_root_dir    [pwd]                     
