@@ -130,7 +130,6 @@ puts  $fd_mod    "   ); \r\n "
 fcopy $fd_wire   $fd_mod
 puts  $fd_mod    "\r\n meep_shell meep_shell_inst"
 puts  $fd_mod    "   \("
-
 if { [info exists ETHrate] && $ETHrate == "10Gb" } {
   putmeeps "Adding dummy AXI Protection type signals for $ETHrate Eth IP."
   puts  $fd_mod  " .eth_axi_awprot('0), // dummy axi signal for 10Gb Eth IP"
