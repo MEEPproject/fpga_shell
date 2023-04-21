@@ -6,6 +6,7 @@
 <h1 align="center">MEEP FPGA Shell 
 <br/>
 <br/>
+[project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki")
 </div>
 <div align="center">
 
