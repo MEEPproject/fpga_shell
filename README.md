@@ -10,7 +10,7 @@ The MEEP Shell needs to be used with Vivado 2021.2. The board files for U280/U55
 
 ## 1. Supported Emulated Accelerators
 
-The list of supported EAs so far (17/02/2022) is as follows:
+The list of supported EAs so far is as follows:
 
 - acme
 - ariane
