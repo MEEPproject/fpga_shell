@@ -22,6 +22,6 @@ tight_setup_hold_pins.txt
 system_timing_u*.xdc
 ./ea_url.txt
 content
-misc/null
+
 
 
