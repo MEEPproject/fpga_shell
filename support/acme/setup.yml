@@ -22,7 +22,7 @@
     BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
-    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230413/osbi_alveo.bin
+    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230424/osbi_buildroot.bin
     RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
     #Link of Nexus cloud where the bitstreams ofr production will be store.
     MEEP_RAW_REPOSITORY: " https://release.meep-project.eu/nexus/repository/acme-images/"
