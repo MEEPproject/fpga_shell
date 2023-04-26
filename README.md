@@ -320,13 +320,6 @@ In order to read from the infoROM, execute [read_inforom.sh](https://gitlab.bsc.
 source read_inforom.sh
 ```
 
-<div align="center">
-    <img src="Images/usage.png" width="500px" alt="<InfoROM output>"/>
-
-Output of _source read_inforom.sh_
-
-</div>
-
 #### 7.1.1-:microscope: Read by element `{chap8.1.1}`
 
 ```Bash
@@ -357,12 +350,6 @@ read all
 
 This will automatically kill the process.
 
-<div align="center">
-    <img src="Images/inforom_example.png" width="500px" alt="<InfoROM output>"/>
-
-Output of _read all_ command
-
-</div>
 
 [Futher information](https://wiki.meep-project.eu/index.php/MEEP_InfoROM)
 
