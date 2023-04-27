@@ -4,7 +4,7 @@
 
 #Colors
 R='\033[0;0;31m'    #Red
-BR='\033[1;31m'     #Bold Red 
+BR='\033[1;31m'     #Bold Red
 BIR='\033[1;3;31m'  #Bold Italic Red
 Y='\033[0;0;93m'    #Yellow
 BY='\033[1;0;93m'   #Bold Yellow
@@ -111,7 +111,6 @@ do
    echo "$k"
    tail $OUTPUT_FILE
    sleep 33
-   
 done
 
 end_time=$(date +%s.%N)     # get end time in seconds.nanoseconds
@@ -121,9 +120,9 @@ echo "Elapsed time: $elapsed_time seconds"
 
 echo "Kill cat process ..."
 
-{ 
-	sudo pkill cat 2> $OUTPUT_FILE.error 
-} || { 
+{
+	sudo pkill cat 2> $OUTPUT_FILE.error
+} || {
 	echo "pkill cat command failed:"
 	cat $OUTPUT_FILE.error || ls
 }
@@ -158,7 +157,7 @@ elif [ $1 == set_file ]; then
 elif [ $1 == test_loop_log ]; then
    test_loop_log $2 $3
 elif [ $1 == pico_close ]; then
-   pico_close 
+   pico_close
 elif [ $1 == clean_log ]; then
    clean_log $2 $3
 fi
