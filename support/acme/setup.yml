@@ -96,7 +96,7 @@
     - mv boot tmp/
     - echo -e "Artifacts:"; ls tmp/
 
-  .reports:
+.reports_data:
   after_script:
     - make parse_util_report
 
