@@ -21,6 +21,6 @@
 
 cd accelerator
 
-meep_shell/accelerator_bin.sh
+bash -x meep_shell/accelerator_bin.sh
 
 cd ..
