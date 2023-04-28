@@ -296,7 +296,7 @@ The same ones than before with **OP routers**. This will help to ensure nothing 
 
 :card_box: Here we uses the **u55c** fpga card.
 
-If we want to use this environment, we need to use the gitlab web page -> **Run Pipeline**
+If we want to use this environment, we must use the GitLab web page. CICD -> **Run Pipeline** -> **Choose** the *branch* and set *variable* **EA** with a specific value. You can use `make help_ea` to know the available bitstream configurations.
 
 There you can add the **EA** variable the right bitstream configuration do you want to use.
 
