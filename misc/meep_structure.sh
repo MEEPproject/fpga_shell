@@ -2,7 +2,7 @@
 
 mkdir -p meep_shell; cd meep_shell
 
-echo -e "EANAME=<thisEA>" >> accelerator_def.csv
+echo -e "EANAME=<thisEA>" >> shell2acc_def.csv
 
 echo -e "// This file is a module definition of the EA top file" >> accelerator_mod.sv
 echo -e "#!/bin/bash \r\n# This is script initializes the EA (e.g, prepare submodules)" >> accelerator_init.sh

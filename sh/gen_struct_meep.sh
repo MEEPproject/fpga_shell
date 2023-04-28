@@ -18,7 +18,7 @@
 # Description: Generate the basic file structure to get fpga-shell compatibility for a given EA
 
 # File list to get compatibility:
-# 1) accelerator_def.csv
+# 1) shell2acc_def.csv
 # 2) accelerator_build.sh
 # 3) accelerator_init.sh - should be removed in the future, it is not useful anymore, but needs to be present -
 # 4) accelerator_mod.sv - a wrapper for the EA. It could be removed in the future, as long as the EA top module is parsed instead
@@ -33,9 +33,9 @@ echo "**** This file has been created automatically. This line must be removed *
 EANAME=my_ea
 PCIE,yes,pcie_axi,1,PCIE_CLK,pcie_clk,pcie_rstn,dma,0
 DDR4,no,mem_axi
-HBM,yes,mem_axi,1,CLK1,0x0,mem_calib_complete,00			
+HBM,yes,mem_axi,1,CLK1,0x0,mem_calib_complete,00
 HBM,yes,ncmem_axi,1,CLK1,0x0,mem_calib_complete,01
-AURORA,no,raw,<name>			
+AURORA,no,raw,<name>
 UART,yes,uart_axi,1,CLK0,0x0,normal,uart_irq
 ETHERNET,yes,eth_axi,1,CLK0,eth_axi_aclk,eth_axi_arstn,10Gb,eth_irq,qsfp1,hbm
 BROM,no,sram_axi,1,CLK0,0x0,initFile.mem
@@ -45,7 +45,7 @@ CLK1,150000000,mc_clk,mc_rstn,LOW
 CLK2,50000000,vpu_clk
 GPIO,5,pcie_gpio,0x00
 ARST,LOW,ExtArstn
-" > $ACC_DIR/accelerator_def.csv
+" > $ACC_DIR/shell2acc_def.csv
 
 echo -e "# Use this script to initialize your EA\n" > $ACC_DIR/accelerator_build.sh
 echo -e "# Use this script to initialize your submodules\n" > $ACC_DIR/accelerator_init.sh

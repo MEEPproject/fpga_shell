@@ -6,7 +6,7 @@
 THIS_DIR=$(pwd) # ~/git_repo/fpga_shell
 PARENT_DIR="$(dirname "$THIS_DIR")" #Returns to parent directory fpga_shell (git_repo)
 
-SHELL_DEF_FILE=$THIS_DIR/accelerator/piton/design/chipset/meep_shell/accelerator_def.csv
+SHELL_DEF_FILE=$THIS_DIR/accelerator/piton/design/chipset/meep_shell/shell2acc_def.csv
 FILE_GENERATED=$THIS_DIR/misc/initrom.mem #primera prueba con txt
 
 # This converts the date (from epoc) to hexadecimal value
@@ -60,7 +60,7 @@ do
             8)
             echo "ETHE" |  xxd -p -c 4 >> $FILE_GENERATED
             ;;
-            9) #La línia 9 de accelerator_def.csv debería borrarse (BROM)
+            9) #La línia 9 de shell2acc_def.csv debería borrarse (BROM)
             echo "BROM" |  xxd -p -c 4 >> $FILE_GENERATED
             ;;
             10)

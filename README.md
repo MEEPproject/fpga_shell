@@ -86,7 +86,7 @@ The supported boards are as follows:
 
 ## 3- 🛠️ Usage `{chap4}`
 
-In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_accelerator_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
+In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_shell2acc_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
 <br/>
 
 ```Bash
@@ -309,7 +309,7 @@ The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
 - SHA of the Accelerator
 - IDs of the active interfaces
 
-The active interfaces are defined in [accelerator_def](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "accelerator_def.csv") and parsed in
+The active interfaces are defined in [accelerator_def](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "shell2acc_def.csv") and parsed in
 [define_shell.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/sh/define_shell.sh "define_shell.sh "), where all the aforementioned information gets written in a new file initrom.mem (gets rewritten if it already exists), stored in _misc_ directory inside the parent directory _fpga_shell_. When issuing _make project_, the [Makefile](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/Makefile "Makefile") moves the information stored in _initrom.mem_ into the ip.
 
 ### 7.1- :book: Read infoROM `{chap8.1}`

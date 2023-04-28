@@ -398,7 +398,6 @@ reports_production:
             - make ci_report_route
             - make validate
         after_script:
-            - !reference [.reports_data,after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_production

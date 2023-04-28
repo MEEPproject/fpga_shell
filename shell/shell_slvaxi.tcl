@@ -3,9 +3,9 @@
 # Licensed under the Solderpad Hardware License v 2.1 (the "License");
 # you may not use this file except in compliance with the License, or, at your option, the Apache License version 2.0.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.solderpad.org/licenses/SHL-2.1
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,7 @@
 
 # Author: Daniel J.Mazure, BSC-CNS
 # Date: 02.12.2022
-# Description: 
+# Description:
 
 # An interconnect needs to be added, considering the potentially diferent clock domains
 
@@ -47,20 +47,20 @@ set_property CONFIG.FREQ_HZ $g_SLVAXI_freq [get_bd_intf_ports /$g_SLVAXI_ifname]
 
 connect_bd_intf_net [get_bd_intf_ports $g_SLVAXI_ifname] -boundary_type upper [get_bd_intf_pins axi_xbar_pcie/M0${slv_axi_ninstances}_AXI]
 
-# Increase the counter to track the number of slaves added	
+# Increase the counter to track the number of slaves added
 incr slv_axi_ninstances
 
 putdebugs "NUMBER LITE $slv_axi_ninstances"
 
 save_bd_design
 
-#### SLVAXI memory map	
+#### SLVAXI memory map
 
 putdebugs "SLVAXIBaseAddr $SLVAXIbaseAddr"
 putdebugs "SLVAXIMemRange $SLVAXIMemRange"
 putdebugs "SLVAXIaddrWidth $SLVAXIaddrWidth"
 
-#Hardcode the mem range to 4K. It might be passed as a parameter via accelerator_def.csv
+#Hardcode the mem range to 4K. It might be passed as a parameter via shell2acc_def.csv
 set SLVAXIMemRange 4
 
 #save_bd_design
