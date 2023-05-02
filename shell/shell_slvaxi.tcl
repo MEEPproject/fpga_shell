@@ -60,7 +60,7 @@ putdebugs "SLVAXIBaseAddr $SLVAXIbaseAddr"
 putdebugs "SLVAXIMemRange $SLVAXIMemRange"
 putdebugs "SLVAXIaddrWidth $SLVAXIaddrWidth"
 
-#Hardcode the mem range to 4K. It might be passed as a parameter via shell2acc_def.csv
+#Hardcode the mem range to 4K. It might be passed as a parameter via accelerator_def.csv
 set SLVAXIMemRange 4
 
 #save_bd_design

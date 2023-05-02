@@ -42,7 +42,7 @@ cd $ACC_DIR
 
 # Find the meep_shell directory based on a typical shell file name
 # TODO: Probably checking for the whole set of meep shell files makes more sense
-MEEP_DIR=$(find $ROOT_DIR -name shell2acc_def.csv -printf '%h\n' | sort -u)
+MEEP_DIR=$(find $ROOT_DIR -name accelerator_def.csv -printf '%h\n' | sort -u)
 echo "[MEEP] INFO: The meepshell folder found at: $MEEP_DIR"
 # Create a symlink in the accelerator root directory
 # in case the user has not placed it there.

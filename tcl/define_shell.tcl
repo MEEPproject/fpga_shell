@@ -36,7 +36,7 @@ source $g_root_dir/tcl/procedures.tcl
 set g_acc_dir $g_root_dir/accelerator
 
 set p_ShellEnvFile  $g_root_dir/tcl/shell_env.tcl
-set p_EAdefFile     $g_acc_dir/meep_shell/shell2acc_def.csv
+set p_EAdefFile     $g_acc_dir/meep_shell/accelerator_def.csv
 set p_EAmodFile	    $g_acc_dir/meep_shell/accelerator_mod.sv
 
 

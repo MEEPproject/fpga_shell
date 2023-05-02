@@ -6,7 +6,7 @@
 # You may obtain a copy of the License at
 # 
 #     http://www.solderpad.org/licenses/SHL-2.1
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,7 +18,7 @@
 # Description: Generate the basic file structure to get fpga-shell compatibility for a given EA
 
 # File list to get compatibility:
-# 1) shell2acc_def.csv
+# 1) accelerator_def.csv
 # 2) accelerator_build.sh
 # 3) accelerator_init.sh - should be removed in the future, it is not useful anymore, but needs to be present -
 # 4) accelerator_mod.sv - a wrapper for the EA. It could be removed in the future, as long as the EA top module is parsed instead
@@ -45,7 +45,7 @@ CLK1,150000000,mc_clk,mc_rstn,LOW
 CLK2,50000000,vpu_clk
 GPIO,5,pcie_gpio,0x00
 ARST,LOW,ExtArstn
-" > $ACC_DIR/shell2acc_def.csv
+" > $ACC_DIR/accelerator_def.csv
 
 echo -e "# Use this script to initialize your EA\n" > $ACC_DIR/accelerator_build.sh
 echo -e "# Use this script to initialize your submodules\n" > $ACC_DIR/accelerator_init.sh
