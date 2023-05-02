@@ -49,7 +49,7 @@ set p_EAmodFile	    $g_acc_dir/meep_shell/accelerator_mod.sv
 proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 
 	set PortEnabledList [list]
-	
+
 	set EnIntfNameList [list]
 	set RetString ""
 	

@@ -6,7 +6,7 @@
 # You may obtain a copy of the License at
 # 
 #     http://www.solderpad.org/licenses/SHL-2.1
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,9 +33,9 @@ echo "**** This file has been created automatically. This line must be removed *
 EANAME=my_ea
 PCIE,yes,pcie_axi,1,PCIE_CLK,pcie_clk,pcie_rstn,dma,0
 DDR4,no,mem_axi
-HBM,yes,mem_axi,1,CLK1,0x0,mem_calib_complete,00			
+HBM,yes,mem_axi,1,CLK1,0x0,mem_calib_complete,00
 HBM,yes,ncmem_axi,1,CLK1,0x0,mem_calib_complete,01
-AURORA,no,raw,<name>			
+AURORA,no,raw,<name>
 UART,yes,uart_axi,1,CLK0,0x0,normal,uart_irq
 ETHERNET,yes,eth_axi,1,CLK0,eth_axi_aclk,eth_axi_arstn,10Gb,eth_irq,qsfp1,hbm
 BROM,no,sram_axi,1,CLK0,0x0,initFile.mem
