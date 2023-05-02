@@ -98,7 +98,7 @@ $(BINARIES_DIR):
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
 	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM)
-	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
+	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX) || (echo "The generation of MEEP Shell has failed $$?"; exit 1)
 	
 $(SYNTH_DCP):
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)

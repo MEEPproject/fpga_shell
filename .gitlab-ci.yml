@@ -10,7 +10,7 @@
 # ea_url.txt file/folder
 # TODO: [Documentation] References are mandatory to exist in the EA included yml
 
-# Include the supported EA configuration files. This could be done in other 
+# Include the supported EA configuration files. This could be done in other
 # included file for clarity
 
 include:
@@ -31,13 +31,13 @@ workflow:
         - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
         - if: $CI_PIPELINE_SOURCE == "web"
         - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
-          when: never  
-        - if: $CI_COMMIT_TAG != null 
+          when: never
+        - if: $CI_COMMIT_TAG != null
         - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
           when: never # Pushing to main doesn't create pipelines unless there is a tag
         - !reference [.test_rules, rules]
         - !reference [.production_rules, rules]
-        - !reference [.quick_test_rules, rules]                        
+        - !reference [.quick_test_rules, rules]
 
 variables: !reference [.setup, variables]
 
@@ -48,10 +48,10 @@ stages:
     - test
     - deploy
 
-.clone_ea: &clone_ea 
+.clone_ea: &clone_ea
     # This is a Gitlab CI/CD requirement. Use a token-ed URL instead of the regular one.
     # The load_module script loads the txt file in the support folder.
-    # The hidden job substitute the SHA in case this is a triggered pipeline 
+    # The hidden job substitute the SHA in case this is a triggered pipeline
     # The extract_url script inserts the token into the repo URL.
     - echo "Inserting the Gitlab token in the EA's URL"
     - sh/load_module.sh $EMULATED_ACCELERATOR
@@ -63,24 +63,24 @@ stages:
     - echo "After update_sha:"; cat ea_url.txt
 
 # EMULATED_ACCELERATOR might be an export variable instead of a GitLab one.
-# Then, before script can setup this bash variable depending on the value 
-# of the EA matrix/parallel value. This way we can clone other EAs 
+# Then, before script can setup this bash variable depending on the value
+# of the EA matrix/parallel value. This way we can clone other EAs
 
 
 synthesis_production:
         stage: synthesis
         extends: .common_conf_production
-        rules: 
+        rules:
             - !reference [.production_rules,rules]
         interruptible: true
         retry: 1
         variables:
-            GIT_STRATEGY: clone            
+            GIT_STRATEGY: clone
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
             #Protosyn flags for prodcution environment
-            PROTON_OP: meep eth ncmem hbm pronoc 
-        before_script:  
+            PROTON_OP: meep eth ncmem hbm pronoc
+        before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + ${FPGA_BOARD}"
@@ -88,7 +88,7 @@ synthesis_production:
         script:
             - echo "[DEBUG] synthesis"
             - make initialize
-            - make $FPGA_BOARD            
+            - make $FPGA_BOARD
             # Synthesis production will use Pronoc routers
             - make project EA_PARAM=$EA EA_PARAM+="${PROTON_OP}"
             - !reference [.riscv_benchmarks, script]
@@ -101,12 +101,12 @@ synthesis_production:
             - cp shell_build.log tmp/project/
             - cp -r src/system_top.sv tmp/project/
             - cp -r tcl/shell_env.tcl tmp/project/
-            - cp gen_system.tcl tmp/project/            
+            - cp gen_system.tcl tmp/project/
             - mv dcp/synthesis.dcp dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
             - echo -e "Artifacts:"; ls tmp; ls dcp
-        allow_failure: false # If any sinthesys fails, all fails 
+        allow_failure: false # If any sinthesys fails, all fails
         artifacts:
           when: always
           expire_in: 3 day
@@ -123,7 +123,7 @@ synthesis_test:
         interruptible: true
         retry: 1
         variables:
-            GIT_STRATEGY: clone            
+            GIT_STRATEGY: clone
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
@@ -133,7 +133,7 @@ synthesis_test:
             - !reference [.export_toolchain, before_script]
         script:
             - make initialize
-            - make $FPGA_BOARD            
+            - make $FPGA_BOARD
             # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
             - make project EA_PARAM=$EA
             - !reference [.riscv_benchmarks, script]
@@ -151,25 +151,25 @@ synthesis_test:
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
             - echo -e "Artifacts:"; ls tmp; ls dcp; tree
-        allow_failure: false # If any sinthesys fails, all fails 
+        allow_failure: false # If any sinthesys fails, all fails
         artifacts:
           when: always
           expire_in: 3 day
           paths:
             - tmp
             - dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp
-            
+
 synthesis_quick_test:
-        stage: synthesis       
+        stage: synthesis
         rules:
             - !reference [.quick_test_rules, rules]
         interruptible: true
         retry: 1
         tags:
             - MEEP_FPGA
-        timeout: 8h 
+        timeout: 8h
         variables:
-            GIT_STRATEGY: clone            
+            GIT_STRATEGY: clone
             GIT_SUBMODULE_STRATEGY: "recursive"
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
             FPGA: u55c
@@ -180,7 +180,7 @@ synthesis_quick_test:
             - !reference [.export_toolchain, before_script]
         script:
             - make initialize
-            - make u55c            
+            - make u55c
             # Synthesis for test env, we are using OP routers so we just need the default protsyn flags. Only specify the acme_ea name
             - make project EA_PARAM=$EA
             - !reference [.riscv_benchmarks, script]
@@ -198,7 +198,7 @@ synthesis_quick_test:
             - !reference [.save_dts, after_script]
             - !reference [.riscv_benchmarks, after_script]
             - echo -e "Artifacts:"; ls tmp; ls dcp
-        allow_failure: false # If any sinthesys fails, all fails 
+        allow_failure: false # If any sinthesys fails, all fails
         artifacts:
           when: always
           expire_in: 1 day
@@ -209,13 +209,13 @@ synthesis_quick_test:
 implementation_production:
         stage: implementation
         extends: .common_conf_production
-        rules: 
-            - !reference [.production_rules,rules] 
+        rules:
+            - !reference [.production_rules,rules]
         needs: [synthesis_production]
         variables:
-            GIT_STRATEGY: fetch         
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-        before_script:     
+        before_script:
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp dcp/synthesis.dcp #?
         script:
             - make ci_implementation DCP_ON=false
@@ -226,7 +226,7 @@ implementation_production:
             - mv reports reports_${EA}_${FPGA_BOARD}_production
         artifacts:
             when: always
-            expire_in: 1 day
+            expire_in: 3 day
             paths:
                 - dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp
                 - reports_${EA}_${FPGA_BOARD}_production
@@ -235,13 +235,13 @@ implementation_test:
         stage: implementation
         extends: .common_conf_test
         variables:
-            GIT_STRATEGY: fetch            
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
-            - !reference [.test_rules,rules] 
+            - !reference [.test_rules,rules]
         needs: [synthesis_test]
-        # As this is a matrix, rename the corresponding dcp for make to recognize it 
-        before_script: 
+        # As this is a matrix, rename the corresponding dcp for make to recognize it
+        before_script:
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}_test.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
@@ -253,7 +253,7 @@ implementation_test:
         allow_failure: true
         artifacts:
             when: always
-            expire_in: 1 day
+            expire_in: 3 day
             paths:
                 - dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp
                 - reports_${EA}_${FPGA_BOARD}_test
@@ -261,16 +261,16 @@ implementation_test:
 implementation_quick_test:
         stage: implementation
         variables:
-            GIT_STRATEGY: fetch            
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         rules:
             - !reference [.quick_test_rules,rules]
         tags:
             - MEEP_FPGA
-        timeout: 8h 
+        timeout: 8h
         needs: [synthesis_quick_test]
-        # As this is a matrix, rename the corresponding dcp for make to recognize it 
-        before_script: 
+        # As this is a matrix, rename the corresponding dcp for make to recognize it
+        before_script:
             - mv dcp/synthesis_${EA}_u55c_qtest.dcp dcp/synthesis.dcp
         script:
             - make ci_implementation DCP_ON=false
@@ -282,7 +282,7 @@ implementation_quick_test:
         allow_failure: true
         artifacts:
             when: always
-            expire_in: 1 day
+            expire_in: 3 day
             paths:
                 - tmp
                 - dcp/implementation_${EA}_u55c_qtest.dcp
@@ -291,15 +291,15 @@ implementation_quick_test:
 bitstream_production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch         
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: bitstream
         extends: .common_conf_production
-        rules: 
+        rules:
             - !reference [.production_rules,rules]
         needs: [implementation_production]
         before_script:
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp            
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_production.dcp dcp/implementation.dcp
         script:
             - make ci_bitstream
         after_script:
@@ -314,9 +314,9 @@ bitstream_production:
             when: always
             expire_in: 7 days
             paths:
-                - bitstream  
+                - bitstream
             reports:
-             dotenv: gen_bitstream.env      
+             dotenv: gen_bitstream.env
 
 bitstream_test:
         variables:
@@ -326,10 +326,10 @@ bitstream_test:
         stage: bitstream
         extends: .common_conf_test
         rules:
-            - !reference [.test_rules,rules] 
+            - !reference [.test_rules,rules]
         needs: [implementation_test]
-        before_script: 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp            
+        before_script:
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp
         script:
             - make ci_bitstream
         after_script:
@@ -345,7 +345,7 @@ bitstream_test:
             when: always
             expire_in: 7 days
             paths:
-                - bitstream  
+                - bitstream
             reports:
              dotenv: gen_bitstream.env
 
@@ -359,9 +359,9 @@ bitstream_quick_test:
             - !reference [.quick_test_rules,rules]
         tags:
             - MEEP_FPGA
-        timeout: 8h 
+        timeout: 8h
         needs: [implementation_quick_test]
-        before_script: 
+        before_script:
             - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp
         script:
             - make ci_bitstream
@@ -378,17 +378,17 @@ bitstream_quick_test:
             when: always
             expire_in: 3 days
             paths:
-                - bitstream  
+                - bitstream
             reports:
              dotenv: gen_bitstream.env
 
 reports_production:
         stage: bitstream
         extends: .common_conf_production
-        variables: 
-            GIT_STRATEGY: fetch         
+        variables:
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-        rules: 
+        rules:
             - !reference [.production_rules,rules]
         needs: [implementation_production]
         before_script:
@@ -396,7 +396,7 @@ reports_production:
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
-            - make validate  
+            - make validate
         after_script:
             - ls reports
             - mkdir -p tmp/reports
@@ -416,12 +416,12 @@ reports_test:
             - !reference [.test_rules,rules]
         needs: [implementation_test]
         before_script:
-            - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp            
+            - ls; ls dcp; tree
+            - mv dcp/implementation_${EA}_${FPGA_BOARD}_test.dcp dcp/implementation.dcp
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
-            - make validate  
+            - make validate
         after_script:
             - ls reports
             - mkdir -p tmp/reports
@@ -441,15 +441,15 @@ reports_quick_test:
             - !reference [.quick_test_rules,rules]
         tags:
             - MEEP_FPGA
-        timeout: 8h 
+        timeout: 8h
         needs: [implementation_quick_test]
         before_script:
-            - ls; ls dcp; tree 
-            - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp            
+            - ls; ls dcp; tree
+            - mv dcp/implementation_${EA}_u55c_qtest.dcp dcp/implementation.dcp
         script:
             - echo "Generate implementation reports..."
             - make ci_report_route
-            - make validate  
+            - make validate
         after_script:
             - ls reports
             - mkdir -p tmp/reports
@@ -470,33 +470,33 @@ reports_quick_test:
 fpga-test-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch         
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_production
-        rules: 
+        rules:
             - !reference [.production_rules,rules]
         needs: [bitstream_production]
         # Overwrite tags to select the right board
-        tags: 
-            - $FPGA_BOARD         
+        tags:
+            - $FPGA_BOARD
         before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_${EA}_production.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit    
-            - mkdir -p tmp/logs                
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
+            - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - sh/check_log.sh $FPGA_LOG $VALID_MSG        
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
-        after_script:            
+        after_script:
             - !reference [.fpga_test, after_script]
         allow_failure: false
         artifacts:
@@ -516,24 +516,24 @@ fpga-test-test:
             - !reference [.test_rules,rules]
         needs: [bitstream_test]
         # Overwrite tags to select the right board
-        tags: 
-            - $FPGA_BOARD        
-        before_script:            
+        tags:
+            - $FPGA_BOARD
+        before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
-            - mkdir -p tmp/logs     
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
+            - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - sh/check_log.sh $FPGA_LOG $VALID_MSG        
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
-        after_script:            
+        after_script:
             - !reference [.fpga_test, after_script]
         allow_failure: true
         artifacts:
@@ -552,25 +552,25 @@ fpga-quick-test:
             - !reference [.quick_test_rules,rules]
         needs: [bitstream_quick_test]
         # Overwrite tags to select the right board
-        tags: 
-            - u55c  
-        timeout: 8h      
-        before_script:            
+        tags:
+            - u55c
+        timeout: 8h
+        before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_${EA}_u55c.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit    
-            - mkdir -p tmp/logs     
+            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
+            - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
             - source sh/fpga_test.sh $FPGA_LOG
             - echo "Checking FPGA log ..."
-            - sh/check_log.sh $FPGA_LOG $VALID_MSG        
+            - sh/check_log.sh $FPGA_LOG $VALID_MSG
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
-        after_script:            
+        after_script:
             - !reference [.fpga_test, after_script]
         allow_failure: false
         artifacts:
@@ -582,7 +582,7 @@ fpga-quick-test:
 test-benchmarks-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch         
+            GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
@@ -590,20 +590,20 @@ test-benchmarks-production:
         rules:
             - !reference [.production_rules,rules]
         needs: [synthesis_production,bitstream_production]
-        tags: 
-            - $FPGA_BOARD        
-        before_script: 
+        tags:
+            - $FPGA_BOARD
+        before_script:
             - !reference [.fpga_test, before_script]
-            # The UTC datetime when the pipeline was created            
+            # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}_production.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit    
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
             - mkdir -p tmp/test_logs
         script:
             # The EA script should provide the right script and the right binary
             - $TOOLS_DIR/fpga/load_bitstream.sh qdma $BITSTREAM
             - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.list $FPGA_LOG
-            - echo "Checking FPGA log ..." 
+            - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
@@ -626,14 +626,14 @@ test-benchmarks-test:
             - !reference [.test_rules,rules]
         needs: [synthesis_test,bitstream_test]
         # Overwrite tags to select the right board
-        tags: 
-            - $FPGA_BOARD        
-        before_script: 
+        tags:
+            - $FPGA_BOARD
+        before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit    
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
             - mkdir -p tmp/test_logs
         script:
             # The EA script should provide the right script and the right binary
@@ -661,15 +661,15 @@ test-benchmarks-quick_test:
             - !reference [.quick_test_rules,rules]
         needs: [synthesis_quick_test,bitstream_quick_test]
         # Overwrite tags to select the right board
-        tags: 
-            - u55c   
-        timeout: 8h    
-        before_script: 
+        tags:
+            - u55c
+        timeout: 8h
+        before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_baremetal_${EA}_u55c_qtest.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit    
+            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
             - mkdir -p tmp/test_logs
         script:
             # The EA script should provide the right script and the right binary
@@ -691,14 +691,14 @@ deploy-EA-production:
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
-        rules: 
+        rules:
             - !reference [.production_rules,rules]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
         timeout: 8h
-        tags: !reference [.default_tags, tags]          
-        before_script:             
+        tags: !reference [.default_tags, tags]
+        before_script:
             # The UTC datetime when the pipeline was created
             - ls tmp; tree
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
@@ -706,21 +706,22 @@ deploy-EA-production:
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - echo "FPGA Shell deploys here ${ABSDIR}"
             - mkdir -p $ABSDIR
-        script: 
-            - echo "Deploy date, commit_sha,reports,dcp, bitstreams"          
+        script:
+            - echo "Deploy date, commit_sha,reports,dcp, bitstreams"
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
             - ls tmp; tree
             - mv bitstream tmp/
-            - mkdir -p tmp/reports; mv reports_* tmp/reports/ 
-            - mv dcp tmp/ 
+            - mkdir -p tmp/reports; mv reports_* tmp/reports/
+            - mv dcp tmp/
             - cp -r tmp/* $ABSDIR
-            - ls $ABSDIR 
+            - ls $ABSDIR
             # Store production's bitstreams: acme_ea_1h_16v, acme_ea_4a, acme_ea_4h2v
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_production.bit
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_production.bit
-        after_script:             
-            - echo "Remember - Exported variables are not propagated to after_script"            
+            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_u55c_production.bit
+            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_u55c_production.bit
+            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u55c_production.bit
+        after_script:
+            - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false
         environment:
             name: production
@@ -736,25 +737,25 @@ deploy-EA-test:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
         timeout: 8h
-        tags: !reference [.default_tags, tags] 
+        tags: !reference [.default_tags, tags]
         before_script:
-            - ls; ls dcp; tree  
+            - ls; ls dcp; tree
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export EADIRNAME=${date_format}_${CI_PIPELINE_ID}_test
             - export ABSDIR=$SHELL_DEPLOY_DIR/$EADIRNAME
             - echo "FPGA Shell deploys here ${ABSDIR}"
             - mkdir -p $ABSDIR
-            - ls 
+            - ls
         script:
             - date >> $ABSDIR/date.txt
             - echo "$CI_COMMIT_SHA" >> $ABSDIR/commit_sha.txt
-            - mv bitstream tmp/            
-            - mkdir -p tmp/reports; mv reports_* tmp/reports/ 
-            - mv dcp tmp/ 
+            - mv bitstream tmp/
+            - mkdir -p tmp/reports; mv reports_* tmp/reports/
+            - mv dcp tmp/
             - cp -r tmp/* $ABSDIR
-            - ls $ABSDIR 
-        after_script:             
+            - ls $ABSDIR
+        after_script:
             - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false
         environment:
@@ -777,7 +778,7 @@ release_job:
             - if: $CI_COMMIT_TAG # Run this job when a tag is created
         script:
             # The UTC datetime when the pipeline was created
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")" 
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - echo "Running release job"
         release:
          name: 'MEEP Release $CI_COMMIT_TAG'
@@ -785,7 +786,7 @@ release_job:
          tag_name: '$CI_COMMIT_TAG'
          assets:
           links:
-            - name: 'Bitstream_${TARGET_MEEP}_production'       
+            - name: 'Bitstream_${TARGET_MEEP}_production'
               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_MEEP}/artifacts/raw/bitstream/${date_format}_acme_ea_4hv2_production.bit 
-            - name: 'Bitstream_${TARGET_GOLDEN}_production'       
+            - name: 'Bitstream_${TARGET_GOLDEN}_production'
               url: https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/jobs/${JOB_ID_GOLDEN}/artifacts/raw/bitstream/${date_format}_acme_ea_4a_production.bit                   
