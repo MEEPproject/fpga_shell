@@ -19,6 +19,7 @@
 
 source [pwd]/tcl/environment.tcl
 source $g_root_dir/tcl/impl_utils.tcl
+set g_board_part [string range [get_property PART [current_design]] 2 5]
 
 if { $::argc > 0 } {
 
