@@ -19,7 +19,6 @@
 
 source [pwd]/tcl/environment.tcl
 source $g_root_dir/tcl/impl_utils.tcl
-set g_board_part [string range [get_property PART [current_design]] 2 5]
 
 if { $::argc > 0 } {
 
@@ -52,8 +51,6 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 	set RefTime [clock seconds]
 	## It is assumed a dcp folder containing the synthesis dcp already exists
 	file mkdir $g_root_dir/reports
-
-	open_checkpoint $g_root_dir/dcp/synthesis.dcp
 
 	### Check as early as possible that all logical ports and all I/O
 	### standards are specified.
@@ -279,6 +276,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 }
 
 ### MAIN PROGRAM
+
+open_checkpoint $g_root_dir/dcp/synthesis.dcp
+set g_board_part [string range [get_property PART [current_design]] 2 5]
 
 # Optionaly add a place directive as an argument.
 
