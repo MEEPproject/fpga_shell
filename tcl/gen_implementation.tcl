@@ -52,8 +52,6 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 	## It is assumed a dcp folder containing the synthesis dcp already exists
 	file mkdir $g_root_dir/reports
 
-	open_checkpoint $g_root_dir/dcp/synthesis.dcp
-
 	### Check as early as possible that all logical ports and all I/O
 	### standards are specified.
 	### This likely shouldn't happen as the Shell is "fixed", but it is
@@ -279,11 +277,19 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 
 ### MAIN PROGRAM
 
+open_checkpoint $g_root_dir/dcp/synthesis.dcp
+set g_board_part [string range [get_property PART [current_design]] 2 5]
+
 # Optionaly add a place directive as an argument.
 
 set directivesFile $g_root_dir/shell/directives.tcl
-# set g_place_directive "Explore"
-set g_place_directive "ExtraNetDelay_low"
+if { $g_board_part == "u280" }  {
+  # this placement strategy works better for high-dense ACME flavors (16h, 1h16v)
+  set g_place_directive "ExtraNetDelay_low"
+} else {
+  set g_place_directive "Explore"
+}
+
 # set g_route_directive "NoTimingRelaxation"
 set g_route_directive "AggressiveExplore"
 
