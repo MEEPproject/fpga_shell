@@ -17,11 +17,11 @@
 
 [[_TOC_]]
 
-## 1- :art: Features `{chap2}`
+## 1- :art: Features
 
 The shell is meant to be a static perimeter architecture that guarantees that the inside accelerator package can be interchangeable for any other package when meeting a defined I/O interface between the shell and the accelerator package.
 
-### 1.1- :house_with_garden: Supported Emulated Accelerators `{chap1}`
+### 1.1- :house_with_garden: Supported Emulated Accelerators
 
 - acme
 - ariane
@@ -34,7 +34,7 @@ The shell is meant to be a static perimeter architecture that guarantees that th
 
 Every EA has a folder fpga_shell/support with a ea_url.txt file. This file contains the Git URL and the commit SHA. If it is necessary to change the commit SHA to point a specific commit this is the place to modify it.
 
-### 1.2- 📡 Interfaces `{chap2.2}`
+### 1.2- 📡 Interfaces
 
 The FPGA Shell implements the following interfaces:
 
@@ -46,19 +46,19 @@ The FPGA Shell implements the following interfaces:
 - Info ROM: Stores and reads information on the configuration of the Shell when booting the project
 - UART
 
-### 1.3- :books: Boards `{chap2.3}`
+### 1.3- :books: Boards
 
 The supported boards are as follows:
 
 - Alveo U55C
 - Alveo U280
 
-## 2- :electric_plug: Prerequisites `{chap3}`
+## 2- :electric_plug: Prerequisites
 
 - The MEEP Shell is compatible with both Vivado 2021.2. and 2021.1 versions
 - It only works on Linux. There is no plan to add Windows support in the middle term.
 
-## 3- 🛠️ Usage `{chap4}`
+## 3- 🛠️ Usage
 
 In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_accelerator_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
 <br/>
@@ -69,9 +69,9 @@ INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
 
 Where _diasmbiguation_ is <span style="color:green">**_yes_**</span> in order to activate the component within the Shell, <span style="color:red">**_no_**</span> for it to be absent.<br/>
 
-### 3.1- :crystal_ball: Project creation process `{chap4.1}`
+### 3.1- :crystal_ball: Project creation process
 
-#### 3.1.1- :racehorse: Quickstart guide `{chap4.1.1}`
+#### 3.1.1- :racehorse: Quickstart guide
 
 If required, adjust the default board. Note that "u55c" is currently set as default.
 
@@ -85,7 +85,7 @@ To perform a complete implementation, include any additional parameters. Please 
 
     make all LOAD_EA=acme EA_PARAM=acme_ea_4a
 
-#### 3.1.2- :snail: Dissected guide `{chap4.1.2}`
+#### 3.1.2- :snail: Dissected guide
 
 After cloning the repository, proceed with the following steps:
 
@@ -131,7 +131,7 @@ make bitstream         # Generates the bitstream. Creates the synthesis.dcp and/
 
 For further information, please refer to [this resource](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_MEEP_Shell_use).
 
-### 3.2- :scroll: Acme project features `{chap4.2}`
+### 3.2- :scroll: Acme project features
 
 To verify the available flavors for acme, execute the following command:
 
@@ -151,13 +151,13 @@ If you intend to include flags:
 
 This will generate an OpenPiton project with Lagarto as a core. Other combinations are available.
 
-### 3.3- :paperclip: Push with GitLab variables `{chap4.3}`
+### 3.3- :paperclip: Push with GitLab variables
 
     git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 
     make project EA_PARAMS=pronoc
 
-### 3.4- :inbox_tray: Other available commands `{chap4.4}`
+### 3.4- :inbox_tray: Other available commands
 
 ```Bash
 make SmartPlace        # Exahustive search of the best placement strategy (~20hours)
@@ -171,7 +171,7 @@ make reports_synth     # Create synthesis reports: Utilization, timing paths
 make reports_impl      # Create implementation reports: Utilization, timing paths
 ```
 
-### 3.5- :mag: Test bitstream `{chap4.5}`
+### 3.5- :mag: Test bitstream
 
 **MEEP SERVERS tools**
 
@@ -195,7 +195,7 @@ You can have open in parallel other terminal to use picocom
 
 Finally, if you want to boot a binary. You can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
 
-## 4- :open_file_folder: Directory Structure `{chap5}`
+## 4- :open_file_folder: Directory Structure
 
 The MEEP FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
 
@@ -208,11 +208,11 @@ The **shell** folder is where all the different IPs that can be part of the Shel
 IPs are treated individually, in such a way there is no friction between different set ups, meaning that any combination of IPs can be set with no dependency or incompatibility between them. Which such approach, the Shell can be built incrementaly, adding more pieces as they are needed. The only exception to this are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it will be explained later.
 
-## 5- :pencil2: Bitstreams Naming convention `{chap6}`
+## 5- :pencil2: Bitstreams Naming convention
 
 To ensure a standardized approach for generating bitstream name releases, it is essential to adhere to certain mandatory rules, which include:
 
-### 5.1- :closed_book: ACME_EA `{chap6.1}`
+### 5.1- :closed_book: ACME_EA
 
 All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
 
@@ -227,11 +227,11 @@ To complete this information, we will add an extra value to each fields:
   - "b" means the number of vector lanes
   - "c" means the number of MT
 
-## 6- :earth_africa: Environments `{chap7}`
+## 6- :earth_africa: Environments
 
 We have defined two different environments in order to generate different bitstreams. Those are **Production** and **Test** .
 
-### 6.1- :wrench: Production `{chap7.1}`
+### 6.1- :wrench: Production
 
 The production environment will be a monthly release. We will work with:
 
@@ -262,7 +262,7 @@ There are two ways to execute the pipeline using this environment. By Merge requ
 
 The bitstreams generated will be released in [here](https://release.meep-project.eu/nexus/#browse/search/raw).
 
-### 6.2- :four_leaf_clover: Test `{chap7.2}`
+### 6.2- :four_leaf_clover: Test
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
 
@@ -272,7 +272,7 @@ Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP r
 
 If we want to use this environment, we need to use in our _commit message_ **#TestCICD**
 
-### 6.3- :dart: Quick Test `{chap7.3}`
+### 6.3- :dart: Quick Test
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .I
 
@@ -282,7 +282,7 @@ If we want to use this environment, we must use the GitLab web page. CICD -> **R
 
 There you can add the **EA** variable the right bitstream configuration do you want to use.
 
-## 7- :floppy_disk: infoROM information `{chap8}`
+## 7- :floppy_disk: infoROM information
 
 The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
 
@@ -294,7 +294,7 @@ The ROM hardcoded in the FPGA Shell (infoROM), stores the following information:
 The active interfaces are defined in [accelerator_def](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "accelerator_def.csv") and parsed in
 [define_shell.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/sh/define_shell.sh "define_shell.sh "), where all the aforementioned information gets written in a new file initrom.mem (gets rewritten if it already exists), stored in _misc_ directory inside the parent directory _fpga_shell_. When issuing _make project_, the [Makefile](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/Makefile "Makefile") moves the information stored in _initrom.mem_ into the ip.
 
-### 7.1- :book: Read infoROM `{chap8.1}`
+### 7.1- :book: Read infoROM
 
 In order to read from the infoROM, execute [read_inforom.sh](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/blob/blanca_ROM/misc/read_inforom.sh):
 
@@ -302,7 +302,7 @@ In order to read from the infoROM, execute [read_inforom.sh](https://gitlab.bsc.
 source read_inforom.sh
 ```
 
-#### 7.1.1-:microscope: Read by element `{chap8.1.1}`
+#### 7.1.1-:microscope: Read by element
 
 ```Bash
 get date
@@ -324,7 +324,7 @@ get EA
 get shell components
 ```
 
-#### 7.1.2- :telescope: Read all at once `{chap8.1.2}`
+#### 7.1.2- :telescope: Read all at once
 
 ```Bash
 read all
@@ -334,7 +334,7 @@ This will automatically kill the process.
 
 [Futher information](https://wiki.meep-project.eu/index.php/MEEP_InfoROM)
 
-## 8- :woman: Authors `{chap9}`
+## 8- :woman: Authors
 
 - Alex Kropotov: alex.kropotov@bsc.es
 - Bachir Fradj: bachir.fradj@bsc.es
@@ -343,7 +343,7 @@ This will automatically kill the process.
 - Elias Perdomo: elias.perdomo@bsc.es
 - Francelly Cano Ladino: francelly.canoladino@bsc.es
 
-## 9- 👷 Partners `{chap10}`
+## 9- 👷 Partners
 
 **Barcelona Supercomputing Center** - Centro Nacional de Supercomputación (BSC-CNS) :globe_with_meridians:
 [Website](https://www.bsc.es "Welcome")
@@ -351,7 +351,7 @@ This will automatically kill the process.
 :globe_with_meridians: [Website](https://www.fer.unizg.hr/en "Welcome")
 <br/>**TÜBITAK BILGEM** Informatics and Information Security Research Center :globe_with_meridians: [Website](https://bilgem.tubitak.gov.tr/en "Welcome")
 
-## 10- :globe_with_meridians: Wiki `{chap11}`
+## 10- :globe_with_meridians: Wiki
 
 For more detailed instructions on how to use this software, visit [project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki").
 
