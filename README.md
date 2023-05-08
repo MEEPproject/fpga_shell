@@ -263,6 +263,14 @@ The production environment will be a monthly release. We will work with:
 
 All use **ProNoC** routers
 
+```mermaid
+graph TD;
+  A-->B;
+  A-->C;
+  B-->D;
+  C-->D;
+```
+
 | Bitstream names                                                  | Description                  | Status                                       |
 | :--------------------------------------------------------------- | :--------------------------- | :------------------------------------------- |
 | acme_ea_4a                                                       | _golden reference_           | available                                    |
