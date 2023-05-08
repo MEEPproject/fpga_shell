@@ -96,7 +96,7 @@ make initialize LOAD_EA=acme  # Should be used with flag LOAD_EA=<selectedEA>
 ```
 
 Utilize the appropriate initialization flag to incorporate the EA package.
-Acme is recommended, but any of the supported EA packages exposed at [Section 1.1](#supported-emulated-accelerators) is elligible.
+Acme is recommended, but any of the supported EA packages exposed at [Section 1.1](#11-supported-emulated-accelerators) is elligible.
 Also, every EA has a folder `fpga_shell/support` with an ea_url.txt file. This file contains the Git URL and the commit SHA. Modify the commit SHA at this location if you need to specify a particular commit.
 
 ---
