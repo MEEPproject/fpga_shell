@@ -43,6 +43,8 @@
 - [👷 Partners](chap10)
 - [:globe_with_meridians: Wiki](chap11)
 
+[[_TOC_]]
+
 ## 1- :art: Features `{chap2}`
 
 The shell is meant to be a static perimeter architecture that guarantees that the inside accelerator package can be interchangeable for any other package when meeting a defined I/O interface between the shell and the accelerator package.
