@@ -263,7 +263,6 @@ All use **ProNoC** routers
 | acme_ea_4h2v4m                                                   |                              | **not** available yet . Pending from MT      |
 | acme_ea_4h2v2m                                                   | (L1.Ariane)                  | **not** available yet [pending from MT]      |
 | Meanwhile 2, 3 & 4 are in place we will include a transition one |
-| acme_ea_1h16v                                                    | (L1.Ariane)                  | available                                    |
 | acme_ea_4h2v                                                     | (L1.Ariane)                  | available                                    |
 | acme_ea_1h2g                                                     | (L1.Ariane)                  | available                                    |
 | acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
