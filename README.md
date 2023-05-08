@@ -96,7 +96,7 @@ make initialize LOAD_EA=acme  # Should be used with flag LOAD_EA=<selectedEA>
 ```
 
 Utilize the appropriate initialization flag to incorporate the EA package.
-Acme is recommended, but any of the supported EA packages exposed at [Section 1.1](chap1.1) is elligible.
+Acme is recommended, but any of the supported EA packages exposed at [Section 1.1](Supported Emulated Accelerators) is elligible.
 Also, every EA has a folder `fpga_shell/support` with an ea_url.txt file. This file contains the Git URL and the commit SHA. Modify the commit SHA at this location if you need to specify a particular commit.
 
 ---
@@ -105,7 +105,7 @@ Also, every EA has a folder `fpga_shell/support` with an ea_url.txt file. This f
 make <board>        # In order to choose the FPGA board, where <board>=u55c / u280.
 ```
 
-Where _board_ can be any of those listed in [Section 1.3](chap1.3).
+Where _board_ can be any of those listed in [Section 1.3](Boards).
 
 ---
 
@@ -113,7 +113,7 @@ Where _board_ can be any of those listed in [Section 1.3](chap1.3).
 make project           # Creates the Vivado project. Generates the FPGA shell around the EA
 ```
 
-**When working with acme, there are different "flavours" that can be generated**. For additional details, please refer to [Section 3.2](chap4.2).
+**When working with acme, there are different "flavours" that can be generated**. For additional details, please refer to [Section 3.2](Acme project features).
 
 ---
 
