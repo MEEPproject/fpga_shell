@@ -15,34 +15,6 @@
 
 ## Table of Contents
 
-- [:art: Features](chap2)
-  - [:house_with_garden: Supported Emulated Accelerators](#1--🏡-supported-emulated-accelerators-chap1chap1)
-  - [📡 Interfaces](chap2.2)
-  - [:books: Boards ](chap2.3)
-- [:electric_plug: Prerequisites](chap3)
-- [🛠️ Usage](chap4)
-  - [:crystal_ball: Project creation process](chap4.1)
-    - [:racehorse: Quickstart guide](chap4.1.1)
-    - [:snail: Dissected guide](chap4.1.2)
-  - [:scroll: Acme project features](chap4.2)
-  - [:paperclip: Push with GitLab variables](chap4.3)
-  - [:inbox_tray: Other available commands](chap4.4)
-  - [:mag: Test bitstream](chap4.5)
-- [:open_file_folder: Directory Structure](chap5)
-- [:pencil2: Bitstreams Naming convention](chap6)
-  - [:closed_book: ACME_EA](chap6.1)
-- [:earth_africa: Environments](chap7)
-  - [:wrench: Production](chap7.1)
-  - [:four_leaf_clover: Test](chap7.2)
-  - [:dart: Quick Test](chap7.3)
-- [:floppy_disk: infoROM information](chap8)
-  - [:book: Read infoROM](chap8.1)
-    - [:microscope: Read by element](chap8.1.1)
-    - [:telescope: Read all at once](chap8.1.2)
-- [:woman: Authors](chap9)
-- [👷 Partners](chap10)
-- [:globe_with_meridians: Wiki](chap11)
-
 [[_TOC_]]
 
 ## 1- :art: Features `{chap2}`
