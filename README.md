@@ -233,9 +233,9 @@ We have defined three different environments in order to generate different bits
 
 ```mermaid
 flowchart LR
-    A[Merge Request]  -- Merge Request to production branch/ Schedule --> B([Synthesis])
-    T[Test]  -- Use #TestCICD commit message --> B([Synthesis])
-    Q[Quick-Test]  --  Use Run pipeline gitlab web --> B([Synthesis])
+    A[Merge Request]  --> B([Synthesis])
+    T[Test]  --> B([Synthesis])
+    Q[Quick-Test]  --> B([Synthesis])
     B --> C([Implementation])
     C --> D([Bitstream Generation])
     D --> E([Booting Linux])
