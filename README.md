@@ -254,6 +254,7 @@ graph TD;
 | Meanwhile 2, 3 & 4 are in place we will include a transition one |
 | acme_ea_1h16v                                                    | (L1.Ariane)                  | available                                    |
 | acme_ea_4h2v                                                     | (L1.Ariane)                  | available                                    |
+| acme_ea_1h2g                                                     | (L1.Ariane)                  | available                                    |
 | acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
 
 :books: The FPGA card used here is the **u55c** (default).
@@ -264,7 +265,14 @@ The bitstreams generated will be released in [here](https://release.meep-project
 
 ### 6.2- :four_leaf_clover: Test
 
-The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .
+Here we are using **OP routers**. This will help to ensure nothing is broken on the way.
+
+| Bitstream names | Description                                           | Status    |
+| :-------------- | :---------------------------------------------------- | :-------- |
+| acme_ea_4a      | _golden reference_                                    | available |
+| acme_ea_4h2v    |                                                       | available |
+| acme_ea_1h16v   | Problems with the route and place implemetation stage | available |
+| acme_ea_16v     | It is too big to be implemented in the FPGA boards    | available |
 
 Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers. (Pending)
 
