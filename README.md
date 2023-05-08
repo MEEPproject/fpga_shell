@@ -245,7 +245,7 @@ flowchart LR
     G --> H([OS tests])
     H --> I([Deploy])
 
-    I --> J{Decision}
+    I --> J{Where?}
     J -->|One| K[MEEP SERVERS]
     J -->|Two| L[Nexus Cloud]
 ```
