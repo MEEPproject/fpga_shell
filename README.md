@@ -229,21 +229,32 @@ To complete this information, we will add an extra value to each fields:
 
 ## 6- :earth_africa: Environments
 
-We have defined two different environments in order to generate different bitstreams. Those are **Production** and **Test** .
+We have defined three different environments in order to generate different bitstreams. Those are **Production**, **Test**, and **Quick-test**.
+
+```mermaid
+flowchart LR
+    A[Merge Request]  -- Merge Request to production branch/ Schedule --> B([Synthesis])
+    T[Test]  -- Use #TestCICD commit message --> B([Synthesis])
+    Q[Quick-Test]  --  Use Run pipeline gitlab web --> B([Synthesis])
+    B --> C([Implementation])
+    C --> D([Bitstream Generation])
+    D --> E([Booting Linux])
+    E --> F([Baremetal Test])
+    F --> G([Fedora])
+    G -- X5 --> G([Fedora])
+    G --> H([OS tests])
+    H --> I([Deploy])
+
+    I --> J{Decision}
+    J -->|One| K[MEEP SERVERS]
+    J -->|Two| L[Nexus Cloud]
+```
 
 ### 6.1- :wrench: Production
 
 The production environment will be a monthly release. We will work with:
 
 All use **ProNoC** routers
-
-```mermaid
-graph TD;
-  A-->B;
-  A-->C;
-  B-->D;
-  C-->D;
-```
 
 | Bitstream names                                                  | Description                  | Status                                       |
 | :--------------------------------------------------------------- | :--------------------------- | :------------------------------------------- |
