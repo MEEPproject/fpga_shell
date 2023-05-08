@@ -267,7 +267,7 @@ All use **ProNoC** routers
 | acme_ea_1h2g                                                     | (L1.Ariane)                  | available                                    |
 | acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
 
-:books: The FPGA card used here is the **u55c** (default).
+:books: The FPGA card used here are the **u280** and **u55c** (default).
 
 There are two ways to execute the pipeline using this environment. By Merge request event :arrow_heading_up: and schedule (monthly, the 1th):clock1:.
 
@@ -286,7 +286,7 @@ Here we are using **OP routers**. This will help to ensure nothing is broken on 
 
 Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers. (Pending)
 
-:card_box: Here we uses the **u280** and **u55c** fpga cards.
+:card_box: Here we use the **u280** and **u55c** fpga cards.
 
 If we want to use this environment, we need to use in our _commit message_ **#TestCICD**
 
