@@ -170,10 +170,11 @@ clean: clean_ip clean_project
 
 clean_ip: 
 	@(make -C ip/100GbEthernet clean)
-	@(make -C ip/aurora_raw clean)
 	@(make -C ip/10GbEthernet clean)
 	@(make -C ip/pulp_uart clean)
 	@(make -C ip/axi_brom clean)
+	@(make -C ip/aurora_dma clean)
+	@(make -C ip/aurora_raw clean)
 
 clean_binaries:
 	@rm -rf binaries
