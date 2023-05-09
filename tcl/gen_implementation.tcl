@@ -288,7 +288,7 @@ if { $g_board_part == "u280" }  {
   set g_place_directive "ExtraNetDelay_low"
 } else {
   set g_place_directive "Explore"
-  set g_place_directive "ExtraNetDelay_low"
+  # set g_place_directive "ExtraNetDelay_low"
 }
 
 # set g_route_directive "NoTimingRelaxation"
