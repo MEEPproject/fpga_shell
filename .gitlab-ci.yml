@@ -398,6 +398,7 @@ reports_production:
             - make ci_report_route
             - make validate
         after_script:
+            - !reference [.reports_data, after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_production
@@ -423,6 +424,7 @@ reports_test:
             - make ci_report_route
             - make validate
         after_script:
+            - !reference [.reports_data, after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_test
@@ -451,6 +453,7 @@ reports_quick_test:
             - make ci_report_route
             - make validate
         after_script:
+            - !reference [.reports_data, after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_u55c_qtest
@@ -757,6 +760,7 @@ deploy-EA-test:
             - mv dcp tmp/
             - cp -r tmp/* $ABSDIR
             - ls $ABSDIR
+            - !reference [.push-to-database, script]
         after_script:
             - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false

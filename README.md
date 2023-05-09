@@ -294,7 +294,7 @@ If we want to use this environment, we need to use in our _commit message_ **#Te
 
 The same ones than before with **OP routers**. This will help to ensure nothing is broken on the way .I
 
-:card_box: Here we uses the **u55c** fpga card.
+:card_box: Here we use the **u55c** fpga card.
 
 If we want to use this environment, we must use the GitLab web page. CICD -> **Run Pipeline** -> **Choose** the _branch_ and set _variable_ **EA** with a specific value. You can use `make help_ea` to know the available bitstream configurations.
 
