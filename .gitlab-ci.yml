@@ -28,7 +28,7 @@ include:
 workflow:
     rules:
         - if: $CI_PIPELINE_SOURCE == "pipeline"
-        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" )
         - if: $CI_PIPELINE_SOURCE == "web"
         - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
           when: never
