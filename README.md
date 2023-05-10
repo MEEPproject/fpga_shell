@@ -2,7 +2,7 @@
     <img src="Images/meep-logo-symbol.png" width="200px" alt="<MEEP logo>"/>
 
 <br/>
-<h1 align="center">MEEP FPGA Shell 
+<h1 align="center">MEEP FPGA Shell
 <br/>
 <br/>
 
@@ -21,18 +21,21 @@
 
 The shell is meant to be a static perimeter architecture that guarantees that the inside accelerator package can be interchangeable for any other package when meeting a defined I/O interface between the shell and the accelerator package.
 
-### 1.1- :house_with_garden: Supported Emulated Accelerators
+### 1.1- :house_with_garden: Supported Emulated Accelerators (EA)[^1]
 
-- acme
-- ariane
-- dvino
-- ea_demo
-- epac
-- eprocessor
-- pronoc
-- sargantana
+| EA             |                                      Description                                      |                                                       Status |
+| :------------- | :-----------------------------------------------------------------------------------: | -----------------------------------------------------------: |
+| **acme**       | MEEP accelerator. The bistreams will be the only public resource available for anyone |                                                      Updated |
+| **ariane**     |                           Ariane RISC-V CPU from OpenPiton                            |                                                            - |
+| **dvino**      |                         DRAC Lagarto Processor (Lagarto Hun)                          | Depracated,it needs to include the BROM memory inside the EA |
+| **ea_demo**    |                                           -                                           |                                                            - |
+| **epac**       |                                           -                                           |                                                            - |
+| **eprocessor** |                                           -                                           |                                                      Updated |
+| **sargantana** |                                DRAC Lagarto Processor                                 |                                                            - |
 
 Every EA has a folder fpga_shell/support with a ea_url.txt file. This file contains the Git URL and the commit SHA. If it is necessary to change the commit SHA to point a specific commit this is the place to modify it.
+
+[^1]: (EA): This element is where all the data process is executed, and involves computation and memory management. In the future, the architecture of the accelerator will depend on Third Parties, since they will be able to map, place and route their own designs. But, right now as a PoC, MEEP considers a specific accelerator architecture, conformed by a set of IPs RISC-V compliant.
 
 ### 1.2- 📡 Interfaces
 
