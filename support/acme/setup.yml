@@ -15,11 +15,7 @@
     VALID_MSG: "Welcome to Buildroot"
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
-    TOOLS_DIR: /home/tools/fpga-tools
-    DRIVERS_DIR: /home/tools/drivers
-    QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
-    BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
     OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230424/osbi_buildroot.bin
@@ -85,10 +81,10 @@
 
 .fpga_test:
   before_script:
-    - *qdma_drivers
+    - git clone -b develop/cicd_improvements --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
+    - ./fpga-tools/fpga/build_pcie_drivers.sh
   script:
-    #- source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
-    - source $BOOT_SCRIPT $OSBI_DEPLOY_DIR
+    - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/
