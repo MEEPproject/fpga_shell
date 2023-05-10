@@ -180,6 +180,10 @@ make reports_impl      # Create implementation reports: Utilization, timing path
 
 You can find the bistream in the folder **bitstream**
 
+**DRIVERS**
+
+1. Default drivers in MEEP Servers:
+
 Before to load the bistream, you need to setup PATH for drivers:
 
     PATH=/home/tools/drivers/'hostname'/dma_ip_drivers/QDMA/linux-kernel/bin/:$PATH
@@ -189,6 +193,10 @@ you can add it in you local .bashrc.
 Then you can use the following command to load the bistream
 
     /home/tools/fpga-tools/fpga/load-bitstream.sh qdma <your_bistream.bit>
+
+2. ONIC drivers
+
+The actual CI is using the onic drivers. Please follow the instruction in the [readme](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools/-/blob/main/README.md) file.
 
 > Be careful with the FPGA board you have used to generate the bistream, and the board you are using to load the bistream. It needs to be the same type.
 

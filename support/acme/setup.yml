@@ -15,6 +15,7 @@
     VALID_MSG: "Welcome to Buildroot"
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
+    BOOT_SCRIPT: /home/tools/fpga-tools/boot_riscv/boot_acme.sh
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
@@ -70,7 +71,7 @@
     - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR
   after_script:
     - mkdir -p boot
-    - cp fpga-tools/boot_riscv/boot_acme.sh boot/
+    - cp $BOOT_SCRIPT boot/
     - cp $OSBI_DEPLOY_DIR boot/
     - mv boot tmp/
     - echo -e "Artifacts:"; ls tmp/

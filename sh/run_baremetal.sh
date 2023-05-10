@@ -15,8 +15,6 @@ BW='\033[1;37m'     #Bold White
 NC='\033[0;0;0m'        #NO COLOR
 
 
-BOOT_FILE=/home/tools/fpga-tools/boot_riscv
-
 #F1. This function is used to set the env flags
 function setup() {
 
@@ -62,7 +60,7 @@ function set_file() {
 function test_loop_log() {
    TEST_LIST=$1
    OUTPUT_FILE=$2
-   $BOOT_FILE=$3
+   BOOT_FILE=$3
 
    readarray -t test_riscv < $TEST_LIST
 
