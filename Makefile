@@ -157,7 +157,7 @@ test_riscv_clean:
 	${MAKE} -C $(ACCEL_DIR) test_riscv_clean
 
 set_env:
-	sh/run_tests.sh setup
+	./sh/run_tests.sh setup
 
 rom_file:
 	@$(SH_DIR)/create_inforom.sh $(ROOT_DIR)
