@@ -30,13 +30,13 @@
 .riscv_benchmarks:
   script:
     # build benchmarks
-    - source sh/run_baremetal.sh setup
+    - source sh/run_tests.sh setup
     - make test_riscv_fpga
   after_script:
     - mkdir -p tmp/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin_$EA
-    - source sh/run_baremetal.sh set_file tmp/bin_$EA/test_list.list $EA
+    - source sh/run_tests.sh set_file tmp/bin_$EA/test_list.list $EA
   artifacts:
     when: always
     paths:
@@ -65,7 +65,7 @@
 
 .fpga_test:
   before_script:
-    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
+    - git clone -b develop/cicd_improvements --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
     - ./fpga-tools/fpga/build_pcie_drivers.sh
   script:
     - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR

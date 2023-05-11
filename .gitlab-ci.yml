@@ -177,7 +177,7 @@ synthesis_quick_test:
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + $FPGA"
-            - !reference [.export_toolchain, before_script]
+            - make set_env
         script:
             - make initialize
             - make u55c
@@ -605,7 +605,7 @@ test-benchmarks-production:
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.list $FPGA_LOG ./fpga-tools/boot_riscv/boot_acme.sh
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -641,7 +641,7 @@ test-benchmarks-test:
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.list $FPGA_LOG ./fpga-tools/boot_riscv/boot_acme.sh
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -677,7 +677,7 @@ test-benchmarks-quick_test:
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - source sh/run_baremetal.sh test_loop_log tmp/bin_$EA/test_list.list $FPGA_LOG ./fpga-tools/boot_riscv/boot_acme.sh
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
