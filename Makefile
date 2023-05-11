@@ -150,14 +150,11 @@ help_ea:
 ####
 
 # Compile benchmarks for FPGA
-test_riscv_fpga: set_env
+test_riscv_fpga:
 	${MAKE} -C $(ACCEL_DIR) test_riscv_fpga
 
 test_riscv_clean:
 	${MAKE} -C $(ACCEL_DIR) test_riscv_clean
-
-set_env:
-	./sh/run_tests.sh setup
 
 rom_file:
 	@$(SH_DIR)/create_inforom.sh $(ROOT_DIR)

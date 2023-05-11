@@ -177,7 +177,7 @@ synthesis_quick_test:
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + $FPGA"
-            - make set_env
+            - !reference [.export_toolchain, before_script]
         script:
             - make initialize
             - make u55c
