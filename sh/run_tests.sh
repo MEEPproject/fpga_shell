@@ -16,7 +16,7 @@ NC='\033[0;0;0m'        #NO COLOR
 
 
 abs_path="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-parent_dir=$(dirname "$abs_path")
+
 
 
 #F1. This function is used to set the env flags
@@ -52,7 +52,7 @@ sed -i '/picocom v3.1/,/Terminal ready/d; /-------------------------------------
 
 #F3.Set the right path to use in the CI for any case
 function set_file() {
-   info="$parent_dir/tmp/bin_$2/"
+   info="$abs_path/tmp/bin_$2/"
 
    #set the right path to execute the baremetal test
    sed -i -e "s#^#${info}#"  $1
