@@ -765,6 +765,7 @@ deploy-EA-test:
             - mv dcp tmp/
             - cp -r tmp/* $ABSDIR
             - ls $ABSDIR
+            #Database
             - !reference [.push-to-database, script]
         after_script:
             - echo "Remember - Exported variables are not propagated to after_script"
