@@ -727,6 +727,8 @@ deploy-EA-production:
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_u280_production.bit
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u55c_production.bit
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u280_production.bit
+            #database
+            !reference [.push-to-database, script]
         after_script:
             - echo "The deploy has finished"
         allow_failure: false
