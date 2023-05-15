@@ -15,11 +15,8 @@
     VALID_MSG: "Welcome to Buildroot"
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
-    TOOLS_DIR: /home/tools/fpga-tools
-    DRIVERS_DIR: /home/tools/drivers
-    QDMA_APPS_DIR: dma_ip_drivers/QDMA/linux-kernel/bin
+    BOOT_SCRIPT: /home/tools/fpga-tools/boot_riscv/boot_acme.sh
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
-    BOOT_SCRIPT: $TOOLS_DIR/boot_riscv/boot_acme.sh
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
     OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230505/osbi_buildroot.bin
@@ -29,38 +26,21 @@
     # Change this is MEEP wants another bitstream as fixed release
     EA: acme_ea_1h
 
-.qdma_drivers: &qdma_drivers
-  - export QDMA_APPS=$DRIVERS_DIR/`hostname`/$QDMA_APPS_DIR
-  - "export PATH=$QDMA_APPS:$PATH"
-
 # Additional information to build the benchmarks
 .riscv_benchmarks:
   script:
     # build benchmarks
-    - source sh/run_baremetal.sh setup
+    - source sh/run_tests.sh setup
     - make test_riscv_fpga
   after_script:
     - mkdir -p tmp/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin_$EA
-    - source sh/run_baremetal.sh set_file tmp/bin_$EA/test_list.list $EA
+    - source sh/run_tests.sh set_file tmp/bin_$EA/test_list.list $EA
   artifacts:
     when: always
     paths:
       - tmp/bin
-
-.sdk_default:
-  before_script:
-    - echo "SDK before script"
-    - mkdir -p sdk_output
-  script:
-    - make -C $SDK_DIR alveo.bin
-  after_script:
-    - mv $SDK_DIR/osbi_alveo.bin sdk_output/$LINUX_IMAGE
-  artifacts:
-    when: always
-    paths:
-      - sdk_output
 
 .synth_default:
   after_script:
@@ -85,10 +65,10 @@
 
 .fpga_test:
   before_script:
-    - *qdma_drivers
+    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
+    - ./fpga-tools/fpga/build_pcie_drivers.sh
   script:
-    #- source $BOOT_SCRIPT sdk_output/$LINUX_IMAGE
-    - source $BOOT_SCRIPT $OSBI_DEPLOY_DIR
+    - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR
   after_script:
     - mkdir -p boot
     - cp $BOOT_SCRIPT boot/
