@@ -21,6 +21,7 @@ set ETHFreq    [dict get $ETHentry SyncClk Freq]
 set ETHClkIf   [dict get $ETHentry SyncClk Name]
 set ETHintf    [dict get $ETHentry IntfLabel]
 set ETHqsfp    [dict get $ETHentry qsfpPort]
+set ETHdmaMem  [dict get $ETHentry dmaMem]
 set EthHBMCh   [dict get $ETHentry HBMChan]
 set EthAxi     [dict get $ETHentry AxiIntf]
 
@@ -125,7 +126,6 @@ set ConstrList [list $dma_mm2s_constr $dma_s2mm_constr ]
 if { $ETHqsfp != "pcie"} {
 
 set ipClock "eth_gt_user_clock"
-set ipRst "eth_gt_rstn"
 set ipLocked "locked"
 
 set EthHierName "Ethernet10Gb_${ETHqsfp}"
@@ -147,8 +147,6 @@ connect_bd_net [get_bd_ports qsfp${QSFP}_fs] [get_bd_pins ${EthHierName}/${ETHqs
 
 connect_bd_net $EthInitClkPin [get_bd_pins ${EthHierName}/init_clk]
 connect_bd_net $MMCMLockedPin [get_bd_pins ${EthHierName}/$ipLocked]
-
-set RstPinIP   [get_bd_pins ${EthHierName}/$ipRst]  
 
 } else {
 
@@ -204,18 +202,32 @@ putdebugs "Base Addr ETH: $ETHbaseAddr"
 
 # Open an HBM Channel so the Ethernet DMA gets to the main memory
 
-if { $g_board_part == "u280" && [expr $EthHBMCh/16] != [expr $PCIeHBMCh/16] } {
-  putmeeps "Resolving not completely investegated HBM issue for board $g_board_part:"
-  putmeeps "probably $ETHrate Eth DMA is single channel ($EthHBMCh) connected to HBM stack [expr $EthHBMCh/16] switch,"
-  set EthHBMCh [formatHBMch [expr $PCIeHBMCh + 1]]
-  putmeeps "so moving it to channel $EthHBMCh, next to PCIe channel $PCIeHBMCh, please change it accordingly if it doesn't fit."
-}
+# if { $g_board_part == "u280" && [expr $EthHBMCh/16] != [expr $PCIeHBMCh/16] } {
+#   putmeeps "Resolving not completely investegated HBM issue for board $g_board_part:"
+#   putmeeps "probably $ETHrate Eth DMA is single channel ($EthHBMCh) connected to HBM stack [expr $EthHBMCh/16] switch,"
+#   set EthHBMCh [formatHBMch [expr $PCIeHBMCh + 1]]
+#   putmeeps "so moving it to channel $EthHBMCh, next to PCIe channel $PCIeHBMCh, please change it accordingly if it doesn't fit."
+# }
 
-set_property -dict [list CONFIG.USER_SAXI_${EthHBMCh} {TRUE}] [get_bd_cells hbm_0]
+set TxHBMCh [expr $EthHBMCh+0]
+set RxHBMCh [expr $EthHBMCh+1]
+set SgHBMCh [expr $EthHBMCh+2]
 
-connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_user_clock] [get_bd_pins hbm_0/AXI_${EthHBMCh}_ACLK] 
-connect_bd_net [get_bd_pins ${EthHierName}/eth_gt_rstn]       [get_bd_pins hbm_0/AXI_${EthHBMCh}_ARESET_N]
-connect_bd_intf_net -boundary_type upper [get_bd_intf_pins ${EthHierName}/eth_dma_m_axi] [get_bd_intf_pins hbm_0/SAXI_${EthHBMCh}${HBM_AXI_LABEL}]
+set_property -dict [list CONFIG.USER_SAXI_${TxHBMCh} {TRUE}] [get_bd_cells hbm_0]
+set_property -dict [list CONFIG.USER_SAXI_${RxHBMCh} {TRUE}] [get_bd_cells hbm_0]
+set_property -dict [list CONFIG.USER_SAXI_${SgHBMCh} {TRUE}] [get_bd_cells hbm_0]
+
+connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${TxHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_tx]
+connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${RxHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_rx]
+connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${SgHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${EthHierName}/m_axi_sg]
+
+connect_bd_net [get_bd_pins hbm_0/AXI_${TxHBMCh}_ACLK] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+connect_bd_net [get_bd_pins hbm_0/AXI_${RxHBMCh}_ACLK] [get_bd_pins ${EthHierName}/eth_gt_user_clock]
+connect_bd_net [get_bd_pins hbm_0/AXI_${SgHBMCh}_ACLK] [get_bd_pins ${EthHierName}/eth_dma_clk]
+
+connect_bd_net [get_bd_pins hbm_0/AXI_${TxHBMCh}_ARESET_N] [get_bd_pins ${EthHierName}/tx_rstn]
+connect_bd_net [get_bd_pins hbm_0/AXI_${RxHBMCh}_ARESET_N] [get_bd_pins ${EthHierName}/rx_rstn]
+connect_bd_net [get_bd_pins hbm_0/AXI_${SgHBMCh}_ARESET_N] [get_bd_pins ${EthHierName}/eth_dma_arstn]
 
 # set_property offset $ETHbaseAddr [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]
 # set_property range ${ETHMemRange}K [get_bd_addr_segs {MEEP_100Gb_Ethernet_0/S_AXI/reg0 }]

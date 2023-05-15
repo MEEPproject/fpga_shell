@@ -2,22 +2,22 @@ ROOT_DIR     ?=  $(PWD)
 TCL_DIR      =  $(ROOT_DIR)/tcl
 SH_DIR	     =  $(ROOT_DIR)/sh
 DEF_FILE     ?= $(ROOT_DIR)/ea_url.txt
-LOAD_EA      ?= 
+LOAD_EA      ?=
 EA_REPO      =  EMULATED_ACCELERATOR_REPO
 EA_SHA       =  EMULATED_ACCELERATOR_SHA
 EA_GIT_URL   = `grep -m 1 $(DEF_FILE) -e $(EA_REPO) | awk -F ' ' '$$2 {print $$2}' `
 EA_GIT_SHA   = `grep -m 1 $(DEF_FILE) -e $(EA_SHA)  | awk -F ' ' '$$2 {print $$2}' `
 EA_DIR       =  $(ROOT_DIR)/accelerator
-EA_PARAM     ?= 
+EA_PARAM     ?=
 OPTIONS      =
 # EA_PARAM is related to the EA, to it can be parametrized from the Shell
 # For MEEP/ACME, the options are: lagarto, ariane, pronoc, meep_dvino @10/11/2022
 DATE         =  `date +'%a %b %e %H:%M:$S %Z %Y'`
 PROJECT_FILE =	$(ROOT_DIR)/project/system.xpr
 ACCEL_DIR    =  $(ROOT_DIR)/accelerator
-SYNTH_DCP    =  $(ROOT_DIR)/dcp/synthesis.dcp 
-PLACE_DCP    =  $(ROOT_DIR)/dcp/post_place.dcp 
-IMPL_DCP     =  $(ROOT_DIR)/dcp/implementation.dcp 
+SYNTH_DCP    =  $(ROOT_DIR)/dcp/synthesis.dcp
+PLACE_DCP    =  $(ROOT_DIR)/dcp/post_place.dcp
+IMPL_DCP     =  $(ROOT_DIR)/dcp/implementation.dcp
 BIT_FILE     =  $(ROOT_DIR)/bitstream/system.bit
 REPORT_DIR   =  $(ROOT_DIR)/reports
 YAML_FILE    =  $(ROOT_DIR)/.gitlab-ci.yml
@@ -27,11 +27,11 @@ VIVADO_VER   ?= 2021.2
 VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
 VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
-DCP_ON       ?= 
+DCP_ON       ?=
 QUICK_IMPL   ?=
 U200_PART    = "xcu200-fsgd2104-2-e"
-U280_PART    = "xcu280-fsvh2892-2L-e" 
-U55C_PART    = "xcu55c-fsvh2892-2L-e"  
+U280_PART    = "xcu280-fsvh2892-2L-e"
+U55C_PART    = "xcu55c-fsvh2892-2L-e"
 U200_BOARD   = "u200"
 U280_BOARD   = "u280"
 U55C_BOARD   = "u55c"
@@ -49,17 +49,17 @@ u200: clean
 	$(SH_DIR)/extract_part.sh $(U200_BOARD)
 
 u280: clean
-	@$(SH_DIR)/extract_part.sh $(U280_BOARD) 
+	@$(SH_DIR)/extract_part.sh $(U280_BOARD)
 
 u55c: clean
-	@($(SH_DIR)/extract_part.sh $(U55C_BOARD)) 
+	@($(SH_DIR)/extract_part.sh $(U55C_BOARD))
 	@(echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.2")
 
-vcu128:	
+vcu128:
 	@$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
 
 
-initialize: submodules clean clean_accelerator $(ACCEL_DIR) 
+initialize: submodules clean clean_accelerator $(ACCEL_DIR)
 
 project: clean_synthesis $(PROJECT_FILE)
 
@@ -98,34 +98,34 @@ $(BINARIES_DIR):
 
 $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
 	@$(SH_DIR)/accelerator_build.sh $(EA_PARAM)
-	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX)
-	
+	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX) || (echo "The generation of MEEP Shell has failed $$?"; exit 1)
+
 $(SYNTH_DCP):
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
-	
+
 $(BIT_FILE): $(IMPL_DCP)
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
-	
+
 #### Special calls for the CI/CD, where the change on the artifact timestamp disables the use of the "requirements"
 
-ci_implementation: 
+ci_implementation:
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
-	
-ci_bitstream: 
+
+ci_bitstream:
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
 
 ci_report_route:
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
-	
+
 
 #### Special script to adquire the best placement strategy #####
 
 SmartPlace: $(SYNTH_DCP)
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
-	
+
 validate: $(REPORT_DIR)
 	@$(SH_DIR)/check_timing.sh
 
@@ -140,12 +140,12 @@ report_route: $(IMPL_DCP)
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
 #Help menu accelerator_build.sh
-syntax_ea: 
+syntax_ea:
 	${MAKE} -C $(ACCEL_DIR) syntax_ea
-#### 
+####
 
 #Help menu accelerator_build.sh
-help_ea: 
+help_ea:
 	${MAKE} -C $(ACCEL_DIR) help_ea
 ####
 
@@ -157,34 +157,35 @@ test_riscv_clean:
 	${MAKE} -C $(ACCEL_DIR) test_riscv_clean
 
 rom_file:
-	@$(SH_DIR)/create_rom.sh $(ROOT_DIR)
+	@$(SH_DIR)/create_inforom.sh $(ROOT_DIR)
 	@mv $(ROOT_DIR)/misc/initrom.mem $(ROOT_DIR)/ip/axi_brom/src/initrom.mem
 
 ####
 
-submodules:	
+submodules:
 	@(git submodule update --init --recursive)
 
 clean: clean_ip clean_project
-	@rm -rf dcp reports src 	
+	@rm -rf dcp reports src
 
-clean_ip: 
+clean_ip:
 	@(make -C ip/100GbEthernet clean)
-	@(make -C ip/aurora_raw clean)
 	@(make -C ip/10GbEthernet clean)
 	@(make -C ip/pulp_uart clean)
 	@(make -C ip/axi_brom clean)
+	@(make -C ip/aurora_dma clean)
+	@(make -C ip/aurora_raw clean)
 
 clean_binaries:
 	@rm -rf binaries
-	
-clean_project: clean_ip 
+
+clean_project: clean_ip
 	@rm -rf project
-	
+
 clean_accelerator:
 	@rm -rf accelerator
 
-clean_synthesis: clean_implementation	
+clean_synthesis: clean_implementation
 	@rm -rf dcp/synthesis.dcp
 
 clean_implementation:

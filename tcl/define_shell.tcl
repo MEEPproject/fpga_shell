@@ -49,7 +49,7 @@ set p_EAmodFile	    $g_acc_dir/meep_shell/accelerator_mod.sv
 proc PortInterfaceDefinition { PortInterfacesList EnabledIntf} {
 
 	set PortEnabledList [list]
-	
+
 	set EnIntfNameList [list]
 	set RetString ""
 	
@@ -196,8 +196,13 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device HBMChan   [lindex $fields 9 ]
 				}
 				if { "${device}" == "AURORA" } {
-					dict set d_device Mode   [lindex $fields 6]
-					dict set d_device UsrClk [lindex $fields 8]
+                    dict set d_device IntfLabel [lindex $fields 2 ]
+                    dict set d_device AxiIntf   [lindex $fields 3 ]
+                    dict set d_device Mode      [lindex $fields 5 ]
+                    dict set d_device IRQ       [lindex $fields 6 ]
+                    dict set d_device qsfpPort  [lindex $fields 7 ]
+					dict set d_device dmaMem    [lindex $fields 8 ]
+                    dict set d_device HBMChan   [lindex $fields 9 ]
 				}
 				if { "${device}" == "SLV_AXI" } {						
 				}
