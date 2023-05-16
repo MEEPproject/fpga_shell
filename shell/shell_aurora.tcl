@@ -41,20 +41,10 @@ set AuroraUserWidth [dict get $$AURORAentry AxiUserWidth]
 set AuroraIP ""
 
 if { $AuroraMode == "dma" } {
-  set AurHierName "Aurora_${AuroraMode}_${AuroradmaMem}"
+  set AurHierName "AuroraSyst_${AuroraMode}_${AuroradmaMem}"
 } elseif { $AuroraMode == "raw" } {
-  set AurHierName "Aurora_${AuroraMode}"
+  set AurHierName "AuroraSyst_${AuroraMode}"
 }
-
-if { $AuroraQSFP == "qsfp0" } {
-        set QSFP "0"
-        set PortList [lappend PortList $g_aurora0_file]
-} else {
-        set QSFP "1"
-        set PortList [lappend PortLIst $g_aurora1_file]
-}
-
-
 
 ### Initialize the IPs
 putmeeps "Packaging Aurora IP..."
@@ -72,23 +62,43 @@ create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_aurora_${AuroraMode}:$g_
 make_bd_intf_pins_external [get_bd_intf_pins $AurHierName/s_axi]
 set_property name $Auroraintf [get_bd_intf_ports s_axi_0]
 
-create_bd_port -dir I -from 3 -to 0 -type data aur_qsfp_4x_grx_n
-create_bd_port -dir I -from 3 -to 0 -type data aur_qsfp_4x_grx_p
+if { $AuroraQSFP == "qsfp0" } {
+  set QSFP "0"
+  set g_aurora_if_file $g_aurora0_file
 
-create_bd_port -dir O -from 3 -to 0 -type data aur_qsfp_4x_gtx_n
-create_bd_port -dir O -from 3 -to 0 -type data aur_qsfp_4x_gtx_p
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp0_4x_grx_n
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp0_4x_grx_p
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp0_4x_gtx_n
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp0_4x_gtx_p
+  create_bd_port -dir I -type clk qsfp0_ref_clk_n
+  create_bd_port -dir I -type clk qsfp0_ref_clk_p
 
-create_bd_port -dir I -type clk aur_qsfp_ref_clk_n
-create_bd_port -dir I -type clk aur_qsfp_ref_clk_p
+  connect_bd_net [get_bd_ports qsfp0_ref_clk_p] [get_bd_pins ${AurHierName}/qsfp_refck_clk_p]
+  connect_bd_net [get_bd_ports qsfp0_ref_clk_n] [get_bd_pins ${AurHierName}/qsfp_refck_clk_n]
+  connect_bd_net [get_bd_ports qsfp0_4x_grx_n]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxn]
+  connect_bd_net [get_bd_ports qsfp0_4x_grx_p]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxp]
+  connect_bd_net [get_bd_ports qsfp0_4x_gtx_n]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txn]
+  connect_bd_net [get_bd_ports qsfp0_4x_gtx_p]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txp]
+} else {
+  set QSFP "1"
+  set g_aurora_if_file $g_aurora1_file
 
-connect_bd_net [get_bd_ports aur_qsfp_ref_clk_p] [get_bd_pins ${AurHierName}/qsfp_refck_clk_p]
-connect_bd_net [get_bd_ports aur_qsfp_ref_clk_n] [get_bd_pins ${AurHierName}/qsfp_refck_clk_n]
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp1_4x_grx_n
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp1_4x_grx_p
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp1_4x_gtx_n
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp1_4x_gtx_p
+  create_bd_port -dir I -type clk qsfp1_ref_clk_n
+  create_bd_port -dir I -type clk qsfp1_ref_clk_p
 
-connect_bd_net [get_bd_ports aur_qsfp_4x_grx_n] [get_bd_pins ${AurHierName}/qsfp_4x_grx_n]
-connect_bd_net [get_bd_ports aur_qsfp_4x_grx_p] [get_bd_pins ${AurHierName}/qsfp_4x_grx_p]
+  connect_bd_net [get_bd_ports qsfp1_ref_clk_p] [get_bd_pins ${AurHierName}/qsfp_refck_clk_p]
+  connect_bd_net [get_bd_ports qsfp1_ref_clk_n] [get_bd_pins ${AurHierName}/qsfp_refck_clk_n]
+  connect_bd_net [get_bd_ports qsfp1_4x_grx_n]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxn]
+  connect_bd_net [get_bd_ports qsfp1_4x_grx_p]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxp]
+  connect_bd_net [get_bd_ports qsfp1_4x_gtx_n]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txn]
+  connect_bd_net [get_bd_ports qsfp1_4x_gtx_p]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txp]
+}
 
-connect_bd_net [get_bd_ports aur_qsfp_4x_gtx_n] [get_bd_pins ${AurHierName}/qsfp_4x_gtx_n]
-connect_bd_net [get_bd_ports aur_qsfp_4x_gtx_p] [get_bd_pins ${AurHierName}/qsfp_4x_gtx_p]
+set PortList [lappend PortList $g_aurora_if_file]
 
 
 connect_bd_net [get_bd_pins ${AurHierName}/s_axi_clk]            [get_bd_pins rst_ea_$AuroraClkNm/slowest_sync_clk]
