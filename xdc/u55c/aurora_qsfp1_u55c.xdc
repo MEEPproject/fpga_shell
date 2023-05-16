@@ -8,10 +8,10 @@
 ##                             |-> OUT1 SYNCE_CLK1_P/SYNCE_CLK1_N 161.1328125 MHz - onboard QSFP Clock
 ##                             |   PINS: MGTREFCLK0P_131_AB42/MGTREFCLK0N_131_AB43
 
-#create_clock is not needed in case of connecting QSFP clock to 100Gb CMAC, but needed for 1Gb PHY (gig_ethernet_pcs_pma)
+#create_clock is not needed in case of connecting QSFP clock to 100Gb CMAC, but needed for Aurora and 1Gb PHY (gig_ethernet_pcs_pma)
 set_property PACKAGE_PIN AB43 [get_ports "qsfp1_ref_clk_n"] ;# Bank 131 - MGTREFCLK0N_131
 set_property PACKAGE_PIN AB42 [get_ports "qsfp1_ref_clk_p"] ;# Bank 131 - MGTREFCLK0P_131
-# create_clock -period 6.206 -name QSFP1_CLK [get_ports "qsfp_ref_clk_p"]
+create_clock -period 6.206 -name QSFP1_CLK [get_ports "qsfp1_ref_clk_p"]
 
 #--------------------------------------------
 # Specifying the placement of QSFP clock domain modules into single SLR to facilitate routing
