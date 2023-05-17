@@ -287,8 +287,8 @@ if { $g_board_part == "u280" }  {
   # this placement strategy works better for high-dense ACME flavors (16h, 1h16v)
   set g_place_directive "ExtraNetDelay_low"
 } else {
+  set g_place_directive "ExtraNetDelay_low"
   set g_place_directive "Explore"
-  # set g_place_directive "ExtraNetDelay_low"
 }
 
 # set g_route_directive "NoTimingRelaxation"
