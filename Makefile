@@ -120,9 +120,6 @@ ci_bitstream:
 ci_report_route:
 	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
-parse_util_report:
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(ROOT_DIR)/misc/parse_util_rpt.tcl -tclargs $(ROOT_DIR)
-
 #### Special script to adquire the best placement strategy #####
 
 SmartPlace: $(SYNTH_DCP)
