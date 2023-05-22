@@ -288,14 +288,14 @@ set directivesFile $g_root_dir/shell/directives.tcl
 set g_place_directive "ExtraNetDelay_low"
 set g_place_directive "Explore"
 set g_place_directive "ExtraTimingOpt"
-set g_place_directive "Auto_3"
+set g_place_directive "Auto_2"
 
-set g_route_directive "NoTimingRelaxation"
 set g_route_directive "AggressiveExplore"
+set g_route_directive "NoTimingRelaxation"
 
 if { $g_board_part == "u280" }  {
   # board-specific strategies in case it helps for heavy designs
-  set g_place_directive "Auto_3"
+  set g_place_directive "Explore"
   set g_route_directive "AggressiveExplore"
 }
 
