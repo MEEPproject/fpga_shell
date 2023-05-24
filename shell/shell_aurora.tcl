@@ -111,9 +111,9 @@ set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_
 
 # Open an HBM Channels so the Ethernet DMA gets to the main memory
 if { $AuroraMode == "dma" && ${AuroradmaMem} eq "hbm" } {
-  set TxHBMCh [expr $AuroraHBMCh+0]
-  set RxHBMCh [expr $AuroraHBMCh+1]
-  set SgHBMCh [expr $AuroraHBMCh+2]
+  set SgHBMCh [expr $AuroraHBMCh+0]
+  set TxHBMCh [expr $AuroraHBMCh+1]
+  set RxHBMCh [expr $AuroraHBMCh+2]
 
   set_property -dict [list CONFIG.USER_SAXI_${TxHBMCh} {TRUE}] [get_bd_cells hbm_0]
   set_property -dict [list CONFIG.USER_SAXI_${RxHBMCh} {TRUE}] [get_bd_cells hbm_0]

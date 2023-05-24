@@ -118,6 +118,11 @@ foreach dicEntry $ShellEnabledIntf {
 
 source $g_root_dir/shell/shell_gpio.tcl
 
+if { [info exists hbm_inst] && [info exists AuroradmaMem] && $AuroradmaMem eq "hbm"} {
+  set AurHBMSwitch [expr $AuroraHBMCh/16]
+  putmeeps "Setting Aurora clock to drive HBM cross-switch $AurHBMSwitch through channel $AuroraHBMCh"
+  set_property -dict [list CONFIG.USER_CLK_SEL_LIST${AurHBMSwitch} AXI_${AuroraHBMCh}_ACLK] [get_bd_cells hbm_0]
+}
 if { [info exists hbm_inst] && $PCIeDMA eq "dma"} {
   set PCIeHBMSwitch [expr $PCIeHBMCh/16]
   putmeeps "Setting PCIe clock to drive HBM cross-switch $PCIeHBMSwitch through channel $PCIeHBMCh"
