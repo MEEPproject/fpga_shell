@@ -804,7 +804,7 @@ deploy-EA-production:
         when: on_success
         rules:
             - !reference [.production_rules,rules]
-        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-production,test-benchmarks-production]
+        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-linux-production,fpga-test-fedora-linux-production,test-benchmarks-production]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
@@ -848,7 +848,7 @@ deploy-EA-test:
         when: on_success
         rules:
             - !reference [.test_rules,rules]
-        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-test,test-benchmarks-test]
+        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,fpga-test-fedora-test,test-benchmarks-test]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
