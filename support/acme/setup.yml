@@ -12,7 +12,6 @@
     CUSTOM_MSG: 1x1_VAS_noVPU
     LINUX_IMAGE: osbi.bin
     SDK_DIR: accelerator/sdk
-    VALID_MSG: "Welcome to Buildroot"
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
     BOOT_SCRIPT: /home/tools/fpga-tools/boot_riscv/boot_acme.sh
@@ -75,6 +74,15 @@
     - cp $OSBI_DEPLOY_DIR boot/
     - mv boot tmp/
     - echo -e "Artifacts:"; ls tmp/
+
+.fpga_test_fedora:
+  before_script:
+    # Download the fedora image and osbi binary
+    - curl -o fedora_image.img https://release.meep-project.eu/nexus/repository/acme-images/fs/0.0.20/fedora-33.img
+    - curl -O https://release.meep-project.eu/nexus/repository/acme-images/osbi/0.0.20/osbi.bin
+    # Prepare the drivers
+    - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+
 
 .reports_data:
   after_script:
