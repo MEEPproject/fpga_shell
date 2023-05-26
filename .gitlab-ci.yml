@@ -500,7 +500,6 @@ fpga-test-linux-production:
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - !reference [.fpga_test, after_script]
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
         allow_failure: false
         artifacts:
             when: always
@@ -536,7 +535,6 @@ fpga-test-linux-test:
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - !reference [.fpga_test, after_script]
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
         allow_failure: true
         artifacts:
             when: always
@@ -572,7 +570,6 @@ fpga-quick-linux-test:
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - !reference [.fpga_test, after_script]
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
         allow_failure: false
         artifacts:
             when: always
@@ -611,7 +608,6 @@ test-benchmarks-production:
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
             - echo "The baremetal tests have been tested"
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
         allow_failure: false
         artifacts:
             when: always
@@ -648,7 +644,6 @@ test-benchmarks-test:
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
             - echo "The baremetal tests have been tested"
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
         allow_failure: true
         artifacts:
             when: always
@@ -685,7 +680,6 @@ test-benchmarks-quick_test:
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
         after_script:
             - echo "The baremetal tests have been tested"
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
         allow_failure: false
         artifacts:
             when: always
@@ -806,7 +800,7 @@ deploy-EA-production:
         when: on_success
         rules:
             - !reference [.production_rules,rules]
-        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-linux-production,fpga-test-fedora-production,test-benchmarks-production]
+        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-linux-production,test-benchmarks-production,fpga-test-fedora-production]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
@@ -850,7 +844,7 @@ deploy-EA-test:
         when: on_success
         rules:
             - !reference [.test_rules,rules]
-        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,fpga-test-fedora-test,test-benchmarks-test]
+        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,,test-benchmarks-test,fpga-test-fedora-test]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
