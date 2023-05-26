@@ -205,7 +205,7 @@ You can have open in parallel other terminal to use picocom
 
     picocom: picocom -b 115200 /dev/ttyUSB2
 
-Finally, if you want to boot a binary. You can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
+Finally, if you want to boot a binary or test the UART output log, you can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it. Follow the README instructions.
 
 ## 4- :open_file_folder: Directory Structure
 
