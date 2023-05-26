@@ -844,7 +844,7 @@ deploy-EA-test:
         when: on_success
         rules:
             - !reference [.test_rules,rules]
-        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,,test-benchmarks-test,fpga-test-fedora-test]
+        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,test-benchmarks-test,fpga-test-fedora-test]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
