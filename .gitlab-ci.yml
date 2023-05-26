@@ -580,113 +580,8 @@ fpga-quick-linux-test:
             paths:
             - tmp
 
-#2. Boot Fedora
-fpga-test-fedora-production:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-        stage: test
-        retry: 2
-        extends: .common_conf_production
-        rules:
-            - !reference [.production_rules,rules]
-        needs: [bitstream_production]
-        # Overwrite tags to select the right board
-        tags:
-            - $FPGA_BOARD
-        before_script:
-            - !reference [.fpga_test, before_script]
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}_production.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
-            - mkdir -p tmp/logs
-            - !reference [.fpga_test_fedora, before_script]
-        script:
-            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
-        after_script:
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
-        allow_failure: false
-        artifacts:
-            when: always
-            paths:
-            - tmp
 
-fpga-test-fedora-test:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
-        stage: test
-        retry: 2
-        extends: .common_conf_test
-        rules:
-            - !reference [.test_rules,rules]
-        needs: [bitstream_test]
-        # Overwrite tags to select the right board
-        tags:
-            - $FPGA_BOARD
-        before_script:
-            - !reference [.fpga_test, before_script]
-            # The UTC datetime when the pipeline was created
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
-            - mkdir -p tmp/logs
-            - !reference [.fpga_test_fedora, before_script]
-        script:
-            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
-        after_script:
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
-        allow_failure: true
-        artifacts:
-            when: always
-            paths:
-            - tmp
-
-fpga-quick-fedora-test:
-        variables:
-            DESIRED_FORMAT: "%Y%m%d"
-            GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
-        stage: test
-        retry: 2
-        rules:
-            - !reference [.quick_test_rules,rules]
-        needs: [bitstream_quick_test]
-        # Overwrite tags to select the right board
-        tags:
-            - u55c
-        timeout: 8h
-        before_script:
-            - !reference [.fpga_test, before_script]
-            # The UTC datetime when the pipeline was created
-            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_u55c.log
-            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
-            - mkdir -p tmp/logs
-            - !reference [.fpga_test_fedora, before_script]
-        script:
-            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
-        after_script:
-            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
-        allow_failure: false
-        artifacts:
-            when: always
-            expire_in: 3 days
-            paths:
-            - tmp
-
-#3. Benchmarks
+#2. Benchmarks
 test-benchmarks-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
@@ -797,6 +692,113 @@ test-benchmarks-quick_test:
             expire_in: 3 days
             paths:
             - tmp
+
+#3. Boot Fedora
+fpga-test-fedora-production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+        stage: test
+        retry: 2
+        extends: .common_conf_production
+        rules:
+            - !reference [.production_rules,rules]
+        needs: [bitstream_production]
+        # Overwrite tags to select the right board
+        tags:
+            - $FPGA_BOARD
+        before_script:
+            - !reference [.fpga_test, before_script]
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}_production.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
+            - mkdir -p tmp/logs
+            - !reference [.fpga_test_fedora, before_script]
+        script:
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:
+            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+        allow_failure: false
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+fpga-test-fedora-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules]
+        needs: [bitstream_test]
+        # Overwrite tags to select the right board
+        tags:
+            - $FPGA_BOARD
+        before_script:
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
+            - mkdir -p tmp/logs
+            - !reference [.fpga_test_fedora, before_script]
+        script:
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:
+            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+fpga-quick-fedora-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        stage: test
+        retry: 2
+        rules:
+            - !reference [.quick_test_rules,rules]
+        needs: [bitstream_quick_test]
+        # Overwrite tags to select the right board
+        tags:
+            - u55c
+        timeout: 8h
+        before_script:
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_u55c.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
+            - mkdir -p tmp/logs
+            - !reference [.fpga_test_fedora, before_script]
+        script:
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:
+            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+        allow_failure: false
+        artifacts:
+            when: always
+            expire_in: 3 days
+            paths:
+            - tmp
+
 
 deploy-EA-production:
         stage: deploy
