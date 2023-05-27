@@ -22,13 +22,13 @@ BITSTREAM_PATH=$1
 REPORT_FILE=$2
 
 # Generate the sha of a bitstream file:
-echo -n bitstream | sha256sum
+# echo -n bitstream | sha256sum
 
 
 #!/bin/bash
 
 # Check if path is provided as parameter
-if [ $# -ne 1 ]; then
+if [ $# -ne 2 ]; then
   echo "Usage: $0 <path>"
   exit 1
 fi
@@ -41,8 +41,15 @@ fi
 
 # Find all .bit files in the directory and calculate their SHA-256 hash
 find "$BITSTREAM_PATH" -name '*.bit' -type f -print0 | while read -d $'\0' bitfile; do
-  sha=sha256sum "$bitfile"
+  sha=$(sha256sum "$bitfile")
+  # sha returns both the sha and the filename
   mydate=$(date +%m.%d.%Y)
-  python connector.py($sha,$bitfile,$mydate,$REPORT_FILE)
+
+  echo $sha
+  #echo $bitfile
+  echo $mydate
+  echo $REPORT_FILE
+
+  python3 misc/connector.py $sha $mydate $REPORT_FILE
 done
 

@@ -44,38 +44,45 @@ def connect2db(bitstreamid_sha, name, date, filename):
         print(resources)
         print(numbers)
 
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='RESOURCES';")
+    cursor.execute("USE MEEP_FPGA")
+    #cursor.execute("DROP TABLE IF EXISTS RESOURCES")
+    #cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='RESOURCES';")
     # Fetch the results of the query
     result = cursor.fetchone()
 
+    # Execute a query to check if the table exists
+    table_name = "RESOURCES"
+    query = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = %s"
+    cursor.execute(query, (table_name,))
 
-    # Creates the table creatin template
-    sql_table ='''CREATE TABLE RESOURCES(
-       BITSTREAM_ID CHAR(20) NOT NULL,
-       NAME CHAR(20) NOT NULL,
-       DATE CHAR(20) NOT NULL'''
+    # Get the result
+    result = cursor.fetchone()[0]
+    print(f"Result is {result}")
 
-    ins_values = ""
+    # Prepare the data
+    sql_table   = ""
+    ins_columns = ""
+
+    if result == 0:
+        # Creates the table
+        sql_table ='''CREATE TABLE RESOURCES(
+        BITSTREAM_ID CHAR(80) NOT NULL UNIQUE,
+        NAME CHAR(20) NOT NULL,
+        DATE CHAR(20) NOT NULL'''
 
     # Concatenates the resources than have been collected by Vivado
     for field in resources:
         if field:
-            sql_table  += ",\n   {} INT".format(field)
-            ins_values += ", {}".format(field)
+            sql_table  += ",\n{} INT".format(field)
+            # Create a copy of the above, without the type. It will be used later when inserting.
+            ins_columns += ", {}".format(field)
 
-    sql_table  += "\n   )"
-    ins_values += ")"
+    # End the lists
+    sql_table   += "\n   )"
+    ins_columns += ")"
 
-    print("SQL_TABLE:\r\n")
-    print(sql_table)
-
-    # cursor.execute("DROP TABLE IF EXISTS RESOURCES")
-    if result:
-        print("Table already exists")
-    else:
-        cursor.execute(sql_table)
-
-    ins_values = '''INSERT INTO RESOURCES( BITSTREAM_ID, NAME, DATE''' + ins_values
+    
+    ins_fields = '''INSERT INTO RESOURCES( BITSTREAM_ID, NAME, DATE''' + ins_columns
 
     sha1 = "'" + bitstreamid_sha + "'"
     BitName = "'" + name + "'"
@@ -94,7 +101,22 @@ def connect2db(bitstreamid_sha, name, date, filename):
     res_values = res_values + ")"
 
     # Compose the data
-    insert_data = ins_values + res_values
+    insert_data = ' '.join([ins_fields.strip(), res_values.strip()])
+ 
+
+    if result:
+        print("Table already exist, inserting data")
+                
+    else:
+        print("Table doesn't exist, creating one ...")
+
+        print("SQL_TABLE:")
+        print(sql_table)
+        try:
+            cursor.execute(sql_table)  
+            conn.commit()
+        except:
+            print("No table created")
 
     try:
         # Executing the SQL command
@@ -110,6 +132,7 @@ def connect2db(bitstreamid_sha, name, date, filename):
         conn.rollback()
         print("Data NOT inserted")
 
+
     # Debug check
     sql = """SELECT * from RESOURCES"""
 
@@ -121,6 +144,12 @@ def connect2db(bitstreamid_sha, name, date, filename):
     conn.close()
 
 def main(bitstreamid_sha, name, date, filename):
+
+    print(f"bitstreamid_sha: {bitstreamid_sha}")
+    print(f"name: {name}")
+    print(f"date: {date}")
+    print(f"filename: {filename}")
+
     connect2db(bitstreamid_sha, name, date, filename)
 
 if __name__ == "__main__":
@@ -128,3 +157,4 @@ if __name__ == "__main__":
     name = sys.argv[2]
     date = sys.argv[3]
     filename = sys.argv[4]
+    main(bitstreamid_sha, name, date, filename)
