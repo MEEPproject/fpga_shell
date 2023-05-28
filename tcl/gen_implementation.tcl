@@ -283,16 +283,20 @@ set g_board_part [string range [get_property PART [current_design]] 2 5]
 # Optionaly add a place directive as an argument.
 
 set directivesFile $g_root_dir/shell/directives.tcl
-if { $g_board_part == "u280" }  {
-  # this placement strategy works better for high-dense ACME flavors (16h, 1h16v)
-  set g_place_directive "ExtraNetDelay_low"
-} else {
-  set g_place_directive "Explore"
-  set g_place_directive "ExtraNetDelay_low"
-}
 
-# set g_route_directive "NoTimingRelaxation"
+# ever tried strategies here
+set g_place_directive "ExtraNetDelay_low"
+set g_place_directive "Explore"
+set g_place_directive "ExtraTimingOpt"
+set g_place_directive "Auto_2"
+
 set g_route_directive "AggressiveExplore"
+set g_route_directive "NoTimingRelaxation"
+
+if { $g_board_part == "u280" }  {
+  # board-specific strategies in case it helps for heavy designs
+  set g_place_directive "ExtraNetDelay_high"
+}
 
 # SmartPlace.tcl script creates a directives file when called.
 
