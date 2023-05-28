@@ -289,6 +289,7 @@ set g_place_directive "ExtraNetDelay_low"
 set g_place_directive "Explore"
 set g_place_directive "ExtraTimingOpt"
 set g_place_directive "Auto_2"
+set g_place_directive "ExtraNetDelay_high"
 
 set g_route_directive "AggressiveExplore"
 set g_route_directive "NoTimingRelaxation"
