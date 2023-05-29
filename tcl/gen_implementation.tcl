@@ -289,14 +289,17 @@ set g_place_directive "ExtraNetDelay_low"
 set g_place_directive "Explore"
 set g_place_directive "ExtraTimingOpt"
 set g_place_directive "Auto_2"
-set g_place_directive "ExtraNetDelay_high"
 
-set g_route_directive "AggressiveExplore"
 set g_route_directive "NoTimingRelaxation"
+set g_route_directive "MoreGlobalIterations"
+set g_route_directive "HigherDelayCost"
+set g_route_directive "AggressiveExplore"
+set g_route_directive "Explore"
 
 if { $g_board_part == "u280" }  {
   # board-specific strategies in case it helps for heavy designs
   set g_place_directive "ExtraNetDelay_high"
+  set g_route_directive "NoTimingRelaxation"
 }
 
 # SmartPlace.tcl script creates a directives file when called.
