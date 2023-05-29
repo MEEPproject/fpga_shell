@@ -694,7 +694,7 @@ fpga-test-fedora-production:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
-        retry: 2
+        retry: 3
         extends: .common_conf_production
         rules:
             - !reference [.production_rules,rules]
@@ -728,7 +728,7 @@ fpga-test-fedora-test:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
-        retry: 2
+        retry: 3
         extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules]
@@ -763,7 +763,7 @@ fpga-quick-fedora-test:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
-        retry: 2
+        retry: 3
         rules:
             - !reference [.quick_test_rules,rules]
         needs: [bitstream_quick_test]
@@ -800,7 +800,7 @@ deploy-EA-production:
         when: on_success
         rules:
             - !reference [.production_rules,rules]
-        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-linux-production,test-benchmarks-production]
+        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-linux-production,test-benchmarks-production,fpga-test-fedora-production]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
@@ -844,7 +844,7 @@ deploy-EA-test:
         when: on_success
         rules:
             - !reference [.test_rules,rules]
-        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,test-benchmarks-test]
+        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,test-benchmarks-test,fpga-test-fedora-test]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
