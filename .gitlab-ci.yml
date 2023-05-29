@@ -694,7 +694,7 @@ fpga-test-fedora-production:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
-        retry: 3
+        retry: 2
         extends: .common_conf_production
         rules:
             - !reference [.production_rules,rules]
@@ -728,7 +728,7 @@ fpga-test-fedora-test:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
-        retry: 3
+        retry: 2
         extends: .common_conf_test
         rules:
             - !reference [.test_rules,rules]
@@ -763,7 +763,7 @@ fpga-quick-fedora-test:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
-        retry: 3
+        retry: 2
         rules:
             - !reference [.quick_test_rules,rules]
         needs: [bitstream_quick_test]
