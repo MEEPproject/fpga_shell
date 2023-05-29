@@ -757,6 +757,7 @@ fpga-test-fedora-test:
             paths:
             - tmp
 
+
 fpga-quick-fedora-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
