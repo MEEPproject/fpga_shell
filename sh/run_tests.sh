@@ -54,11 +54,11 @@ sed -i '/picocom v3.1/,/Terminal ready/d; /-------------------------------------
 function set_file() {
    info="$abs_path/tmp/bin/bin_$2/"
 
-   if [ -f regularfile ]; then
+   if [ -e "$info" ]; then
       #set the right path to execute the baremetal test
       sed -i -e "s#^#${info}#"  $1
    else
-      echo "can't read $info No such file"
+      echo "Path does not exist: $info"
       exit 1
    fi
 
