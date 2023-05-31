@@ -291,10 +291,10 @@ set g_place_directive "ExtraTimingOpt"
 set g_place_directive "Auto_2"
 
 set g_route_directive "NoTimingRelaxation"
-set g_route_directive "MoreGlobalIterations"
+set g_route_directive "HigherDelayCost"
 set g_route_directive "AggressiveExplore"
 set g_route_directive "Explore"
-set g_route_directive "HigherDelayCost"
+set g_route_directive "MoreGlobalIterations"
 
 if { $g_board_part == "u280" }  {
   # board-specific strategies in case it helps for heavy designs
