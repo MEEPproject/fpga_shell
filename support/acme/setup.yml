@@ -35,7 +35,7 @@
     - mkdir -p tmp/bin/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin/bin_$EA
     - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin/bin_$EA
-    - source sh/run_tests.sh set_file tmp/bin_$EA/test_list.list $EA
+    - source sh/run_tests.sh set_file tmp/bin/bin_$EA/test_list.list $EA
   artifacts:
     when: always
     paths:

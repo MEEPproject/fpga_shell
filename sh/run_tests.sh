@@ -52,10 +52,15 @@ sed -i '/picocom v3.1/,/Terminal ready/d; /-------------------------------------
 
 #F3.Set the right path to use in the CI for any case
 function set_file() {
-   info="$abs_path/tmp/bin_$2/"
+   info="$abs_path/tmp/bin/bin_$2/"
 
-   #set the right path to execute the baremetal test
-   sed -i -e "s#^#${info}#"  $1
+   if [ -f regularfile ]; then
+      #set the right path to execute the baremetal test
+      sed -i -e "s#^#${info}#"  $1
+   else
+      echo "can't read $info No such file"
+      exit 1
+   fi
 
 }
 
