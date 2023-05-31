@@ -599,10 +599,11 @@ test-benchmarks-production:
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
             - mkdir -p tmp/test_logs
+            - !reference [.test_benchmark, before_script]
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -635,10 +636,11 @@ test-benchmarks-test:
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
             - mkdir -p tmp/test_logs
+            - !reference [.test_benchmark, before_script]
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -671,10 +673,11 @@ test-benchmarks-quick_test:
             - export FPGA_LOG=fpga_test_baremetal_${EA}_u55c_qtest.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
             - mkdir -p tmp/test_logs
+            - !reference [.test_benchmark, before_script]
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
