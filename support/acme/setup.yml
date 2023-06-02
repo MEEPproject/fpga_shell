@@ -32,10 +32,9 @@
     - source sh/run_tests.sh setup
     - make test_riscv_fpga
   after_script:
-    - mkdir -p tmp/bin_$EA
-    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin_$EA
-    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin_$EA
-    - source sh/run_tests.sh set_file tmp/bin_$EA/test_list.list $EA
+    - mkdir -p tmp/bin/bin_$EA
+    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin/bin_$EA
+    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin/bin_$EA
   artifacts:
     when: always
     paths:
@@ -64,7 +63,7 @@
 
 .fpga_test:
   before_script:
-    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
+    - git clone -b develop/tools_fedora --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
     - ./fpga-tools/fpga/build_pcie_drivers.sh
   script:
     - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR
@@ -74,6 +73,11 @@
     - cp $OSBI_DEPLOY_DIR boot/
     - mv boot tmp/
     - echo -e "Artifacts:"; ls tmp/
+
+
+.test_benchmark:
+  before_script:
+    - source sh/run_tests.sh set_file tmp/bin/bin_$EA/test_list.list $EA
 
 .fpga_test_fedora:
   before_script:
