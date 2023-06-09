@@ -189,11 +189,24 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 	#     return 1
 	# }	
 
-	# TODO: Explore other routing strategies?
-	route_design -directive $route_design_directive
 
-	set Lapsed2routeTime [getLapsedTime $RefTime]
-	puts "Lapsed time after route_design: $Lapsed2routeTime"
+  # Explore other routing strategies
+  set RouteDirectives "NoTimingRelaxation \
+        AggressiveExplore  \
+        Explore  \
+        Default  \
+        HigherDelayCost \
+        MoreGlobalIterations"
+
+  set route_loops [llength $RouteDirectives]
+  for {set route_loop 0} {$route_loop < $route_loops} {incr route_loop} {
+
+    set route_design_directive [lindex $RouteDirectives $route_loop]
+    puts "Running route_design iteration $route_loop/$route_loops with directive $route_design_directive"
+    route_design -directive $route_design_directive
+
+    set Lapsed2routeTime [getLapsedTime $RefTime]
+    puts "Lapsed time after route_design: $Lapsed2routeTime"
     puts "--------------------------------------"
 
 	## TODO: Directives can be added here to go the extra mile. E.g, the WNS is below -0.1 after 
@@ -224,6 +237,11 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
       break;
       }
     }
+
+    if { [expr $CurrentSlack >= 0.000] } {
+      break
+    }
+  }
 
     write_checkpoint -force $g_root_dir/dcp/implementation.dcp
     set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
@@ -290,7 +308,6 @@ set g_place_directive "Explore"
 set g_place_directive "ExtraTimingOpt"
 set g_place_directive "Auto_2"
 
-set g_route_directive "AggressiveExplore"
 set g_route_directive "NoTimingRelaxation"
 
 if { $g_board_part == "u280" }  {
