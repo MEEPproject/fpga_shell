@@ -6,7 +6,7 @@
 THIS_DIR=$(pwd) # ~/git_repo/fpga_shell
 PARENT_DIR="$(dirname "$THIS_DIR")" #Returns to parent directory fpga_shell (git_repo)
 
-SHELL_DEF_FILE=$THIS_DIR/accelerator/piton/design/chipset/meep_shell/accelerator_def.csv
+SHELL_DEF_FILE=$THIS_DIR/accelerator/meep_shell/accelerator_def.csv
 FILE_GENERATED=$THIS_DIR/misc/initrom.mem #primera prueba con txt
 
 # This converts the date (from epoc) to hexadecimal value
