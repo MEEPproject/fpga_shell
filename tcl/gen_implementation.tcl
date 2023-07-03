@@ -221,7 +221,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
     set nloops [llength $PhysOptDirectives]
     set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
     set PrevSlack $CurrentSlack
-    for {set i 0} {$i < $nloops} {incr i} {		
+	# Post-Route Physical Optimization is effective when WNS is above -0.5ns, and could be stuck otherwise
+    if { [expr {$CurrentSlack >= -0.5 || $route_loop == ($route_loops-1)}] } {
+     for {set i 0} {$i < $nloops} {incr i} {
       set CurrentDirective [lindex $PhysOptDirectives $i]
       puts "Running post-route phys_opt_design iteration $i/$nloops with directive $CurrentDirective"
       phys_opt_design -directive $CurrentDirective
@@ -236,6 +238,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
       # Don't run the optimization loop when quick flag is enabled. Break the foreach loop
       break;
       }
+     }
     }
 
     if { [expr $CurrentSlack >= 0.000] } {
