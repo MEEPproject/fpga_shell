@@ -192,11 +192,13 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 
   # Explore other routing strategies
   set RouteDirectives "NoTimingRelaxation \
-        AggressiveExplore  \
         Explore  \
-        Default  \
+        MoreGlobalIterations \
         HigherDelayCost \
-        MoreGlobalIterations"
+        AdvancedSkewModeling \
+        AlternateCLBRouting \
+        AggressiveExplore  \
+        Default"
 
   set route_loops [llength $RouteDirectives]
   for {set route_loop 0} {$route_loop < $route_loops} {incr route_loop} {
@@ -221,7 +223,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
     set nloops [llength $PhysOptDirectives]
     set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
     set PrevSlack $CurrentSlack
-	# Post-Route Physical Optimization is effective when WNS is above -0.5ns, and could be stuck otherwise
+    # Post-Route Physical Optimization is effective when WNS is above -0.5ns, and could be stuck otherwise
     if { [expr {$CurrentSlack >= -0.5 || $route_loop == ($route_loops-1)}] } {
      for {set i 0} {$i < $nloops} {incr i} {
       set CurrentDirective [lindex $PhysOptDirectives $i]
@@ -230,8 +232,8 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
       # Get the Slack after the optimization
       set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
       puts "\r\n-------------------------"
-      puts "Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack\r\nPrevious WNS: $PrevSlack"
-      puts "Directive $CurrentDirective improved WNS by [expr abs($PrevSlack - $CurrentSlack)]ns"
+      puts "Post-route phys_opt_design Directive Applied: $CurrentDirective\r\nWNS: $CurrentSlack\r\nPrevious WNS: $PrevSlack"
+      puts "Post-route phys_opt_design Directive $CurrentDirective improved WNS by [expr abs($PrevSlack - $CurrentSlack)]ns"
       set PrevSlack $CurrentSlack
       puts "-------------------------\r\n"
       if {$g_quick_impl == "true" } {
@@ -241,6 +243,9 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
      }
     }
 
+    puts "\r\n-------------------------"
+    puts "route_design iteratiion $route_loop/$route_loops with directive $route_design_directive finished: WNS = $CurrentSlack"
+    puts "-------------------------\r\n"
     if { [expr $CurrentSlack >= 0.000] } {
       break
     }
