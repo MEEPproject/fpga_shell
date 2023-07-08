@@ -223,39 +223,25 @@ if { [info exists hbm_inst] == 0 } {
 # NEED TO ENABLE THE RIGHT HBM CHANNEL!!
         set_property -dict [list CONFIG.USER_SAXI_${HBMChNum} {TRUE}] [get_bd_cells hbm_0]
 
-	## Width
-        if { $HBMaxiProt == "AXI4LITE" } {
-                set smartConnectLite [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_4lite${HBMChNum}]
-                set_property -dict [list CONFIG.NUM_SI {1}] $smartConnectLite
-     		connect_bd_intf_net [get_bd_intf_pins smartconnect_4lite${HBMChNum}/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins smartconnect_4lite${HBMChNum}/S00_AXI]
-                connect_bd_net  [get_bd_pins smartconnect_4lite${HBMChNum}/aclk] $HBMClockPin
-                connect_bd_net  [get_bd_pins smartconnect_4lite${HBMChNum}/aresetn] $HBMRstPin
-
-	} elseif { $HBMdataWidth != 256 } {
-                create_bd_cell -type ip -vlnv xilinx.com:ip:axi_protocol_converter:2.1 axi_protocol_convert_${HBMChNum}
-                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/S_AXI]
-                connect_bd_net [get_bd_pins axi_protocol_convert_${HBMChNum}/aclk] $HBMClockPin
-		# The protocol converter is not needed if the RAMA IP is used.
-		# TODO: RAMA might be not the best option for non-random accesss. 
-		create_bd_cell -type ip -vlnv xilinx.com:ip:axi_dwidth_converter:2.1 axi_dwidth_converter_${HBMChNum}
-		connect_bd_net [get_bd_pins axi_dwidth_converter_${HBMChNum}/s_axi_aclk] $HBMClockPin
-		connect_bd_intf_net [get_bd_intf_pins axi_protocol_convert_${HBMChNum}/M_AXI] [get_bd_intf_pins axi_dwidth_converter_${HBMChNum}/S_AXI]
-		connect_bd_intf_net [get_bd_intf_pins axi_dwidth_converter_${HBMChNum}/M_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-		connect_bd_net $HBMRstPin [get_bd_pins axi_protocol_convert_${HBMChNum}/aresetn]
-		connect_bd_net $HBMRstPin [get_bd_pins axi_dwidth_converter_${HBMChNum}/s_axi_aresetn] 
-
-	} elseif { $HBMaxiProt == "AXI3" } {
-                # direct connection to HBM if assigned protocol is AXI3
-		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-	} else {
-                # using RAMA IP in between if assigned protocol is AXI4
-		create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
-		connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-		connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
-	        connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
-		connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
-	}
+        if       { $HBMaxiProt == "AXI3" && $HBMdataWidth == 256 } {
+                # direct connection to HBM if assigned protocol is AXI3-256
+                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+        } elseif { $HBMaxiProt == "AXI4" && $HBMdataWidth == 256 } {
+                # using RAMA IP in between if assigned protocol is AXI4-256
+                create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
+                connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
+                connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
+                connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
+        } else {
+                # in all rest cases putting smartconnect as a converter
+                set hbm_connect [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 hbm_connect_${HBMChNum}]
+                set_property -dict [list CONFIG.NUM_SI {1}] $hbm_connect
+                connect_bd_intf_net [get_bd_intf_pins hbm_connect_${HBMChNum}/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins hbm_connect_${HBMChNum}/S00_AXI]
+                connect_bd_net [get_bd_pins hbm_connect_${HBMChNum}/aclk]    $HBMClockPin
+                connect_bd_net [get_bd_pins hbm_connect_${HBMChNum}/aresetn] $HBMRstPin
+        }
 
 	## IF PCIe has a direct access to the main memory, open an HBM channel for it
 	## PCIeDMAdone is set on shell_qdma.tcl
