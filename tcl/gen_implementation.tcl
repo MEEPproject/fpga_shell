@@ -192,13 +192,13 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
 
   # Explore other routing strategies
   set RouteDirectives "NoTimingRelaxation \
-        Explore  \
-        MoreGlobalIterations \
-        HigherDelayCost \
-        AdvancedSkewModeling \
-        AlternateCLBRouting \
+        Default \
         AggressiveExplore  \
-        Default"
+        AlternateCLBRouting \
+        AdvancedSkewModeling \
+        HigherDelayCost \
+        MoreGlobalIterations \
+        Explore"
 
   set route_loops [llength $RouteDirectives]
   for {set route_loop 0} {$route_loop < $route_loops} {incr route_loop} {

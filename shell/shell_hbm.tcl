@@ -63,6 +63,8 @@ putmeeps "Creating HBM instance..."
 set HBMaxiProt   [string replace $HBMaxi   [string first "-" $HBMaxi] end]
 set HBMdataWidth [string replace $HBMaxi 0 [string first "-" $HBMaxi]    ]
 
+if { $HBMaxi != "AXI3-256" && $HBMaxi != "RAMAIP" } {
+# all aside AXI signal properties are left as in HBM
 set hbm_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_rtl:1.0 $HBMintf ]
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH $HBMaddrWidth \
@@ -93,6 +95,7 @@ set hbm_axi [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:aximm_r
    CONFIG.WUSER_BITS_PER_BYTE {0} \
    CONFIG.WUSER_WIDTH {0} \
    ] $hbm_axi
+}
 
 
 # Create HBM instance if doesn't exsists already
@@ -223,18 +226,21 @@ if { [info exists hbm_inst] == 0 } {
 # NEED TO ENABLE THE RIGHT HBM CHANNEL!!
         set_property -dict [list CONFIG.USER_SAXI_${HBMChNum} {TRUE}] [get_bd_cells hbm_0]
 
-        if       { $HBMaxiProt == "AXI3" && $HBMdataWidth == 256 } {
+        if { $HBMaxi == "AXI3-256" } {
                 # direct connection to HBM if assigned protocol is AXI3-256
-                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-        } elseif { $HBMaxiProt == "AXI4" && $HBMdataWidth == 256 } {
-                # using RAMA IP in between if assigned protocol is AXI4-256
+	        make_bd_intf_pins_external [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
+                set_property name $HBMintf [get_bd_intf_ports SAXI_${HBMChNum}${HBM_AXI_LABEL}_0]
+        } elseif { $HBMaxi == "RAMAIP" } {
+                # using RAMA IP in between
                 create_bd_cell -type ip -vlnv xilinx.com:ip:rama:1.1 rama_${HBMChNum}
                 connect_bd_intf_net [get_bd_intf_pins rama_${HBMChNum}/m_axi] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
-                connect_bd_intf_net [get_bd_intf_ports $HBMintf] [get_bd_intf_pins rama_${HBMChNum}/s_axi]
                 connect_bd_net [get_bd_pins rama_${HBMChNum}/axi_aclk] $HBMClockPin
                 connect_bd_net $HBMRstPin [get_bd_pins rama_${HBMChNum}/axi_aresetn]
+	        make_bd_intf_pins_external [get_bd_intf_pins rama_${HBMChNum}/s_axi]
+                set_property name $HBMintf [get_bd_intf_ports s_axi_0]
+                set_property -dict [list CONFIG.ADDR_WIDTH $HBMaddrWidth] [get_bd_intf_ports $HBMintf]
         } else {
-                # in all rest cases putting smartconnect as a converter
+                # in all rest cases putting smartconnect as a bus converter
                 set hbm_connect [create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 hbm_connect_${HBMChNum}]
                 set_property -dict [list CONFIG.NUM_SI {1}] $hbm_connect
                 connect_bd_intf_net [get_bd_intf_pins hbm_connect_${HBMChNum}/M00_AXI] [get_bd_intf_pins hbm_0/SAXI_${HBMChNum}${HBM_AXI_LABEL}]
