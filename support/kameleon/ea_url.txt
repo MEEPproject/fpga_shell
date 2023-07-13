@@ -1,0 +1,4 @@
+EMULATED_ACCELERATOR_NAME: kameleon
+EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/meep/rtl_designs/meep_dvino.git
+EMULATED_ACCELERATOR_SHA: 9c33116f275536e6ace447455f8b14587265ac7e
+
