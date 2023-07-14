@@ -385,6 +385,29 @@ This will automatically kill the process.
 
 For more detailed instructions on how to use this software, visit [project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki").
 
+## 11- FAQ
+
+#### Generating the bitstream, I found this error:
+
+ERROR: [Common 17-69] Command failed: This design contains one or more cells for which bitstream generation is not permitted:
+meep_shell_inst/Eth100GbSyst_w_hbm/inst/eth100gb/inst/i_Eth_CMAC_syst_eth100gb_0_top
+
+Answer
+
+You need to get the license here:
+https://www.xilinx.com/products/intellectual-property/cmac_usplus.html#overview
+
+#### Creating the project, I found this error:
+
+[MEEP] ERROR: File project_options.tcl has not been loaded
+[MEEP] ERROR: couldn't read file "~/fpga_shell/accelerator/piton/design/chipset/meep_shell/tcl/openpiton_conf.tcl": no such file or directory
+
+Answer
+
+We need to check this log cat meep_openpiton/build/alveou280/system/protosyn_logs7make_project.log
+
+We are using Python3. Please check the Python version you are using https://github.com/MEEPproject/meep_ariane/blob/f62b738515f0ea2126d9ee0deed387324978f346/openpiton/bootrom/linux/Makefile#L49
+
 <br/>
 <br/>
 <div align="center">
