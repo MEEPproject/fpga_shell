@@ -408,6 +408,12 @@ Answer
 > You need to get the license here:
 > https://www.xilinx.com/products/intellectual-property/cmac_usplus.html#overview
 
+#### External users :surfer: :
+
+We highly recommend to use this branch
+
+    git clone -b ft/external_usershttps://github.com/MEEPproject/fpga_shell.git
+
 <br/>
 <br/>
 <div align="center">
