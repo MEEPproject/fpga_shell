@@ -46,6 +46,8 @@ if { $::argc > 2} {
 
 }
 
+set_param general.maxThreads 4
+
 proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_quick_impl } {
 
 	set RefTime [clock seconds]

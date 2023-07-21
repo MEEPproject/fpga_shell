@@ -25,6 +25,8 @@ if { $::argc > 0 } {
  puts "project directory is $g_project_dir"
 }
 
+set_param general.maxThreads 4
+
 open_project ${g_project_dir}/${g_project_name}.xpr
 
 proc synthesis { g_root_dir g_number_of_jobs} {
