@@ -244,7 +244,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
     }
 
     puts "\r\n-------------------------"
-    puts "route_design iteratiion $route_loop/$route_loops with directive $route_design_directive finished: WNS = $CurrentSlack"
+    puts "route_design iteration $route_loop/$route_loops with directive $route_design_directive finished: WNS = $CurrentSlack"
     puts "-------------------------\r\n"
     if { [expr $CurrentSlack >= 0.000] } {
       break
