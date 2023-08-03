@@ -35,7 +35,7 @@ set g_number_of_jobs 8
 # This list the shell capabilities. Add more interfaces when they 
 # are ready to be implemented. XDC FPGA Board file could be used.
 #################################################################
-set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART BROM BRAM SLV_AXI] 
+set ShellInterfacesList [list PCIE DDR4 HBM AURORA ETHERNET UART JTAG BROM BRAM SLV_AXI] 
 
 ## TODO: Add JTAG?
 ## List here the physical interfaces. Lowercase as they are connected
