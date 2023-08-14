@@ -23,9 +23,10 @@ REPORT_DIR   =  $(ROOT_DIR)/reports
 YAML_FILE    =  $(ROOT_DIR)/.gitlab-ci.yml
 PROJECT_DIR  =  $(ROOT_DIR)/project
 BINARIES_DIR =  $(ROOT_DIR)/binaries
-VIVADO_VER   ?= 2021.2
-VIVADO_PATH  = /opt/Xilinx/Vivado/$(VIVADO_VER)/bin/
-VIVADO_XLNX  ?= $(VIVADO_PATH)/vivado
+# taking default Xilinx install path if not propagated from environment var
+VIVADO_VER    ?= 2021.2
+XILINX_VIVADO ?= /opt/Xilinx/Vivado/$(VIVADO_VER)/
+VIVADO_XLNX   := $(XILINX_VIVADO)/bin/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 DCP_ON       ?=
 QUICK_IMPL   ?=
