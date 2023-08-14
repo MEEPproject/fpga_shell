@@ -1,4 +1,4 @@
 EMULATED_ACCELERATOR_NAME: eprocessor
 EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/eprocessor/eprocessor-rtl/fpga-sdv.git
-EMULATED_ACCELERATOR_SHA: f235748f6fd713daaf7943fa4c86618bf86e6ef5
+EMULATED_ACCELERATOR_SHA: fc5a9b72b8919edc9174efede88a7be7595805a3
 

@@ -96,7 +96,11 @@ foreach dicEntry $ShellEnabledIntf {
 	if {[regexp -inline -all "AURORA" $IntfName] ne "" } {
 		set AURORAentry $dicEntry
 		source $g_root_dir/shell/shell_aurora.tcl
-		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/aurora_${g_board_part}.xdc"		
+		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/aurora_${AuroraQSFP}_${g_board_part}.xdc"		
+	}
+    if {[regexp -inline -all "JTAG" $IntfName] ne "" } {
+      set JTAGentry $dicEntry
+      source $g_root_dir/shell/shell_jtag.tcl
 	}
 	if {[regexp -inline -all "BROM" $IntfName] ne "" } {
 		set BROMentry $dicEntry
@@ -118,6 +122,11 @@ foreach dicEntry $ShellEnabledIntf {
 
 source $g_root_dir/shell/shell_gpio.tcl
 
+if { [info exists hbm_inst] && [info exists AuroradmaMem] && $AuroradmaMem eq "hbm"} {
+  set AurHBMSwitch [expr $AuroraHBMCh/16]
+  putmeeps "Setting Aurora clock to drive HBM cross-switch $AurHBMSwitch through channel $AuroraHBMCh"
+  set_property -dict [list CONFIG.USER_CLK_SEL_LIST${AurHBMSwitch} AXI_${AuroraHBMCh}_ACLK] [get_bd_cells hbm_0]
+}
 if { [info exists hbm_inst] && $PCIeDMA eq "dma"} {
   set PCIeHBMSwitch [expr $PCIeHBMCh/16]
   putmeeps "Setting PCIe clock to drive HBM cross-switch $PCIeHBMSwitch through channel $PCIeHBMCh"

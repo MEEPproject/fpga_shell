@@ -205,7 +205,7 @@ You can have open in parallel other terminal to use picocom
 
     picocom: picocom -b 115200 /dev/ttyUSB2
 
-Finally, if you want to boot a binary. You can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it.
+Finally, if you want to boot a binary or test the UART output log, you can use the [fpga_tools](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools) to do it. Follow the README instructions.
 
 ## 4- :open_file_folder: Directory Structure
 
@@ -384,6 +384,35 @@ This will automatically kill the process.
 ## 10- :globe_with_meridians: Wiki
 
 For more detailed instructions on how to use this software, visit [project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki").
+
+## 11-:grey_question: FAQ
+
+#### 11.1- Creating the project, I found this error:
+
+    [MEEP] ERROR: File project_options.tcl has not been loaded
+    [MEEP] ERROR: couldn't read file "~/fpga_shell/accelerator/piton/design/chipset/meep_shell/tcl/openpiton_conf.tcl": no such file or directory
+
+Answer
+
+> We need to check this log cat meep_openpiton/build/alveou280/system/protosyn_logs7make_project.log
+
+> We are using Python3. Please check the Python version you are using https://github.com/MEEPproject/meep_ariane/blob/f62b738515f0ea2126d9ee0deed387324978f346/openpiton/bootrom/linux/Makefile#L49
+
+#### 11.2- Generating the bitstream, I found this error:
+
+    ERROR: [Common 17-69] Command failed: This design contains one or more cells for which bitstream generation is not permitted:
+    meep_shell_inst/Eth100GbSyst_w_hbm/inst/eth100gb/inst/i_Eth_CMAC_syst_eth100gb_0_top
+
+Answer
+
+> You need to get the license here:
+> https://www.xilinx.com/products/intellectual-property/cmac_usplus.html#overview
+
+#### 11.3- External users :surfer: :
+
+We highly recommend to use this branch
+
+    git clone -b ft/external_users https://github.com/MEEPproject/fpga_shell.git
 
 <br/>
 <br/>

@@ -28,7 +28,7 @@ include:
 workflow:
     rules:
         - if: $CI_PIPELINE_SOURCE == "pipeline"
-        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && ($CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master" )
+        - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production"
         - if: $CI_PIPELINE_SOURCE == "web"
         - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
           when: never
@@ -398,7 +398,7 @@ reports_production:
             - make ci_report_route
             - make validate
         after_script:
-            - !reference [.reports_data, after_script]
+            #- !reference [.reports_data, after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_production
@@ -424,7 +424,7 @@ reports_test:
             - make ci_report_route
             - make validate
         after_script:
-            - !reference [.reports_data, after_script]
+            #- !reference [.reports_data, after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_${FPGA_BOARD}_test
@@ -453,7 +453,7 @@ reports_quick_test:
             - make ci_report_route
             - make validate
         after_script:
-            - !reference [.reports_data, after_script]
+            #- !reference [.reports_data, after_script]
             - ls reports
             - mkdir -p tmp/reports
             - mv reports reports_${EA}_u55c_qtest
@@ -465,12 +465,13 @@ reports_quick_test:
                 - tmp
                 - reports_${EA}_u55c_qtest
 
-###
-### Tests jobs
-###
+##################
+### Tests jobs ###
+##################
 
+#1. Boot Buildroot/linux
 # The entire fpga-test is EA dependant, it should probably be a job from an included file
-fpga-test-production:
+fpga-test-linux-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
@@ -488,16 +489,14 @@ fpga-test-production:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_production.log
+            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
             - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG
-            - echo "Checking FPGA log ..."
-            - ./fpga-tools/fpga/check_log.sh $FPGA_LOG $VALID_MSG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "Welcome to Buildroot"
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - !reference [.fpga_test, after_script]
@@ -507,7 +506,7 @@ fpga-test-production:
             paths:
             - tmp
 
-fpga-test-test:
+fpga-test-linux-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
@@ -532,9 +531,7 @@ fpga-test-test:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG
-            - echo "Checking FPGA log ..."
-            - ./fpga-tools/fpga/check_log.sh $FPGA_LOG $VALID_MSG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "Welcome to Buildroot"
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - !reference [.fpga_test, after_script]
@@ -544,7 +541,7 @@ fpga-test-test:
             paths:
             - tmp
 
-fpga-quick-test:
+fpga-quick-linux-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
@@ -569,9 +566,7 @@ fpga-quick-test:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG
-            - echo "Checking FPGA log ..."
-            - ./fpga-tools/fpga/check_log.sh $FPGA_LOG $VALID_MSG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "Welcome to Buildroot"
             - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - !reference [.fpga_test, after_script]
@@ -582,6 +577,8 @@ fpga-quick-test:
             paths:
             - tmp
 
+
+#2. Benchmarks
 test-benchmarks-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
@@ -602,10 +599,11 @@ test-benchmarks-production:
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
             - mkdir -p tmp/test_logs
+            - !reference [.test_benchmark, before_script]
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -638,10 +636,11 @@ test-benchmarks-test:
             - export FPGA_LOG=fpga_test_baremetal_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
             - mkdir -p tmp/test_logs
+            - !reference [.test_benchmark, before_script]
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -674,10 +673,11 @@ test-benchmarks-quick_test:
             - export FPGA_LOG=fpga_test_baremetal_${EA}_u55c_qtest.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
             - mkdir -p tmp/test_logs
+            - !reference [.test_benchmark, before_script]
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
-            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin_$EA/test_list.list $FPGA_LOG
+            - ./fpga-tools/fpga/run_loop_binaries.sh tmp/bin/bin_$EA/test_list.list $FPGA_LOG
             - echo "Checking FPGA log ..."
             - cat $FPGA_LOG
             - mv $FPGA_LOG tmp/test_logs/$FPGA_LOG
@@ -690,13 +690,121 @@ test-benchmarks-quick_test:
             paths:
             - tmp
 
+#3. Boot Fedora
+fpga-test-fedora-production:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+        stage: test
+        retry: 2
+        extends: .common_conf_production
+        rules:
+            - !reference [.production_rules,rules]
+        needs: [bitstream_production]
+        # Overwrite tags to select the right board
+        tags:
+            - $FPGA_BOARD
+        before_script:
+            - !reference [.fpga_test, before_script]
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}_production.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
+            - mkdir -p tmp/logs
+            - !reference [.fpga_test_fedora, before_script]
+        script:
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:
+            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+        allow_failure: false
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+fpga-test-fedora-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
+        stage: test
+        retry: 2
+        extends: .common_conf_test
+        rules:
+            - !reference [.test_rules,rules]
+        needs: [bitstream_test]
+        # Overwrite tags to select the right board
+        tags:
+            - $FPGA_BOARD
+        before_script:
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
+            - mkdir -p tmp/logs
+            - !reference [.fpga_test_fedora, before_script]
+        script:
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:
+            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+        allow_failure: true
+        artifacts:
+            when: always
+            paths:
+            - tmp
+
+
+fpga-quick-fedora-test:
+        variables:
+            DESIRED_FORMAT: "%Y%m%d"
+            GIT_STRATEGY: fetch
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
+        stage: test
+        retry: 2
+        rules:
+            - !reference [.quick_test_rules,rules]
+        needs: [bitstream_quick_test]
+        # Overwrite tags to select the right board
+        tags:
+            - u55c
+        timeout: 8h
+        before_script:
+            - !reference [.fpga_test, before_script]
+            # The UTC datetime when the pipeline was created
+            - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
+            - export FPGA_LOG=fpga_test_${EA}_u55c.log
+            - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
+            - mkdir -p tmp/logs
+            - !reference [.fpga_test_fedora, before_script]
+        script:
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
+            - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
+            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+        after_script:
+            - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+        allow_failure: false
+        artifacts:
+            when: always
+            expire_in: 3 days
+            paths:
+            - tmp
+
+
 deploy-EA-production:
         stage: deploy
         # Run the job only when all jobs in earlier stages succeed or have allow_failure: true
         when: on_success
         rules:
             - !reference [.production_rules,rules]
-        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-production,test-benchmarks-production]
+        needs: [synthesis_production,implementation_production,bitstream_production,reports_production,fpga-test-linux-production,test-benchmarks-production,fpga-test-fedora-production]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
@@ -740,7 +848,7 @@ deploy-EA-test:
         when: on_success
         rules:
             - !reference [.test_rules,rules]
-        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-test,test-benchmarks-test]
+        needs: [synthesis_test,implementation_test,bitstream_test,reports_test,fpga-test-linux-test,test-benchmarks-test,fpga-test-fedora-test]
         variables:
             GIT_STRATEGY: fetch
             DESIRED_FORMAT: "%Y%m%d"
@@ -763,7 +871,6 @@ deploy-EA-test:
             - mv dcp tmp/
             - cp -r tmp/* $ABSDIR
             - ls $ABSDIR
-            - !reference [.push-to-database, script]
         after_script:
             - echo "Remember - Exported variables are not propagated to after_script"
         allow_failure: false

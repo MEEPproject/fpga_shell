@@ -12,14 +12,13 @@
     CUSTOM_MSG: 1x1_VAS_noVPU
     LINUX_IMAGE: osbi.bin
     SDK_DIR: accelerator/sdk
-    VALID_MSG: "Welcome to Buildroot"
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
     BOOT_SCRIPT: /home/tools/fpga-tools/boot_riscv/boot_acme.sh
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
-    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230505/osbi_buildroot.bin
+    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230622/osbi_buildroot.bin
     RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
     #Link of Nexus cloud where the bitstreams ofr production will be store.
     MEEP_RAW_REPOSITORY: " https://release.meep-project.eu/nexus/repository/acme-images/"
@@ -33,10 +32,9 @@
     - source sh/run_tests.sh setup
     - make test_riscv_fpga
   after_script:
-    - mkdir -p tmp/bin_$EA
-    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin_$EA
-    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin_$EA
-    - source sh/run_tests.sh set_file tmp/bin_$EA/test_list.list $EA
+    - mkdir -p tmp/bin/bin_$EA
+    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/*.bin tmp/bin/bin_$EA
+    - cp -r accelerator/piton/design/chip/tile/vas_tile_core/modules/riscv-tests/benchmarks/test_list.list tmp/bin/bin_$EA
   artifacts:
     when: always
     paths:
@@ -75,6 +73,18 @@
     - cp $OSBI_DEPLOY_DIR boot/
     - mv boot tmp/
     - echo -e "Artifacts:"; ls tmp/
+
+.test_benchmark:
+  before_script:
+    - source sh/run_tests.sh set_file tmp/bin/bin_$EA/test_list.list $EA
+
+.fpga_test_fedora:
+  before_script:
+    # Download the fedora image and osbi binary
+    - curl -o fedora_image.img https://release.meep-project.eu/nexus/repository/acme-images/fs/0.0.20/fedora-33.img
+    - curl -O https://release.meep-project.eu/nexus/repository/acme-images/osbi/0.0.20/osbi.bin
+    # Prepare the drivers
+    - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
 
 .reports_data:
   after_script:
