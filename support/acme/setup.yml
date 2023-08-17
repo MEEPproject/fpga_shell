@@ -18,7 +18,7 @@
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
-    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230622/osbi_buildroot.bin
+    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230816/osbi_buildroot.bin
     RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
     #Link of Nexus cloud where the bitstreams ofr production will be store.
     MEEP_RAW_REPOSITORY: " https://release.meep-project.eu/nexus/repository/acme-images/"
