@@ -252,6 +252,7 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
   }
 
     write_checkpoint -force $g_root_dir/dcp/implementation.dcp
+    report_utilization -file $g_root_dir/reports/utilization.rpt
     set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 
 	# The netlist file below can size ~220MB, need to check if it is worth
