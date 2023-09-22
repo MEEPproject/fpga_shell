@@ -1,5 +1,5 @@
 [submodule "ip/axi_brom"]
-	path = ip/axi-brom
+	path = ip/axi_brom
 	url = ../axi-brom.git
 [submodule "ip/100GbEthernet"]
 	path = ip/100GbEthernet
