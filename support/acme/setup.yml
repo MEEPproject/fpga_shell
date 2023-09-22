@@ -59,7 +59,7 @@
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - synthesis
 
 .fpga_test:
   before_script:
