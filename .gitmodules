@@ -1,18 +1,18 @@
 [submodule "ip/axi_brom"]
-	path = ip/axi_brom
+	path = ip/axi-brom
 	url = ../axi_brom.git
 [submodule "ip/100GbEthernet"]
 	path = ip/100GbEthernet
-	url = ../ethernet_test.git
+	url = ../100gb-ethernet.git
 [submodule "ip/aurora_dma"]
 	path = ip/aurora_dma
-	url = ../aurora_user_interface.git
+	url = ../aurora-dma.git
 [submodule "ip/aurora_raw"]
 	path = ip/aurora_raw
-	url = ../aurora_raw.git
+	url = ../aurora-raw.git
 [submodule "ip/10GbEthernet"]
 	path = ip/10GbEthernet
 	url = ../10gb_ethernet.git
 [submodule "ip/pulp_uart"]
 	path = ip/pulp_uart
-	url = ../ariane_uart.git
+	url = ../pulp-uart.git
