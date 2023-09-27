@@ -18,7 +18,7 @@ include:
   - local: support/acme/setup.yml
 
 image:
-  name: registry.gitlab.es/hwdesign/containerhub/ubuntu_base:dev
+  name: registry.gitlab.bsc.es/hwdesign/containerhub/ubuntu_base:dev
 
 # The workflow includes all the necessary rules to run all the jobs in this .gitlab-ci.yml.
 # The pipeline ca be trigger for:
