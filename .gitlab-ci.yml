@@ -17,6 +17,9 @@ include:
   - local: cicd/ea_conf.yml
   - local: support/acme/setup.yml
 
+image:
+  name: "registry.example.com/my/image:latest"
+
 # The workflow includes all the necessary rules to run all the jobs in this .gitlab-ci.yml.
 # The pipeline ca be trigger for:
 # pipeline: Multi-project pipelines
