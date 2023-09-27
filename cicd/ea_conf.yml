@@ -16,7 +16,7 @@
 .multi_target_production:
   parallel:
     matrix:
-      - FPGA_BOARD: [u55c, u280]
+      - FPGA_BOARD: [u55c]
         EA: [acme_ea_4a, acme_ea_1h2g]
 
 .default_tags:
