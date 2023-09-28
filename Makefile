@@ -26,7 +26,7 @@ BINARIES_DIR =  $(ROOT_DIR)/binaries
 # taking default Xilinx install path if not propagated from environment var
 VIVADO_VER    ?= 2021.2
 XILINX_VIVADO ?= /opt/Xilinx/Vivado/$(VIVADO_VER)/
-VIVADO_XLNX   := $(XILINX_VIVADO)/bin/vivado
+VIVADO_XLNX   :=  LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1 $(XILINX_VIVADO)/bin/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 DCP_ON       ?=
 QUICK_IMPL   ?=
