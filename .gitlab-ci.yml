@@ -80,7 +80,7 @@ synthesis_production:
         variables:
             GIT_STRATEGY: clone
             GIT_SUBMODULE_STRATEGY: "recursive"
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
             #Protosyn flags for prodcution environment
             PROTON_OP: meep eth ncmem hbm pronoc
         before_script:
@@ -128,7 +128,7 @@ synthesis_test:
         variables:
             GIT_STRATEGY: clone
             GIT_SUBMODULE_STRATEGY: "recursive"
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
@@ -174,7 +174,7 @@ synthesis_quick_test:
         variables:
             GIT_STRATEGY: clone
             GIT_SUBMODULE_STRATEGY: "recursive"
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
             FPGA: u55c
         before_script:
             - !reference [.git_clean, before_script]
@@ -217,7 +217,7 @@ implementation_production:
         needs: [synthesis_production]
         variables:
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         before_script:
             - mv dcp/synthesis_${EA}_${FPGA_BOARD}_production.dcp dcp/synthesis.dcp #?
         script:
@@ -239,7 +239,7 @@ implementation_test:
         extends: .common_conf_test
         variables:
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.test_rules,rules]
         needs: [synthesis_test]
@@ -265,7 +265,7 @@ implementation_quick_test:
         stage: implementation
         variables:
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         rules:
             - !reference [.quick_test_rules,rules]
         tags:
@@ -295,7 +295,7 @@ bitstream_production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: bitstream
         extends: .common_conf_production
         rules:
@@ -325,7 +325,7 @@ bitstream_test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: bitstream
         extends: .common_conf_test
         rules:
@@ -356,7 +356,7 @@ bitstream_quick_test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: bitstream
         rules:
             - !reference [.quick_test_rules,rules]
@@ -390,7 +390,7 @@ reports_production:
         extends: .common_conf_production
         variables:
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.production_rules,rules]
         needs: [implementation_production]
@@ -415,7 +415,7 @@ reports_test:
         extends: .common_conf_test
         variables:
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         rules:
             - !reference [.test_rules,rules]
         needs: [implementation_test]
@@ -441,7 +441,7 @@ reports_quick_test:
         stage: bitstream
         variables:
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         rules:
             - !reference [.quick_test_rules,rules]
         tags:
@@ -478,7 +478,7 @@ fpga-test-linux-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_production
@@ -513,7 +513,7 @@ fpga-test-linux-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_test
@@ -548,7 +548,7 @@ fpga-quick-linux-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
         rules:
@@ -586,7 +586,7 @@ test-benchmarks-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_production
@@ -622,7 +622,7 @@ test-benchmarks-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_test
@@ -659,7 +659,7 @@ test-benchmarks-quick_test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
         rules:
@@ -698,7 +698,7 @@ fpga-test-fedora-production:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_production
@@ -732,7 +732,7 @@ fpga-test-fedora-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_${FPGA_BOARD}
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_${FPGA_BOARD}
         stage: test
         retry: 2
         extends: .common_conf_test
@@ -768,7 +768,7 @@ fpga-quick-fedora-test:
         variables:
             DESIRED_FORMAT: "%Y%m%d"
             GIT_STRATEGY: fetch
-            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/dev/${EA}_u55c
+            GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
         rules:
