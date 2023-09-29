@@ -9,19 +9,19 @@
   parallel:
     matrix:
       - FPGA_BOARD: [u55c, u280]
-        EA: [acme_ea_4a, acme_ea_4h2v, acme_ea_1h,acme_ea_1h2g]
+        EA: [acme_ea_4a, acme_ea_4h2v, acme_ea_1h, acme_ea_1h2g]
         # These labels need to match what is at accelerator_build.sh
         # on the EA meep_shell directory
 
 .multi_target_production:
   parallel:
     matrix:
-      - FPGA_BOARD: [u55c, u280]
-        EA: [acme_ea_4a, acme_ea_4h2v, acme_ea_1h,acme_ea_1h2g]
+      - FPGA_BOARD: [u55c]
+        EA: [acme_ea_4a]
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - synthesis
 
 .production_rules:
   rules:

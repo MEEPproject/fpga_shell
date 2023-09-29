@@ -17,6 +17,9 @@ include:
   - local: cicd/ea_conf.yml
   - local: support/acme/setup.yml
 
+image:
+  name: registry.gitlab.bsc.es/hwdesign/containerhub/ubuntu_base:dev
+
 # The workflow includes all the necessary rules to run all the jobs in this .gitlab-ci.yml.
 # The pipeline ca be trigger for:
 # pipeline: Multi-project pipelines
@@ -166,7 +169,7 @@ synthesis_quick_test:
         interruptible: true
         retry: 1
         tags:
-            - MEEP_FPGA
+            - synthesis
         timeout: 8h
         variables:
             GIT_STRATEGY: clone
@@ -266,7 +269,7 @@ implementation_quick_test:
         rules:
             - !reference [.quick_test_rules,rules]
         tags:
-            - MEEP_FPGA
+            - synthesis
         timeout: 8h
         needs: [synthesis_quick_test]
         # As this is a matrix, rename the corresponding dcp for make to recognize it
@@ -358,7 +361,7 @@ bitstream_quick_test:
         rules:
             - !reference [.quick_test_rules,rules]
         tags:
-            - MEEP_FPGA
+            - synthesis
         timeout: 8h
         needs: [implementation_quick_test]
         before_script:
@@ -442,7 +445,7 @@ reports_quick_test:
         rules:
             - !reference [.quick_test_rules,rules]
         tags:
-            - MEEP_FPGA
+            - synthesis
         timeout: 8h
         needs: [implementation_quick_test]
         before_script:

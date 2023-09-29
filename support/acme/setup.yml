@@ -59,11 +59,11 @@
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - synthesis
 
 .fpga_test:
   before_script:
-    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
+    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/hwdesign/fpga/integration-lab/fpga-tools
     - ./fpga-tools/fpga/build_pcie_drivers.sh
   script:
     - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR

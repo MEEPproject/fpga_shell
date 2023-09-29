@@ -25,8 +25,9 @@ PROJECT_DIR  =  $(ROOT_DIR)/project
 BINARIES_DIR =  $(ROOT_DIR)/binaries
 # taking default Xilinx install path if not propagated from environment var
 VIVADO_VER    ?= 2021.2
-XILINX_VIVADO ?= /opt/Xilinx/Vivado/$(VIVADO_VER)/
-VIVADO_XLNX   := $(XILINX_VIVADO)/bin/vivado
+XILINX_VIVADO ?= /opt/Xilinx/Vivado/$(VIVADO_VER)
+LD_PRELOAD_PATH = LD_PRELOAD=/lib/x86_64-linux-gnu/libudev.so.1
+VIVADO_XLNX   :=   $(XILINX_VIVADO)/bin/vivado
 VIVADO_OPT   = -mode batch -nolog -nojournal -notrace -source
 DCP_ON       ?=
 QUICK_IMPL   ?=
@@ -102,42 +103,42 @@ $(PROJECT_FILE): clean_ip $(ACCEL_DIR) rom_file
 	$(SH_DIR)/init_vivado.sh $(VIVADO_XLNX) || (echo "The generation of MEEP Shell has failed $$?"; exit 1)
 
 $(SYNTH_DCP):
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_synthesis.tcl -tclargs $(PROJECT_DIR)
 
 $(IMPL_DCP): $(SYNTH_DCP)
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON) $(QUICK_IMPL)
 
 $(BIT_FILE): $(IMPL_DCP)
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
 
 #### Special calls for the CI/CD, where the change on the artifact timestamp disables the use of the "requirements"
 
 ci_implementation:
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_implementation.tcl -tclargs $(ROOT_DIR) $(DCP_ON)
 
 ci_bitstream:
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/gen_bitstream.tcl -tclargs $(ROOT_DIR)
 
 ci_report_route:
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
 #### Special script to adquire the best placement strategy #####
 
 SmartPlace: $(SYNTH_DCP)
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/SmartPlace.tcl -tclargs $(ROOT_DIR)
 
 validate: $(REPORT_DIR)
-	@$(SH_DIR)/check_timing.sh
+	$(LD_PRELOAD_PATH) $(SH_DIR)/check_timing.sh
 
 report_synth: $(SYNTH_DCP)
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_synth.tcl -tclargs $(ROOT_DIR)
 
 report_place: $(PLACE_DCP)
 	echo "Make sure you have run the implementation process with the DCP_ON option"
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_place.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_place.tcl -tclargs $(ROOT_DIR)
 
 report_route: $(IMPL_DCP)
-	@$(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
+	$(LD_PRELOAD_PATH) $(VIVADO_XLNX) $(VIVADO_OPT) $(TCL_DIR)/report_route.tcl -tclargs $(ROOT_DIR)
 
 #Help menu accelerator_build.sh
 syntax_ea:
