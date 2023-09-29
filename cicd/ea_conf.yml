@@ -17,7 +17,7 @@
   parallel:
     matrix:
       - FPGA_BOARD: [u55c]
-        EA: [acme_ea_4a, acme_ea_4h2v]
+        EA: [acme_ea_4a]
 
 .default_tags:
   tags:
