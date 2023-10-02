@@ -204,6 +204,10 @@ proc ShellInterfaceDefinition { ShellInterfacesList ClockList DefinitionFile She
 					dict set d_device dmaMem    [lindex $fields 8 ]
                     dict set d_device HBMChan   [lindex $fields 9 ]
 				}
+				if { "${device}" == "JTAG" } {
+                    dict set d_device IntfLabel [lindex $fields 2 ]
+                    dict set d_device Mode      [lindex $fields 5 ]
+				}
 				if { "${device}" == "SLV_AXI" } {						
 				}
 				set EnabledIntf [lappend EnabledIntf "$d_device"]					

@@ -18,7 +18,7 @@
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
     # TODO: Link with the SDK repo, set triggering policies. At the moment, We are using the lagarto sdk deploy
-    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230622/osbi_buildroot.bin
+    OSBI_DEPLOY_DIR: /home/fpga-runnerMEEP/lagarto_sdk_deploy/rv64gc/230816/osbi_buildroot.bin
     RELEASE_BITSTREAM: system_acme_vpu_u55c.bit
     #Link of Nexus cloud where the bitstreams ofr production will be store.
     MEEP_RAW_REPOSITORY: " https://release.meep-project.eu/nexus/repository/acme-images/"
@@ -59,11 +59,11 @@
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - synthesis
 
 .fpga_test:
   before_script:
-    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga-tools
+    - git clone --recurse-submodules https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/hwdesign/fpga/integration-lab/fpga-tools
     - ./fpga-tools/fpga/build_pcie_drivers.sh
   script:
     - ./fpga-tools/boot_riscv/boot_acme.sh $OSBI_DEPLOY_DIR

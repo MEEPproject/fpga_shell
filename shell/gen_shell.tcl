@@ -98,6 +98,10 @@ foreach dicEntry $ShellEnabledIntf {
 		source $g_root_dir/shell/shell_aurora.tcl
 		add_files -fileset [get_filesets constrs_1] "$g_root_dir/xdc/$g_board_part/aurora_${AuroraQSFP}_${g_board_part}.xdc"		
 	}
+    if {[regexp -inline -all "JTAG" $IntfName] ne "" } {
+      set JTAGentry $dicEntry
+      source $g_root_dir/shell/shell_jtag.tcl
+	}
 	if {[regexp -inline -all "BROM" $IntfName] ne "" } {
 		set BROMentry $dicEntry
 		source $g_root_dir/shell/shell_brom.tcl

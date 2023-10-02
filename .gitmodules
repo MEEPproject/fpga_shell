@@ -15,4 +15,4 @@
 	url = ../10gb_ethernet.git
 [submodule "ip/pulp_uart"]
 	path = ip/pulp_uart
-	url = ../pulp_uart.git
+	url = ../pulp-uart.git
