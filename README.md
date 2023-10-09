@@ -366,7 +366,7 @@ This will automatically kill the process.
 
 ## 8- :woman: Authors
 
-    fpga@bsc.es
+fpga@bsc.es
 
 ## 9- 👷 Partners
 

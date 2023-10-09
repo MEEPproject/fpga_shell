@@ -17,8 +17,6 @@ include:
   - local: cicd/ea_conf.yml
   - local: support/acme/setup.yml
 
-image:
-  name: registry.gitlab.bsc.es/hwdesign/containerhub/ubuntu_base:dev
 
 # The workflow includes all the necessary rules to run all the jobs in this .gitlab-ci.yml.
 # The pipeline ca be trigger for:
@@ -833,11 +831,11 @@ deploy-EA-production:
             - ls $ABSDIR
             # Store production's bitstreams: acme_ea_1h2g, acme_ea_4a, acme_ea_4h2v
             - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_u55c_production.bit
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_u280_production.bit
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_u55c_production.bit
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_u280_production.bit
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u55c_production.bit
-            - curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u280_production.bit
+            #- curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4a_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4a/${date_format}_acme_ea_4a_u280_production.bit
+            #- curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_u55c_production.bit
+            #- curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_4h2v_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_4h2v/${date_format}_acme_ea_4h2v_u280_production.bit
+            #- curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u55c_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u55c_production.bit
+            #- curl -k -u "${MEEP_REGISTRY_USER}:${MEEP_REGISTRY_PASSWORD}" --upload-file $ABSDIR/bitstream/${date_format}_acme_ea_1h2g_u280_production.bit ${MEEP_RAW_REPOSITORY}/bitstreams/acme_ea_1h2g/${date_format}_acme_ea_1h2g_u280_production.bit
         after_script:
             - echo "The deploy has finished"
         allow_failure: false
