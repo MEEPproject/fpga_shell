@@ -366,12 +366,7 @@ This will automatically kill the process.
 
 ## 8- :woman: Authors
 
-- Alex Kropotov: alex.kropotov@bsc.es
-- Bachir Fradj: bachir.fradj@bsc.es
-- Blanca Sabater: bsabater@bsc.es
-- Daniel J. Mazure: daniel.jimenez2@bsc.es
-- Elias Perdomo: elias.perdomo@bsc.es
-- Francelly Cano Ladino: francelly.canoladino@bsc.es
+fpga@bsc.es
 
 ## 9- 👷 Partners
 
