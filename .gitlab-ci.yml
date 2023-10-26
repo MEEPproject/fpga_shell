@@ -190,6 +190,7 @@ synthesis_quick_test:
         after_script:
             - mkdir -p tmp/project
             - !reference [.synth_default, after_script]
+            - cp accelerator/build/alveou280/system/protosyn_logs/make_project.log  tmp/make_project.log
             - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp/project/
             - cp -r src/system_top.sv tmp/project/
@@ -201,9 +202,9 @@ synthesis_quick_test:
             - echo -e "Artifacts:"; ls tmp; ls dcp
         allow_failure: false # If any sinthesys fails, all fails
         artifacts:
-          when: always
-          expire_in: 1 day
-          paths:
+            when: always
+            expire_in: 1 day
+            paths:
             - tmp
             - dcp/synthesis_${EA}_u55c_qtest.dcp
 
