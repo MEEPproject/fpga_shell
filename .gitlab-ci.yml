@@ -131,6 +131,7 @@ synthesis_test:
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
+            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
             - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
             - !reference [.export_toolchain, before_script]
         script:
@@ -178,6 +179,7 @@ synthesis_quick_test:
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
+            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
             - echo "Actual element in the matrix is $EA + $FPGA"
             - !reference [.export_toolchain, before_script]
         script:
