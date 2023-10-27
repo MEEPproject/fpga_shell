@@ -82,11 +82,11 @@ synthesis_production:
             #Protosyn flags for prodcution environment
             PROTON_OP: meep eth ncmem hbm pronoc
         before_script:
+            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
             - !reference [.git_clean, before_script]
             - *clone_ea
             - echo "Actual element in the matrix is $EA + ${FPGA_BOARD}"
             - !reference [.export_toolchain, before_script]
-            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
         script:
             - echo "[DEBUG] synthesis"
             - make initialize
