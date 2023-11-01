@@ -47,8 +47,8 @@
 # This is OpenPiton dependant, so it is declared here and referenced in the shell yml
 .save_dts:
   after_script:
-    - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
-    - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*info.h" -type f -print -quit) tmp/dts/info_${EA}_${FPGA_BOARD}.h
+    - mkdir -p tmp/dts; cp $(find . -wholename "*bootrom/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
+    - mkdir -p tmp/dts; cp $(find . -wholename "*bootrom/*info.h" -type f -print -quit) tmp/dts/info_${EA}_${FPGA_BOARD}.h
 
 .export_toolchain:
   before_script:
