@@ -786,15 +786,15 @@ fpga-quick-fedora-test:
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
             - export FPGA_LOG=fpga_test_${EA}_u55c.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
-            - mkdir -p tmp/logs
             - !reference [.fpga_test_fedora, before_script]
         script:
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
             - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
         after_script:
             - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+            - mkdir -p tmp/logs
+            - cp 
         allow_failure: false
         artifacts:
             when: always
