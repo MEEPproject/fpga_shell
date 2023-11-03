@@ -794,7 +794,7 @@ fpga-quick-fedora-test:
         after_script:
             - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
             - mkdir -p tmp/logs
-            - cp 
+            - cp $FPGA_LOG tmp/logs
         allow_failure: false
         artifacts:
             when: always
