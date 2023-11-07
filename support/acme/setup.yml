@@ -14,6 +14,8 @@
     SDK_DIR: accelerator/sdk
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
+    FPGA_LOG_TEST_FEDORA: fpga_test_fedora_${EA}_${FPGA_BOARD}.log
+    FPGA_LOG_TEST_BUILDROOT: fpga_test_buildroot_${EA}_${FPGA_BOARD}.log
     BOOT_SCRIPT: /home/tools/fpga-tools/boot_riscv/boot_acme.sh
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install

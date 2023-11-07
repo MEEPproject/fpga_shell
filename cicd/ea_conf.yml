@@ -40,6 +40,8 @@
     - if: ($CI_COMMIT_MESSAGE =~ /#TestCICD/)
 
 .quick_test_rules:
+  variables:
+    FPGA_BOARD: u55c
   rules:
     - if: $ENV_WORK == "QUICKTEST" && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_PIPELINE_SOURCE == "web"
