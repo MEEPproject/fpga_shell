@@ -42,6 +42,7 @@
 .quick_test_rules:
   variables:
     FPGA_BOARD: u55c
+    EA: acme_ea_1h
   rules:
     - if: $ENV_WORK == "QUICKTEST" && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_PIPELINE_SOURCE == "web"
