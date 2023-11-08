@@ -770,7 +770,7 @@ fpga-quick-fedora-test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
-        extends: .common_conf_test
+        extends: .quick_test_rules
         rules:
             - !reference [.quick_test_rules,rules]
         needs: [bitstream_quick_test]
