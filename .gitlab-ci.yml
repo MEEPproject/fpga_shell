@@ -84,6 +84,7 @@ synthesis_production:
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
+            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
             - echo "Actual element in the matrix is $EA + ${FPGA_BOARD}"
             - !reference [.export_toolchain, before_script]
         script:
@@ -130,6 +131,7 @@ synthesis_test:
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
+            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
             - echo "Actual element in the matrix is $EA + $FPGA_BOARD"
             - !reference [.export_toolchain, before_script]
         script:
@@ -177,6 +179,7 @@ synthesis_quick_test:
         before_script:
             - !reference [.git_clean, before_script]
             - *clone_ea
+            - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.bsc.es/".insteadOf "https://gitlab.bsc.es/"
             - echo "Actual element in the matrix is $EA + $FPGA"
             - !reference [.export_toolchain, before_script]
         script:
@@ -190,6 +193,7 @@ synthesis_quick_test:
         after_script:
             - mkdir -p tmp/project
             - !reference [.synth_default, after_script]
+            - cp accelerator/build/alveou280/system/protosyn_logs/make_project.log  tmp/make_project.log
             - cp ea_url.txt tmp/EA_info.txt
             - cp shell_build.log tmp/project/
             - cp -r src/system_top.sv tmp/project/
@@ -201,9 +205,9 @@ synthesis_quick_test:
             - echo -e "Artifacts:"; ls tmp; ls dcp
         allow_failure: false # If any sinthesys fails, all fails
         artifacts:
-          when: always
-          expire_in: 1 day
-          paths:
+            when: always
+            expire_in: 1 day
+            paths:
             - tmp
             - dcp/synthesis_${EA}_u55c_qtest.dcp
 
@@ -490,17 +494,16 @@ fpga-test-linux-production:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
-            - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "Welcome to Buildroot"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG_TEST_BUILDROOT "Welcome to Buildroot"
         after_script:
             - !reference [.fpga_test, after_script]
+            - mkdir -p tmp/logs # Keep the log even if the boot fails
+            - cp $FPGA_LOG_TEST_BUILDROOT tmp/logs/$FPGA_LOG_TEST_BUILDROOT
         allow_failure: false
         artifacts:
             when: always
@@ -525,17 +528,16 @@ fpga-test-linux-test:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
-            - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "Welcome to Buildroot"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG_TEST_BUILDROOT "Welcome to Buildroot"
         after_script:
             - !reference [.fpga_test, after_script]
+            - mkdir -p tmp/logs # Keep the log even if the boot fails
+            - cp $FPGA_LOG_TEST_BUILDROOT tmp/logs/$FPGA_LOG_TEST_BUILDROOT
         allow_failure: true
         artifacts:
             when: always
@@ -548,29 +550,29 @@ fpga-quick-linux-test:
             GIT_STRATEGY: fetch
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
+        extends: .quick_test_rules
         retry: 2
         rules:
             - !reference [.quick_test_rules,rules]
         needs: [bitstream_quick_test]
         # Overwrite tags to select the right board
         tags:
-            - u55c
+            - $FPGA_BOARD
         timeout: 8h
         before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_u55c.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
-            - mkdir -p tmp/logs
         script:
             # The EA script should provide the right script and the right binary
             - ./fpga-tools/fpga/load-bitstream-onic.sh qdma $BITSTREAM
             - !reference [.fpga_test, script]
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "Welcome to Buildroot"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG_TEST_BUILDROOT "Welcome to Buildroot"
         after_script:
             - !reference [.fpga_test, after_script]
+            - mkdir -p tmp/logs # Keep the log even if the boot fails
+            - cp $FPGA_LOG_TEST_BUILDROOT tmp/logs/$FPGA_LOG_TEST_BUILDROOT
         allow_failure: false
         artifacts:
             when: always
@@ -709,17 +711,16 @@ fpga-test-fedora-production:
         before_script:
             - !reference [.fpga_test, before_script]
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}_production.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_production.bit
-            - mkdir -p tmp/logs
             - !reference [.fpga_test_fedora, before_script]
         script:
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG_TEST_FEDORA "fedora-riscv login:"
         after_script:
             - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+            - mkdir -p tmp/logs
+            - cp $FPGA_LOG_TEST_FEDORA tmp/logs/$FPGA_LOG_TEST_FEDORA
         allow_failure: false
         artifacts:
             when: always
@@ -744,17 +745,17 @@ fpga-test-fedora-test:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_fedora_${EA}_${FPGA_BOARD}.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_${FPGA_BOARD}_test.bit
             - mkdir -p tmp/logs
             - !reference [.fpga_test_fedora, before_script]
         script:
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG_TEST_FEDORA "fedora-riscv login:"
         after_script:
             - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+            - mkdir -p tmp/logs
+            - cp $FPGA_LOG_TEST_FEDORA tmp/logs/$FPGA_LOG_TEST_FEDORA
         allow_failure: true
         artifacts:
             when: always
@@ -769,28 +770,28 @@ fpga-quick-fedora-test:
             GIT_CLONE_PATH: $CI_BUILDS_DIR/$CI_CONCURRENT_ID/${EA}_u55c
         stage: test
         retry: 2
+        extends: .quick_test_rules
         rules:
             - !reference [.quick_test_rules,rules]
         needs: [bitstream_quick_test]
         # Overwrite tags to select the right board
         tags:
-            - u55c
+            - $FPGA_BOARD
         timeout: 8h
         before_script:
             - !reference [.fpga_test, before_script]
             # The UTC datetime when the pipeline was created
             - date_format="$(date -d "$CI_COMMIT_TIMESTAMP" +"$DESIRED_FORMAT")"
-            - export FPGA_LOG=fpga_test_${EA}_u55c.log
             - export BITSTREAM=bitstream/${date_format}_${EA}_u55c_qtest.bit
-            - mkdir -p tmp/logs
             - !reference [.fpga_test_fedora, before_script]
         script:
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh qdma $BITSTREAM
             - ./fpga-tools/fpga/load-bitstream-onic-nfs.sh x--reload-fs fedora_image.img osbi.bin
-            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG "fedora-riscv login:"
-            - mv $FPGA_LOG tmp/logs/$FPGA_LOG
+            - ./fpga-tools/fpga/fpga_test.sh $FPGA_LOG_TEST_FEDORA "fedora-riscv login:"
         after_script:
             - ./fpga-tools/fpga/load-bitstream-onic.sh driverdown
+            - mkdir -p tmp/logs
+            - cp $FPGA_LOG_TEST_FEDORA tmp/logs/$FPGA_LOG_TEST_FEDORA
         allow_failure: false
         artifacts:
             when: always

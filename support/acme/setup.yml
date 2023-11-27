@@ -14,6 +14,8 @@
     SDK_DIR: accelerator/sdk
     # Local workstation Setup
     NUMBER_OF_JOBS: "8"
+    FPGA_LOG_TEST_FEDORA: fpga_test_fedora_${EA}_${FPGA_BOARD}.log
+    FPGA_LOG_TEST_BUILDROOT: fpga_test_buildroot_${EA}_${FPGA_BOARD}.log
     BOOT_SCRIPT: /home/tools/fpga-tools/boot_riscv/boot_acme.sh
     SHELL_DEPLOY_DIR: /home/fpga-runnerMEEP/shell_deploy
     CI_RISCV_DIR: /home/tools/openpiton/riscv_install
@@ -23,7 +25,6 @@
     #Link of Nexus cloud where the bitstreams ofr production will be store.
     MEEP_RAW_REPOSITORY: " https://release.meep-project.eu/nexus/repository/acme-images/"
     # Change this is MEEP wants another bitstream as fixed release
-    EA: acme_ea_1h
 
 # Additional information to build the benchmarks
 .riscv_benchmarks:
@@ -47,8 +48,8 @@
 # This is OpenPiton dependant, so it is declared here and referenced in the shell yml
 .save_dts:
   after_script:
-    - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
-    - mkdir -p tmp/dts; cp $(find . -wholename "*openpiton/*info.h" -type f -print -quit) tmp/dts/info_${EA}_${FPGA_BOARD}.h
+    - mkdir -p tmp/dts; cp $(find . -wholename "*bootrom/*.dts" -type f -print -quit) tmp/dts/${EA}_${FPGA_BOARD}.dts
+    - mkdir -p tmp/dts; cp $(find . -wholename "*bootrom/*info.h" -type f -print -quit) tmp/dts/info_${EA}_${FPGA_BOARD}.h
 
 .export_toolchain:
   before_script:
