@@ -22,7 +22,7 @@ set JTAGCkName [dict get $JTAGentry SyncClk Name]
 set JTAGLabl   [dict get $JTAGentry IntfLabel]
 set JTAGMode   [dict get $JTAGentry Mode]
 
-putmeeps "Instantiating JTAG interface $JTAGLabl in $JTAGMode mode (bscan mode only is supported so far)..."
+putmeeps "Instantiating JTAG interface $JTAGLabl in $JTAGMode mode"
 
 set bscan_prim [ create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 bscan_prim ]
   set_property -dict [ list \
@@ -30,13 +30,17 @@ set bscan_prim [ create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 bs
    CONFIG.C_NUM_BS_MASTER {2} \
  ] $bscan_prim
 set debug_hub  [ create_bd_cell -type ip -vlnv xilinx.com:ip:debug_bridge:3.0 debug_hub ]
-set bscan2jtag [ create_bd_cell -type ip -vlnv xilinx.com:ip:bscan_jtag:1.0 bscan2jtag ]
-
-connect_bd_intf_net [get_bd_intf_pins bscan_prim/m0_bscan] [get_bd_intf_pins bscan2jtag/S_BSCAN]
 connect_bd_intf_net [get_bd_intf_pins bscan_prim/m1_bscan] [get_bd_intf_pins debug_hub/S_BSCAN ]
 
-make_bd_intf_pins_external  [get_bd_intf_pins bscan2jtag/M_JTAG]
-set_property name $JTAGLabl [get_bd_intf_ports M_JTAG_0]
+if { $JTAGMode == "bscan" } {
+  make_bd_intf_pins_external  [get_bd_intf_pins bscan_prim/m0_bscan]
+  set_property name $JTAGLabl [get_bd_intf_ports m0_bscan_0]
+} else {
+  set bscan2jtag [ create_bd_cell -type ip -vlnv xilinx.com:ip:bscan_jtag:1.0 bscan2jtag ]
+  connect_bd_intf_net [get_bd_intf_pins bscan_prim/m0_bscan] [get_bd_intf_pins bscan2jtag/S_BSCAN]
+  make_bd_intf_pins_external  [get_bd_intf_pins bscan2jtag/M_JTAG]
+  set_property name $JTAGLabl [get_bd_intf_ports M_JTAG_0]
+}
 
 putmeeps "Using $JTAGCkLabl clock = $JTAGCkFreq Hz ($JTAGCkName) as free-running clock for Debug Hub"
 connect_bd_net [get_bd_pins debug_hub/clk] [get_bd_pins rst_ea_$JTAGCkLabl/slowest_sync_clk]

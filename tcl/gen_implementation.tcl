@@ -246,12 +246,12 @@ proc implementation { g_root_dir g_place_directive g_route_directive g_dcp_on g_
     puts "\r\n-------------------------"
     puts "route_design iteration $route_loop/$route_loops with directive $route_design_directive finished: WNS = $CurrentSlack"
     puts "-------------------------\r\n"
+    write_checkpoint -force $g_root_dir/dcp/implementation.dcp
     if { [expr $CurrentSlack >= 0.000] } {
       break
     }
   }
 
-    write_checkpoint -force $g_root_dir/dcp/implementation.dcp
     report_utilization -file $g_root_dir/reports/utilization.rpt
     set CurrentSlack [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 
