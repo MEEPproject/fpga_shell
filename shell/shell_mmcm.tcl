@@ -42,13 +42,16 @@ if { $ARSTDef ne "" } {
 
 foreach clkObj $ClockList {
 
+  set ClkFreq  [dict get $clkObj ClkFreq]
+  # if the clock is not for just fanout (freq value is present)
+  if {$ClkFreq != ""} {
+
 	### Spaces at the end of a string are necessary when using append
 	# CLKOUT1 is enabled by default, skip it. 0 doesn't exist.
 	if { $i > 1 } {
 		set ConfMMCM "CONFIG.CLKOUT${i}_USED true "
 		append ConfMMCMString "$ConfMMCM"
 	}
-	set ClkFreq  [dict get $clkObj ClkFreq]
 	set ClkName  [dict get $clkObj ClkName]
 	set ClkFreqMHz [expr $ClkFreq/1000000 ]
 	putmeeps "Configuring MMCM output $i: ${ClkFreqMHz}MHz"
@@ -79,7 +82,7 @@ foreach clkObj $ClockList {
 	}
 
 	putdebugs $ConfMMCM
-
+  }
 }
 
 putmeeps "Slowest CLK: $slowestSyncCLKname, APBcandidate: $APBclkCandidate"
@@ -103,7 +106,8 @@ if { $APBclkCandidate != "None" } {
 
 # If ethernet is enabled, and no candidate has been found --> Enable a extra 125MHz clock
 foreach dicEntry $ShellEnabledIntf {
-	if {[regexp -inline -all "ETHERNET" $dicEntry] ne "" } {
+	if {[dict get $dicEntry Name ] == "g_ETHERNET"} {
+	if {[dict get $dicEntry GbEth] == "10Gb"      } {
 		if { $ETHclkCandidate == "None" } {
 			set EthInitClk [list "EthInitClk" 125000000]		
 			set ClocksAndConf [AddClk2MMCM $ClockList $ConfMMCMString $EthInitClk ]
@@ -113,7 +117,7 @@ foreach dicEntry $ShellEnabledIntf {
 		} else {
 			set EthInitClk $ETHclkCandidate
 		}
-	}
+	} }
 }
 
 putdebugs $ClockList
@@ -151,29 +155,35 @@ putdebugs $ConfMMCMString
 
 
 # Start from 1, because the MMCM IP uses outputs numbered starting from 1
-  set n 1 
+  set n 0
 
 	foreach clkObj $ClockList {
 
+        set ClkFreq [dict get $clkObj ClkFreq]
 		set ClkNum  [dict get $clkObj ClkNum]
 		set ClkName [dict get $clkObj ClkName]
 
 		set RstSync [dict get $clkObj ClkRst]
 		set RstPol  [dict get $clkObj ClkRstPol]
+
+        # if the clock is not for just fanout (freq value is present)
+        if {$ClkFreq != ""} {incr n}
 		
 		# TODO: we dont want the APB clock to be external and we do want the PCIe clock in case
 		# it is used as an interface
 		
 		if { !($ClkName == "APBclk" || $ClkName == "EthInitClk")} {
 
-			create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum
-			connect_bd_net [get_bd_ports resetn] [get_bd_pins rst_ea_$ClkNum/ext_reset_in]
-			### Create the reset list to be used later
-			connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/clk_out${n}]
-			### TODO: connect DCM locked signal
-			if { $RstExist == 1 } {
-				connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
-			}
+            if {![info exists rst_gen_$ClkNum]} {
+              set rst_gen_$ClkNum [create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_ea_$ClkNum]
+              connect_bd_net [get_bd_pins rst_ea_$ClkNum/ext_reset_in]     [get_bd_ports resetn]
+              ### Create the reset list to be used later
+              connect_bd_net [get_bd_pins rst_ea_$ClkNum/slowest_sync_clk] [get_bd_pins clk_wiz_1/clk_out${n}]
+              connect_bd_net [get_bd_pins rst_ea_$ClkNum/dcm_locked]       [get_bd_pins clk_wiz_1/locked]
+              if { $RstExist == 1 } {
+                connect_bd_net [get_bd_ports $AsyncRstName] [get_bd_pins rst_ea_$ClkNum/aux_reset_in]
+              }
+            }
 
 			## Make the clocks external and user-usable
 			## User clocks
@@ -206,8 +216,6 @@ putdebugs $ConfMMCMString
 		} elseif { $ClkName == "EthInitClk" } {
 			set EthInitClkPin [get_bd_pins clk_wiz_1/clk_out${n}]
 		}
-		# Increase at the end
-		incr n
 	}
 # Store the locked pin to be used later
  set MMCMLockedPin [get_bd_pins clk_wiz_1/locked]

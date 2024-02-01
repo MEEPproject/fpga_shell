@@ -35,23 +35,23 @@ proc reportRoute { g_root_dir } {
 
 	file mkdir $routeDir
 	open_checkpoint $g_root_dir/dcp/implementation.dcp
-	report_methodology -file $routeDir/methodology.rpt
-        report_design_analysis -timing -extend -file $routeDir/design_analysis_timing.rpt
-        report_design_analysis -max_paths 50 -setup -file $routeDir/design_analysis_setup.rpt
-        report_design_analysis -complexity -file $routeDir/design_analysis_complexity.rpt
-        report_design_analysis -congestion -file $routeDir/design_analysis_congestion.rpt
-        report_route_status -file $routeDir/route_status.rpt
+	report_methodology -file $routeDir/methodology.txt
+        report_design_analysis -timing -extend -file $routeDir/design_analysis_timing.txt
+        report_design_analysis -max_paths 50 -setup -file $routeDir/design_analysis_setup.txt
+        report_design_analysis -complexity -file $routeDir/design_analysis_complexity.txt
+        report_design_analysis -congestion -file $routeDir/design_analysis_congestion.txt
+        report_route_status -file $routeDir/route_status.txt
         report_timing_summary -file $routeDir/timing_summary.rpt
-        report_timing_summary -delay_type min_max -report_unconstrained -warn_on_violation -check_timing_verbose -input_pins -routable_nets -file $routeDir/timing_summary.rpt
-        report_timing -setup -file $routeDir/timing_setup.rpt
-        report_timing -hold -file $routeDir/timing_hold.rpt
-        report_power -file $routeDir/power.rpt
-        report_drc -file $routeDir/drc.rpt
+        report_timing_summary -delay_type min_max -report_unconstrained -warn_on_violation -check_timing_verbose -input_pins -routable_nets -file $routeDir/timing_summary.txt
+        report_timing -setup -file $routeDir/timing_setup.txt
+        report_timing -hold -file $routeDir/timing_hold.txt
+        report_power -file $routeDir/power.txt
+        report_drc -file $routeDir/drc.txt
 	reportCriticalPaths $routeDir/critical_path_report.csv
 
-        report_utilization -hierarchical -file $routeDir/utilization_hier.rpt
-        report_utilization -file $routeDir/utilization_summary.rpt
-        report_utilization -slr -file $routeDir/utilization_slr.rpt
+        report_utilization -hierarchical -file $routeDir/utilization_hier.txt
+        report_utilization -file $routeDir/utilization_summary.txt
+        report_utilization -slr -file $routeDir/utilization_slr.txt
 
 
 }

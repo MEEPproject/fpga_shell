@@ -1,38 +1,82 @@
 # Variable size of Matrix
 # TODO: This file could be auto-generated depending on the Matrix
-# It turns out that dependencies are only needed to specify which job 
+# It turns out that dependencies are only needed to specify which job
 # the artifacts should be downloaded from. It is not mandatory, as by
 # default, all artifacts are downloaded. Dependencies is an optimization.
 # Same applies for needs. It is not mandatory.
 
-.multi_target:
-    parallel:
-        matrix:
-            - FPGA_BOARD: [u55c,u280]
-              EA: [acme, ariane, pronoc, meep_dvino, acme_vpu]
-              # These labels need to match what is at accelerator_build.sh
-              # on the EA meep_shell directory    
+.multi_target_test:
+  parallel:
+    matrix:
+      - FPGA_BOARD: [u55c]
+        EA: [acme_ea_4a, acme_ea_4h2v]
+        # These labels need to match what is at accelerator_build.sh
+        # on the EA meep_shell directory
+
+.multi_target_production:
+  parallel:
+    matrix:
+      - FPGA_BOARD: [u55c]
+        EA: [acme_ea_4a, acme_ea_4h2v]
 
 .default_tags:
   tags:
-    - MEEP_FPGA
+    - synthesis
 
-.common_conf:
+.production_rules:
   rules:
-    - !reference [.default_rules, rules]  
-    - if: $CI_PIPELINE_SOURCE == "pipeline"  
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $ENV_WORK == "PRODUCTION" && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "production" #Can be trigger for a mer_request to the The target branch "production"
+    - if: $CI_PIPELINE_SOURCE == "schedule" #A schedule pipeline: production monthly
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_TAG != null
+    - if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+      when: never #
+
+.test_rules:
+  rules:
+    - if: $ENV_WORK == "TEST" && $CI_PIPELINE_SOURCE == "pipeline"
+    - if: ($CI_COMMIT_MESSAGE =~ /#TestCICD/)
+
+.quick_test_rules:
+  variables:
+    FPGA_BOARD: u55c
+    EA: acme_ea_1h
+  rules:
+    - if: $ENV_WORK == "QUICKTEST" && $CI_PIPELINE_SOURCE == "pipeline"
     - if: $CI_PIPELINE_SOURCE == "web"
-    - if: $CI_COMMIT_TAG != null 
+    - if: ($CI_COMMIT_MESSAGE =~ /#TestHun/)
+
+.common_conf_production:
+  # rules:
+  #   - if: $CI_PIPELINE_SOURCE == "pipeline"
+  #   - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  #   - if: $CI_PIPELINE_SOURCE == "web"
+  #   - if: $CI_COMMIT_TAG != null
   variables:
     GIT_SUBMODULE_STRATEGY: "none"
-  parallel: !reference [.multi_target, parallel]  
-  timeout: 8h
-  tags: !reference [.default_tags, tags] 
+  parallel: !reference [.multi_target_production, parallel]
+  timeout: 72h
+  tags: !reference [.default_tags, tags]
   # Don't block successfull builds in the matrix:
   # This would benefit from variable dependencies/needs, but that's not supported as per today on GitLab
-  allow_failure: true  
+  allow_failure: true
 
+.common_conf_test:
+  # rules:
+  #   - if: $CI_PIPELINE_SOURCE == "pipeline"
+  #   - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  #   - if: $CI_PIPELINE_SOURCE == "web"
+  #   - if: $CI_COMMIT_TAG != null
+  variables:
+    GIT_SUBMODULE_STRATEGY: "none"
+  parallel: !reference [.multi_target_test, parallel]
+  timeout: 72h
+  tags: !reference [.default_tags, tags]
+  # Don't block successfull builds in the matrix:
+  # This would benefit from variable dependencies/needs, but that's not supported as per today on GitLab
+  allow_failure: true
 
 .check_synth:
   script:
@@ -41,7 +85,7 @@
         echo "dcp file has not been created"
         exit 23; 
       fi;
-      
+
 .check_impl:
   script:
     - |
@@ -52,13 +96,12 @@
 
 .update_sha:
   script:
-    - |      
+    - |
       if [ "x$COMMIT_SHA" != "x" ]; then
         sh/update_sha.sh ea_url.txt $COMMIT_REF $COMMIT_SHA
-      fi   
+      fi
 
 .git_clean:
-    before_script:
-        - git config --local --unset http.proxy || true
-        - git config --local --unset https.proxy || true      
-
+  before_script:
+    - git config --local --unset http.proxy || true
+    - git config --local --unset https.proxy || true

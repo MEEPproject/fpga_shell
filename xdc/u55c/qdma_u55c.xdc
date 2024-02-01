@@ -78,3 +78,13 @@ set_property PACKAGE_PIN AP9              [get_ports {pci_express_x16_txp[3]} ] 
 set_property PACKAGE_PIN AN11             [get_ports {pci_express_x16_txp[2]} ]                    ;# Bank 227 - MGTYTXP1_227
 set_property PACKAGE_PIN AM9              [get_ports {pci_express_x16_txp[1]} ]                    ;# Bank 227 - MGTYTXP2_227
 set_property PACKAGE_PIN AL11             [get_ports {pci_express_x16_txp[0]} ]  
+
+#--------------------------------------------
+# Specifying the placement of PCIe clock domain modules into single SLR to facilitate routing
+# https://www.xilinx.com/support/documentation/sw_manuals/xilinx2020_1/ug912-vivado-properties.pdf#page=386
+#Collecting all units from correspondingly PCIe domain,
+set pcie_clk_units [get_cells -of_objects [get_nets -of_objects [get_pins -hierarchical qdma_0/axi_aclk]]]]
+#Setting specific SLR to which PCIe pins are wired since placer may miss it if just "group_name" is applied
+set_property USER_SLR_ASSIGNMENT SLR0 [get_cells "$pcie_clk_units"]
+
+## ================================

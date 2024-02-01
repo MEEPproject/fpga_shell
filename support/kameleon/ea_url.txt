@@ -1,0 +1,4 @@
+EMULATED_ACCELERATOR_NAME: kameleon
+EMULATED_ACCELERATOR_REPO: https://gitlab.bsc.es/drac/lagarto-lowrisc.git
+EMULATED_ACCELERATOR_SHA: 82bafb788a4b5ad4b940ccd85cf29e25694ea70b
+

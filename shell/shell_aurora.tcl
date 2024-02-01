@@ -22,11 +22,16 @@
 
 set AuroraClkNm  [dict get $AURORAentry SyncClk Label]
 set AuroraFreq   [dict get $AURORAentry SyncClk Freq]
-set Auroraname   [dict get $AURORAentry SyncClk Name]
+set AuroraClkIf  [dict get $AURORAentry SyncClk Name]
 set Auroraintf   [dict get $AURORAentry IntfLabel]
 set AuroraMode   [dict get $AURORAentry Mode]
-set AuroraUsrClk [dict get $AURORAentry UsrClk]
-set AuroraQSFP   [dict get $Auroraentry qsfpPort]
+# set AuroraUsrClk [dict get $AURORAentry UsrClk]
+set AuroraQSFP   [dict get $AURORAentry qsfpPort]
+set AuroradmaMem [dict get $AURORAentry dmaMem]
+set AuroraHBMCh  [dict get $AURORAentry HBMChan]
+set AuroraAXI    [dict get $AURORAentry AxiIntf]
+set Aurorairq    [dict get $AURORAentry IRQ]
+
 
 set AuroraaddrWidth [dict get $$AURORAentry AxiAddrWidth]
 set AuroradataWidth [dict get $$AURORAentry AxiDataWidth]
@@ -35,28 +40,15 @@ set AuroraUserWidth [dict get $$AURORAentry AxiUserWidth]
 
 set AuroraIP ""
 
-if { $AuroraMode == "DMA" } {
-
-	set AuroraMode "dma"
-
-} elseif { $AuroraMode == "RAW" } {
-
-       set AuroraMode "raw"
+if { $AuroraMode == "dma" } {
+  set AurHierName "AuroraSyst_${AuroraMode}_${AuroradmaMem}"
+} elseif { $AuroraMode == "raw" } {
+  set AurHierName "AuroraSyst_${AuroraMode}"
 }
-
-if { $AuroraQSFP == "qsfp0" } {
-        set QSFP "0"
-        set PortList [lappend PortList $g_aurora0_file]
-} else {
-        set QSFP "1"
-        set PortList [lappend PortLIst $g_aurora1_file]
-}
-
-
 
 ### Initialize the IPs
 putmeeps "Packaging Aurora IP..."
-exec vivado -mode batch -nolog -nojournal -notrace -source ./ip/aurora_${AuroraMode}/tcl/gen_project.tcl -tclargs $g_board_part
+exec vivado -mode batch -nolog -nojournal -notrace -source ./ip/aurora_${AuroraMode}/tcl/gen_project.tcl -tclargs $g_board_part $AuroraQSFP $AuroradmaMem $AuroraFreq $AuroraAXI
 putmeeps "... Done."
 update_ip_catalog -rebuild
 
@@ -64,62 +56,100 @@ source $g_root_dir/ip/aurora_${AuroraMode}/tcl/project_options.tcl
 
 #TODO: The Numbering of the added cells need to be dependant on the number of QSFP interfaces the user has defined
 
-create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_aurora_${AuroraMode}:$g_ip_version aurora_${AuroraMode}_${QSFP}
+create_bd_cell -type ip -vlnv meep-project.eu:MEEP:MEEP_aurora_${AuroraMode}:$g_ip_version ${AurHierName}
 
-# TODO: Again, there are several naming possibilities depending on the selected combination of QSFP devices
-make_bd_intf_pins_external  [get_bd_intf_pins aurora_${AuroraMode}_${QSFP}/gt_refclk]
+# Now all AXI properties are inhereted from the IP
+make_bd_intf_pins_external [get_bd_intf_pins $AurHierName/s_axi]
+set_property name $Auroraintf [get_bd_intf_ports s_axi_0]
 
-# Leverage from the APBCLK to connect the init CLK, as we know the former is always between 50-100MHz
-connect_bd_net [get_bd_pins aurora_${AuroraMode}_${QSFP}/INIT_CLK] $APBClockPin
-# Active-high reset
-connect_bd_net [get_bd_pins rst_ea_${AuroraClkNm}/peripheral_reset] [get_bd_pins aurora_${AuroraMode}_${QSFP}/RESET]
+if { $AuroraQSFP == "qsfp0" } {
+  set QSFP "0"
+  set g_aurora_if_file $g_aurora0_file
 
-# Connect to ground the self-testing capabilities. 
-# TODO: Add GPIO connections for these pins
-create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 aurora_gnd
-set_property -dict [list CONFIG.CONST_VAL {0}] [get_bd_cells aurora_gnd]
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp0_4x_grx_n
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp0_4x_grx_p
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp0_4x_gtx_n
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp0_4x_gtx_p
+  create_bd_port -dir I -type clk qsfp0_ref_clk_n
+  create_bd_port -dir I -type clk qsfp0_ref_clk_p
 
-connect_bd_net [get_bd_pins aurora_gnd/dout] [get_bd_pins aurora_${AuroraMode}_${QSFP}/SIMULATE_FRAME_CHECK]
-connect_bd_net [get_bd_pins aurora_${AuroraMode}_${QSFP}/SIMULATE_FRAME_GEN] [get_bd_pins aurora_gnd/dout]
-connect_bd_net [get_bd_pins aurora_${AuroraMode}_${QSFP}/DATA_INJ] [get_bd_pins aurora_gnd/dout]
+  connect_bd_net [get_bd_ports qsfp0_ref_clk_p] [get_bd_pins ${AurHierName}/qsfp_refck_clk_p]
+  connect_bd_net [get_bd_ports qsfp0_ref_clk_n] [get_bd_pins ${AurHierName}/qsfp_refck_clk_n]
+  connect_bd_net [get_bd_ports qsfp0_4x_grx_n]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxn]
+  connect_bd_net [get_bd_ports qsfp0_4x_grx_p]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxp]
+  connect_bd_net [get_bd_ports qsfp0_4x_gtx_n]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txn]
+  connect_bd_net [get_bd_ports qsfp0_4x_gtx_p]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txp]
+} else {
+  set QSFP "1"
+  set g_aurora_if_file $g_aurora1_file
+
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp1_4x_grx_n
+  create_bd_port -dir I -from 3 -to 0 -type data qsfp1_4x_grx_p
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp1_4x_gtx_n
+  create_bd_port -dir O -from 3 -to 0 -type data qsfp1_4x_gtx_p
+  create_bd_port -dir I -type clk qsfp1_ref_clk_n
+  create_bd_port -dir I -type clk qsfp1_ref_clk_p
+
+  connect_bd_net [get_bd_ports qsfp1_ref_clk_p] [get_bd_pins ${AurHierName}/qsfp_refck_clk_p]
+  connect_bd_net [get_bd_ports qsfp1_ref_clk_n] [get_bd_pins ${AurHierName}/qsfp_refck_clk_n]
+  connect_bd_net [get_bd_ports qsfp1_4x_grx_n]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxn]
+  connect_bd_net [get_bd_ports qsfp1_4x_grx_p]  [get_bd_pins ${AurHierName}/qsfp_rx_4x_rxp]
+  connect_bd_net [get_bd_ports qsfp1_4x_gtx_n]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txn]
+  connect_bd_net [get_bd_ports qsfp1_4x_gtx_p]  [get_bd_pins ${AurHierName}/qsfp_tx_4x_txp]
+}
+
+set PortList [lappend PortList $g_aurora_if_file]
 
 
+connect_bd_net [get_bd_pins ${AurHierName}/s_axi_clk]            [get_bd_pins rst_ea_$AuroraClkNm/slowest_sync_clk]
+connect_bd_net [get_bd_pins rst_ea_$AuroraClkNm/peripheral_aresetn] [get_bd_pins ${AurHierName}/s_axi_resetn]
+# Make External avoids passing the signal width to this point. The bus is created automatically
+make_bd_pins_external  [get_bd_pins ${AurHierName}/intc]
+set_property name $Aurorairq [get_bd_ports intc_0]
+# connect_bd_intf_net [get_bd_intf_ports $Auroraintf] [get_bd_intf_pins ${AurHierName}/s_axi]
+set_property CONFIG.ASSOCIATED_BUSIF [get_property CONFIG.ASSOCIATED_BUSIF [get_bd_ports /$AuroraClkIf]]$Auroraintf: [get_bd_ports /$AuroraClkIf]
 
+# Open an HBM Channels so the Ethernet DMA gets to the main memory
+if { $AuroraMode == "dma" && ${AuroradmaMem} eq "hbm" } {
+  set SgHBMCh [expr $AuroraHBMCh+0]
+  set TxHBMCh [expr $AuroraHBMCh+1]
+  set RxHBMCh [expr $AuroraHBMCh+2]
 
-if { $AuroraMode == "dma" } {
+  set_property -dict [list CONFIG.USER_SAXI_${TxHBMCh} {TRUE}] [get_bd_cells hbm_0]
+  set_property -dict [list CONFIG.USER_SAXI_${RxHBMCh} {TRUE}] [get_bd_cells hbm_0]
+  set_property -dict [list CONFIG.USER_SAXI_${SgHBMCh} {TRUE}] [get_bd_cells hbm_0]
 
-### Set Base Addresses to peripheral
-# Aurora
-set AurorabaseAddr [dict get $AURORAentry BaseAddr]
-set AuroraMemRange [expr {2**$AuroraaddrWidth/1024}]
+  connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${TxHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${AurHierName}/m_axi_tx]
+  connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${RxHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${AurHierName}/m_axi_rx]
+  connect_bd_intf_net [get_bd_intf_pins hbm_0/SAXI_${SgHBMCh}${HBM_AXI_LABEL}] [get_bd_intf_pins ${AurHierName}/m_axi_sg]
 
-putdebugs "Base Addr Aurora: $AurorabaseAddr"
-putdebugs "Mem Range Aurora: $AuroraMemRange"
+  connect_bd_net [get_bd_pins hbm_0/AXI_${TxHBMCh}_ACLK] [get_bd_pins ${AurHierName}/tx_clk]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${RxHBMCh}_ACLK] [get_bd_pins ${AurHierName}/rx_clk]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${SgHBMCh}_ACLK] [get_bd_pins ${AurHierName}/s_axi_clk]
 
-
-set_property offset $AurorabaseAddr [get_bd_addr_segs $Auroraintf/SEG_aurora_dma_0_Mem0]
-set_property range ${AuroraMemRange}K [get_bd_addr_segs $Auroraintf/SEG_aurora_dma_0_Mem0]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${TxHBMCh}_ARESET_N] [get_bd_pins ${AurHierName}/tx_rstn]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${RxHBMCh}_ARESET_N] [get_bd_pins ${AurHierName}/rx_rstn]
+  connect_bd_net [get_bd_pins hbm_0/AXI_${SgHBMCh}_ARESET_N] [get_bd_pins ${AurHierName}/s_axi_resetn]
 
 } elseif { $AuroraMode == "raw" } {
 
-	make_bd_intf_pins_external  [get_bd_intf_pins aurora_raw_0/S_USER_AXIS_UI_TX]
+    connect_bd_net [get_bd_pins aurora_${AurHierName}/SIMULATE_FRAME_CHECK] [get_bd_pins aurora_gnd/dout]
+    connect_bd_net [get_bd_pins aurora_${AurHierName}/SIMULATE_FRAME_GEN]   [get_bd_pins aurora_gnd/dout]
+    connect_bd_net [get_bd_pins aurora_${AurHierName}/DATA_INJ]             [get_bd_pins aurora_gnd/dout]
+
+	make_bd_intf_pins_external  [get_bd_intf_pins aurora_${AurHierName}/S_USER_AXIS_UI_TX]
+	make_bd_intf_pins_external  [get_bd_intf_pins aurora_${AurHierName}/M_USER_AXIS_UI_RX]
 	
 	# REQUIREMENT: The csv definition file can use only one intf name but
 	# the ea wrapper module need to extend the name with _rx and _tx
 	set_property name ${Auroraintf}_tx [get_bd_intf_ports S_USER_AXIS_UI_TX_0]
-
-	make_bd_intf_pins_external  [get_bd_intf_pins aurora_raw_0/M_USER_AXIS_UI_RX]
 	set_property name ${Auroraintf}_rx [get_bd_intf_ports M_USER_AXIS_UI_RX_0]
 	# TODO: RX and TX labels can create confussion: TX is injected to the core to be 
 	# transmitted. RX is ouput from the core and served to the user logic
 	
- 	set aurora_usr_clk $AuroraUsrClk	
-	make_bd_pins_external  [get_bd_pins aurora_raw_0/USER_CLK_OUT]
-	set_property name $AuroraUsrClk [get_bd_ports USER_CLK_OUT_0]
-
-
+ 	# set aurora_usr_clk $AuroraUsrClk	
+	make_bd_pins_external  [get_bd_pins aurora_${AurHierName}/USER_CLK_OUT]
+	# set_property name $AuroraUsrClk [get_bd_ports USER_CLK_OUT_0]
 }
 
-
-
-
+save_bd_design
