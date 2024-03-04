@@ -14,5 +14,5 @@
 	path = ip/pulp_uart
 	url = ../pulp-uart.git
 [submodule "ip/aurora-dma"]
-	path = ip/aurora-dma
+	path = ip/aurora_dma
 	url = ../aurora-dma.git
