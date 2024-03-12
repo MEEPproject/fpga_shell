@@ -1,15 +1,6 @@
-<div align="center">
-    <img src="Images/meep-logo-symbol.png" width="200px" alt="<MEEP logo>"/>
+# FPGA Shell
 
-<br/>
-<h1 align="center">MEEP FPGA Shell
-<br/>
-<br/>
-
-</div>
-<div align="center">
-
-[![pipeline status](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/badges/production/pipeline.svg)](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/commits/production)
+[![pipeline status](https://gitlab.bsc.es/hwdesign/fpga/integration-lab/fpga-shell/badges/production/pipeline.svg)](https://gitlab.bsc.es/hwdesign/fpga/integration-lab/fpga-shell/commits/production)
 
 </div>
 
@@ -21,7 +12,45 @@
 
 The shell is meant to be a static perimeter architecture that guarantees that the inside accelerator package can be interchangeable for any other package when meeting a defined I/O interface between the shell and the accelerator package.
 
-### 1.1- :house_with_garden: Supported Emulated Accelerators (EA)[^1]
+
+### 1.1- 📡 Interfaces
+
+The FPGA Shell implements the following interfaces:
+
+- PCIe: Establishes communication between FPGA and the host server.
+- HBM: High Bandwidth Memory. HBM is the high-performance DRAM interface. It is embedded in the same silicon interposer as the Super Logic Regions (SLR).
+- Ethernet: 100Gb Ethernet.
+- Aurora: P2P interface.
+- DDR4: External Memory.
+- Info ROM: Stores and reads information on the configuration of the Shell when booting the project
+- UART
+
+### 1.2- :books: Boards
+
+The supported boards are as follows:
+
+- Alveo U55C
+- Alveo U280
+
+## 2- :electric_plug: Prerequisites
+
+- The FPGA Shell is compatible with both Vivado 2021.2. and 2021.1 versions
+- It only works on Linux. There is no plan to add Windows support in the middle term.
+
+## 3- 🛠️ Usage
+
+In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_accelerator_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
+<br/>
+
+```Bash
+INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
+```
+
+Where _diasmbiguation_ is <span style="color:green">**_yes_**</span> in order to activate the component within the Shell, <span style="color:red">**_no_**</span> for it to be absent.<br/>
+
+### 3.1- :house_with_garden: Supported Emulated Accelerators (EA)[^1]
+
+Most of these accelerators are been used in BSC and some of them are not open source at the moment.
 
 | EA             |                                                                                                                                                                                                                                                                     Description                                                                                                                                                                                                                                                                     |                                                         Status |
 | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | -------------------------------------------------------------: |
@@ -38,44 +67,9 @@ Every EA has a folder fpga_shell/support with a ea_url.txt file. This file conta
 
 [^1]: (EA): This element is where all the data process is executed, and involves computation and memory management. In the future, the architecture of the accelerator will depend on Third Parties, since they will be able to map, place and route their own designs. But, right now as a PoC, MEEP considers a specific accelerator architecture, conformed by a set of IPs RISC-V compliant.
 
-### 1.2- 📡 Interfaces
+### 3.2- :crystal_ball: Project creation process
 
-The FPGA Shell implements the following interfaces:
-
-- PCIe: Establishes communication between FPGA and the host server.
-- HBM: High Bandwidth Memory. HBM is the high-performance DRAM interface. It is embedded in the same silicon interposer as the Super Logic Regions (SLR).
-- Ethernet: 100Gb Ethernet.
-- Aurora: P2P interface.
-- DDR4: External Memory.
-- Info ROM: Stores and reads information on the configuration of the Shell when booting the project
-- UART
-
-### 1.3- :books: Boards
-
-The supported boards are as follows:
-
-- Alveo U55C
-- Alveo U280
-
-## 2- :electric_plug: Prerequisites
-
-- The MEEP Shell is compatible with both Vivado 2021.2. and 2021.1 versions
-- It only works on Linux. There is no plan to add Windows support in the middle term.
-
-## 3- 🛠️ Usage
-
-In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_accelerator_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
-<br/>
-
-```Bash
-INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
-```
-
-Where _diasmbiguation_ is <span style="color:green">**_yes_**</span> in order to activate the component within the Shell, <span style="color:red">**_no_**</span> for it to be absent.<br/>
-
-### 3.1- :crystal_ball: Project creation process
-
-#### 3.1.1- :racehorse: Quickstart guide
+#### 3.2.1- :racehorse: Quickstart guide
 
 If required, adjust the default board. Note that "u55c" is currently set as default.
 
@@ -83,13 +77,9 @@ If required, adjust the default board. Note that "u55c" is currently set as defa
 
 Prior to cloning the accelerator repository, please note that if you wish to specify a particular commit, you must update the ea_url.txt file located in the support folder (`fpga_shell/support`) of the corresponding EA.
 
-    make initialize LOAD_EA=acme
+    make initialize LOAD_EA=sargantana
 
-To perform a complete implementation, include any additional parameters. Please refer to Section 4.2 for further information.
-
-    make all LOAD_EA=acme EA_PARAM=acme_ea_4a
-
-#### 3.1.2- :snail: Dissected guide
+#### 3.2.2- :snail: Dissected guide
 
 After cloning the repository, proceed with the following steps:
 
@@ -135,7 +125,7 @@ make bitstream         # Generates the bitstream. Creates the synthesis.dcp and/
 
 For further information, please refer to [this resource](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_MEEP_Shell_use).
 
-### 3.2- :scroll: Acme project features
+### 3.3- :scroll: Acme project features
 
 To verify the available flavors for acme, execute the following command:
 
@@ -155,13 +145,13 @@ If you intend to include flags:
 
 This will generate an OpenPiton project with Lagarto as a core. Other combinations are available.
 
-### 3.3- :paperclip: Push with GitLab variables
+### 3.4- :paperclip: Push with GitLab variables
 
     git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 
     make project EA_PARAMS=pronoc
 
-### 3.4- :inbox_tray: Other available commands
+### 3.5- :inbox_tray: Other available commands
 
 ```Bash
 make SmartPlace        # Exahustive search of the best placement strategy (~20hours)
@@ -175,7 +165,7 @@ make reports_synth     # Create synthesis reports: Utilization, timing paths
 make reports_impl      # Create implementation reports: Utilization, timing paths
 ```
 
-### 3.5- :mag: Test bitstream
+### 3.6- :mag: Test bitstream
 
 **MEEP SERVERS tools**
 
@@ -183,7 +173,7 @@ You can find the bistream in the folder **bitstream**
 
 **DRIVERS**
 
-1. Default drivers in MEEP Servers:
+1. Default drivers in HW Servers:
 
 Before to load the bistream, you need to setup PATH for drivers:
 
@@ -209,7 +199,7 @@ Finally, if you want to boot a binary or test the UART output log, you can use t
 
 ## 4- :open_file_folder: Directory Structure
 
-The MEEP FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
+The FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
 
 The **sh** folder handle some automatic tasks during the whole flow, working closely with Makefiles.
 
@@ -403,14 +393,5 @@ Answer
 > You need to get the license here:
 > https://www.xilinx.com/products/intellectual-property/cmac_usplus.html#overview
 
-#### 11.3- External users :surfer: :
 
-We highly recommend to use this branch
 
-    git clone -b ft/external_users https://github.com/MEEPproject/fpga_shell.git
-
-<br/>
-<br/>
-<div align="center">
-<h2 align="center">🤝 Support</h2>
-<p align="center">The MEEP project has received funding from the European High-Performance Computing Joint Undertaking (JU) under grant agreement No 946002. The JU receives support from the European Union’s Horizon 2020 research and innovation programme in Spain, Croatia, Turkey.</p>
