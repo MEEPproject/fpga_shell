@@ -73,7 +73,7 @@ Every EA has a folder fpga_shell/support with a ea_url.txt file. This file conta
 
 If required, adjust the default board. Note that "u55c" is currently set as default.
 
-    make u280
+    make u55c
 
 Prior to cloning the accelerator repository, please note that if you wish to specify a particular commit, you must update the ea_url.txt file located in the support folder (`fpga_shell/support`) of the corresponding EA.
 
@@ -210,26 +210,7 @@ The **shell** folder is where all the different IPs that can be part of the Shel
 IPs are treated individually, in such a way there is no friction between different set ups, meaning that any combination of IPs can be set with no dependency or incompatibility between them. Which such approach, the Shell can be built incrementaly, adding more pieces as they are needed. The only exception to this are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it will be explained later.
 
-## 5- :pencil2: Bitstreams Naming convention
-
-To ensure a standardized approach for generating bitstream name releases, it is essential to adhere to certain mandatory rules, which include:
-
-### 5.1- :closed_book: ACME_EA
-
-All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
-
-- First letter: to designate the core (A: _Ariane_; H: _Lagarto Hun_)
-- Second letter: to identify the accelerator (x: _no accelerator_; V: _VPU_; G: _VPU+SA-HEVC+SA-NN_)
-- Thrid letter: to identify the Memory Tile (x: _no MT_, M: _Memory Tile_)
-
-To complete this information, we will add an extra value to each fields:
-
-- **acme_ea_ahbvcm**; where:
-  - "a" means the number of cores in the system
-  - "b" means the number of vector lanes
-  - "c" means the number of MT
-
-## 6- :earth_africa: Environments
+## 5- :earth_africa: Environments. CICD
 
 We have defined three different environments in order to generate different bitstreams. Those are **Production**, **Test**, and **Quick-test**.
 
@@ -243,7 +224,7 @@ flowchart LR
     D --> E([Booting Linux])
     E --> F([Baremetal Test])
     F --> G([Fedora])
-    G -- X5 --> G([Fedora])
+    G --> G([Fedora])
     G --> H([OS tests])
     H --> I([Deploy])
 
@@ -252,22 +233,10 @@ flowchart LR
     J -->|Two| L[Nexus Cloud]
 ```
 
-### 6.1- :wrench: Production
+### 6.1- :wrench: Production.
+
 
 The production environment will be a monthly release. We will work with:
-
-All use **ProNoC** routers
-
-| Bitstream names                                                  | Description                  | Status                                       |
-| :--------------------------------------------------------------- | :--------------------------- | :------------------------------------------- |
-| acme_ea_4a                                                       | _golden reference_           | available                                    |
-| acme_ea_1h16g1m                                                  |                              | **not** available yet. Pending from MT & SAs |
-| acme_ea_4h2v4m                                                   |                              | **not** available yet . Pending from MT      |
-| acme_ea_4h2v2m                                                   | (L1.Ariane)                  | **not** available yet [pending from MT]      |
-| Meanwhile 2, 3 & 4 are in place we will include a transition one |
-| acme_ea_4h2v                                                     | (L1.Ariane)                  | available                                    |
-| acme_ea_1h2g                                                     | (L1.Ariane)                  | available                                    |
-| acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
 
 :books: The FPGA card used here are the **u280** and **u55c** (default).
 
@@ -276,17 +245,6 @@ There are two ways to execute the pipeline using this environment. By Merge requ
 The bitstreams generated will be released in [here](https://release.meep-project.eu/nexus/#browse/search/raw).
 
 ### 6.2- :four_leaf_clover: Test
-
-Here we are using **OP routers**. This will help to ensure nothing is broken on the way.
-
-| Bitstream names | Description                                           | Status    |
-| :-------------- | :---------------------------------------------------- | :-------- |
-| acme_ea_4a      | _golden reference_                                    | available |
-| acme_ea_4h2v    |                                                       | available |
-| acme_ea_1h16v   | Problems with the route and place implemetation stage | available |
-| acme_ea_16v     | It is too big to be implemented in the FPGA boards    | available |
-
-Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers. (Pending)
 
 :card_box: Here we use the **u280** and **u55c** fpga cards.
 
@@ -352,21 +310,13 @@ read all
 
 This will automatically kill the process.
 
-[Futher information](https://wiki.meep-project.eu/index.php/MEEP_InfoROM)
 
 ## 8- :woman: Authors
 
 fpga@bsc.es
 
-## 9- 👷 Partners
 
-**Barcelona Supercomputing Center** - Centro Nacional de Supercomputación (BSC-CNS) :globe_with_meridians:
-[Website](https://www.bsc.es "Welcome")
-<br/>**University of Zagreb**, Faculty of Electrical Engineering and Computing
-:globe_with_meridians: [Website](https://www.fer.unizg.hr/en "Welcome")
-<br/>**TÜBITAK BILGEM** Informatics and Information Security Research Center :globe_with_meridians: [Website](https://bilgem.tubitak.gov.tr/en "Welcome")
-
-## 10- :globe_with_meridians: Wiki
+## 9- :globe_with_meridians: Wiki
 
 For more detailed instructions on how to use this software, visit [project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki").
 
