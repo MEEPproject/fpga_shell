@@ -1,17 +1,15 @@
-<div align="center">
-    <img src="Images/meep-logo-symbol.png" width="200px" alt="<MEEP logo>"/>
+# FPGA Shell
 
-<br/>
-<h1 align="center">MEEP FPGA Shell
-<br/>
-<br/>
+[![pipeline status](https://gitlab.bsc.es/hwdesign/fpga/integration-lab/fpga-shell/badges/production/pipeline.svg)](https://gitlab.bsc.es/hwdesign/fpga/integration-lab/fpga-shell/commits/production)
 
 </div>
-<div align="center">
 
-[![pipeline status](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/badges/production/pipeline.svg)](https://gitlab.bsc.es/meep/FPGA_implementations/AlveoU280/fpga_shell/-/commits/production)
+## Publication
 
-</div>
+Makinote has been published in ACM RAPIDO '2024: Elias Perdomo, Alexander Kropotov, Francelly Katherine Cano Ladino, Syed Zafar, Teresa Cervero, Xavier Martorell Bofill, and Behzad Salami. "Makinote: An FPGA-Based HW/SW Platform for Pre-Silicon Emulation of RISC-V Designs". In Proceedings of the 16th Workshop on Rapid Simulation and Performance Evaluation for Design (RAPIDO '24). Association for Computing Machinery, New York, NY, USA, 29–34. January 2024. https://doi.org/10.1145/3642921.3642928
+
+If you use our Makinote HW or SW tools anyhow in your research please reference our AMC paper mentioned above and send us a citation of your work.
+
 
 ## Table of Contents
 
@@ -21,7 +19,45 @@
 
 The shell is meant to be a static perimeter architecture that guarantees that the inside accelerator package can be interchangeable for any other package when meeting a defined I/O interface between the shell and the accelerator package.
 
-### 1.1- :house_with_garden: Supported Emulated Accelerators (EA)[^1]
+
+### 1.1- 📡 Interfaces
+
+The FPGA Shell implements the following interfaces:
+
+- PCIe: Establishes communication between FPGA and the host server.
+- HBM: High Bandwidth Memory. HBM is the high-performance DRAM interface. It is embedded in the same silicon interposer as the Super Logic Regions (SLR).
+- Ethernet: 100Gb Ethernet.
+- Aurora: P2P interface.
+- DDR4: External Memory.
+- Info ROM: Stores and reads information on the configuration of the Shell when booting the project
+- UART
+
+### 1.2- :books: Boards
+
+The supported boards are as follows:
+
+- Alveo U55C
+- Alveo U280
+
+## 2- :electric_plug: Prerequisites
+
+- The FPGA Shell is compatible with both Vivado 2021.2. and 2021.1 versions
+- It only works on Linux. There is no plan to add Windows support in the middle term.
+
+## 3- 🛠️ Usage
+
+In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_accelerator_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
+<br/>
+
+```Bash
+INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
+```
+
+Where _diasmbiguation_ is <span style="color:green">**_yes_**</span> in order to activate the component within the Shell, <span style="color:red">**_no_**</span> for it to be absent.<br/>
+
+### 3.1- :house_with_garden: Supported Emulated Accelerators (EA)[^1]
+
+Most of these accelerators are been used in BSC and some of them are not open source at the moment.
 
 | EA             |                                                                                                                                                                                                                                                                     Description                                                                                                                                                                                                                                                                     |                                                         Status |
 | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | -------------------------------------------------------------: |
@@ -38,58 +74,19 @@ Every EA has a folder fpga_shell/support with a ea_url.txt file. This file conta
 
 [^1]: (EA): This element is where all the data process is executed, and involves computation and memory management. In the future, the architecture of the accelerator will depend on Third Parties, since they will be able to map, place and route their own designs. But, right now as a PoC, MEEP considers a specific accelerator architecture, conformed by a set of IPs RISC-V compliant.
 
-### 1.2- 📡 Interfaces
+### 3.2- :crystal_ball: Project creation process
 
-The FPGA Shell implements the following interfaces:
-
-- PCIe: Establishes communication between FPGA and the host server.
-- HBM: High Bandwidth Memory. HBM is the high-performance DRAM interface. It is embedded in the same silicon interposer as the Super Logic Regions (SLR).
-- Ethernet: 100Gb Ethernet.
-- Aurora: P2P interface.
-- DDR4: External Memory.
-- Info ROM: Stores and reads information on the configuration of the Shell when booting the project
-- UART
-
-### 1.3- :books: Boards
-
-The supported boards are as follows:
-
-- Alveo U55C
-- Alveo U280
-
-## 2- :electric_plug: Prerequisites
-
-- The MEEP Shell is compatible with both Vivado 2021.2. and 2021.1 versions
-- It only works on Linux. There is no plan to add Windows support in the middle term.
-
-## 3- 🛠️ Usage
-
-In order to define the interfaces that ought to be active in the Shell, edit <span style="color:green">_accelerator_def.csv_</span> <span style="color:grey"> (`./fpga shell/accelerator/piton/design/chipset/meep shell/accelerator def.csv`)</span> in the following format:
-<br/>
-
-```Bash
-INTERFACE_NAME,<diasmbiguation>,XXX,XXX,XXX
-```
-
-Where _diasmbiguation_ is <span style="color:green">**_yes_**</span> in order to activate the component within the Shell, <span style="color:red">**_no_**</span> for it to be absent.<br/>
-
-### 3.1- :crystal_ball: Project creation process
-
-#### 3.1.1- :racehorse: Quickstart guide
+#### 3.2.1- :racehorse: Quickstart guide
 
 If required, adjust the default board. Note that "u55c" is currently set as default.
 
-    make u280
+    make u55c
 
 Prior to cloning the accelerator repository, please note that if you wish to specify a particular commit, you must update the ea_url.txt file located in the support folder (`fpga_shell/support`) of the corresponding EA.
 
-    make initialize LOAD_EA=acme
+    make initialize LOAD_EA=sargantana
 
-To perform a complete implementation, include any additional parameters. Please refer to Section 4.2 for further information.
-
-    make all LOAD_EA=acme EA_PARAM=acme_ea_4a
-
-#### 3.1.2- :snail: Dissected guide
+#### 3.2.2- :snail: Dissected guide
 
 After cloning the repository, proceed with the following steps:
 
@@ -135,7 +132,7 @@ make bitstream         # Generates the bitstream. Creates the synthesis.dcp and/
 
 For further information, please refer to [this resource](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_MEEP_Shell_use).
 
-### 3.2- :scroll: Acme project features
+### 3.3- :scroll: Acme project features
 
 To verify the available flavors for acme, execute the following command:
 
@@ -155,13 +152,13 @@ If you intend to include flags:
 
 This will generate an OpenPiton project with Lagarto as a core. Other combinations are available.
 
-### 3.3- :paperclip: Push with GitLab variables
+### 3.4- :paperclip: Push with GitLab variables
 
     git push -o ci.variable="FPGA_BOARD=u55c" -o ci.variable="CUSTOM_MSG=2x2_withVPU"
 
     make project EA_PARAMS=pronoc
 
-### 3.4- :inbox_tray: Other available commands
+### 3.5- :inbox_tray: Other available commands
 
 ```Bash
 make SmartPlace        # Exahustive search of the best placement strategy (~20hours)
@@ -175,7 +172,7 @@ make reports_synth     # Create synthesis reports: Utilization, timing paths
 make reports_impl      # Create implementation reports: Utilization, timing paths
 ```
 
-### 3.5- :mag: Test bitstream
+### 3.6- :mag: Test bitstream
 
 **MEEP SERVERS tools**
 
@@ -183,7 +180,7 @@ You can find the bistream in the folder **bitstream**
 
 **DRIVERS**
 
-1. Default drivers in MEEP Servers:
+1. Default drivers in HW Servers:
 
 Before to load the bistream, you need to setup PATH for drivers:
 
@@ -209,7 +206,7 @@ Finally, if you want to boot a binary or test the UART output log, you can use t
 
 ## 4- :open_file_folder: Directory Structure
 
-The MEEP FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
+The FPGA Shell is built around the **sh**, **shell** and **tcl** folders.
 
 The **sh** folder handle some automatic tasks during the whole flow, working closely with Makefiles.
 
@@ -220,26 +217,7 @@ The **shell** folder is where all the different IPs that can be part of the Shel
 IPs are treated individually, in such a way there is no friction between different set ups, meaning that any combination of IPs can be set with no dependency or incompatibility between them. Which such approach, the Shell can be built incrementaly, adding more pieces as they are needed. The only exception to this are the shell_mmcm.tcl file, which configures the clock infrastructure for the
 whole design, and the shell_qdma.tcl. The call to these tcls is mandatory, as it will be explained later.
 
-## 5- :pencil2: Bitstreams Naming convention
-
-To ensure a standardized approach for generating bitstream name releases, it is essential to adhere to certain mandatory rules, which include:
-
-### 5.1- :closed_book: ACME_EA
-
-All the bistreams will use the **ACME_EA** with three letters to better identify the main characteristics:
-
-- First letter: to designate the core (A: _Ariane_; H: _Lagarto Hun_)
-- Second letter: to identify the accelerator (x: _no accelerator_; V: _VPU_; G: _VPU+SA-HEVC+SA-NN_)
-- Thrid letter: to identify the Memory Tile (x: _no MT_, M: _Memory Tile_)
-
-To complete this information, we will add an extra value to each fields:
-
-- **acme_ea_ahbvcm**; where:
-  - "a" means the number of cores in the system
-  - "b" means the number of vector lanes
-  - "c" means the number of MT
-
-## 6- :earth_africa: Environments
+## 5- :earth_africa: Environments. CICD
 
 We have defined three different environments in order to generate different bitstreams. Those are **Production**, **Test**, and **Quick-test**.
 
@@ -253,7 +231,7 @@ flowchart LR
     D --> E([Booting Linux])
     E --> F([Baremetal Test])
     F --> G([Fedora])
-    G -- X5 --> G([Fedora])
+    G --> G([Fedora])
     G --> H([OS tests])
     H --> I([Deploy])
 
@@ -262,22 +240,10 @@ flowchart LR
     J -->|Two| L[Nexus Cloud]
 ```
 
-### 6.1- :wrench: Production
+### 6.1- :wrench: Production.
+
 
 The production environment will be a monthly release. We will work with:
-
-All use **ProNoC** routers
-
-| Bitstream names                                                  | Description                  | Status                                       |
-| :--------------------------------------------------------------- | :--------------------------- | :------------------------------------------- |
-| acme_ea_4a                                                       | _golden reference_           | available                                    |
-| acme_ea_1h16g1m                                                  |                              | **not** available yet. Pending from MT & SAs |
-| acme_ea_4h2v4m                                                   |                              | **not** available yet . Pending from MT      |
-| acme_ea_4h2v2m                                                   | (L1.Ariane)                  | **not** available yet [pending from MT]      |
-| Meanwhile 2, 3 & 4 are in place we will include a transition one |
-| acme_ea_4h2v                                                     | (L1.Ariane)                  | available                                    |
-| acme_ea_1h2g                                                     | (L1.Ariane)                  | available                                    |
-| acme_ea_1h                                                       | (L1.Ariane) Drivers purposes | available                                    |
 
 :books: The FPGA card used here are the **u280** and **u55c** (default).
 
@@ -286,17 +252,6 @@ There are two ways to execute the pipeline using this environment. By Merge requ
 The bitstreams generated will be released in [here](https://release.meep-project.eu/nexus/#browse/search/raw).
 
 ### 6.2- :four_leaf_clover: Test
-
-Here we are using **OP routers**. This will help to ensure nothing is broken on the way.
-
-| Bitstream names | Description                                           | Status    |
-| :-------------- | :---------------------------------------------------- | :-------- |
-| acme_ea_4a      | _golden reference_                                    | available |
-| acme_ea_4h2v    |                                                       | available |
-| acme_ea_1h16v   | Problems with the route and place implemetation stage | available |
-| acme_ea_16v     | It is too big to be implemented in the FPGA boards    | available |
-
-Including a bitstream with Lagarto Tile: ACME_EA 1Hxx v2.y.z (L1.Tile) with OP routers and ProNoC routers. (Pending)
 
 :card_box: Here we use the **u280** and **u55c** fpga cards.
 
@@ -362,21 +317,13 @@ read all
 
 This will automatically kill the process.
 
-[Futher information](https://wiki.meep-project.eu/index.php/MEEP_InfoROM)
 
 ## 8- :woman: Authors
 
 fpga@bsc.es
 
-## 9- 👷 Partners
 
-**Barcelona Supercomputing Center** - Centro Nacional de Supercomputación (BSC-CNS) :globe_with_meridians:
-[Website](https://www.bsc.es "Welcome")
-<br/>**University of Zagreb**, Faculty of Electrical Engineering and Computing
-:globe_with_meridians: [Website](https://www.fer.unizg.hr/en "Welcome")
-<br/>**TÜBITAK BILGEM** Informatics and Information Security Research Center :globe_with_meridians: [Website](https://bilgem.tubitak.gov.tr/en "Welcome")
-
-## 10- :globe_with_meridians: Wiki
+## 9- :globe_with_meridians: Wiki
 
 For more detailed instructions on how to use this software, visit [project wiki](https://wiki.meep-project.eu/index.php/MEEP_Shell#FPGA_SHELL_TCL_building_program "Wiki").
 
@@ -403,14 +350,5 @@ Answer
 > You need to get the license here:
 > https://www.xilinx.com/products/intellectual-property/cmac_usplus.html#overview
 
-#### 11.3- External users :surfer: :
 
-We highly recommend to use this branch
 
-    git clone -b ft/external_users https://github.com/MEEPproject/fpga_shell.git
-
-<br/>
-<br/>
-<div align="center">
-<h2 align="center">🤝 Support</h2>
-<p align="center">The MEEP project has received funding from the European High-Performance Computing Joint Undertaking (JU) under grant agreement No 946002. The JU receives support from the European Union’s Horizon 2020 research and innovation programme in Spain, Croatia, Turkey.</p>
