@@ -55,7 +55,6 @@ u280: clean
 
 u55c: clean
 	@($(SH_DIR)/extract_part.sh $(U55C_BOARD))
-	@(echo "Target Board: xcu55c. Make sure you call make using VIVADO_VER=2021.2")
 
 vcu128:
 	@$(SH_DIR)/extract_part.sh $(VCU128_PART) $(VCU128_BOARD)
@@ -174,7 +173,7 @@ clean_ip:
 	@(make -C ip/10GbEthernet clean)
 	@(make -C ip/pulp_uart clean)
 	@(make -C ip/axi_brom clean)
-	@(make -C ip/aurora_dma clean)
+	@(make -C ip/aurora-dma clean)
 	@(make -C ip/aurora_raw clean)
 
 clean_binaries:

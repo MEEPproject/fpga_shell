@@ -4,9 +4,6 @@
 [submodule "ip/100GbEthernet"]
 	path = ip/100GbEthernet
 	url = ../100gb-ethernet.git
-[submodule "ip/aurora_dma"]
-	path = ip/aurora_dma
-	url = ../aurora-dma.git
 [submodule "ip/aurora_raw"]
 	path = ip/aurora_raw
 	url = ../aurora-raw.git
@@ -16,3 +13,6 @@
 [submodule "ip/pulp_uart"]
 	path = ip/pulp_uart
 	url = ../pulp-uart.git
+[submodule "ip/aurora_dma"]
+	path = ip/aurora-dma
+	url = ../aurora-dma.git
